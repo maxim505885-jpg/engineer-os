@@ -179,9 +179,9 @@ async function createProject(){
 
 function showLogin(){
   document.querySelector(".sidebar").style.display="none";document.querySelector(".topbar").style.display="none";
-  $("#page").innerHTML=`<div style="max-width:440px;margin:8vh auto"><div class="card"><div class="eyebrow">ENGINEER OS / PRIVATE</div><h2 style="margin-top:8px">Аккаунт ENGINEER OS</h2><p class="label">Регистрация и вход выполняются через Supabase Auth. Доступ к инженерному контуру остаётся защищённым owner-lock.</p><div style="display:flex;gap:8px;margin-top:18px"><button id="showLoginBtn" class="btn primary" type="button">Войти</button><button id="showSignupBtn" class="btn secondary" type="button">Зарегистрироваться</button></div><div id="authFormWrap" style="margin-top:18px"></div><div id="loginError" class="notice" hidden style="margin-top:12px"></div></div>
+  $("#page").innerHTML=`<div style="max-width:440px;margin:8vh auto"><div class="card"><div class="eyebrow">ENGINEER OS / PRIVATE</div><h2 style="margin-top:8px">Аккаунт ENGINEER OS</h2><p class="label">Регистрация и вход выполняются через Supabase Auth. Доступ к инженерному контуру остаётся защищённым owner-lock.</p><div style="display:flex;gap:8px;margin-top:18px"><button id="showLoginBtn" class="btn primary" type="button">Войти</button><button id="showSignupBtn" class="btn secondary" type="button">Зарегистрироваться</button></div><div id="authFormWrap" style="margin-top:18px"></div><div id="loginError" class="notice" hidden style="margin-top:12px"></div></div></div>`;
   $("#showLoginBtn").addEventListener("click",()=>renderAuthForm("login"));
-  $("#showSignupBtn").addEventListener("click",()=>renderAuthForm("signup"));</div>`;
+  $("#showSignupBtn").addEventListener("click",()=>renderAuthForm("signup"));
 }
 
 function renderAuthForm(mode){
