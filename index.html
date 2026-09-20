@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ENGINEER OS</title>
+  <meta name="description" content="ENGINEER OS — инженерная система обследования, верификации и технического аудита">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">E</span><div><b>ENGINEER OS</b><small>VALIDATION-FIRST</small></div></div>
+      <nav id="nav">
+        <button data-page="dashboard" class="nav-item active">⌂ <span>Обзор</span></button>
+        <button data-page="case" class="nav-item">🏗 <span>Инженерный кейс</span></button>
+        <button data-page="documents" class="nav-item">▤ <span>Документы</span></button>
+        <button data-page="tasks" class="nav-item">◈ <span>Задачи</span></button>
+        <button data-page="agents" class="nav-item">◎ <span>Агенты</span></button>
+        <button data-page="calculations" class="nav-item">∑ <span>Расчёты</span></button>
+        <button data-page="audit" class="nav-item">✓ <span>Аудит</span></button>
+        <button data-page="pipeline" class="nav-item">↻ <span>Pipeline / Recovery</span></button>
+      </nav>
+      <div class="sidebar-foot"><span id="connectionDot" class="dot"></span><span id="connectionText">Проверка связи…</span></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">ИНЖЕНЕРНАЯ ПЛАТФОРМА</div>
+          <h1 id="pageTitle">Обзор</h1>
+        </div>
+        <div class="header-actions">
+          <select id="projectSelect" aria-label="Проект"><option value="">Выберите проект</option></select>
+          <button id="createProjectTopBtn" class="btn secondary">Новый проект</button><button id="refreshBtn" class="btn secondary">Обновить</button><button id="logoutBtn" class="btn secondary">Выйти</button>
+        </div>
+      </header>
+
+      <section id="page" class="page"></section>
+    </main>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+</body>
+</html>
