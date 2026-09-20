@@ -179,8 +179,14 @@ async function createProject(){
 
 function showLogin(){
   document.querySelector(".sidebar").style.display="none";document.querySelector(".topbar").style.display="none";
-  $("#page").innerHTML=`<div style="max-width:440px;margin:8vh auto"><div class="card"><div class="eyebrow">ENGINEER OS / PRIVATE</div><h2 style="margin-top:8px">Вход владельца</h2><p class="label">Система предназначена для одного владельца. Публичная регистрация в интерфейсе отсутствует; вход выполняется только для уже созданной учётной записи.</p><form id="loginForm" class="grid" style="margin-top:18px"><input id="email" type="email" autocomplete="username" placeholder="E-mail" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="password" type="password" autocomplete="current-password" placeholder="Пароль" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><button class="btn primary" type="submit">Войти</button></form><div id="loginError" class="notice" hidden style="margin-top:12px"></div></div></div>`;
-  $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const {error}=await supabase.auth.signInWithPassword({email:$("#email").value.trim(),password:$("#password").value});if(error){$("#loginError").textContent="Вход отклонён: "+error.message;$("#loginError").hidden=false;}});
+  $("#page").innerHTML=`<div style="max-width:440px;margin:8vh auto"><div class="card"><div class="eyebrow">ENGINEER OS / PRIVATE</div><h2 style="margin-top:8px">Аккаунт ENGINEER OS</h2><p class="label">Регистрация и вход выполняются через Supabase Auth. Доступ к инженерному контуру остаётся защищённым owner-lock.</p><div style="display:flex;gap:8px;margin-top:18px"><button id="showLoginBtn" class="btn primary" type="button">Войти</button><button id="showSignupBtn" class="btn secondary" type="button">Зарегистрироваться</button></div><div id="authFormWrap" style="margin-top:18px"></div><div id="loginError" class="notice" hidden style="margin-top:12px"></div></div></div>`;
+}
+
+function renderAuthForm(mode){
+  const wrap=$("#authFormWrap");
+  const signup=mode==="signup";
+  wrap.innerHTML=signup?'<form id="authForm" class="grid"><input id="authEmail" type="email" autocomplete="email" placeholder="E-mail" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Пароль (не менее 8 символов)" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword2" type="password" autocomplete="new-password" minlength="8" placeholder="Повторите пароль" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><button class="btn primary" type="submit">Создать аккаунт</button></form>':'<form id="authForm" class="grid"><input id="authEmail" type="email" autocomplete="username" placeholder="E-mail" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword" type="password" autocomplete="current-password" placeholder="Пароль" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><button class="btn primary" type="submit">Войти</button></form>';
+  $("#authForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("#loginError");err.hidden=true;const email=$("#authEmail").value.trim(),password=$("#authPassword").value;if(signup){if(password!==$("#authPassword2").value){err.textContent="Пароли не совпадают";err.hidden=false;return}const {data,error}=await supabase.auth.signUp({email,password});if(error){err.textContent="Регистрация отклонена: "+error.message;err.hidden=false;return}if(data.session){return}err.textContent="Аккаунт создан. Подтвердите e-mail, если подтверждение включено, затем войдите.";err.hidden=false}else{const {error}=await supabase.auth.signInWithPassword({email,password});if(error){err.textContent="Вход отклонён: "+error.message;err.hidden=false}}});
 }
 
 async function enforceOwner(){
@@ -203,6 +209,8 @@ async function boot(){
   $("#refreshBtn").addEventListener("click",()=>{loadProjects().then(render).catch(e=>toast(e.message))});
   $("#createProjectTopBtn")?.addEventListener("click",createProject);
   $("#logoutBtn")?.addEventListener("click",()=>supabase.auth.signOut());
+  $("#showLoginBtn")?.addEventListener("click",()=>renderAuthForm("login"));
+  $("#showSignupBtn")?.addEventListener("click",()=>renderAuthForm("signup"));
   const {data:{session}}=await supabase.auth.getSession();state.session=session;
   supabase.auth.onAuthStateChange(async (_event,session)=>{
     state.session=session;
@@ -210,7 +218,7 @@ async function boot(){
     document.querySelector(".sidebar").style.display="flex";document.querySelector(".topbar").style.display="flex";
     if(await enforceOwner()){await loadProjects();await render();}
   });
-  if(!state.session){showLogin();return;}
+  if(!state.session){showLogin();renderAuthForm("login");return;}
   if(!(await enforceOwner()))return;
   await loadProjects();await render();
 }
