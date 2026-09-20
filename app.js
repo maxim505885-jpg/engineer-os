@@ -186,20 +186,61 @@ function renderAuthForm(mode){
   const wrap=$("#authFormWrap");
   const signup=mode==="signup";
   wrap.innerHTML=signup?'<form id="authForm" class="grid"><input id="authEmail" type="email" autocomplete="email" placeholder="E-mail" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Пароль (не менее 8 символов)" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword2" type="password" autocomplete="new-password" minlength="8" placeholder="Повторите пароль" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><button class="btn primary" type="submit">Создать аккаунт</button></form>':'<form id="authForm" class="grid"><input id="authEmail" type="email" autocomplete="username" placeholder="E-mail" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><input id="authPassword" type="password" autocomplete="current-password" placeholder="Пароль" required style="background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:11px"><button class="btn primary" type="submit">Войти</button></form>';
-  $("#authForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("#loginError");err.hidden=true;const email=$("#authEmail").value.trim(),password=$("#authPassword").value;if(signup){if(password!==$("#authPassword2").value){err.textContent="Пароли не совпадают";err.hidden=false;return}const {data,error}=await supabase.auth.signUp({email,password});if(error){err.textContent="Регистрация отклонена: "+error.message;err.hidden=false;return}if(data.session){return}err.textContent="Аккаунт создан. Подтвердите e-mail, если подтверждение включено, затем войдите.";err.hidden=false}else{const {error}=await supabase.auth.signInWithPassword({email,password});if(error){err.textContent="Вход отклонён: "+error.message;err.hidden=false}}});
+  $("#authForm").addEventListener("submit",async e=>{e.preventDefault();const err=$("#loginError");err.hidden=true;const email=$("#authEmail").value.trim(),password=$("#authPassword").value;if(signup){if(password!==$("#authPassword2").value){err.textContent="Пароли не совпадают";err.hidden=false;return}const {data,error}=await supabase.auth.signUp({email,password});if(error){err.textContent="Регистрация отклонена: "+error.message;err.hidden=false;return}if(data.session){
+  err.textContent="Аккаунт создан. Настраиваем инженерный контур…";
+  err.hidden=false;
+  await ensureAccountAccess();
+  await loadProjects();
+  await render();
+  return;
+}
+err.textContent="Аккаунт создан. Подтвердите e-mail, если подтверждение включено, затем войдите.";
+err.hidden=false}else{const {error}=await supabase.auth.signInWithPassword({email,password});if(error){err.textContent="Вход отклонён: "+error.message;err.hidden=false}}});
 }
 
-async function enforceOwner(){
+async function ensureAccountAccess(){
   const {data:{session}}=await supabase.auth.getSession();
-  if(!session){return false;}
-  const {data,error}=await supabase.rpc("claim_engineer_os_owner");
-  if(error || data !== true){
-    console.error("ENGINEER OS owner lock:",error||"owner mismatch");
-    await supabase.auth.signOut();
+  if(!session)return false;
+
+  const {data:profile,error:profileError}=await supabase
+    .from("user_profiles")
+    .select("user_id,email,display_name,account_status")
+    .eq("user_id",session.user.id)
+    .maybeSingle();
+
+  if(profileError){
+    console.error("ENGINEER OS profile:",profileError);
     showLogin();
-    toast("Доступ разрешён только владельцу ENGINEER OS");
+    toast("Не удалось проверить профиль аккаунта");
     return false;
   }
+
+  if(profile?.account_status==="blocked"){
+    await supabase.auth.signOut();
+    showLogin();
+    toast("Аккаунт заблокирован");
+    return false;
+  }
+
+  const {data:owner,error:ownerError}=await supabase.rpc("claim_engineer_os_owner");
+  if(ownerError){
+    console.error("ENGINEER OS owner check:",ownerError);
+    showLogin();
+    toast("Не удалось проверить доступ ENGINEER OS");
+    return false;
+  }
+
+  if(owner !== true){
+    const {data:projectId,error:projectError}=await supabase.rpc("create_personal_engineer_project");
+    if(projectError){
+      console.error("ENGINEER OS onboarding:",projectError);
+      showLogin();
+      toast("Не удалось создать инженерный контур аккаунта");
+      return false;
+    }
+    state.projectId=projectId;
+  }
+
   return true;
 }
 
@@ -216,10 +257,10 @@ async function boot(){
     state.session=session;
     if(!session){showLogin();return;}
     document.querySelector(".sidebar").style.display="flex";document.querySelector(".topbar").style.display="flex";
-    if(await enforceOwner()){await loadProjects();await render();}
+    if(await ensureAccountAccess()){await loadProjects();await render();}
   });
   if(!state.session){showLogin();renderAuthForm("login");return;}
-  if(!(await enforceOwner()))return;
+  if(!(await ensureAccountAccess()))return;
   await loadProjects();await render();
 }
 boot().catch(e=>{console.error(e);toast("Ошибка запуска: "+e.message)});
