@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="./styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="./app.js"></script>
+  <script src="./auth-recovery.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -25,19 +26,16 @@
       </nav>
       <div class="sidebar-foot"><span id="connectionDot" class="dot"></span><span id="connectionText">Проверка связи…</span></div>
     </aside>
-
     <main class="main">
       <header class="topbar">
-        <div>
-          <div class="eyebrow">ИНЖЕНЕРНАЯ ПЛАТФОРМА</div>
-          <h1 id="pageTitle">Обзор</h1>
-        </div>
+        <div><div class="eyebrow">ИНЖЕНЕРНАЯ ПЛАТФОРМА</div><h1 id="pageTitle">Обзор</h1></div>
         <div class="header-actions">
           <select id="projectSelect" aria-label="Проект"><option value="">Выберите проект</option></select>
-          <button id="createProjectTopBtn" class="btn secondary">Новый проект</button><button id="refreshBtn" class="btn secondary">Обновить</button><button id="logoutBtn" class="btn secondary">Выйти</button>
+          <button id="createProjectTopBtn" class="btn secondary">Новый проект</button>
+          <button id="refreshBtn" class="btn secondary">Обновить</button>
+          <button id="logoutBtn" class="btn secondary">Выйти</button>
         </div>
       </header>
-
       <section id="page" class="page"></section>
     </main>
   </div>
