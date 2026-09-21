@@ -5,6 +5,8 @@ on:
     branches: ["main", "ci/**"]
   pull_request:
     branches: ["main"]
+  merge_group:
+    types: [checks_requested]
   workflow_dispatch:
 
 permissions:
@@ -31,8 +33,10 @@ jobs:
           test -f index.html
           test -f app.js
           test -f styles.css
+          test -f auth-recovery.js
           test -f Dockerfile
           test -f nginx.conf.template
+          test -f tests/regression.js
           echo "Required files: PASS"
 
       - name: Validate JavaScript syntax
@@ -40,8 +44,15 @@ jobs:
         run: |
           set -euo pipefail
           node --check app.js
-          if test -f auth-recovery.js; then node --check auth-recovery.js; fi
+          node --check auth-recovery.js
+          node --check tests/regression.js
           echo "JavaScript syntax: PASS"
+
+      - name: Run regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/regression.js
 
       - name: Validate HTML/CSS presence
         shell: bash
