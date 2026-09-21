@@ -39,7 +39,7 @@ assert(/function\s+runSecurityTest\s*\(/.test(app), "app.js: security self-test 
 assert(/function\s+runPipelineTest\s*\(/.test(app), "app.js: pipeline self-test missing");
 assert(/function\s+runModelTest\s*\(/.test(app), "app.js: model self-test missing");
 assert(/function\s+runRecovery\s*\(/.test(app), "app.js: recovery action missing");
-assert(/function\s+esc\s*\(/.test(app), "app.js: HTML escaping helper missing");
+assert(/\besc\s*=/.test(app), "app.js: HTML escaping helper missing");
 assert(/supabase\.rpc\("create_project_with_membership"/.test(app), "app.js: project creation RPC missing");
 assert(!/service_role/i.test(app), "app.js: service-role secret must not be present in frontend");
 assert(!/sk-[A-Za-z0-9_-]{20,}/.test(app), "app.js: OpenAI secret-like token detected in frontend");
