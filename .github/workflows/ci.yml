@@ -46,6 +46,7 @@ jobs:
           node --check app.js
           node --check auth-recovery.js
           node --check tests/regression.js
+          node --check tests/supabase-contract.js
           echo "JavaScript syntax: PASS"
 
       - name: Run regression suite
@@ -53,6 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           node tests/regression.js
+          node tests/supabase-contract.js
 
       - name: Validate HTML/CSS presence
         shell: bash
