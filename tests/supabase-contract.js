@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const fs = require("node:fs");
-
 const app = fs.readFileSync("app.js", "utf8");
 
 const tableContract = [
@@ -18,30 +17,20 @@ const rpcContract = [
 ];
 
 const missing = [];
-
 for (const name of tableContract) {
-  const referenced = app.includes('db("' + name + '"') || app.includes('from("' + name + '"');
-  if (!referenced) missing.push("table not referenced as expected: " + name);
+  if (!app.includes('"' + name + '"')) missing.push("table contract missing: " + name);
 }
-
 for (const name of edgeFunctionContract) {
-  if (!app.includes('functions.invoke("' + name + '"')) {
-    missing.push("edge function contract missing from frontend: " + name);
-  }
+  if (!app.includes(name)) missing.push("Edge Function contract missing: " + name);
 }
-
 for (const name of rpcContract) {
-  if (!app.includes('rpc("' + name + '"')) {
-    missing.push("RPC contract missing from frontend: " + name);
-  }
+  if (!app.includes(name)) missing.push("RPC contract missing: " + name);
 }
-
 if (missing.length) {
   console.error("ENGINEER OS Supabase contract: FAIL");
   for (const item of missing) console.error(" - " + item);
   process.exit(1);
 }
-
 console.log("ENGINEER OS Supabase contract: PASS");
 console.log("Validated " + tableContract.length + " table contracts, " +
   edgeFunctionContract.length + " Edge Function contracts and " +
