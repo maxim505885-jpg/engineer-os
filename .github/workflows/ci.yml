@@ -1,0 +1,64 @@
+name: ENGINEER OS CI
+
+on:
+  push:
+    branches: ["main", "ci/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engineer-os-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate ENGINEER OS
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f app.js
+          test -f styles.css
+          test -f Dockerfile
+          test -f nginx.conf.template
+          echo "Required files: PASS"
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          if test -f auth-recovery.js; then node --check auth-recovery.js; fi
+          echo "JavaScript syntax: PASS"
+
+      - name: Validate HTML/CSS presence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<html' index.html
+          grep -q 'ENGINEER OS' index.html
+          grep -q ':root' styles.css
+          echo "HTML/CSS structural checks: PASS"
+
+      - name: Validate Dockerfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^FROM nginx:alpine' Dockerfile
+          grep -q 'EXPOSE 8080' Dockerfile
+          echo "Dockerfile checks: PASS"
+
+      - name: Build container
+        run: docker build --tag engineer-os:ci .
