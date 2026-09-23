@@ -40,4 +40,6 @@ jobs:
           codex --version
           codex app-server --help
       - name: Run live Codex App Server transport smoke
+        env:
+          PYTHONPATH: .
         run: python tests/codex_app_server_smoke.py
