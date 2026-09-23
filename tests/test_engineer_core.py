@@ -137,6 +137,16 @@ class CodexResultParserTests(unittest.TestCase):
         )
         self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
+    def test_findings_require_structured_engineering_fields(self):
+        raw = '{"status":"WARNING","findings":[{"observation":"трещина","evidence_ids":["m1"],"basis":"осмотр","certainty":"measured","conclusion":"требуется проверка"}],"evidence_ids":["m1"],"message":"x"}'
+        result = CodexResultParser.parse(self.specialist, raw)
+        self.assertEqual(result.status, AgentStatus.ACCEPTED)
+
+    def test_findings_without_structured_fields_are_uncertainty(self):
+        raw = '{"status":"WARNING","findings":[{"issue":"трещина","evidence_ids":["m1"]}],"evidence_ids":["m1"],"message":"x"}'
+        result = CodexResultParser.parse(self.specialist, raw)
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
     def test_evidence_ids_must_be_non_empty_and_unique(self):
         result = CodexResultParser.parse(
             self.specialist,
