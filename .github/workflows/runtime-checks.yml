@@ -35,3 +35,5 @@ jobs:
           command -v codex
           codex --version
           codex app-server --help
+      - name: Run live Codex App Server transport smoke
+        run: python tests/codex_app_server_smoke.py
