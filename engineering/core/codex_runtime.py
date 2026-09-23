@@ -10,6 +10,7 @@ from typing import Any
 
 from .contracts import AgentResult, AgentStatus, SpecialistTask
 from .engineer_core import AgentRuntimeAdapter
+from .skill_loader import SkillLoader
 
 
 @dataclass(frozen=True)
@@ -25,8 +26,9 @@ class CodexServerConfig:
 class CodexAppServerClient:
     """JSONL client for Codex app-server stdio transport."""
 
-    def __init__(self, config: CodexServerConfig = CodexServerConfig()) -> None:
+    def __init__(self, config: CodexServerConfig = CodexServerConfig(), skill_loader: SkillLoader | None = None) -> None:
         self.config = config
+        self.skill_loader = skill_loader or SkillLoader(config.cwd or ".")
         self.process: subprocess.Popen[str] | None = None
         self._request_id = 0
 
@@ -160,10 +162,13 @@ class CodexAppServerClient:
         materials = "\n".join(
             f"- {m.id}: {m.name} [{m.kind}] URI={m.uri or 'n/a'}" for m in task.inputs
         ) or "- NONE"
+        skill_text = self.skill_loader.load(task.skill)
         prompt = (
             f"ENGINEER OS specialist task.\\nAgent: {task.agent}\\nSkill: {task.skill}\\n"
             f"Purpose: {task.purpose}\\nTask ID: {task.task_id}\\n"
-            f"Materials available:\\n{materials}\\n"
+            f"Materials available:\\n{materials}\\n\\n"
+            "AUTHORITATIVE ENGINEER OS SKILL INSTRUCTIONS:\\n"
+            f"{skill_text}\\n\\n"
             "Execute only this specialist responsibility; link findings to evidence; "
             "never invent missing data; use UNCERTAINTY/BLOCK when evidence is insufficient."
         )
