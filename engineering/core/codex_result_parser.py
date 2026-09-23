@@ -47,6 +47,16 @@ class CodexResultParser:
             return cls._uncertainty(task, "evidence_ids must be a JSON array of non-empty strings.", raw_text, thread_id, turn_id)
         if len(set(evidence_ids)) != len(evidence_ids):
             return cls._uncertainty(task, "evidence_ids must not contain duplicates.", raw_text, thread_id, turn_id)
+        supplied_ids = {material.id for material in task.inputs}
+        unknown_evidence = sorted(set(evidence_ids) - supplied_ids)
+        if unknown_evidence:
+            return cls._uncertainty(
+                task,
+                f"evidence_ids reference materials not supplied to this specialist: {unknown_evidence}.",
+                raw_text,
+                thread_id,
+                turn_id,
+            )
         if findings and not evidence_ids:
             return cls._uncertainty(task, "Findings require at least one evidence_id.", raw_text, thread_id, turn_id)
         if message is not None and not isinstance(message, str):
