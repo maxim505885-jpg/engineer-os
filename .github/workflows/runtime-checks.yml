@@ -39,6 +39,12 @@ jobs:
           command -v codex
           codex --version
           codex app-server --help
+      - name: Authenticate Codex with API key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
+          codex login status
       - name: Run live Codex App Server transport smoke
         env:
           PYTHONPATH: .
