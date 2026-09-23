@@ -25,7 +25,7 @@
   }
 
   function injectForgotButton() {
-    const form = document.querySelector("#loginForm");
+    const form = document.querySelector("#authForm");
     if (!form || document.querySelector("#forgotPasswordBtn")) return;
 
     const btn = document.createElement("button");
@@ -44,10 +44,10 @@
     form.appendChild(message);
 
     btn.addEventListener("click", async () => {
-      const email = document.querySelector("#email")?.value.trim();
+      const email = document.querySelector("#authEmail")?.value.trim();
       if (!email) {
         setMessage("Сначала укажи e-mail.", "error");
-        document.querySelector("#email")?.focus();
+        document.querySelector("#authEmail")?.focus();
         return;
       }
 

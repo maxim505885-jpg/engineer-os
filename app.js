@@ -64,16 +64,48 @@ async function renderDashboard(){
   let latest=[];try{latest=await db("orchestration_runs",{projectId:state.projectId,select:"id,status,current_stage,progress,updated_at,last_error",order:"updated_at",limit:5})}catch{}
   $("#page").innerHTML=`
     <div class="grid cards">${[['Документы',c.documents],['Доказательства',c.evidence],['Находки',c.engineering_findings],['Задачи',c.engineering_tasks],['ТЗ / требования',c.technical_assignment_items]].slice(0,4).map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="metric">${x[1]}</div><div class="label">текущий проект</div></div>`).join("")}</div>
-    <div class="section-title"><h2>Сквозной pipeline</h2><button id="pipelineBtn" class="btn secondary">Открыть pipeline</button></div>
+    <div class="section-title"><h2>Сквозной pipeline</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="launchEngineeringBtn" class="btn primary">Запустить ENGINEER OS</button><button id="pipelineBtn" class="btn secondary">Открыть pipeline</button></div></div><div id="launchResult" class="card" style="display:none;margin-bottom:14px"></div>
     <div class="pipeline">${["AUTH","PROJECT","ТЗ","DOCUMENT","EVIDENCE","TASK","ORCHESTRATOR","QUEUE","WORKER","AGENT","RESULT","VALIDATION","HANDOFF","RECOVERY","FINAL"].map(x=>`<div class="stage"><b>${x}</b><span>контур</span></div>`).join("")}</div>
     <div class="section-title"><h2>Последние orchestration runs</h2></div>
     ${latest.length?table(latest,[["status","Статус"],["current_stage","Этап"],["progress","Прогресс %"],["updated_at","Обновлён"],["last_error","Последняя ошибка"]]):'<div class="card empty">Запусков ещё нет.</div>'}
     <div class="section-title"><h2>Инженерное правило</h2></div>
     <div class="grid two"><div class="card"><div class="label">VALIDATION FIRST</div><div class="metric" style="font-size:18px">Доказательство → проверка → handoff</div><div class="label">Неподтверждённое не становится инженерным фактом.</div></div><div class="card"><div class="label">RECOVERY</div><div class="metric" style="font-size:18px">v28 Autonomous Recovery</div><div class="label">Stale worker lease восстанавливается до исчерпания попыток.</div></div></div>`;
   $("#pipelineBtn").addEventListener("click",()=>{state.page="pipeline";render().catch(e=>toast(e.message))});
+  $("#launchEngineeringBtn").addEventListener("click",launchEngineeringRun);
 }
 
-async function renderCase(){
+
+async function launchEngineeringRun(){
+  if(!state.projectId){toast("Сначала выберите проект");return;}
+  const docs=await db("documents",{projectId:state.projectId,select:"id,name,document_type,status,processing_status",order:"created_at",limit:100});
+  if(!docs.length){toast("В проекте нет обработанных документов");return;}
+  const sourceOptions=docs.map((d,i)=>`${i+1}. ${d.name} [${d.id}]`).join("\n");
+  const sourceInput=prompt("Введите номер или ID исходного отчёта/документа:\n\n"+sourceOptions,"1");
+  if(!sourceInput)return;
+  const source=docs[Number(sourceInput)-1]||docs.find(d=>d.id===sourceInput.trim());
+  if(!source){toast("Исходный документ не найден");return;}
+
+  const embedded=confirm("Техническое задание уже находится внутри выбранного отчёта?\n\nОК — использовать ТЗ внутри этого документа.\nОтмена — выбрать отдельный документ ТЗ.");
+  let tz=source;
+  if(!embedded){
+    if(docs.length<2){toast("Для отдельного ТЗ нужен второй обработанный документ");return;}
+    const suggested=Math.max(1,docs.findIndex(d=>/ТЗ|техническ|assignment/i.test(d.name+" "+(d.document_type||"")))+1);
+    const tzInput=prompt("Введите номер или ID документа ТЗ:\n\n"+sourceOptions,String(suggested));
+    if(!tzInput)return;
+    tz=docs[Number(tzInput)-1]||docs.find(d=>d.id===tzInput.trim());
+    if(!tz){toast("Документ ТЗ не найден");return;}
+  }
+
+  const objective=prompt("Цель проверки (необязательно):","Провести инженерную проверку отчёта по ТЗ с доказательной базой и FINAL_AUDIT.")||"";
+  const box=$("#launchResult");box.style.display="block";box.innerHTML='<div class="label">Запуск ENGINEER OS…</div>';
+  try{
+    const {data,error}=await supabase.functions.invoke("pipeline-launch-v1",{body:{project_id:state.projectId,document_id:source.id,technical_assignment_document_id:tz.id,title:"Инженерное обследование / аудит отчёта",objective}});
+    if(error)throw error;
+    box.innerHTML=`<div class="eyebrow">ENGINEER OS / LAUNCH</div><h3 style="margin:6px 0">${esc(data?.status||"UNKNOWN")}</h3><div class="label">Task ID: <span class="mono">${esc(data?.task_id||"—")}</span></div><div class="label">Analysis Run: <span class="mono">${esc(data?.analysis_run_id||"—")}</span></div><div class="label" style="margin-top:8px">ТЗ: ${embedded?"внутри исходного документа":"отдельный документ"}. Оркестратор и очередь получили задачу. Следите за этапами в Pipeline.</div>`;
+    toast("ENGINEER OS запущен");
+  }catch(e){box.innerHTML=`<div class="status BLOCK">BLOCK</div><div style="margin-top:8px">${esc(e.message)}</div>`;toast("Запуск заблокирован: "+e.message);}
+}
+\nasync function renderCase(){
   const p=state.projectId;
   const [els,locs,meas,finds]=await Promise.all([
     db("structural_elements",{projectId:p,select:"id,name,element_type,material,location"}),
