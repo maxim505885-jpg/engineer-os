@@ -204,25 +204,20 @@ class EngineerCore:
                 if not evidence.issubset(finding_evidence):
                     continue
                 addressed = True
-                basis = str(finding.get("basis", "")).upper()
-                conclusion = str(finding.get("conclusion", "")).upper()
-                observation = str(finding.get("observation", "")).upper()
-                # Resolution must be explicit in the audit finding, not inferred
-                # merely from evidence coverage.
-                resolution_markers = (
-                    "RESOLVED",
-                    "РАЗРЕШ",
-                    "ПОДТВЕРЖД",
-                    "ОПРОВЕРГ",
-                    "НЕ ПОДТВЕРЖД",
-                    "НЕДОСТАТОЧНО ДАННЫХ",
-                    "UNCERTAINTY",
-                    "BLOCK",
-                )
-                if any(marker in text for marker in resolution_markers
-                       for text in (basis, conclusion, observation)):
+                if finding.get("conflict_ids") != [conflict_id]:
+                    continue
+                resolution_status = finding.get("resolution_status")
+                resolution_basis = finding.get("resolution_basis")
+                if resolution_status not in {"RESOLVED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"}:
+                    continue
+                if not isinstance(resolution_basis, str) or not resolution_basis.strip():
+                    continue
+                if resolution_status == "RESOLVED":
                     resolved = True
                     break
+                # Explicit unresolved/insufficient-evidence states are accountable,
+                # but they cannot produce an accepting final status.
+                addressed = True
             if not addressed or not resolved:
                 unresolved.append(conflict_id)
 
