@@ -1,7 +1,6 @@
 name: ENGINEER OS runtime checks
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - architecture/runtime-integration
