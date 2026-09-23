@@ -39,16 +39,28 @@ jobs:
           command -v codex
           codex --version
           codex app-server --help
+      - name: Run live Codex App Server transport smoke
+        env:
+          PYTHONPATH: .
+        run: python tests/codex_app_server_smoke.py
+
+  codex-model-turn-optional:
+    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_MODEL_SMOKE == 'true' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Codex CLI
+        run: npm install -g @openai/codex
       - name: Authenticate Codex with API key
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
           codex login status
-      - name: Run live Codex App Server transport smoke
-        env:
-          PYTHONPATH: .
-        run: python tests/codex_app_server_smoke.py
       - name: Run live Codex model turn smoke
         env:
           PYTHONPATH: .
