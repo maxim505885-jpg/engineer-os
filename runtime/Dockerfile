@@ -12,6 +12,7 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY engineering /app/engineering
+COPY skills /app/skills
 COPY runtime /app/runtime
 COPY AGENTS.md /app/AGENTS.md
 
