@@ -2,6 +2,7 @@ import unittest
 
 from engineering.core import AgentResult, AgentStatus, EngineerCore, EngineerTask, MaterialRef
 from engineering.core.engineer_core import AgentRuntimeAdapter
+from engineering.core.codex_runtime import CodexAppServerClient, CodexServerConfig
 
 
 class EngineerCoreTests(unittest.TestCase):
@@ -59,6 +60,19 @@ class EngineerCoreTests(unittest.TestCase):
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
 
+
+    def test_codex_extracts_final_agent_message_item(self):
+        message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
+        self.assertEqual(CodexAppServerClient._extract_agent_message(message), "FINAL RESULT")
+
+    def test_codex_extracts_empty_for_non_agent_item(self):
+        message = {"params": {"item": {"type": "commandExecution", "command": "pytest"}}}
+        self.assertEqual(CodexAppServerClient._extract_agent_message(message), "")
+
+    def test_codex_config_has_safe_read_only_defaults(self):
+        config = CodexServerConfig()
+        self.assertEqual(config.sandbox, "read-only")
+        self.assertEqual(config.approval_policy, "never")
     def test_all_accepted(self):
         core = EngineerCore()
         state = core.plan(self.task)
