@@ -44,6 +44,11 @@ jobs:
           PYTHONPATH: .
         run: python tests/codex_app_server_smoke.py
       - name: Run live Codex model turn smoke
+        if: ${{ secrets.OPENAI_API_KEY != '' }}
         env:
           PYTHONPATH: .
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python tests/codex_model_turn_smoke.py
+      - name: Report model turn smoke status
+        if: ${{ secrets.OPENAI_API_KEY == '' }}
+        run: echo "LIVE MODEL TURN SMOKE SKIPPED: repository secret OPENAI_API_KEY is not configured."
