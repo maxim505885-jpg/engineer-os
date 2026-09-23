@@ -191,7 +191,10 @@ class CodexAppServerClient:
             "A finding evidence_ids list may contain only supplied material IDs and must be included in top-level evidence_ids. "
             "evidence_ids must be an array of strings. "
             "Never invent missing data, calculations, normative clauses or evidence. "
-            "For final-audit-agent, every detected cross-agent conflict must be explicitly addressed and resolved or explicitly left unresolved due to insufficient source evidence. At least one finding must contain the complete conflict evidence set and state the resolution basis or the remaining uncertainty/block. Do not return an accepting audit for an unresolved conflict. "
+            "For final-audit-agent, every detected cross-agent conflict must be explicitly addressed using structured fields: conflict_ids (array of detected conflict IDs), resolution_status (RESOLVED, UNRESOLVED, or INSUFFICIENT_EVIDENCE), and non-empty resolution_basis. "
+            "Every RESOLVED conflict finding must include the complete conflict evidence set in evidence_ids. "
+            "Do not encode resolution only in free text markers such as RESOLVED; the structured fields are authoritative. "
+            "If the source evidence cannot resolve a conflict, use INSUFFICIENT_EVIDENCE or UNRESOLVED and do not return an accepting audit. "
             "Use UNCERTAINTY or BLOCK when evidence is insufficient."
         )
         turn = self.request(
