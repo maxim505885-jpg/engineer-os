@@ -79,18 +79,26 @@ async function launchEngineeringRun(){
   if(!state.projectId){toast("Сначала выберите проект");return;}
   const docs=await db("documents",{projectId:state.projectId,select:"id,name,document_type,status,processing_status",order:"created_at",limit:100});
   if(!docs.length){toast("В проекте нет обработанных документов");return;}
-  const sourceOptions=docs.map((d,i)=>`${i+1}. ${d.name} [${d.id}]`).join("\n");
-  const sourceInput=prompt("Введите номер или ID исходного отчёта/документа:\n\n"+sourceOptions,"1");
+  const sourceOptions=docs.map((d,i)=>`${i+1}. ${d.name} [${d.id}]`).join("
+");
+  const sourceInput=prompt("Введите номер или ID исходного отчёта/документа:
+
+"+sourceOptions,"1");
   if(!sourceInput)return;
   const source=docs[Number(sourceInput)-1]||docs.find(d=>d.id===sourceInput.trim());
   if(!source){toast("Исходный документ не найден");return;}
 
-  const embedded=confirm("Техническое задание уже находится внутри выбранного отчёта?\n\nОК — использовать ТЗ внутри этого документа.\nОтмена — выбрать отдельный документ ТЗ.");
+  const embedded=confirm("Техническое задание уже находится внутри выбранного отчёта?
+
+ОК — использовать ТЗ внутри этого документа.
+Отмена — выбрать отдельный документ ТЗ.");
   let tz=source;
   if(!embedded){
     if(docs.length<2){toast("Для отдельного ТЗ нужен второй обработанный документ");return;}
     const suggested=Math.max(1,docs.findIndex(d=>/ТЗ|техническ|assignment/i.test(d.name+" "+(d.document_type||"")))+1);
-    const tzInput=prompt("Введите номер или ID документа ТЗ:\n\n"+sourceOptions,String(suggested));
+    const tzInput=prompt("Введите номер или ID документа ТЗ:
+
+"+sourceOptions,String(suggested));
     if(!tzInput)return;
     tz=docs[Number(tzInput)-1]||docs.find(d=>d.id===tzInput.trim());
     if(!tz){toast("Документ ТЗ не найден");return;}
@@ -105,7 +113,8 @@ async function launchEngineeringRun(){
     toast("ENGINEER OS запущен");
   }catch(e){box.innerHTML=`<div class="status BLOCK">BLOCK</div><div style="margin-top:8px">${esc(e.message)}</div>`;toast("Запуск заблокирован: "+e.message);}
 }
-\nasync function renderCase(){
+
+async function renderCase(){
   const p=state.projectId;
   const [els,locs,meas,finds]=await Promise.all([
     db("structural_elements",{projectId:p,select:"id,name,element_type,material,location"}),
