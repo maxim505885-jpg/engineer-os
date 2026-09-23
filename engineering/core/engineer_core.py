@@ -108,8 +108,7 @@ class EngineerCore:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
             return AgentStatus.UNCERTAINTY
-        if self._has_cross_agent_conflict(state.results):
-            return AgentStatus.UNCERTAINTY
+        conflicts = self.cross_agent_conflicts(state.results)
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
 
@@ -121,12 +120,15 @@ class EngineerCore:
         if not state.results or state.results[-1].agent != "final-audit-agent":
             return AgentStatus.UNCERTAINTY
 
+        if conflicts and not self.final_audit_covers_conflicts(state.results[-1], conflicts):
+            return AgentStatus.UNCERTAINTY
+
         return AgentStatus.ACCEPTED
 
     @staticmethod
-    def _has_cross_agent_conflict(results: list[AgentResult]) -> bool:
-        """Detect incompatible certainty claims tied to the same evidence."""
-        evidence_certainty: dict[frozenset[str], set[str]] = {}
+    def cross_agent_conflicts(results: list[AgentResult]) -> tuple[dict[str, object], ...]:
+        """Return deterministic conflict records tied to the same evidence."""
+        evidence_claims: dict[frozenset[str], dict[str, set[str]]] = {}
         for result in results:
             for finding in result.findings:
                 if not isinstance(finding, dict):
@@ -136,14 +138,44 @@ class EngineerCore:
                 if not isinstance(evidence, list) or not evidence or not isinstance(certainty, str):
                     continue
                 key = frozenset(item for item in evidence if isinstance(item, str) and item)
-                if key:
-                    evidence_certainty.setdefault(key, set()).add(certainty)
-        return any(
-            len(certainties) > 1
-            and "CONFIRMED" in certainties
-            and "UNCERTAIN" in certainties
-            for certainties in evidence_certainty.values()
-        )
+                if not key:
+                    continue
+                claims = evidence_claims.setdefault(key, {})
+                claims.setdefault(certainty, set()).add(result.agent)
+
+        conflicts: list[dict[str, object]] = []
+        for index, evidence in enumerate(sorted(evidence_claims, key=lambda item: tuple(sorted(item))), start=1):
+            claims = evidence_claims[evidence]
+            if "CONFIRMED" not in claims or "UNCERTAIN" not in claims:
+                continue
+            conflicts.append({
+                "id": f"conflict-{index:03d}",
+                "evidence_ids": tuple(sorted(evidence)),
+                "agents": {certainty: tuple(sorted(agents)) for certainty, agents in sorted(claims.items())},
+            })
+        return tuple(conflicts)
+
+    @classmethod
+    def _has_cross_agent_conflict(cls, results: list[AgentResult]) -> bool:
+        return bool(cls.cross_agent_conflicts(results))
+
+    @staticmethod
+    def final_audit_covers_conflicts(final_audit: AgentResult, conflicts: tuple[dict[str, object], ...]) -> bool:
+        """Require every detected conflict's evidence set to be explicitly audited."""
+        if final_audit.agent != "final-audit-agent":
+            return False
+        for conflict in conflicts:
+            conflict_evidence = set(conflict["evidence_ids"])
+            covered = any(
+                isinstance(finding, dict)
+                and conflict_evidence.issubset(
+                    set(item for item in finding.get("evidence_ids", []) if isinstance(item, str))
+                )
+                for finding in final_audit.findings
+            )
+            if not covered:
+                return False
+        return True
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
