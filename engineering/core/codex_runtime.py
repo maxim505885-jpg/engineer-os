@@ -178,6 +178,7 @@ class CodexAppServerClient:
             "Return ONLY one JSON object with status, findings, evidence_ids and message; no Markdown fences. "
             "status must be one of PASS, ACCEPTED, ACCEPTED_ALTERNATIVE, WARNING, UNCERTAINTY, ERROR, BLOCK. "
             "findings must be an array of objects. Every finding must contain non-empty string fields observation, basis, certainty, conclusion, plus a non-empty evidence_ids array. "
+            "certainty must be exactly CONFIRMED, PROBABLE, or UNCERTAIN. UNCERTAIN findings cannot use PASS, ACCEPTED, or ACCEPTED_ALTERNATIVE; PASS must contain no findings. "
             "A finding evidence_ids list may contain only supplied material IDs and must be included in top-level evidence_ids. "
             "evidence_ids must be an array of strings. "
             "Never invent missing data, calculations, normative clauses or evidence. "
