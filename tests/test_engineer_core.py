@@ -25,6 +25,20 @@ class EngineerCoreTests(unittest.TestCase):
         state = EngineerCore().plan(self.task)
         self.assertTrue(all(item.tz == self.task.tz for item in state.planned))
 
+    def test_final_audit_is_always_last_even_when_requested_early(self):
+        task = EngineerTask(
+            task_id="audit-order",
+            tz="Проверить отчет по ТЗ",
+            materials=(MaterialRef("m1", "report", "report.docx"),),
+            requested_checks=("final_audit", "report", "normative"),
+        )
+        state = EngineerCore().plan(task)
+        self.assertEqual(
+            [item.skill for item in state.planned],
+            ["report-review", "normative-check", "final-audit"],
+        )
+
+
     def test_missing_runtime_handler_is_uncertainty(self):
         state = EngineerCore().run(self.task, AgentRuntimeAdapter())
         self.assertEqual(EngineerCore().final_status(state), AgentStatus.UNCERTAINTY)
