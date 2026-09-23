@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .contracts import AgentResult, AgentStatus, SpecialistTask
+from .codex_result_parser import CodexResultParser
 from .engineer_core import AgentRuntimeAdapter
 from .skill_loader import SkillLoader
 
@@ -169,8 +170,12 @@ class CodexAppServerClient:
             f"Materials available:\\n{materials}\\n\\n"
             "AUTHORITATIVE ENGINEER OS SKILL INSTRUCTIONS:\\n"
             f"{skill_text}\\n\\n"
-            "Execute only this specialist responsibility; link findings to evidence; "
-            "never invent missing data; use UNCERTAINTY/BLOCK when evidence is insufficient."
+            "Execute only this specialist responsibility; link findings to evidence. "
+            "Return ONLY one JSON object with status, findings, evidence_ids and message; no Markdown fences. "
+            "status must be one of PASS, ACCEPTED, ACCEPTED_ALTERNATIVE, WARNING, UNCERTAINTY, ERROR, BLOCK. "
+            "findings must be an array of objects and evidence_ids an array of strings. "
+            "Never invent missing data, calculations, normative clauses or evidence. "
+            "Use UNCERTAINTY or BLOCK when evidence is insufficient."
         )
         turn = self.request(
             "turn/start",
@@ -195,17 +200,11 @@ class CodexAppServerClient:
                                findings=({"codex_thread_id": thread_id, "codex_turn_id": turn_id},),
                                message="Codex turn was interrupted.")
 
-        return AgentResult(
-            task.task_id,
-            task.agent,
-            AgentStatus.ACCEPTED,
-            findings=({
-                "codex_thread_id": thread_id,
-                "codex_turn_id": turn_id,
-                "text": final_text,
-                "turn": final_turn,
-            },),
-            message="Codex specialist turn completed.",
+        return CodexResultParser.parse(
+            task,
+            final_text,
+            thread_id=thread_id,
+            turn_id=turn_id,
         )
 
 
