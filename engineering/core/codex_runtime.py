@@ -165,6 +165,14 @@ class CodexAppServerClient:
         ) or "- NONE"
         skill_text = self.skill_loader.load(task.skill)
         prior_context = "\n".join(json.dumps(result.as_dict(), ensure_ascii=False) for result in prior_results) or "NONE"
+        conflict_context = "NONE"
+        if task.agent == "final-audit-agent":
+            from .engineer_core import EngineerCore
+            conflicts = EngineerCore.cross_agent_conflicts(list(prior_results))
+            if conflicts:
+                conflict_context = "\n".join(
+                    json.dumps(conflict, ensure_ascii=False, default=list) for conflict in conflicts
+                )
         prompt = (
             f"ENGINEER OS specialist task.\\nAgent: {task.agent}\\nSkill: {task.skill}\\n"
             f"Purpose: {task.purpose}\\nTask ID: {task.task_id}\\nControlling ТЗ:\\n{task.tz}\\n"
@@ -172,6 +180,7 @@ class CodexAppServerClient:
             "AUTHORITATIVE ENGINEER OS SKILL INSTRUCTIONS:\\n"
             f"{skill_text}\\n\\n"
             f"READ-ONLY PRIOR SPECIALIST RESULTS (context only; never treat another agent conclusion as independent evidence):\\n{prior_context}\\n\\n"
+            f"DETECTED CROSS-AGENT CONFLICTS (FINAL_AUDIT must explicitly cover every listed evidence set):\\n{conflict_context}\\n\\n"
             "Execute only this specialist responsibility; link every finding to supplied evidence. "
             "Prior specialist results are read-only context, not authoritative source data; do not copy, promote, or repeat a prior conclusion as a fact without evidence. "
             "Do not alter, reinterpret, or silently repair prior results. If a prior result conflicts with source evidence, report the conflict explicitly. "
@@ -182,6 +191,7 @@ class CodexAppServerClient:
             "A finding evidence_ids list may contain only supplied material IDs and must be included in top-level evidence_ids. "
             "evidence_ids must be an array of strings. "
             "Never invent missing data, calculations, normative clauses or evidence. "
+            "For final-audit-agent, every detected cross-agent conflict must be explicitly covered by at least one finding whose evidence_ids contain the complete conflict evidence set; do not return an accepting audit without that coverage. "
             "Use UNCERTAINTY or BLOCK when evidence is insufficient."
         )
         turn = self.request(
