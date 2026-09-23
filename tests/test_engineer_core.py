@@ -3,6 +3,7 @@ import unittest
 from engineering.core import AgentResult, AgentStatus, EngineerCore, EngineerTask, MaterialRef
 from engineering.core.engineer_core import AgentRuntimeAdapter
 from engineering.core.codex_runtime import CodexAppServerClient, CodexServerConfig
+from engineering.core.codex_result_parser import CodexResultParser
 
 
 class EngineerCoreTests(unittest.TestCase):
@@ -38,7 +39,6 @@ class EngineerCoreTests(unittest.TestCase):
             ["report-review", "normative-check", "final-audit"],
         )
 
-
     def test_missing_runtime_handler_is_uncertainty(self):
         state = EngineerCore().run(self.task, AgentRuntimeAdapter())
         self.assertEqual(EngineerCore().final_status(state), AgentStatus.UNCERTAINTY)
@@ -70,6 +70,20 @@ class EngineerCoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             EngineerCore().run(self.task, runtime)
 
+    def test_duplicate_runtime_result_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        first = AgentResult("demo-001", "report-audit-agent", AgentStatus.ACCEPTED)
+        with self.assertRaises(ValueError):
+            core.collect(state, [first, first])
+
+    def test_final_audit_must_be_terminal_result(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
+        state.results = [results[-1], results[0], results[1], results[2]]
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
@@ -77,7 +91,6 @@ class EngineerCoreTests(unittest.TestCase):
         results[-1] = AgentResult("demo-001", state.planned[-1].agent, AgentStatus.BLOCK)
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
-
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
@@ -91,12 +104,38 @@ class EngineerCoreTests(unittest.TestCase):
         config = CodexServerConfig()
         self.assertEqual(config.sandbox, "read-only")
         self.assertEqual(config.approval_policy, "never")
+
     def test_all_accepted(self):
         core = EngineerCore()
         state = core.plan(self.task)
         results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
+
+
+class CodexResultParserTests(unittest.TestCase):
+    def setUp(self):
+        self.task = EngineerTask(
+            task_id="parser-001",
+            tz="Проверить отчет по ТЗ",
+            materials=(MaterialRef("m1", "report", "report.docx"),),
+            requested_checks=("report",),
+        )
+        self.specialist = EngineerCore().plan(self.task).planned[0]
+
+    def test_findings_require_evidence(self):
+        result = CodexResultParser.parse(
+            self.specialist,
+            '{"status":"WARNING","findings":[{"issue":"x"}],"evidence_ids":[],"message":"x"}',
+        )
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
+    def test_evidence_ids_must_be_non_empty_and_unique(self):
+        result = CodexResultParser.parse(
+            self.specialist,
+            '{"status":"ACCEPTED","findings":[],"evidence_ids":["m1","m1"],"message":"ok"}',
+        )
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
 
 if __name__ == "__main__":
