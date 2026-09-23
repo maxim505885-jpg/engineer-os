@@ -43,3 +43,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: python tests/codex_app_server_smoke.py
+      - name: Run live Codex model turn smoke
+        env:
+          PYTHONPATH: .
+        run: python tests/codex_model_turn_smoke.py
