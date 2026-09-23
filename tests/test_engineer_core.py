@@ -130,6 +130,13 @@ class CodexResultParserTests(unittest.TestCase):
         )
         self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
+    def test_evidence_ids_must_reference_supplied_materials(self):
+        result = CodexResultParser.parse(
+            self.specialist,
+            '{"status":"ACCEPTED","findings":[],"evidence_ids":["missing-material"],"message":"ok"}',
+        )
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
     def test_evidence_ids_must_be_non_empty_and_unique(self):
         result = CodexResultParser.parse(
             self.specialist,
