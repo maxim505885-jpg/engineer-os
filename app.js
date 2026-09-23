@@ -74,7 +74,38 @@ async function renderDashboard(){
   $("#launchEngineeringBtn").addEventListener("click",launchEngineeringRun);
 }
 
-\nasync function launchEngineeringRun(){\n  if(!state.projectId){toast("Сначала выберите проект");return;}\n  const docs=await db("documents",{projectId:state.projectId,select:"id,name,document_type,status,processing_status",order:"created_at",limit:100});\n  if(docs.length<2){toast("Нужно минимум два обработанных документа: отчёт и ТЗ");return;}\n  const sourceOptions=docs.map((d,i)=>`${i+1}. ${d.name} [${d.id}]`).join("\\n");\n  const sourceInput=prompt("Введите номер или ID исходного отчёта/документа:\\n\\n"+sourceOptions, "1");\n  if(!sourceInput)return;\n  const source=docs[Number(sourceInput)-1]||docs.find(d=>d.id===sourceInput.trim());\n  if(!source){toast("Исходный документ не найден");return;}\n  const tzInput=prompt("Введите номер или ID документа ТЗ:\\n\\n"+sourceOptions, docs.findIndex(d=>/ТЗ|техническ|assignment/i.test(d.name+" "+(d.document_type||"")))+1||"2");\n  if(!tzInput)return;\n  const tz=docs[Number(tzInput)-1]||docs.find(d=>d.id===tzInput.trim());\n  if(!tz){toast("Документ ТЗ не найден");return;}\n  const objective=prompt("Цель проверки (необязательно):","Провести инженерную проверку отчёта по ТЗ с доказательной базой и FINAL_AUDIT.")||"";\n  const box=$("#launchResult");box.style.display="block";box.innerHTML='<div class="label">Запуск ENGINEER OS…</div>';\n  try{\n    const {data,error}=await supabase.functions.invoke("pipeline-launch-v1",{body:{project_id:state.projectId,document_id:source.id,technical_assignment_document_id:tz.id,title:"Инженерное обследование / аудит отчёта",objective}});\n    if(error)throw error;\n    box.innerHTML=`<div class="eyebrow">ENGINEER OS / LAUNCH</div><h3 style="margin:6px 0">${esc(data?.status||"UNKNOWN")}</h3><div class="label">Task ID: <span class="mono">${esc(data?.task_id||"—")}</span></div><div class="label">Analysis Run: <span class="mono">${esc(data?.analysis_run_id||"—")}</span></div><div class="label" style="margin-top:8px">Оркестратор и очередь получили задачу. Следите за этапами в Pipeline.</div>`;\n    toast("ENGINEER OS запущен");\n  }catch(e){box.innerHTML=`<div class="status BLOCK">BLOCK</div><div style="margin-top:8px">${esc(e.message)}</div>`;toast("Запуск заблокирован: "+e.message);}\n}\n\nasync function renderCase(){
+
+async function launchEngineeringRun(){
+  if(!state.projectId){toast("Сначала выберите проект");return;}
+  const docs=await db("documents",{projectId:state.projectId,select:"id,name,document_type,status,processing_status",order:"created_at",limit:100});
+  if(!docs.length){toast("В проекте нет обработанных документов");return;}
+  const sourceOptions=docs.map((d,i)=>`${i+1}. ${d.name} [${d.id}]`).join("\n");
+  const sourceInput=prompt("Введите номер или ID исходного отчёта/документа:\n\n"+sourceOptions,"1");
+  if(!sourceInput)return;
+  const source=docs[Number(sourceInput)-1]||docs.find(d=>d.id===sourceInput.trim());
+  if(!source){toast("Исходный документ не найден");return;}
+
+  const embedded=confirm("Техническое задание уже находится внутри выбранного отчёта?\n\nОК — использовать ТЗ внутри этого документа.\nОтмена — выбрать отдельный документ ТЗ.");
+  let tz=source;
+  if(!embedded){
+    if(docs.length<2){toast("Для отдельного ТЗ нужен второй обработанный документ");return;}
+    const suggested=Math.max(1,docs.findIndex(d=>/ТЗ|техническ|assignment/i.test(d.name+" "+(d.document_type||"")))+1);
+    const tzInput=prompt("Введите номер или ID документа ТЗ:\n\n"+sourceOptions,String(suggested));
+    if(!tzInput)return;
+    tz=docs[Number(tzInput)-1]||docs.find(d=>d.id===tzInput.trim());
+    if(!tz){toast("Документ ТЗ не найден");return;}
+  }
+
+  const objective=prompt("Цель проверки (необязательно):","Провести инженерную проверку отчёта по ТЗ с доказательной базой и FINAL_AUDIT.")||"";
+  const box=$("#launchResult");box.style.display="block";box.innerHTML='<div class="label">Запуск ENGINEER OS…</div>';
+  try{
+    const {data,error}=await supabase.functions.invoke("pipeline-launch-v1",{body:{project_id:state.projectId,document_id:source.id,technical_assignment_document_id:tz.id,title:"Инженерное обследование / аудит отчёта",objective}});
+    if(error)throw error;
+    box.innerHTML=`<div class="eyebrow">ENGINEER OS / LAUNCH</div><h3 style="margin:6px 0">${esc(data?.status||"UNKNOWN")}</h3><div class="label">Task ID: <span class="mono">${esc(data?.task_id||"—")}</span></div><div class="label">Analysis Run: <span class="mono">${esc(data?.analysis_run_id||"—")}</span></div><div class="label" style="margin-top:8px">ТЗ: ${embedded?"внутри исходного документа":"отдельный документ"}. Оркестратор и очередь получили задачу. Следите за этапами в Pipeline.</div>`;
+    toast("ENGINEER OS запущен");
+  }catch(e){box.innerHTML=`<div class="status BLOCK">BLOCK</div><div style="margin-top:8px">${esc(e.message)}</div>`;toast("Запуск заблокирован: "+e.message);}
+}
+\nasync function renderCase(){
   const p=state.projectId;
   const [els,locs,meas,finds]=await Promise.all([
     db("structural_elements",{projectId:p,select:"id,name,element_type,material,location"}),
