@@ -39,6 +39,7 @@ class SpecialistTask:
     skill: str
     inputs: tuple[MaterialRef, ...]
     purpose: str
+    tz: str = ""
 
 
 @dataclass(frozen=True)
