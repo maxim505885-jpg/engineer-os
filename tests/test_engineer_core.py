@@ -135,6 +135,67 @@ class EngineerCoreTests(unittest.TestCase):
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
 
+    def test_conflict_without_final_audit_coverage_is_uncertainty(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned[:-1]:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(AgentResult(
+                "demo-001", planned.agent, AgentStatus.ACCEPTED,
+                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
+                evidence_ids=("m1",),
+            ))
+        results.append(AgentResult("demo-001", "final-audit-agent", AgentStatus.ACCEPTED))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_conflict_with_final_audit_coverage_can_be_accepted(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned[:-1]:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(AgentResult(
+                "demo-001", planned.agent, AgentStatus.ACCEPTED,
+                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
+                evidence_ids=("m1",),
+            ))
+        results.append(AgentResult(
+            "demo-001", "final-audit-agent", AgentStatus.ACCEPTED,
+            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"FINAL_AUDIT","certainty":"CONFIRMED","conclusion":"проверено"},),
+            evidence_ids=("m1",),
+        ))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
+
+    def test_two_conflicts_require_both_evidence_sets(self):
+        core = EngineerCore()
+        task = EngineerTask(
+            task_id="two-conflicts", tz="Проверить по ТЗ",
+            materials=(MaterialRef("m1","report","one"), MaterialRef("m2","photo","two")),
+            requested_checks=("report","normative"),
+        )
+        state = core.plan(task)
+        results = []
+        for planned in state.planned[:-1]:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(AgentResult(
+                "two-conflicts", planned.agent, AgentStatus.ACCEPTED,
+                findings=(
+                    {"observation":"a","evidence_ids":["m1"],"basis":"x","certainty":certainty,"conclusion":"y"},
+                    {"observation":"b","evidence_ids":["m2"],"basis":"x","certainty":certainty,"conclusion":"y"},
+                ),
+                evidence_ids=("m1","m2"),
+            ))
+        results.append(AgentResult(
+            "two-conflicts","final-audit-agent",AgentStatus.ACCEPTED,
+            findings=({"observation":"covered one","evidence_ids":["m1"],"basis":"audit","certainty":"CONFIRMED","conclusion":"covered"},),
+            evidence_ids=("m1",),
+        ))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
@@ -204,9 +265,9 @@ class CodexResultParserTests(unittest.TestCase):
         self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
     def test_findings_require_structured_engineering_fields(self):
-        raw = '{"status":"WARNING","findings":[{"observation":"трещина","evidence_ids":["m1"],"basis":"осмотр","certainty":"measured","conclusion":"требуется проверка"}],"evidence_ids":["m1"],"message":"x"}'
+        raw = '{"status":"WARNING","findings":[{"observation":"трещина","evidence_ids":["m1"],"basis":"осмотр","certainty":"CONFIRMED","conclusion":"требуется проверка"}],"evidence_ids":["m1"],"message":"x"}'
         result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.ACCEPTED)
+        self.assertEqual(result.status, AgentStatus.WARNING)
 
     def test_findings_without_structured_fields_are_uncertainty(self):
         raw = '{"status":"WARNING","findings":[{"issue":"трещина","evidence_ids":["m1"]}],"evidence_ids":["m1"],"message":"x"}'
