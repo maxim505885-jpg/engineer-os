@@ -85,13 +85,18 @@ class EngineerCore:
         return self.collect(state, runtime.execute(state.planned))
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
-        allowed = {p.agent for p in state.planned}
+        planned_agents = [p.agent for p in state.planned]
+        allowed = set(planned_agents)
+        seen = {r.agent for r in state.results}
         for result in results:
             if result.agent not in allowed:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
             if result.task_id != state.task.task_id:
                 raise ValueError("Result task_id does not match core task")
+            if result.agent in seen:
+                raise ValueError(f"Duplicate result from agent: {result.agent}")
             state.results.append(result)
+            seen.add(result.agent)
         return state
 
     def final_status(self, state: CoreState) -> AgentStatus:
@@ -105,10 +110,15 @@ class EngineerCore:
             return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
+
         expected = {p.agent for p in state.planned}
         actual = {r.agent for r in state.results}
         if expected - actual:
             return AgentStatus.UNCERTAINTY
+
+        if not state.results or state.results[-1].agent != "final-audit-agent":
+            return AgentStatus.UNCERTAINTY
+
         return AgentStatus.ACCEPTED
 
     @staticmethod
