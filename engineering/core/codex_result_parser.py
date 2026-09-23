@@ -128,6 +128,41 @@ class CodexResultParser:
                     turn_id,
                 )
 
+            conflict_fields = {"conflict_ids", "resolution_status", "resolution_basis"}
+            if any(key in finding for key in conflict_fields):
+                conflict_ids = finding.get("conflict_ids")
+                if (
+                    not isinstance(conflict_ids, list)
+                    or not conflict_ids
+                    or not all(isinstance(item, str) and item.strip() for item in conflict_ids)
+                    or len(set(conflict_ids)) != len(conflict_ids)
+                ):
+                    return cls._uncertainty(
+                        task,
+                        f"finding[{index}].conflict_ids must be a non-empty unique array of strings.",
+                        raw_text,
+                        thread_id,
+                        turn_id,
+                    )
+                resolution_status = finding.get("resolution_status")
+                if resolution_status not in {"RESOLVED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"}:
+                    return cls._uncertainty(
+                        task,
+                        f"finding[{index}].resolution_status is invalid.",
+                        raw_text,
+                        thread_id,
+                        turn_id,
+                    )
+                resolution_basis = finding.get("resolution_basis")
+                if not isinstance(resolution_basis, str) or not resolution_basis.strip():
+                    return cls._uncertainty(
+                        task,
+                        f"finding[{index}].resolution_basis must be a non-empty string.",
+                        raw_text,
+                        thread_id,
+                        turn_id,
+                    )
+
         has_uncertain_finding = any(finding["certainty"] == "UNCERTAIN" for finding in findings)
         if has_uncertain_finding and status in {
             AgentStatus.PASS,
