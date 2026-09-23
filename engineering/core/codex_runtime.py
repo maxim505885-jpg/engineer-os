@@ -167,10 +167,11 @@ class CodexAppServerClient:
         prior_context = "\n".join(json.dumps(result.as_dict(), ensure_ascii=False) for result in prior_results) or "NONE"
         prompt = (
             f"ENGINEER OS specialist task.\\nAgent: {task.agent}\\nSkill: {task.skill}\\n"
-            f"Purpose: {task.purpose}\\nTask ID: {task.task_id}\\n"
+            f"Purpose: {task.purpose}\\nTask ID: {task.task_id}\\nControlling ТЗ:\\n{task.tz}\\n"
             f"Materials available:\\n{materials}\\n\\n"
             "AUTHORITATIVE ENGINEER OS SKILL INSTRUCTIONS:\\n"
             f"{skill_text}\\n\\n"
+            f"READ-ONLY PRIOR SPECIALIST RESULTS:\\n{prior_context}\\n\\n"
             "Execute only this specialist responsibility; link findings to evidence. "
             "Return ONLY one JSON object with status, findings, evidence_ids and message; no Markdown fences. "
             "status must be one of PASS, ACCEPTED, ACCEPTED_ALTERNATIVE, WARNING, UNCERTAINTY, ERROR, BLOCK. "
