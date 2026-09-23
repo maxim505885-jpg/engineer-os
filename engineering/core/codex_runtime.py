@@ -16,7 +16,7 @@ from .skill_loader import SkillLoader
 
 @dataclass(frozen=True)
 class CodexServerConfig:
-    command: tuple[str, ...] = ("codex-app-server",)
+    command: tuple[str, ...] = ("codex", "app-server")
     cwd: str | None = None
     model: str | None = None
     sandbox: str = "read-only"
