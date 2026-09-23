@@ -177,7 +177,9 @@ class CodexAppServerClient:
             "Do not alter, reinterpret, or silently repair prior results. If a prior result conflicts with source evidence, report the conflict explicitly. "
             "Return ONLY one JSON object with status, findings, evidence_ids and message; no Markdown fences. "
             "status must be one of PASS, ACCEPTED, ACCEPTED_ALTERNATIVE, WARNING, UNCERTAINTY, ERROR, BLOCK. "
-            "findings must be an array of objects and evidence_ids an array of strings. "
+            "findings must be an array of objects. Every finding must contain non-empty string fields observation, basis, certainty, conclusion, plus a non-empty evidence_ids array. "
+            "A finding evidence_ids list may contain only supplied material IDs and must be included in top-level evidence_ids. "
+            "evidence_ids must be an array of strings. "
             "Never invent missing data, calculations, normative clauses or evidence. "
             "Use UNCERTAINTY or BLOCK when evidence is insufficient."
         )
