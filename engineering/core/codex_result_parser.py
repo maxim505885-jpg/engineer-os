@@ -10,6 +10,7 @@ class CodexResultParser:
     """Validates strict JSON specialist output without inventing engineering data."""
 
     REQUIRED_KEYS = {"status", "findings", "evidence_ids", "message"}
+    FINDING_REQUIRED_KEYS = {"observation", "evidence_ids", "basis", "certainty", "conclusion"}
 
     @classmethod
     def parse(
@@ -59,6 +60,65 @@ class CodexResultParser:
             )
         if findings and not evidence_ids:
             return cls._uncertainty(task, "Findings require at least one evidence_id.", raw_text, thread_id, turn_id)
+
+        for index, finding in enumerate(findings):
+            missing_finding = cls.FINDING_REQUIRED_KEYS - finding.keys()
+            if missing_finding:
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}] is missing fields: {sorted(missing_finding)}.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
+            for key in ("observation", "basis", "certainty", "conclusion"):
+                if not isinstance(finding[key], str) or not finding[key].strip():
+                    return cls._uncertainty(
+                        task,
+                        f"finding[{index}].{key} must be a non-empty string.",
+                        raw_text,
+                        thread_id,
+                        turn_id,
+                    )
+            finding_evidence = finding["evidence_ids"]
+            if (
+                not isinstance(finding_evidence, list)
+                or not all(isinstance(item, str) and item.strip() for item in finding_evidence)
+                or not finding_evidence
+            ):
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}].evidence_ids must be a non-empty array of strings.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
+            if len(set(finding_evidence)) != len(finding_evidence):
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}].evidence_ids must not contain duplicates.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
+            unknown_finding_evidence = sorted(set(finding_evidence) - supplied_ids)
+            if unknown_finding_evidence:
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}].evidence_ids reference materials not supplied to this specialist: {unknown_finding_evidence}.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
+            if not set(finding_evidence).issubset(set(evidence_ids)):
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}].evidence_ids must be included in top-level evidence_ids.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
+
         if message is not None and not isinstance(message, str):
             return cls._uncertainty(task, "message must be a string or null.", raw_text, thread_id, turn_id)
 
