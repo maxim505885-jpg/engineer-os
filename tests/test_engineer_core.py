@@ -84,6 +84,57 @@ class EngineerCoreTests(unittest.TestCase):
         state.results = [results[-1], results[0], results[1], results[2]]
         self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
 
+    def test_cross_agent_conflicting_certainty_is_uncertainty(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(
+                AgentResult(
+                    "demo-001",
+                    planned.agent,
+                    AgentStatus.WARNING,
+                    findings=(
+                        {
+                            "observation": "признак",
+                            "evidence_ids": ["m1"],
+                            "basis": "осмотр",
+                            "certainty": certainty,
+                            "conclusion": "вывод",
+                        },
+                    ),
+                    evidence_ids=("m1",),
+                )
+            )
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_same_agent_findings_do_not_create_cross_agent_conflict(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned:
+            results.append(
+                AgentResult(
+                    "demo-001",
+                    planned.agent,
+                    AgentStatus.ACCEPTED,
+                    findings=(
+                        {
+                            "observation": "признак",
+                            "evidence_ids": ["m1"],
+                            "basis": "осмотр",
+                            "certainty": "CONFIRMED",
+                            "conclusion": "вывод",
+                        },
+                    ),
+                    evidence_ids=("m1",),
+                )
+            )
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
+
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
