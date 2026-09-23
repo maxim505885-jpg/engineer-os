@@ -18,3 +18,14 @@ Before FINAL_AUDIT:
 - changes traceable.
 
 FINAL_AUDIT is a verification state, not a quality score.
+
+## Cross-agent conflict accountability
+
+When prior specialist results contain a detected cross-agent conflict:
+- review the conflict against the supplied source evidence;
+- explicitly address every detected conflict;
+- include the complete conflict evidence set in at least one FINAL_AUDIT finding for each conflict;
+- do not treat another agent's conclusion as independent evidence;
+- do not return an accepting audit unless every detected conflict is covered.
+
+If the source evidence does not resolve the conflict, report UNCERTAINTY or BLOCK as appropriate.
