@@ -108,6 +108,8 @@ class EngineerCore:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
             return AgentStatus.UNCERTAINTY
+        if self._has_cross_agent_conflict(state.results):
+            return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
 
@@ -120,6 +122,28 @@ class EngineerCore:
             return AgentStatus.UNCERTAINTY
 
         return AgentStatus.ACCEPTED
+
+    @staticmethod
+    def _has_cross_agent_conflict(results: list[AgentResult]) -> bool:
+        """Detect incompatible certainty claims tied to the same evidence."""
+        evidence_certainty: dict[frozenset[str], set[str]] = {}
+        for result in results:
+            for finding in result.findings:
+                if not isinstance(finding, dict):
+                    continue
+                evidence = finding.get("evidence_ids")
+                certainty = finding.get("certainty")
+                if not isinstance(evidence, list) or not evidence or not isinstance(certainty, str):
+                    continue
+                key = frozenset(item for item in evidence if isinstance(item, str) and item)
+                if key:
+                    evidence_certainty.setdefault(key, set()).add(certainty)
+        return any(
+            len(certainties) > 1
+            and "CONFIRMED" in certainties
+            and "UNCERTAIN" in certainties
+            for certainties in evidence_certainty.values()
+        )
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
