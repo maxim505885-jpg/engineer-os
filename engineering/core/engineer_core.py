@@ -120,8 +120,10 @@ class EngineerCore:
         if not state.results or state.results[-1].agent != "final-audit-agent":
             return AgentStatus.UNCERTAINTY
 
-        if conflicts and not self.final_audit_covers_conflicts(state.results[-1], conflicts):
-            return AgentStatus.UNCERTAINTY
+        if conflicts:
+            resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts)
+            if not resolution["complete"]:
+                return AgentStatus.UNCERTAINTY
 
         return AgentStatus.ACCEPTED
 
@@ -176,6 +178,58 @@ class EngineerCore:
             if not covered:
                 return False
         return True
+
+    @staticmethod
+    def final_audit_conflict_resolution(
+        final_audit: AgentResult,
+        conflicts: tuple[dict[str, object], ...],
+    ) -> dict[str, object]:
+        """Evaluate whether FINAL_AUDIT explicitly resolves every detected conflict."""
+        unresolved: list[str] = []
+        if final_audit.agent != "final-audit-agent":
+            return {"complete": False, "unresolved": [str(c["id"]) for c in conflicts]}
+
+        for conflict in conflicts:
+            conflict_id = str(conflict["id"])
+            evidence = set(conflict["evidence_ids"])
+            addressed = False
+            resolved = False
+            for finding in final_audit.findings:
+                if not isinstance(finding, dict):
+                    continue
+                finding_evidence = set(
+                    item for item in finding.get("evidence_ids", [])
+                    if isinstance(item, str)
+                )
+                if not evidence.issubset(finding_evidence):
+                    continue
+                addressed = True
+                basis = str(finding.get("basis", "")).upper()
+                conclusion = str(finding.get("conclusion", "")).upper()
+                observation = str(finding.get("observation", "")).upper()
+                # Resolution must be explicit in the audit finding, not inferred
+                # merely from evidence coverage.
+                resolution_markers = (
+                    "RESOLVED",
+                    "РАЗРЕШ",
+                    "ПОДТВЕРЖД",
+                    "ОПРОВЕРГ",
+                    "НЕ ПОДТВЕРЖД",
+                    "НЕДОСТАТОЧНО ДАННЫХ",
+                    "UNCERTAINTY",
+                    "BLOCK",
+                )
+                if any(marker in text for marker in resolution_markers
+                       for text in (basis, conclusion, observation)):
+                    resolved = True
+                    break
+            if not addressed or not resolved:
+                unresolved.append(conflict_id)
+
+        return {
+            "complete": not unresolved,
+            "unresolved": tuple(unresolved),
+        }
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
