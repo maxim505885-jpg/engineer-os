@@ -11,6 +11,7 @@ class CodexResultParser:
 
     REQUIRED_KEYS = {"status", "findings", "evidence_ids", "message"}
     FINDING_REQUIRED_KEYS = {"observation", "evidence_ids", "basis", "certainty", "conclusion"}
+    FINDING_CERTAINTIES = {"CONFIRMED", "PROBABLE", "UNCERTAIN"}
 
     @classmethod
     def parse(
@@ -80,6 +81,14 @@ class CodexResultParser:
                         thread_id,
                         turn_id,
                     )
+            if finding["certainty"] not in cls.FINDING_CERTAINTIES:
+                return cls._uncertainty(
+                    task,
+                    f"finding[{index}].certainty must be one of {sorted(cls.FINDING_CERTAINTIES)}.",
+                    raw_text,
+                    thread_id,
+                    turn_id,
+                )
             finding_evidence = finding["evidence_ids"]
             if (
                 not isinstance(finding_evidence, list)
@@ -118,6 +127,28 @@ class CodexResultParser:
                     thread_id,
                     turn_id,
                 )
+
+        has_uncertain_finding = any(finding["certainty"] == "UNCERTAIN" for finding in findings)
+        if has_uncertain_finding and status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        }:
+            return cls._uncertainty(
+                task,
+                "Result status cannot be accepting while a finding is marked UNCERTAIN.",
+                raw_text,
+                thread_id,
+                turn_id,
+            )
+        if status == AgentStatus.PASS and findings:
+            return cls._uncertainty(
+                task,
+                "PASS result cannot contain findings.",
+                raw_text,
+                thread_id,
+                turn_id,
+            )
 
         if message is not None and not isinstance(message, str):
             return cls._uncertainty(task, "message must be a string or null.", raw_text, thread_id, turn_id)
