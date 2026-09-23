@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Callable, Iterable
 
 from .contracts import AgentResult, AgentStatus, EngineerTask, SpecialistTask
 
@@ -22,22 +22,65 @@ class CoreState:
     results: list[AgentResult]
 
 
+AgentHandler = Callable[[SpecialistTask], AgentResult]
+
+
+class AgentRuntimeAdapter:
+    """Small runtime boundary.
+
+    A real Codex/runtime integration can implement this interface without
+    changing ENGINEER CORE contracts. Missing handlers are never treated as
+    successful engineering work.
+    """
+
+    def __init__(self, handlers: dict[str, AgentHandler] | None = None) -> None:
+        self.handlers = handlers or {}
+
+    def execute(self, planned: Iterable[SpecialistTask]) -> list[AgentResult]:
+        results: list[AgentResult] = []
+        for task in planned:
+            handler = self.handlers.get(task.agent)
+            if handler is None:
+                results.append(
+                    AgentResult(
+                        task_id=task.task_id,
+                        agent=task.agent,
+                        status=AgentStatus.UNCERTAINTY,
+                        message=f"No runtime handler registered for {task.agent}.",
+                    )
+                )
+                continue
+            result = handler(task)
+            if result.task_id != task.task_id or result.agent != task.agent:
+                raise ValueError("Runtime handler returned a result for the wrong task or agent")
+            results.append(result)
+        return results
+
+
 class EngineerCore:
     """Deterministic orchestration layer; it does not invent engineering results."""
 
     def plan(self, task: EngineerTask) -> CoreState:
         self._validate(task)
         planned: list[SpecialistTask] = []
+        seen: set[str] = set()
         for check in task.requested_checks:
             key = check.strip().lower()
             if key not in CHECK_REGISTRY:
                 raise ValueError(f"Unknown requested check: {check}")
+            if key in seen:
+                continue
+            seen.add(key)
             agent, skill, purpose = CHECK_REGISTRY[key]
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose))
-        if "final_audit" not in {x.strip().lower() for x in task.requested_checks}:
+        if "final_audit" not in seen:
             agent, skill, purpose = CHECK_REGISTRY["final_audit"]
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose))
         return CoreState(task=task, planned=planned, results=[])
+
+    def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
+        state = self.plan(task)
+        return self.collect(state, runtime.execute(state.planned))
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
         allowed = {p.agent for p in state.planned}
@@ -50,9 +93,7 @@ class EngineerCore:
         return state
 
     def final_status(self, state: CoreState) -> AgentStatus:
-        if not state.task.tz.strip():
-            return AgentStatus.BLOCK
-        if not state.task.materials:
+        if not state.task.tz.strip() or not state.task.materials:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.ERROR for r in state.results):
             return AgentStatus.ERROR
