@@ -196,6 +196,44 @@ class EngineerCoreTests(unittest.TestCase):
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
 
+    def test_conflict_coverage_without_explicit_resolution_is_uncertainty(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned[:-1]:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(AgentResult(
+                "demo-001", planned.agent, AgentStatus.ACCEPTED,
+                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
+                evidence_ids=("m1",),
+            ))
+        results.append(AgentResult(
+            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
+            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"сопоставление","certainty":"CONFIRMED","conclusion":"вывод проверен"},),
+            evidence_ids=("m1",),
+        ))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_conflict_explicitly_resolved_can_be_accepted(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = []
+        for planned in state.planned[:-1]:
+            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
+            results.append(AgentResult(
+                "demo-001", planned.agent, AgentStatus.ACCEPTED,
+                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
+                evidence_ids=("m1",),
+            ))
+        results.append(AgentResult(
+            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
+            findings=({"observation":"конфликт RESOLVED","evidence_ids":["m1"],"basis":"источник подтверждён","certainty":"CONFIRMED","conclusion":"противоречие разрешено исходными доказательствами"},),
+            evidence_ids=("m1",),
+        ))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
+
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
