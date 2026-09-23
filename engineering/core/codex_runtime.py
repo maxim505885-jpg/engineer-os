@@ -140,7 +140,7 @@ class CodexAppServerClient:
 
         raise TimeoutError(f"Codex turn {turn_id} did not complete before timeout.")
 
-    def execute_specialist(self, task: SpecialistTask) -> AgentResult:
+    def execute_specialist(self, task: SpecialistTask, prior_results: tuple[AgentResult, ...] = ()) -> AgentResult:
         self.start()
         thread = self.request(
             "thread/start",
@@ -164,6 +164,7 @@ class CodexAppServerClient:
             f"- {m.id}: {m.name} [{m.kind}] URI={m.uri or 'n/a'}" for m in task.inputs
         ) or "- NONE"
         skill_text = self.skill_loader.load(task.skill)
+        prior_context = "\n".join(json.dumps(result.as_dict(), ensure_ascii=False) for result in prior_results) or "NONE"
         prompt = (
             f"ENGINEER OS specialist task.\\nAgent: {task.agent}\\nSkill: {task.skill}\\n"
             f"Purpose: {task.purpose}\\nTask ID: {task.task_id}\\n"
@@ -217,9 +218,12 @@ class CodexRuntimeAdapter(AgentRuntimeAdapter):
 
     def execute(self, planned):
         results = []
+        prior_results: tuple[AgentResult, ...] = ()
         for task in planned:
             try:
-                results.append(self.client.execute_specialist(task))
+                result = self.client.execute_specialist(task, prior_results)
+                results.append(result)
+                prior_results = tuple(results)
             except Exception as exc:
                 results.append(
                     AgentResult(task.task_id, task.agent, AgentStatus.ERROR,
