@@ -137,6 +137,21 @@ class CodexResultParserTests(unittest.TestCase):
         )
         self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
+    def test_uncertain_finding_cannot_be_accepted(self):
+        raw = '{"status":"ACCEPTED","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"UNCERTAIN","conclusion":"данных недостаточно"}],"evidence_ids":["m1"],"message":"x"}'
+        result = CodexResultParser.parse(self.specialist, raw)
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
+    def test_pass_cannot_contain_findings(self):
+        raw = '{"status":"PASS","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"CONFIRMED","conclusion":"вывод"}],"evidence_ids":["m1"],"message":"x"}'
+        result = CodexResultParser.parse(self.specialist, raw)
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
+    def test_finding_certainty_is_enum(self):
+        raw = '{"status":"WARNING","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"maybe","conclusion":"вывод"}],"evidence_ids":["m1"],"message":"x"}'
+        result = CodexResultParser.parse(self.specialist, raw)
+        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
+
     def test_findings_require_structured_engineering_fields(self):
         raw = '{"status":"WARNING","findings":[{"observation":"трещина","evidence_ids":["m1"],"basis":"осмотр","certainty":"measured","conclusion":"требуется проверка"}],"evidence_ids":["m1"],"message":"x"}'
         result = CodexResultParser.parse(self.specialist, raw)
