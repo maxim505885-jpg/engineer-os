@@ -43,8 +43,12 @@ class CodexResultParser:
 
         if not isinstance(findings, list) or not all(isinstance(item, dict) for item in findings):
             return cls._uncertainty(task, "findings must be a JSON array of objects.", raw_text, thread_id, turn_id)
-        if not isinstance(evidence_ids, list) or not all(isinstance(item, str) for item in evidence_ids):
-            return cls._uncertainty(task, "evidence_ids must be a JSON array of strings.", raw_text, thread_id, turn_id)
+        if not isinstance(evidence_ids, list) or not all(isinstance(item, str) and item.strip() for item in evidence_ids):
+            return cls._uncertainty(task, "evidence_ids must be a JSON array of non-empty strings.", raw_text, thread_id, turn_id)
+        if len(set(evidence_ids)) != len(evidence_ids):
+            return cls._uncertainty(task, "evidence_ids must not contain duplicates.", raw_text, thread_id, turn_id)
+        if findings and not evidence_ids:
+            return cls._uncertainty(task, "Findings require at least one evidence_id.", raw_text, thread_id, turn_id)
         if message is not None and not isinstance(message, str):
             return cls._uncertainty(task, "message must be a string or null.", raw_text, thread_id, turn_id)
 
