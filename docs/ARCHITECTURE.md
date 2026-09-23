@@ -73,3 +73,23 @@ Agents should have narrow responsibilities and explicit inputs/outputs rather th
 The user's supplied ТЗ controls the requested scope for each engineering task.
 
 Engineering conclusions must be traceable to source evidence and must preserve uncertainty where evidence is insufficient.
+
+
+## Runtime integration
+
+The runtime boundary is documented in `runtime/README.md` and `runtime/HERMES_CODEX_BOUNDARY.md`.
+
+The current executable path is:
+
+```
+EngineerRunner
+  -> EngineerCore
+  -> AgentRuntimeAdapter
+  -> CodexRuntimeAdapter
+  -> Codex App Server
+```
+
+Hermes is an optional runtime host. It must not replace ENGINEER CORE or redefine engineering result contracts.
+
+The controlling ТЗ is passed to every specialist, including FINAL_AUDIT. Prior specialist results are read-only context for subsequent specialists.
+
