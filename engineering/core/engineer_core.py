@@ -75,7 +75,7 @@ class EngineerCore:
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         if "final_audit" not in seen:
             agent, skill, purpose = CHECK_REGISTRY["final_audit"]
-            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose))
+            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
 
     def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
