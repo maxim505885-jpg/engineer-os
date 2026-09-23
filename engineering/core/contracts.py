@@ -53,3 +53,17 @@ class AgentResult:
     @property
     def blocks_progress(self) -> bool:
         return self.status in {AgentStatus.ERROR, AgentStatus.BLOCK}
+
+    @property
+    def has_findings(self) -> bool:
+        return bool(self.findings)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "task_id": self.task_id,
+            "agent": self.agent,
+            "status": self.status.value,
+            "findings": list(self.findings),
+            "evidence_ids": list(self.evidence_ids),
+            "message": self.message,
+        }
