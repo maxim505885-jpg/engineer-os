@@ -117,7 +117,7 @@ class SupabaseTaskStore(TaskRepository):
             {
                 "p_owner_id": self.owner_id,
                 "p_stale_after_seconds": stale_after_seconds,
-                "p_task_id": str(task_id) if task_id else None,
+                "p_engineer_os_task_id": str(task_id) if task_id else None,
             },
         )
         return rows[0] if rows else None
