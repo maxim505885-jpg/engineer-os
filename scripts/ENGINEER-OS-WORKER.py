@@ -33,7 +33,7 @@ def main() -> int:
 
     print("ENGINEER OS persistent worker started.")
     print("Queue: Supabase")
-    print("Runtime: Open WebUI -> Ollama -> local model")
+    print("Runtime: Open WebUI -> configured model gateway")
     print("Waiting for QUEUED tasks...")
 
     try:
