@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Callable
-
 from .contracts import AgentStatus, EngineerTask
 from .engineer_core import AgentRuntimeAdapter, CoreState, EngineerCore
+from .task_store import TaskRepository
 
 
 class TaskStatus(str, Enum):
@@ -37,9 +36,23 @@ class TaskEngine:
     from missing or incomplete evidence.
     """
 
-    def __init__(self, core: EngineerCore | None = None) -> None:
+    def __init__(
+        self,
+        core: EngineerCore | None = None,
+        store: TaskRepository | None = None,
+    ) -> None:
         self.core = core or EngineerCore()
+        self.store = store
         self._tasks: dict[str, TaskRecord] = {}
+        if self.store is not None:
+            for record in self.store.load():
+                if record.task.task_id in self._tasks:
+                    raise ValueError(f"Duplicate persisted task: {record.task.task_id}")
+                self._tasks[record.task.task_id] = record
+
+    def _persist(self) -> None:
+        if self.store is not None:
+            self.store.save(list(self._tasks.values()))
 
     def submit(self, task: EngineerTask) -> TaskRecord:
         if task.task_id in self._tasks:
@@ -48,6 +61,7 @@ class TaskEngine:
         self.core.plan(task)
         record = TaskRecord(task=task)
         self._tasks[task.task_id] = record
+        self._persist()
         return record
 
     def get(self, task_id: str) -> TaskRecord:
@@ -78,11 +92,15 @@ class TaskEngine:
             record.state = state
             record.result_status = result_status
             record.status = self._lifecycle_status(result_status)
-            return self._finish(record)
+            result = self._finish(record)
+            self._persist()
+            return result
         except Exception as exc:
             record.error = str(exc)
             record.status = TaskStatus.FAILED
-            return self._finish(record)
+            result = self._finish(record)
+            self._persist()
+            return result
 
     @staticmethod
     def _lifecycle_status(status: AgentStatus) -> TaskStatus:
