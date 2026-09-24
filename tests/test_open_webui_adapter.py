@@ -94,3 +94,25 @@ def test_openwebui_to_router_model_free_e2e():
     assert result[0].task_id == task.task_id
     assert result[0].agent == task.agent
     assert result[0].evidence_ids == ('evidence-1',)
+
+
+def test_openwebui_normalizes_status_string_as_empty_findings():
+    task = SpecialistTask(
+        task_id='uncertain-task', agent='inspection-agent', skill='inspection-audit',
+        inputs=(), purpose='validate missing evidence', tz='do not invent missing facts',
+    )
+    payload = {
+        'choices': [{'message': {'content': json.dumps({
+            'task_id': task.task_id, 'agent': task.agent, 'status': 'UNCERTAINTY',
+            'findings': 'UNCERTAINTY', 'evidence_ids': [], 'message': 'Insufficient evidence.'
+        })}}],
+    }
+
+    class Client:
+        def execute(self, prompt):
+            assert 'findings MUST ALWAYS be a JSON ARRAY' in prompt
+            return payload
+
+    result = OpenWebUIRuntimeAdapter(Client()).execute([task])[0]
+    assert result.status is AgentStatus.UNCERTAINTY
+    assert result.findings == ()
