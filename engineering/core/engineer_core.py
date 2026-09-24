@@ -76,7 +76,7 @@ class EngineerCore:
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         if "final_audit" not in seen:
             agent, skill, purpose = CHECK_REGISTRY["final_audit"]
-            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose))
+            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
 
     def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
@@ -85,12 +85,16 @@ class EngineerCore:
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
         allowed = {p.agent for p in state.planned}
+        seen: set[str] = set()
         for result in results:
             if result.agent not in allowed:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
             if result.task_id != state.task.task_id:
                 raise ValueError("Result task_id does not match core task")
+            if result.agent in seen:
+                raise ValueError(f"Duplicate result from agent: {result.agent}")
             self._validate_result_contract(result)
+            seen.add(result.agent)
             state.results.append(result)
         return state
 
@@ -105,10 +109,31 @@ class EngineerCore:
             return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
+
         expected = {p.agent for p in state.planned}
         actual = {r.agent for r in state.results}
         if expected - actual:
             return AgentStatus.UNCERTAINTY
+
+        final_audit = next(
+            (r for r in state.results if r.agent == CHECK_REGISTRY["final_audit"][0]),
+            None,
+        )
+        if final_audit is None:
+            return AgentStatus.UNCERTAINTY
+
+        if final_audit.status not in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        }:
+            return AgentStatus.UNCERTAINTY
+
+        expected_coverage = expected - {CHECK_REGISTRY["final_audit"][0]}
+        covered = set(final_audit.checked_agents)
+        if covered != expected_coverage:
+            return AgentStatus.UNCERTAINTY
+
         return AgentStatus.ACCEPTED
 
     @staticmethod
@@ -127,6 +152,15 @@ class EngineerCore:
         } and not result.evidence_ids:
             raise ValueError(
                 f"{result.agent} returned {result.status.value} without evidence_ids"
+            )
+
+        if result.agent == CHECK_REGISTRY["final_audit"][0] and result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.checked_agents:
+            raise ValueError(
+                "final-audit-agent returned an accepting status without checked_agents"
             )
 
     @staticmethod
