@@ -106,10 +106,23 @@ class TaskWorker:
             )
             return 1
 
-        if record.status in {TaskStatus.RUNNING, TaskStatus.FAILED}:
+        if record.status == TaskStatus.RUNNING:
             self.engine.requeue(
                 str(task_id),
                 "Recovered before execution after a stale queue lease.",
+            )
+        elif record.status == TaskStatus.FAILED:
+            if int(item.get("attempt_count", 1)) >= int(item.get("max_attempts", 1)):
+                self.queue.finish_queue_item(
+                    str(queue_id),
+                    "FAILED",
+                    result={"engineer_os_task_id": str(task_id), "error": record.error},
+                    blocking_reasons=([record.error] if record.error else []),
+                )
+                return 1
+            self.engine.requeue(
+                str(task_id),
+                "Retrying after a stale queue lease.",
             )
 
         record = self.engine.run(str(task_id), self.runtime_factory())
