@@ -83,6 +83,12 @@ jobs:
           node-version: "22"
       - name: Install Codex CLI
         run: npm install -g @openai/codex
+      - name: Authenticate Codex with API key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
+          codex login status
       - name: Run live Supabase → Worker → Codex E2E
         env:
           PYTHONPATH: .
