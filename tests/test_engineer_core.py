@@ -65,8 +65,9 @@ class EngineerCoreTests(unittest.TestCase):
                 "final_audit": ("final-audit-agent", "final-audit", ""),
             }.values()}
         )
-        state = EngineerCore().run(self.task, runtime)
-        self.assertEqual(EngineerCore().final_status(state), AgentStatus.ACCEPTED)
+        core = EngineerCore(acceptance_gate=lambda state: True)
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
         self.assertEqual(len(calls), 4)
 
     def test_wrong_runtime_result_is_rejected(self):
