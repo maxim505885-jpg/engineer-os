@@ -48,13 +48,6 @@ class EngineeringRuntimeRouter(AgentRuntimeAdapter):
                     AgentStatus.UNCERTAINTY,
                     message=f"Runtime backend '{self.policy.backend}' is not configured.",
                 )
-                for task in planned
-            ]
-                    task.agent,
-                    AgentStatus.UNCERTAINTY,
-                    message=f"Runtime backend '{self.policy.backend}' is not configured.",
-                )
-                for task in planned
             ]
 
         raw_results = runtime.execute(planned)
