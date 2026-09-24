@@ -19,7 +19,10 @@ def validate_agent_result(task: SpecialistTask, result: AgentResult) -> AgentRes
     top_evidence = {item for item in result.evidence_ids if isinstance(item, str) and item}
     if len(top_evidence) != len(result.evidence_ids):
         raise RuntimeContractError("Runtime result evidence_ids must contain non-empty strings")
-    if not top_evidence.issubset(supplied):
+    def evidence_is_supplied(evidence_id: str) -> bool:
+        return any(evidence_id == material_id or evidence_id.startswith(f"{material_id}:") for material_id in supplied)
+
+    if not all(evidence_is_supplied(item) for item in top_evidence):
         raise RuntimeContractError("Runtime result references evidence not supplied to the specialist")
 
     if result.status == AgentStatus.PASS and result.findings:
@@ -37,7 +40,7 @@ def validate_agent_result(task: SpecialistTask, result: AgentResult) -> AgentRes
         finding_evidence = finding.get("evidence_ids")
         if not isinstance(finding_evidence, list) or not finding_evidence or not all(isinstance(x, str) and x for x in finding_evidence):
             raise RuntimeContractError(f"Finding {index} must contain non-empty evidence_ids")
-        if not set(finding_evidence).issubset(supplied):
+        if not all(evidence_is_supplied(item) for item in finding_evidence):
             raise RuntimeContractError(f"Finding {index} references evidence not supplied to the specialist")
         if not set(finding_evidence).issubset(top_evidence):
             raise RuntimeContractError(f"Finding {index} evidence_ids must be present in top-level evidence_ids")
