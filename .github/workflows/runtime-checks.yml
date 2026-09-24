@@ -91,3 +91,16 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ENGINEER_OS_OWNER_ID: ${{ secrets.ENGINEER_OS_OWNER_ID }}
         run: python tests/live_supabase_codex_e2e.py
+
+  model-free-orchestration-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run model-free orchestration E2E
+        env:
+          PYTHONPATH: .
+        run: python -m unittest tests.test_task_worker.WorkerTests.test_persistent_infrastructure_path_can_finish_without_codex_model -v
