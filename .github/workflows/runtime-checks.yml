@@ -47,7 +47,7 @@ jobs:
         run: python tests/codex_app_server_smoke.py
 
   codex-model-turn-optional:
-    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_MODEL_SMOKE == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_MODEL_SMOKE == 'true' }}
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -70,7 +70,7 @@ jobs:
         run: python tests/codex_model_turn_smoke.py
 
   live-supabase-codex-e2e:
-    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_E2E == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_E2E == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -106,7 +106,7 @@ jobs:
         run: python -m unittest tests.test_task_worker.WorkerTests.test_persistent_infrastructure_path_can_finish_without_codex_model -v
 
   live-supabase-infrastructure-e2e:
-    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_E2E == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_E2E == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
