@@ -114,3 +114,20 @@ Establish:
 6. Clear separation between runtime and engineering logic.
 
 Do not implement a large application before these boundaries are reviewable.
+
+## Developer documentation — Context7
+
+When implementation depends on a third-party library, framework, SDK, API, CLI, or MCP contract, prefer current version-specific documentation from Context7 before writing integration code.
+
+Context7 source repository for this project:
+https://github.com/maxim505885-jpg/context7
+
+Use Context7 for:
+- library/API syntax and current method signatures;
+- configuration and integration examples;
+- version-specific migration/setup details;
+- MCP client/server configuration.
+
+Do not use Context7 as an engineering truth source. It is a developer documentation aid only. Engineering conclusions, normative requirements, calculations, inspection findings, and FINAL_AUDIT remain governed by ENGINEER OS contracts.
+
+Do not add a paid dependency merely to use Context7. Prefer the available free/local path when it is sufficient.
