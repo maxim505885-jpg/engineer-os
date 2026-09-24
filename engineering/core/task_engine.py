@@ -73,6 +73,18 @@ class TaskEngine:
     def list(self) -> tuple[TaskRecord, ...]:
         return tuple(self._tasks.values())
 
+    def requeue(self, task_id: str, reason: str | None = None) -> TaskRecord:
+        record = self.get(task_id)
+        if record.status not in {TaskStatus.RUNNING, TaskStatus.FAILED}:
+            raise ValueError(f"Task {task_id} cannot be requeued from {record.status.value}")
+        record.status = TaskStatus.QUEUED
+        if reason:
+            record.error = reason
+        record.started_at = None
+        record.finished_at = None
+        self._persist()
+        return record
+
     def run_next(self, runtime: AgentRuntimeAdapter) -> TaskRecord | None:
         queued = next((r for r in self._tasks.values() if r.status == TaskStatus.QUEUED), None)
         if queued is None:
