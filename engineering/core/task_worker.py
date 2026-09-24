@@ -65,7 +65,10 @@ class TaskWorker:
         return 1
 
     def _run_persistent_once(self, task_id: str | None = None) -> int:
-        item = self.queue.claim_queue_item(self.config.stale_after_seconds, task_id=task_id)
+        if task_id is None:
+            item = self.queue.claim_queue_item(self.config.stale_after_seconds)
+        else:
+            item = self.queue.claim_queue_item(self.config.stale_after_seconds, task_id=task_id)
         if item is None:
             return 0
 
