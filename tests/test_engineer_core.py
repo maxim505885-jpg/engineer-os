@@ -163,7 +163,7 @@ class EngineerCoreTests(unittest.TestCase):
             ))
         results.append(AgentResult(
             "demo-001", "final-audit-agent", AgentStatus.ACCEPTED,
-            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"FINAL_AUDIT","certainty":"CONFIRMED","conclusion":"проверено"},),
+            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"FINAL_AUDIT","certainty":"CONFIRMED","conclusion":"проверено","conflict_ids":["conflict-001"],"resolution_status":"RESOLVED","resolution_basis":"исходное доказательство подтверждает вывод"},),
             evidence_ids=("m1",),
         ))
         core.collect(state, results)
