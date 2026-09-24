@@ -71,13 +71,27 @@ class TaskWorker:
         task_id = (item.get("payload") or {}).get("engineer_os_task_id")
         if not queue_id or not task_id:
             if queue_id:
-                self.queue.finish_queue_item(
+                if run_row is not None and hasattr(self.queue, "finish_task_run"):
+            self.queue.finish_task_run(
+                str(run_row["id"]),
+                record.status.value,
+                {
+                    "result_status": result_status,
+                    "error": record.error,
+                    "results": [r.as_dict() for r in record.state.results] if record.state else [],
+                },
+                validation={"lifecycle_status": record.status.value},
+                blocking_reasons=([record.error] if record.error else []),
+            )
+
+        self.queue.finish_queue_item(
                     str(queue_id),
                     "FAILED",
                     blocking_reasons=["Queue payload lacks task identity"],
                 )
             return 1
 
+        run_row = None
         try:
             record = self.engine.get(str(task_id))
         except KeyError as exc:
@@ -123,6 +137,18 @@ class TaskWorker:
             self.engine.requeue(
                 str(task_id),
                 "Retrying after a stale queue lease.",
+            )
+
+        if hasattr(self.queue, "create_task_run"):
+            run_row = self.queue.create_task_run(
+                str(item.get("task_uuid") or item.get("task_id")),
+                {
+                    "engineer_os_task_id": str(task_id),
+                    "queue_id": str(queue_id),
+                    "requested_checks": list(record.task.requested_checks),
+                    "material_ids": [m.id for m in record.task.materials],
+                    "tz": record.task.tz,
+                },
             )
 
         record = self.engine.run(str(task_id), self.runtime_factory())
