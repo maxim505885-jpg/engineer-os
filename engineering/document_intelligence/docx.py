@@ -81,9 +81,9 @@ class DocxTextExtractor:
                 if node.tag == self._NS + "t" and node.text:
                     parts.append(node.text)
                 elif node.tag == self._NS + "tab":
-                    parts.append("\\t")
+                    parts.append("\t")
                 elif node.tag in {self._NS + "br", self._NS + "cr"}:
-                    parts.append("\\n")
+                    parts.append("\n")
             return "".join(parts).strip()
 
         def table_rows(table: ET.Element) -> tuple[tuple[str, ...], ...]:
@@ -112,7 +112,7 @@ class DocxTextExtractor:
                 table_id = f"{document_id}:table:{table_index:04d}"
                 rows = table_rows(child)
                 tables.append(ExtractedTable(table_id, rows))
-                table_text = "\\n".join("\\t".join(row) for row in rows)
+                table_text = "\n".join("\t".join(row) for row in rows)
                 blocks.append(ExtractedBlock(table_id, "table", table_text))
 
         image_ids = tuple(
@@ -126,7 +126,7 @@ class DocxTextExtractor:
         return ExtractedDocument(
             source_path=str(source),
             media_type=self.media_type,
-            text="\\n\\n".join(paragraphs),
+            text="\n\n".join(paragraphs),
             paragraphs=tuple(paragraphs),
             paragraph_ids=tuple(paragraph_ids),
             tables=tuple(tables),
