@@ -10,7 +10,7 @@ from .task_engine import TaskEngine, TaskStatus
 
 
 class PersistentQueue(Protocol):
-    def claim_queue_item(self, stale_after_seconds: int = 900) -> dict | None: ...
+    def claim_queue_item(self, stale_after_seconds: int = 900, task_id: str | None = None) -> dict | None: ...
 
     def finish_queue_item(
         self,
@@ -53,10 +53,10 @@ class TaskWorker:
     def stop(self) -> None:
         self._stop = True
 
-    def run_once(self) -> int:
+    def run_once(self, task_id: str | None = None) -> int:
         if self.queue is None:
             return self._run_local_once()
-        return self._run_persistent_once()
+        return self._run_persistent_once(task_id)
 
     def _run_local_once(self) -> int:
         if not any(record.status == TaskStatus.QUEUED for record in self.engine.list()):
@@ -64,8 +64,8 @@ class TaskWorker:
         self.engine.run_next(self.runtime_factory())
         return 1
 
-    def _run_persistent_once(self) -> int:
-        item = self.queue.claim_queue_item(self.config.stale_after_seconds)
+    def _run_persistent_once(self, task_id: str | None = None) -> int:
+        item = self.queue.claim_queue_item(self.config.stale_after_seconds, task_id=task_id)
         if item is None:
             return 0
 
