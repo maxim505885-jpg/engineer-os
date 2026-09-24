@@ -1,0 +1,202 @@
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Callable, Protocol
+
+from .engineer_core import AgentRuntimeAdapter
+from .task_engine import TaskEngine, TaskStatus
+
+
+class PersistentQueue(Protocol):
+    def claim_queue_item(self, stale_after_seconds: int = 900, task_id: str | None = None) -> dict | None: ...
+
+    def finish_queue_item(
+        self,
+        queue_id: str,
+        status: str,
+        result: dict | None = None,
+        blocking_reasons: list[str] | None = None,
+        retry: bool = False,
+    ) -> dict: ...
+
+
+@dataclass(frozen=True)
+class WorkerConfig:
+    poll_interval_seconds: float = 5.0
+    max_tasks_per_cycle: int = 1
+    stale_after_seconds: int = 900
+
+
+class TaskWorker:
+    """Persistent ENGINEER OS worker backed by the existing Supabase queue.
+
+    Queue claiming is atomic in Postgres (FOR UPDATE SKIP LOCKED). TaskEngine
+    remains the lifecycle authority; the queue only owns durable execution
+    leasing and completion state.
+    """
+
+    def __init__(
+        self,
+        engine: TaskEngine,
+        runtime_factory: Callable[[], AgentRuntimeAdapter],
+        config: WorkerConfig | None = None,
+        queue: PersistentQueue | None = None,
+    ) -> None:
+        self.engine = engine
+        self.runtime_factory = runtime_factory
+        self.queue = queue
+        self.config = config or WorkerConfig()
+        self._stop = False
+
+    def stop(self) -> None:
+        self._stop = True
+
+    def run_once(self, task_id: str | None = None) -> int:
+        if self.queue is None:
+            return self._run_local_once()
+        return self._run_persistent_once(task_id)
+
+    def _run_local_once(self) -> int:
+        if not any(record.status == TaskStatus.QUEUED for record in self.engine.list()):
+            return 0
+        self.engine.run_next(self.runtime_factory())
+        return 1
+
+    def _run_persistent_once(self, task_id: str | None = None) -> int:
+        if task_id is None:
+            item = self.queue.claim_queue_item(self.config.stale_after_seconds)
+        else:
+            item = self.queue.claim_queue_item(self.config.stale_after_seconds, task_id=task_id)
+        if item is None:
+            return 0
+
+        queue_id = item.get("id")
+        task_id = (item.get("payload") or {}).get("engineer_os_task_id")
+        if not queue_id or not task_id:
+            if queue_id:
+                self.queue.finish_queue_item(
+                    str(queue_id),
+                    "FAILED",
+                    blocking_reasons=["Queue payload lacks task identity"],
+                )
+            return 1
+
+        run_row = None
+        try:
+            record = self.engine.get(str(task_id))
+        except KeyError as exc:
+            self.queue.finish_queue_item(
+                str(queue_id),
+                "FAILED",
+                blocking_reasons=[str(exc)],
+            )
+            return 1
+
+        if record.status == TaskStatus.COMPLETED:
+            self.queue.finish_queue_item(
+                str(queue_id),
+                "COMPLETED",
+                result={"engineer_os_task_id": str(task_id)},
+            )
+            return 1
+        if record.status == TaskStatus.BLOCKED:
+            self.queue.finish_queue_item(
+                str(queue_id),
+                "BLOCKED",
+                blocking_reasons=([record.error] if record.error else []),
+            )
+            return 1
+
+        if record.status == TaskStatus.RUNNING:
+            self.engine.requeue(
+                str(task_id),
+                "Recovered before execution after a stale queue lease.",
+            )
+        elif record.status == TaskStatus.FAILED:
+            if int(item.get("attempt_count", 1)) >= int(item.get("max_attempts", 1)):
+                self.queue.finish_queue_item(
+                    str(queue_id),
+                    "FAILED",
+                    result={"engineer_os_task_id": str(task_id), "error": record.error},
+                    blocking_reasons=([record.error] if record.error else []),
+                )
+                return 1
+            self.engine.requeue(
+                str(task_id),
+                "Retrying after a stale queue lease.",
+            )
+
+        if hasattr(self.queue, "create_task_run"):
+            run_row = self.queue.create_task_run(
+                str(item.get("task_uuid") or item.get("task_id")),
+                {
+                    "engineer_os_task_id": str(task_id),
+                    "queue_id": str(queue_id),
+                    "requested_checks": list(record.task.requested_checks),
+                    "material_ids": [m.id for m in record.task.materials],
+                    "tz": record.task.tz,
+                },
+            )
+
+        record = self.engine.run(str(task_id), self.runtime_factory())
+        result_status = record.result_status.value if record.result_status else None
+        queue_status = {
+            TaskStatus.COMPLETED: "COMPLETED",
+            TaskStatus.BLOCKED: "BLOCKED",
+            TaskStatus.FAILED: "FAILED",
+        }[record.status]
+
+        retry = (
+            record.status == TaskStatus.FAILED
+            and int(item.get("attempt_count", 1)) < int(item.get("max_attempts", 1))
+        )
+        if retry:
+            self.engine.requeue(
+                str(task_id),
+                "Retry scheduled after a runtime failure.",
+            )
+
+        output_snapshot = {
+            "engineer_os_task_id": str(task_id),
+            "result_status": result_status,
+            "error": record.error,
+            "results": [r.as_dict() for r in record.state.results] if record.state else [],
+        }
+        if run_row is not None and hasattr(self.queue, "finish_task_run"):
+            self.queue.finish_task_run(
+                str(run_row["id"]),
+                record.status.value,
+                output_snapshot,
+                validation={"lifecycle_status": record.status.value},
+                blocking_reasons=([record.error] if record.error else []),
+            )
+
+        self.queue.finish_queue_item(
+            str(queue_id),
+            queue_status,
+            result=output_snapshot,
+            blocking_reasons=([record.error] if record.error else []),
+            retry=retry,
+        )
+        return 1
+
+    def run_forever(self) -> None:
+        while not self._stop:
+            processed = self.run_once()
+            if processed == 0:
+                time.sleep(max(0.1, self.config.poll_interval_seconds))
+
+
+def recover_stale_running_tasks(engine: TaskEngine) -> int:
+    """Recover in-memory tasks left RUNNING by a process restart."""
+    recovered = 0
+    for record in engine.list():
+        if record.status == TaskStatus.RUNNING:
+            engine.requeue(
+                record.task.task_id,
+                "Recovered after worker restart.",
+            )
+            recovered += 1
+    return recovered
