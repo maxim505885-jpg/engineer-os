@@ -26,12 +26,7 @@ AgentHandler = Callable[[SpecialistTask], AgentResult]
 
 
 class AgentRuntimeAdapter:
-    """Small runtime boundary.
-
-    A real Codex/runtime integration can implement this interface without
-    changing ENGINEER CORE contracts. Missing handlers are never treated as
-    successful engineering work.
-    """
+    """Small runtime boundary."""
 
     def __init__(self, handlers: dict[str, AgentHandler] | None = None) -> None:
         self.handlers = handlers or {}
@@ -41,14 +36,7 @@ class AgentRuntimeAdapter:
         for task in planned:
             handler = self.handlers.get(task.agent)
             if handler is None:
-                results.append(
-                    AgentResult(
-                        task_id=task.task_id,
-                        agent=task.agent,
-                        status=AgentStatus.UNCERTAINTY,
-                        message=f"No runtime handler registered for {task.agent}.",
-                    )
-                )
+                results.append(AgentResult(task.task_id, task.agent, AgentStatus.UNCERTAINTY, message=f"No runtime handler registered for {task.agent}."))
                 continue
             result = handler(task)
             if result.task_id != task.task_id or result.agent != task.agent:
@@ -75,7 +63,6 @@ class EngineerCore:
             seen.add(key)
             agent, skill, purpose = CHECK_REGISTRY[key]
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
-
         agent, skill, purpose = CHECK_REGISTRY["final_audit"]
         planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
@@ -85,8 +72,7 @@ class EngineerCore:
         return self.collect(state, runtime.execute(state.planned))
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
-        planned_agents = [p.agent for p in state.planned]
-        allowed = set(planned_agents)
+        allowed = {p.agent for p in state.planned}
         seen = {r.agent for r in state.results}
         for result in results:
             if result.agent not in allowed:
@@ -106,19 +92,26 @@ class EngineerCore:
             return AgentStatus.ERROR
         if any(r.status == AgentStatus.BLOCK for r in state.results):
             return AgentStatus.BLOCK
-        if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
-            return AgentStatus.UNCERTAINTY
-        if any(
-            isinstance(finding, dict) and finding.get("certainty") == "UNCERTAIN"
-            for result in state.results
-            for finding in result.findings
-        ):
-            return AgentStatus.UNCERTAINTY
+
         conflicts = self.cross_agent_conflicts(state.results)
         if conflicts:
             resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts) if state.results else {"complete": False}
             if not resolution["complete"]:
                 return AgentStatus.UNCERTAINTY
+
+        # UNCERTAIN normally blocks acceptance. It may be accepted only when it
+        # is part of an explicitly RESOLVED cross-agent conflict.
+        resolved_conflict_evidence = self._resolved_conflict_evidence(state.results, conflicts)
+        for result in state.results:
+            for finding in result.findings:
+                if not isinstance(finding, dict) or finding.get("certainty") != "UNCERTAIN":
+                    continue
+                evidence = {item for item in finding.get("evidence_ids", []) if isinstance(item, str) and item}
+                if not any(evidence and evidence.issubset(conflict_evidence) for conflict_evidence in resolved_conflict_evidence):
+                    return AgentStatus.UNCERTAINTY
+
+        if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
+            return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
 
@@ -126,15 +119,36 @@ class EngineerCore:
         actual = {r.agent for r in state.results}
         if expected - actual:
             return AgentStatus.UNCERTAINTY
-
         if not state.results or state.results[-1].agent != "final-audit-agent":
             return AgentStatus.UNCERTAINTY
-
         return AgentStatus.ACCEPTED
 
     @staticmethod
+    def _resolved_conflict_evidence(results: list[AgentResult], conflicts: tuple[dict[str, object], ...]) -> tuple[frozenset[str], ...]:
+        if not results or not conflicts:
+            return ()
+        audit = results[-1]
+        resolved: list[frozenset[str]] = []
+        for conflict in conflicts:
+            conflict_id = str(conflict["id"])
+            evidence = frozenset(str(item) for item in conflict["evidence_ids"])
+            for finding in audit.findings:
+                if not isinstance(finding, dict):
+                    continue
+                finding_evidence = {item for item in finding.get("evidence_ids", []) if isinstance(item, str)}
+                if (
+                    finding.get("conflict_ids") == [conflict_id]
+                    and finding.get("resolution_status") == "RESOLVED"
+                    and isinstance(finding.get("resolution_basis"), str)
+                    and finding.get("resolution_basis", "").strip()
+                    and evidence.issubset(finding_evidence)
+                ):
+                    resolved.append(evidence)
+                    break
+        return tuple(resolved)
+
+    @staticmethod
     def cross_agent_conflicts(results: list[AgentResult]) -> tuple[dict[str, object], ...]:
-        """Return deterministic conflict records tied to the same evidence."""
         evidence_claims: dict[frozenset[str], dict[str, set[str]]] = {}
         for result in results:
             for finding in result.findings:
@@ -147,9 +161,7 @@ class EngineerCore:
                 key = frozenset(item for item in evidence if isinstance(item, str) and item)
                 if not key:
                     continue
-                claims = evidence_claims.setdefault(key, {})
-                claims.setdefault(certainty, set()).add(result.agent)
-
+                evidence_claims.setdefault(key, {}).setdefault(certainty, set()).add(result.agent)
         conflicts: list[dict[str, object]] = []
         for index, evidence in enumerate(sorted(evidence_claims, key=lambda item: tuple(sorted(item))), start=1):
             claims = evidence_claims[evidence]
@@ -168,16 +180,13 @@ class EngineerCore:
 
     @staticmethod
     def final_audit_covers_conflicts(final_audit: AgentResult, conflicts: tuple[dict[str, object], ...]) -> bool:
-        """Require every detected conflict's evidence set to be explicitly audited."""
         if final_audit.agent != "final-audit-agent":
             return False
         for conflict in conflicts:
             conflict_evidence = set(conflict["evidence_ids"])
             covered = any(
                 isinstance(finding, dict)
-                and conflict_evidence.issubset(
-                    set(item for item in finding.get("evidence_ids", []) if isinstance(item, str))
-                )
+                and conflict_evidence.issubset(set(item for item in finding.get("evidence_ids", []) if isinstance(item, str)))
                 for finding in final_audit.findings
             )
             if not covered:
@@ -185,15 +194,10 @@ class EngineerCore:
         return True
 
     @staticmethod
-    def final_audit_conflict_resolution(
-        final_audit: AgentResult,
-        conflicts: tuple[dict[str, object], ...],
-    ) -> dict[str, object]:
-        """Evaluate whether FINAL_AUDIT explicitly resolves every detected conflict."""
+    def final_audit_conflict_resolution(final_audit: AgentResult, conflicts: tuple[dict[str, object], ...]) -> dict[str, object]:
         unresolved: list[str] = []
         if final_audit.agent != "final-audit-agent":
             return {"complete": False, "unresolved": [str(c["id"]) for c in conflicts]}
-
         for conflict in conflicts:
             conflict_id = str(conflict["id"])
             evidence = set(conflict["evidence_ids"])
@@ -202,10 +206,7 @@ class EngineerCore:
             for finding in final_audit.findings:
                 if not isinstance(finding, dict):
                     continue
-                finding_evidence = set(
-                    item for item in finding.get("evidence_ids", [])
-                    if isinstance(item, str)
-                )
+                finding_evidence = {item for item in finding.get("evidence_ids", []) if isinstance(item, str)}
                 if not evidence.issubset(finding_evidence):
                     continue
                 addressed = True
@@ -220,14 +221,9 @@ class EngineerCore:
                 if resolution_status == "RESOLVED":
                     resolved = True
                     break
-                addressed = True
             if not addressed or not resolved:
                 unresolved.append(conflict_id)
-
-        return {
-            "complete": not unresolved,
-            "unresolved": tuple(unresolved),
-        }
+        return {"complete": not unresolved, "unresolved": tuple(unresolved)}
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
