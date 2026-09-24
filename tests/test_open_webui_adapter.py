@@ -58,3 +58,38 @@ def test_open_webui_runtime_adapter_parses_structured_result():
     assert result.status.value == 'ACCEPTED'
     assert result.task_id == 'task-1'
     assert result.agent == 'inspection-agent'
+def test_openwebui_to_router_model_free_e2e():
+    task = SpecialistTask(
+        task_id='e2e-task-1', agent='inspection-agent', skill='inspection-audit',
+        inputs=(MaterialRef(id='evidence-1', kind='report', name='report.docx'),),
+        purpose='validate supplied evidence', tz='do not invent missing facts',
+    )
+    finding = {
+        'observation': 'Observed condition is documented in supplied report.',
+        'basis': 'Directly supplied report evidence.',
+        'certainty': 'CONFIRMED',
+        'conclusion': 'Condition is confirmed from the supplied evidence.',
+        'evidence_ids': ['evidence-1'],
+    }
+    payload = {
+        'choices': [{'message': {'content': json.dumps({
+            'task_id': task.task_id, 'agent': task.agent, 'status': 'ACCEPTED',
+            'findings': [finding], 'evidence_ids': ['evidence-1'], 'message': 'validated'
+        })}}],
+    }
+
+    class Client:
+        def execute(self, prompt):
+            assert 'Never invent facts' in prompt
+            assert task.task_id in prompt
+            return payload
+
+    runtime = OpenWebUIRuntimeAdapter(Client())
+    router = EngineeringRuntimeRouter(RuntimePolicy('openwebui'), openwebui=runtime)
+    result = router.execute([task])
+
+    assert len(result) == 1
+    assert result[0].status.value == 'ACCEPTED'
+    assert result[0].task_id == task.task_id
+    assert result[0].agent == task.agent
+    assert result[0].evidence_ids == ('evidence-1',)
