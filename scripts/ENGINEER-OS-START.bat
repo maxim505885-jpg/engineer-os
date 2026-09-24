@@ -57,8 +57,15 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [4/5] Running ENGINEER OS local runtime...
-python scripts/local_openwebui_smoke.py
+echo [4/5] Running ENGINEER OS local runtime with Python 3.11...
+where uv >nul 2>nul
+if errorlevel 1 (
+  echo [ERROR] uv is required to run the ENGINEER OS local runtime with Python 3.11.
+  echo Install uv, then run this launcher again.
+  pause
+  exit /b 1
+)
+uv run --python 3.11 python scripts/local_openwebui_smoke.py
 if errorlevel 1 (
   echo.
   echo ==========================================
@@ -74,8 +81,8 @@ echo [5/5] RESULT
 echo ==========================================
 echo Open WebUI API: PASSED
 echo Model: %ENGINEER_OS_OPEN_WEBUI_MODEL%
-echo ENGINEER OS runtime: PASSED
-echo Engineering status is reported by the smoke test.
+echo ENGINEER OS runtime transport: PASSED
+echo Engineering status: see JSON result above (UNCERTAINTY is expected for this no-materials smoke test).
 echo ==========================================
 echo.
 pause
