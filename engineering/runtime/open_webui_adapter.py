@@ -50,7 +50,7 @@ def _build_prompt(task: SpecialistTask, context: str = "") -> str:
         f"task_id: {task.task_id}\nagent: {task.agent}\nskill: {task.skill}\npurpose: {task.purpose}\n"
         f"ТЗ:\n{task.tz}\n\nMATERIALS:\n{materials}\n\n"
         + (f"EVIDENCE CONTEXT:\n{context}\n\n" if context else "")
-        "Return ONLY one JSON object. Exact schema: {\"task_id\": string, \"agent\": string, \"status\": \"PASS\"|\"ACCEPTED\"|\"ACCEPTED_ALTERNATIVE\"|\"WARNING\"|\"UNCERTAINTY\"|\"ERROR\"|\"BLOCK\", \"findings\": [], \"evidence_ids\": [], \"message\": string|null}.\\n"
+        + "Return ONLY one JSON object. Exact schema: {\"task_id\": string, \"agent\": string, \"status\": \"PASS\"|\"ACCEPTED\"|\"ACCEPTED_ALTERNATIVE\"|\"WARNING\"|\"UNCERTAINTY\"|\"ERROR\"|\"BLOCK\", \"findings\": [], \"evidence_ids\": [], \"message\": string|null}.\\n"
         "IMPORTANT: findings MUST ALWAYS be a JSON ARRAY, never a string. If status is UNCERTAINTY and there is no concrete finding, use findings: [].\\n"
         "Do not return markdown fences, prose, or a bare status word. Repeat the exact task_id and agent values provided above."
     )
