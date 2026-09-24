@@ -40,6 +40,16 @@ class EngineeringRuntimeRouter(AgentRuntimeAdapter):
             "codex": self.codex,
             "openwebui": self.openwebui,
         }[self.policy.backend]
+        if runtime is None:
+            return [
+                AgentResult(
+                    task.task_id,
+                    task.agent,
+                    AgentStatus.UNCERTAINTY,
+                    message=f"Runtime backend '{self.policy.backend}' is not configured.",
+                )
+                for task in planned
+            ]
                     task.agent,
                     AgentStatus.UNCERTAINTY,
                     message=f"Runtime backend '{self.policy.backend}' is not configured.",
