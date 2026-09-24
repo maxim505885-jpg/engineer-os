@@ -30,8 +30,6 @@ class EngineerTask:
     materials: tuple[MaterialRef, ...] = ()
     requested_checks: tuple[str, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
-    context_chunk_ids: tuple[str, ...] = ()
-    context_evidence_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
