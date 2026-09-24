@@ -140,7 +140,7 @@ class EngineerCoreTests(unittest.TestCase):
         core = EngineerCore()
         state = core.plan(self.task)
         results = [
-            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
             for p in state.planned[:-1]
         ]
         results.append(
@@ -150,7 +150,7 @@ class EngineerCoreTests(unittest.TestCase):
                 AgentStatus.ACCEPTED,
                 evidence_ids=self.evidence,
                 checked_agents=("report-audit-agent",),
-            acceptance_basis={},
+                acceptance_basis={},
             )
         )
         core.collect(state, results)
