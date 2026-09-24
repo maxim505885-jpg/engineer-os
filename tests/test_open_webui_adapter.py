@@ -52,7 +52,8 @@ def test_open_webui_runtime_adapter_parses_structured_result():
     }
 
     class Client:
-        def execute(self, prompt):
+        config = OpenWebUIExecutionConfig(model='local-model')
+        def execute(self, prompt, model=None):
             return payload
 
     result = OpenWebUIRuntimeAdapter(Client()).execute([task])[0]
@@ -80,7 +81,8 @@ def test_openwebui_to_router_model_free_e2e():
     }
 
     class Client:
-        def execute(self, prompt):
+        config = OpenWebUIExecutionConfig(model='local-model')
+        def execute(self, prompt, model=None):
             assert 'Never invent facts' in prompt
             assert task.task_id in prompt
             return payload
@@ -109,10 +111,39 @@ def test_openwebui_normalizes_status_string_as_empty_findings():
     }
 
     class Client:
-        def execute(self, prompt):
+        config = OpenWebUIExecutionConfig(model='local-model')
+        def execute(self, prompt, model=None):
             assert 'findings MUST ALWAYS be a JSON ARRAY' in prompt
             return payload
 
     result = OpenWebUIRuntimeAdapter(Client()).execute([task])[0]
     assert result.status is AgentStatus.UNCERTAINTY
     assert result.findings == ()
+
+
+def test_openwebui_falls_back_to_configured_model():
+    task = SpecialistTask(
+        task_id='fallback-task', agent='inspection-agent', skill='inspection-audit',
+        inputs=(), purpose='runtime fallback', tz='do not invent missing facts',
+    )
+    calls = []
+
+    class Client:
+        config = OpenWebUIExecutionConfig(
+            model='primary-model', fallback_models=('qwen3:8b',)
+        )
+
+        def execute(self, prompt, model=None):
+            calls.append(model)
+            if model == 'primary-model':
+                from engineering.runtime.open_webui_adapter import OpenWebUIRuntimeError
+                raise OpenWebUIRuntimeError('primary unavailable')
+            return {'choices': [{'message': {'content': json.dumps({
+                'task_id': task.task_id, 'agent': task.agent, 'status': 'UNCERTAINTY',
+                'findings': [], 'evidence_ids': [], 'message': 'fallback response'
+            })}}]}
+
+    result = OpenWebUIRuntimeAdapter(Client()).execute([task])[0]
+    assert calls == ['primary-model', 'qwen3:8b']
+    assert result.status is AgentStatus.UNCERTAINTY
+    assert result.message.startswith('Runtime model fallback used: qwen3:8b.')
