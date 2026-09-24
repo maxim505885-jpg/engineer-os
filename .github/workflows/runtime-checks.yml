@@ -68,3 +68,26 @@ jobs:
           PYTHONPATH: .
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python tests/codex_model_turn_smoke.py
+
+  live-supabase-codex-e2e:
+    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_E2E == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Codex CLI
+        run: npm install -g @openai/codex
+      - name: Run live Supabase → Worker → Codex E2E
+        env:
+          PYTHONPATH: .
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ENGINEER_OS_OWNER_ID: ${{ secrets.ENGINEER_OS_OWNER_ID }}
+        run: python tests/live_supabase_codex_e2e.py
