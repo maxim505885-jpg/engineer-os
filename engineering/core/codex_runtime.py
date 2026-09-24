@@ -44,7 +44,13 @@ class CodexAppServerClient:
             stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
-            env={\n                "PATH": os.environ.get("PATH", ""),\n                "HOME": os.environ.get("HOME", ""),\n                "LANG": os.environ.get("LANG", "C.UTF-8"),\n                "LC_ALL": os.environ.get("LC_ALL", ""),\n                "TMPDIR": os.environ.get("TMPDIR", ""),\n            },
+            env={
+                "PATH": os.environ.get("PATH", ""),
+                "HOME": os.environ.get("HOME", ""),
+                "LANG": os.environ.get("LANG", "C.UTF-8"),
+                "LC_ALL": os.environ.get("LC_ALL", ""),
+                "TMPDIR": os.environ.get("TMPDIR", ""),
+            },
         )
         self.request(
             "initialize",
