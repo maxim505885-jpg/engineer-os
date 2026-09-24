@@ -35,7 +35,18 @@ class EngineerCoreTests(unittest.TestCase):
 
         def accepted(task):
             calls.append(task.agent)
-            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+            )
 
         runtime = AgentRuntimeAdapter(
             {agent: accepted for agent, _, _ in {
@@ -97,6 +108,55 @@ class EngineerCoreTests(unittest.TestCase):
                 state,
                 [AgentResult("demo-001", state.planned[0].agent, AgentStatus.PASS)],
             )
+
+    def test_final_audit_without_coverage_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+            )
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, results)
+
+    def test_final_audit_incomplete_coverage_cannot_accept(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=("report-audit-agent",),
+            )
+        )
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_duplicate_agent_result_cannot_hide_missing_coverage(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        duplicate = AgentResult(
+            "demo-001",
+            "report-audit-agent",
+            AgentStatus.ACCEPTED,
+            evidence_ids=self.evidence,
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, [duplicate, duplicate])
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
