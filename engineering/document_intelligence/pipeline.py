@@ -26,8 +26,10 @@ class DocumentIntelligence:
     def ingest(self, path: str | Path, *, material_id: str | None = None) -> DocumentIntelligenceResult:
         document = self.extractor.extract(path)
         document_id = self._document_id(document)
+        if material_id is not None and material_id != document_id:
+            raise ValueError("material_id must match the deterministic document_id to preserve evidence provenance")
         material = MaterialRef(
-            id=material_id or document_id,
+            id=document_id,
             kind="document",
             name=Path(document.source_path).name,
             uri=document.source_path,
