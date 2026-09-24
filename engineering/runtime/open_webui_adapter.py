@@ -28,6 +28,7 @@ class OpenWebUIExecutionConfig:
             base_url=os.getenv("ENGINEER_OS_OPEN_WEBUI_URL", "http://127.0.0.1:8080"),
             api_key=os.getenv("ENGINEER_OS_OPEN_WEBUI_API_KEY") or None,
             model=os.getenv("ENGINEER_OS_OPEN_WEBUI_MODEL", ""),
+            fallback_models=tuple(m.strip() for m in os.getenv("ENGINEER_OS_OPEN_WEBUI_FALLBACK_MODELS", "qwen3:8b").split(",") if m.strip()),
             timeout_seconds=int(os.getenv("ENGINEER_OS_OPEN_WEBUI_TIMEOUT", "1800")),
         )
 
@@ -109,12 +110,12 @@ class OpenWebUIClient:
         self.config = config or OpenWebUIExecutionConfig.from_env()
         self.opener = opener or urlopen
 
-    def execute(self, prompt: str) -> dict:
-        if not self.config.model:
+    def execute(self, prompt: str, model: str | None = None) -> dict:
+        if not (model or self.config.model):
             raise OpenWebUIRuntimeError("ENGINEER_OS_OPEN_WEBUI_MODEL is not configured")
         url = f"{self.config.base_url.rstrip('/')}/api/chat/completions"
         payload = json.dumps({
-            "model": self.config.model,
+            "model": model or self.config.model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
         }).encode("utf-8")
@@ -161,6 +162,34 @@ class OpenWebUIRuntimeAdapter(AgentRuntimeAdapter):
     def execute(self, planned: list[SpecialistTask]) -> list[AgentResult]:
         results: list[AgentResult] = []
         for task in planned:
-            response = self.client.execute(_build_prompt(task))
-            results.append(_parse_result(_extract_content(response), task))
+            prompt = _build_prompt(task)
+            candidates = []
+            for model in (self.client.config.model, *self.client.config.fallback_models):
+                if model and model not in candidates:
+                    candidates.append(model)
+            if not candidates:
+                raise OpenWebUIRuntimeError("ENGINEER_OS_OPEN_WEBUI_MODEL is not configured")
+            errors = []
+            for model in candidates:
+                try:
+                    response = self.client.execute(prompt, model=model)
+                    result = _parse_result(_extract_content(response), task)
+                    if model != self.client.config.model:
+                        note = f"Runtime model fallback used: {model}."
+                        result = AgentResult(
+                            task_id=result.task_id,
+                            agent=result.agent,
+                            status=result.status,
+                            findings=result.findings,
+                            evidence_ids=result.evidence_ids,
+                            message=f"{note} {result.message}" if result.message else note,
+                        )
+                    results.append(result)
+                    break
+                except OpenWebUIRuntimeError as exc:
+                    errors.append(f"{model}: {exc}")
+            else:
+                raise OpenWebUIRuntimeError(
+                    "All configured Open WebUI models failed: " + " | ".join(errors)
+                )
         return results
