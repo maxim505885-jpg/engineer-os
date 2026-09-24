@@ -81,7 +81,8 @@ def _parse_result(content: str, task: SpecialistTask) -> AgentResult:
     findings = payload.get("findings", [])
     evidence_ids = payload.get("evidence_ids", [])
     if not isinstance(findings, list) or not all(isinstance(x, dict) for x in findings):
-        raise OpenWebUIRuntimeError("Open WebUI returned invalid findings")
+        preview = json.dumps(findings, ensure_ascii=False)[:2000]
+        raise OpenWebUIRuntimeError(f"Open WebUI returned invalid findings; raw findings={preview}")
     if not isinstance(evidence_ids, list) or not all(isinstance(x, str) and x for x in evidence_ids):
         raise OpenWebUIRuntimeError("Open WebUI returned invalid evidence_ids")
     return AgentResult(
