@@ -67,21 +67,49 @@ class TaskWorker:
         if item is None:
             return 0
 
-        task_id = (item.get("payload") or {}).get("engineer_os_task_id")
         queue_id = item.get("id")
-        if not task_id or not queue_id:
+        task_id = (item.get("payload") or {}).get("engineer_os_task_id")
+        if not queue_id or not task_id:
+            if queue_id:
+                self.queue.finish_queue_item(
+                    str(queue_id),
+                    "FAILED",
+                    blocking_reasons=["Queue payload lacks task identity"],
+                )
+            return 1
+
+        try:
+            record = self.engine.get(str(task_id))
+        except KeyError as exc:
             self.queue.finish_queue_item(
                 str(queue_id),
                 "FAILED",
-                blocking_reasons=["Queue payload lacks task identity"],
+                blocking_reasons=[str(exc)],
             )
             return 1
 
-        record = self.engine.get(str(task_id))
-        if record.status == TaskStatus.RUNNING:
+        # Idempotency boundary: if the process died after ENGINEER CORE
+        # completed but before queue acknowledgement, never execute the
+        # engineering task a second time.
+        if record.status == TaskStatus.COMPLETED:
+            self.queue.finish_queue_item(
+                str(queue_id),
+                "COMPLETED",
+                result={"engineer_os_task_id": str(task_id)},
+            )
+            return 1
+        if record.status == TaskStatus.BLOCKED:
+            self.queue.finish_queue_item(
+                str(queue_id),
+                "BLOCKED",
+                blocking_reasons=([record.error] if record.error else []),
+            )
+            return 1
+
+        if record.status in {TaskStatus.RUNNING, TaskStatus.FAILED}:
             self.engine.requeue(
                 str(task_id),
-                "Recovered after a stale execution lease.",
+                "Recovered before execution after a stale queue lease.",
             )
 
         record = self.engine.run(str(task_id), self.runtime_factory())
@@ -104,7 +132,7 @@ class TaskWorker:
 
         self.queue.finish_queue_item(
             str(queue_id),
-            "FAILED" if record.status == TaskStatus.FAILED else queue_status,
+            queue_status,
             result={
                 "engineer_os_task_id": str(task_id),
                 "result_status": result_status,
