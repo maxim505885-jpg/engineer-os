@@ -68,3 +68,10 @@ def test_router_rejects_unknown_evidence():
         ]),
     ).execute([task()])
     assert result[0].status is AgentStatus.ERROR
+
+
+def test_router_selects_openwebui():
+    openwebui = FakeRuntime([AgentResult("task-1", "inspection-agent", AgentStatus.ACCEPTED)])
+    result = EngineeringRuntimeRouter(RuntimePolicy("openwebui"), openwebui=openwebui).execute([task()])
+    assert result[0].status is AgentStatus.ACCEPTED
+    assert openwebui.calls == 1
