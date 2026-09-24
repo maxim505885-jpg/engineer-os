@@ -13,6 +13,7 @@ class EngineerCoreTests(unittest.TestCase):
             materials=(MaterialRef("m1", "report", "report.docx"),),
             requested_checks=("report", "normative", "calculation"),
         )
+        self.evidence = ("m1",)
 
     def test_plan_adds_final_audit(self):
         state = EngineerCore().plan(self.task)
@@ -34,7 +35,7 @@ class EngineerCoreTests(unittest.TestCase):
 
         def accepted(task):
             calls.append(task.agent)
-            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
 
         runtime = AgentRuntimeAdapter(
             {agent: accepted for agent, _, _ in {
@@ -59,11 +60,43 @@ class EngineerCoreTests(unittest.TestCase):
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence) for p in state.planned]
         results[-1] = AgentResult("demo-001", state.planned[-1].agent, AgentStatus.BLOCK)
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
 
+    def test_accepted_without_evidence_is_rejected_at_runtime_boundary(self):
+        def accepted_without_evidence(task):
+            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted_without_evidence for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        with self.assertRaises(ValueError):
+            EngineerCore().run(self.task, runtime)
+
+    def test_accepted_without_evidence_is_rejected_at_core_boundary(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned],
+            )
+
+    def test_pass_without_evidence_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", state.planned[0].agent, AgentStatus.PASS)],
+            )
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
@@ -77,12 +110,6 @@ class EngineerCoreTests(unittest.TestCase):
         config = CodexServerConfig()
         self.assertEqual(config.sandbox, "read-only")
         self.assertEqual(config.approval_policy, "never")
-    def test_all_accepted(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
 
 
 if __name__ == "__main__":
