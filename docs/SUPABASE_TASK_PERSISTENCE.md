@@ -60,3 +60,11 @@ If `project_id` is not a valid UUID, it is kept in provenance rather than invent
 
 The adapter expects a server-side service-role credential. It must only run in
 a trusted backend/worker environment, never in the browser.
+
+## Persistent worker
+
+The queue can be driven by `TaskWorker`. It polls the durable repository through
+`TaskEngine`, executes one or more queued tasks, and persists lifecycle changes.
+On startup, call `recover_stale_running_tasks(engine)` before entering the loop.
+This recovers tasks left RUNNING by a process restart without reopening tasks that
+were already completed.
