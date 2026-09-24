@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions
 title ENGINEER OS - One Click Start
 
 cd /d "%~dp0.."
@@ -16,8 +16,8 @@ if not exist "%CD%\scripts\local_openwebui_smoke.py" (
   exit /b 1
 )
 
-echo [1/4] Checking Open WebUI...
-powershell -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/' -TimeoutSec 3 | Out-Null; exit 0 } catch { exit 1 }"
+echo [1/5] Checking Open WebUI...
+powershell -NoProfile -Command "try { $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/' -TimeoutSec 5; if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { exit 0 } else { exit 1 } } catch { exit 1 }"
 if errorlevel 1 (
   echo [INFO] Open WebUI is not running. Starting it...
   start "Open WebUI" powershell -NoExit -ExecutionPolicy Bypass -Command "$env:DATA_DIR='C:\open-webui\data'; uvx --python 3.11 open-webui@latest serve"
@@ -30,17 +30,16 @@ if errorlevel 1 (
   )
 )
 
-echo [2/4] Configuring ENGINEER OS runtime...
+echo [2/5] Configuring ENGINEER OS runtime...
 set "PYTHONPATH=%CD%"
 set "ENGINEER_OS_OPEN_WEBUI_URL=http://127.0.0.1:8080"
-
 if "%ENGINEER_OS_OPEN_WEBUI_MODEL%"=="" set "ENGINEER_OS_OPEN_WEBUI_MODEL=gemini-3-flash-preview"
 
 if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
   echo.
-  echo Open WebUI requires an API key for ENGINEER OS.
-  echo Enter it once for this Windows process.
-  set /p "ENGINEER_OS_OPEN_WEBUI_API_KEY=Open WebUI API key: "
+  echo Open WebUI API key is required.
+  echo The key is hidden while you type and is used only for this process.
+  powershell -NoProfile -Command "$p=Read-Host 'Open WebUI API key' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try { [Environment]::SetEnvironmentVariable('ENGINEER_OS_OPEN_WEBUI_API_KEY',[Runtime.InteropServices.Marshal]::PtrToStringBSTR($b),'Process') } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b) }"
 )
 
 if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
@@ -49,7 +48,16 @@ if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
   exit /b 1
 )
 
-echo [3/4] Checking ENGINEER OS local runtime...
+echo [3/5] Checking Open WebUI API...
+powershell -NoProfile -Command "$h=@{Authorization='Bearer ' + $env:ENGINEER_OS_OPEN_WEBUI_API_KEY}; try { $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/models' -Headers $h -TimeoutSec 10; if ($r.StatusCode -eq 200) { exit 0 } else { exit 1 } } catch { Write-Host ('[ERROR] Open WebUI API check failed: ' + $_.Exception.Message); exit 1 }"
+if errorlevel 1 (
+  echo [ERROR] Open WebUI API is not accepting the supplied key or connection.
+  echo Check Open WebUI Settings ^> Account/Settings ^> API Keys.
+  pause
+  exit /b 1
+)
+
+echo [4/5] Running ENGINEER OS local runtime...
 python scripts/local_openwebui_smoke.py
 if errorlevel 1 (
   echo.
@@ -62,11 +70,11 @@ if errorlevel 1 (
 )
 
 echo.
-echo [4/4] RESULT
+echo [5/5] RESULT
 echo ==========================================
-echo Open WebUI runtime: PASSED
+echo Open WebUI API: PASSED
 echo Model: %ENGINEER_OS_OPEN_WEBUI_MODEL%
-echo ENGINEER OS transport: PASSED
+echo ENGINEER OS runtime: PASSED
 echo Engineering status is reported by the smoke test.
 echo ==========================================
 echo.
