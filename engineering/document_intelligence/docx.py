@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from hashlib import sha256
 from zipfile import BadZipFile, ZipFile
 from xml.etree import ElementTree as ET
 
@@ -12,6 +13,7 @@ class DocumentExtractionError(RuntimeError):
 
 @dataclass(frozen=True)
 class ExtractedTable:
+    id: str
     rows: tuple[tuple[str, ...], ...]
 
 
@@ -21,8 +23,9 @@ class ExtractedDocument:
     media_type: str
     text: str
     paragraphs: tuple[str, ...]
+    paragraph_ids: tuple[str, ...] = ()
     tables: tuple[ExtractedTable, ...] = ()
-    image_count: int = 0
+    image_ids: tuple[str, ...] = ()
 
 
 class DocxTextExtractor:
@@ -49,8 +52,10 @@ class DocxTextExtractor:
         except ET.ParseError as exc:
             raise DocumentExtractionError("Invalid DOCX XML") from exc
 
+        document_id = sha256(str(source.resolve()).encode("utf-8")).hexdigest()[:12]
         paragraphs: list[str] = []
-        for paragraph in root.iter(self._NS + "p"):
+        paragraph_ids: list[str] = []
+        for index, paragraph in enumerate(root.iter(self._NS + "p"), start=1):
             parts: list[str] = []
             for node in paragraph.iter():
                 if node.tag == self._NS + "t" and node.text:
@@ -62,6 +67,7 @@ class DocxTextExtractor:
             value = "".join(parts).strip()
             if value:
                 paragraphs.append(value)
+                paragraph_ids.append(f"{document_id}:paragraph:{index:04d}")
 
         tables: list[ExtractedTable] = []
         for table in root.iter(self._NS + "tbl"):
@@ -77,11 +83,15 @@ class DocxTextExtractor:
                             parts.append("\\t")
                     cells.append("".join(parts).strip())
                 rows.append(tuple(cells))
-            tables.append(ExtractedTable(tuple(rows)))
+            table_index = len(tables) + 1
+            tables.append(ExtractedTable(f"{document_id}:table:{table_index:04d}", tuple(rows)))
 
-        image_count = sum(
-            1 for node in root.iter()
-            if node.tag.endswith("}blip") or node.tag.endswith("}imagedata")
+        image_ids = tuple(
+            f"{document_id}:image:{index:04d}"
+            for index, node in enumerate(
+                (node for node in root.iter() if node.tag.endswith("}blip") or node.tag.endswith("}imagedata")),
+                start=1,
+            )
         )
 
         return ExtractedDocument(
@@ -89,6 +99,7 @@ class DocxTextExtractor:
             media_type=self.media_type,
             text="\\n\\n".join(paragraphs),
             paragraphs=tuple(paragraphs),
+            paragraph_ids=tuple(paragraph_ids),
             tables=tuple(tables),
-            image_count=image_count,
+            image_ids=image_ids,
         )
