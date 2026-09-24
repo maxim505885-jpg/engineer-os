@@ -4,7 +4,8 @@ from .contracts import AgentResult, AgentStatus, EngineerTask, MaterialRef, Spec
 from .engineer_core import EngineerCore
 from .runner import EngineerRunner, RunSummary
 from .task_engine import TaskEngine, TaskRecord, TaskStatus
+from .task_store import TaskStore
 
 __all__ = [
-    "AgentResult", "AgentStatus", "EngineerTask", "MaterialRef", "SpecialistTask", "EngineerCore", "EngineerRunner", "RunSummary", "TaskEngine", "TaskRecord", "TaskStatus"
+    "AgentResult", "AgentStatus", "EngineerTask", "MaterialRef", "SpecialistTask", "EngineerCore", "EngineerRunner", "RunSummary", "TaskEngine", "TaskRecord", "TaskStatus", "TaskStore"
 ]
