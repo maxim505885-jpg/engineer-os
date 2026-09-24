@@ -45,7 +45,8 @@ if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
   pause
   exit /b 1
 )
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; try { $key=$env:ENGINEER_OS_OPEN_WEBUI_API_KEY; if ([string]::IsNullOrWhiteSpace($key)) { throw 'Empty API key' }; $h=@{Authorization='Bearer ' + $key}; $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/models' -Headers $h -TimeoutSec 10; if ($r.StatusCode -ne 200) { throw ('HTTP ' + $r.StatusCode) }; Write-Host '[OK] Open WebUI API accepted the key.'; & uv run --python 3.11 python scripts/local_openwebui_smoke.py; exit $LASTEXITCODE } catch { Write-Host ('[ERROR] Open WebUI/runtime check failed: ' + $_.Exception.Message); exit 1 }"
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; try { $key=$env:ENGINEER_OS_OPEN_WEBUI_API_KEY; if ([string]::IsNullOrWhiteSpace($key)) { throw 'Empty API key' }; $h=@{Authorization='Bearer ' + $key}; $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/models' -Headers $h -TimeoutSec 10; if ($r.StatusCode -ne 200) { throw ('HTTP ' + $r.StatusCode) }; Write-Host '[OK] Open WebUI API accepted the key.'; Write-Host '[4/5] Running ENGINEER OS local runtime with Python 3.11...'; & uv run --python 3.11 python scripts/local_openwebui_smoke.py; exit $LASTEXITCODE } catch { Write-Host ('[ERROR] Open WebUI/runtime check failed: ' + $_.Exception.Message); exit 1 }"
 if errorlevel 1 (
   echo.
   echo ==========================================
@@ -57,14 +58,13 @@ if errorlevel 1 (
 )
 
 echo.
-  echo ==========================================
-  echo ENGINEER OS local runtime FAILED.
-  echo ==========================================
-  echo.
-  pause
-  exit /b 1
-)
-
+echo [5/5] RESULT
+echo ==========================================
+echo Open WebUI API: PASSED
+echo Model: %ENGINEER_OS_OPEN_WEBUI_MODEL%
+echo ENGINEER OS runtime transport: PASSED
+echo Engineering status: see JSON result above (UNCERTAINTY is expected for this no-materials smoke test).
+echo ==========================================
 echo.
 pause
 endlocal
