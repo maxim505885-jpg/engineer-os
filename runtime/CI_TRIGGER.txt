@@ -1,1 +1,2 @@
 Runtime CI trigger for Codex smoke validation.
+Open WebUI integration CI trigger.
