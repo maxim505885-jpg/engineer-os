@@ -25,9 +25,8 @@ class OpenWebUIRuntimeFactoryTests(unittest.TestCase):
         self.assertIsInstance(runtime, EngineeringRuntimeRouter)
         self.assertEqual(runtime.policy.backend, "openwebui")
         self.assertIsInstance(runtime.openwebui, OpenWebUIRuntimeAdapter)
-        self.assertEqual(runtime.openwebui.config.model, "qwen3:8b")
-        self.assertEqual(runtime.openwebui.config.timeout_seconds, 600.0)
-
+        self.assertEqual(runtime.openwebui.client.config.model, "qwen3:8b")
+        self.assertEqual(runtime.openwebui.client.config.timeout_seconds, 600)
 
 if __name__ == "__main__":
     unittest.main()
