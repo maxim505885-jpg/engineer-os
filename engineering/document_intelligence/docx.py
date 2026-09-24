@@ -11,15 +11,22 @@ class DocumentExtractionError(RuntimeError):
 
 
 @dataclass(frozen=True)
+class ExtractedTable:
+    rows: tuple[tuple[str, ...], ...]
+
+
+@dataclass(frozen=True)
 class ExtractedDocument:
     source_path: str
     media_type: str
     text: str
     paragraphs: tuple[str, ...]
+    tables: tuple[ExtractedTable, ...] = ()
+    image_count: int = 0
 
 
 class DocxTextExtractor:
-    """Dependency-free DOCX text extraction; it does not infer engineering facts."""
+    """Dependency-free DOCX extraction; it does not infer engineering facts."""
 
     media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     _NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
@@ -56,5 +63,32 @@ class DocxTextExtractor:
             if value:
                 paragraphs.append(value)
 
-        text = "\\n\\n".join(paragraphs)
-        return ExtractedDocument(str(source), self.media_type, text, tuple(paragraphs))
+        tables: list[ExtractedTable] = []
+        for table in root.iter(self._NS + "tbl"):
+            rows: list[tuple[str, ...]] = []
+            for row in table.findall(self._NS + "tr"):
+                cells: list[str] = []
+                for cell in row.findall(self._NS + "tc"):
+                    parts: list[str] = []
+                    for node in cell.iter():
+                        if node.tag == self._NS + "t" and node.text:
+                            parts.append(node.text)
+                        elif node.tag == self._NS + "tab":
+                            parts.append("\\t")
+                    cells.append("".join(parts).strip())
+                rows.append(tuple(cells))
+            tables.append(ExtractedTable(tuple(rows)))
+
+        image_count = sum(
+            1 for node in root.iter()
+            if node.tag.endswith("}blip") or node.tag.endswith("}imagedata")
+        )
+
+        return ExtractedDocument(
+            source_path=str(source),
+            media_type=self.media_type,
+            text="\\n\\n".join(paragraphs),
+            paragraphs=tuple(paragraphs),
+            tables=tuple(tables),
+            image_count=image_count,
+        )
