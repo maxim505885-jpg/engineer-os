@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - architecture/runtime-integration
+      - architecture/e2e-orchestration
   pull_request:
     branches:
       - main
