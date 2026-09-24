@@ -53,3 +53,11 @@ def test_docx_extractor_extracts_tables_and_image_references(tmp_path):
 
     assert result.tables[0].rows == (("Section", "Value"), ("Roof", "Steel"))
     assert result.image_count == 1
+
+
+def test_docx_extractor_assigns_stable_evidence_ids(tmp_path):
+    source = tmp_path / "report.docx"
+    make_docx(source, ["First", "Second"])
+    result = DocxTextExtractor().extract(source)
+    assert result.paragraph_ids[0].endswith(":paragraph:0001")
+    assert result.paragraph_ids[1].endswith(":paragraph:0002")
