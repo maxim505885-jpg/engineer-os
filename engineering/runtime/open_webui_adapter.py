@@ -46,7 +46,9 @@ def _build_prompt(task: SpecialistTask) -> str:
         "ТЗ is controlling.\n\n"
         f"task_id: {task.task_id}\nagent: {task.agent}\nskill: {task.skill}\npurpose: {task.purpose}\n"
         f"ТЗ:\n{task.tz}\n\nMATERIALS:\n{materials}\n\n"
-        "Return ONLY JSON with task_id, agent, status, findings, evidence_ids and message."
+        "Return ONLY one JSON object. Exact schema: {\"task_id\": string, \"agent\": string, \"status\": \"PASS\"|\"ACCEPTED\"|\"ACCEPTED_ALTERNATIVE\"|\"WARNING\"|\"UNCERTAINTY\"|\"ERROR\"|\"BLOCK\", \"findings\": [], \"evidence_ids\": [], \"message\": string|null}.\\n"
+        "IMPORTANT: findings MUST ALWAYS be a JSON ARRAY, never a string. If status is UNCERTAINTY and there is no concrete finding, use findings: [].\\n"
+        "Do not return markdown fences, prose, or a bare status word. Repeat the exact task_id and agent values provided above."
     )
 
 
@@ -80,6 +82,11 @@ def _parse_result(content: str, task: SpecialistTask) -> AgentResult:
         raise OpenWebUIRuntimeError("Unknown ENGINEER OS status returned by Open WebUI") from exc
     findings = payload.get("findings", [])
     evidence_ids = payload.get("evidence_ids", [])
+    # Small, semantics-preserving repair for local models that encode an empty
+    # uncertainty finding as the literal status string. The engineering status
+    # remains UNCERTAINTY; no engineering fact is invented.
+    if isinstance(findings, str) and findings.strip().upper() == status.value:
+        findings = []
     if not isinstance(findings, list) or not all(isinstance(x, dict) for x in findings):
         preview = json.dumps(findings, ensure_ascii=False)[:2000]
         raise OpenWebUIRuntimeError(f"Open WebUI returned invalid findings; raw findings={preview}")
