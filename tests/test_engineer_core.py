@@ -15,6 +15,14 @@ class EngineerCoreTests(unittest.TestCase):
         )
         self.evidence = ("m1",)
 
+    @staticmethod
+    def _basis(agent):
+        return {
+            "report-audit-agent": {"report_quality": ("report-validation-1",)},
+            "normative-agent": {"normative_verification": ("normative-verification-1",)},
+            "calculation-agent": {"calculation_verification": ("calculation-verification-1",)},
+        }.get(agent, {})
+
     def test_plan_adds_final_audit(self):
         state = EngineerCore().plan(self.task)
         self.assertEqual(
@@ -46,6 +54,7 @@ class EngineerCoreTests(unittest.TestCase):
                 AgentStatus.ACCEPTED,
                 evidence_ids=self.evidence,
                 checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
             )
 
         runtime = AgentRuntimeAdapter(
@@ -71,7 +80,7 @@ class EngineerCoreTests(unittest.TestCase):
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence) for p in state.planned]
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent)) for p in state.planned]
         results[-1] = AgentResult("demo-001", state.planned[-1].agent, AgentStatus.BLOCK)
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
@@ -113,7 +122,7 @@ class EngineerCoreTests(unittest.TestCase):
         core = EngineerCore()
         state = core.plan(self.task)
         results = [
-            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence)
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
             for p in state.planned[:-1]
         ]
         results.append(
@@ -141,6 +150,7 @@ class EngineerCoreTests(unittest.TestCase):
                 AgentStatus.ACCEPTED,
                 evidence_ids=self.evidence,
                 checked_agents=("report-audit-agent",),
+            acceptance_basis={},
             )
         )
         core.collect(state, results)
@@ -154,6 +164,7 @@ class EngineerCoreTests(unittest.TestCase):
             "report-audit-agent",
             AgentStatus.ACCEPTED,
             evidence_ids=self.evidence,
+            acceptance_basis=self._basis("report-audit-agent"),
         )
         with self.assertRaises(ValueError):
             core.collect(state, [duplicate, duplicate])
