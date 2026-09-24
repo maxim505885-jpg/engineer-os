@@ -1,7 +1,7 @@
 import unittest
 
 from engineering.core.codex_result_parser import CodexResultParser
-from engineering.core.contracts import AgentStatus, SpecialistTask
+from engineering.core.contracts import AgentStatus, MaterialRef, SpecialistTask
 
 
 class CodexResultParserTests(unittest.TestCase):
@@ -10,7 +10,7 @@ class CodexResultParserTests(unittest.TestCase):
             "task-1",
             "report-audit-agent",
             "report-review",
-            (),
+            (MaterialRef("e1", "report", "report.docx"),),
             "Audit report",
             "Проверить отчёт согласно ТЗ.",
         )
