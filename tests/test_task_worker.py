@@ -73,6 +73,37 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(queue.finished[0][1], "COMPLETED")
         self.assertFalse(queue.finished[0][4])
 
+    def test_persistent_infrastructure_path_can_finish_without_codex_model(self):
+        engine = TaskEngine()
+        engine.submit(self.make_task("infra-1"))
+
+        queue = FakeQueue({
+            "id": "queue-infra-1",
+            "attempt_count": 1,
+            "max_attempts": 1,
+            "payload": {"engineer_os_task_id": "infra-1"},
+        })
+
+        calls = []
+
+        def deterministic_runtime():
+            calls.append("runtime")
+            return self.accepted_runtime()
+
+        worker = TaskWorker(
+            engine,
+            deterministic_runtime,
+            config=WorkerConfig(),
+            queue=queue,
+        )
+
+        self.assertEqual(worker.run_once(), 1)
+        record = engine.get("infra-1")
+        self.assertEqual(record.status, TaskStatus.COMPLETED)
+        self.assertEqual(record.result_status, AgentStatus.ACCEPTED)
+        self.assertEqual(calls, ["runtime"])
+        self.assertEqual(queue.finished[0][1], "COMPLETED")
+
     def test_stale_running_task_is_requeued(self):
         engine = TaskEngine()
         record = TaskRecord(task=self.make_task("stale-1"))
