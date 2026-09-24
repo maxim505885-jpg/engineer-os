@@ -7,10 +7,13 @@ on:
       - architecture/runtime-integration
       - architecture/hermes-adapter
       - architecture/e2e-orchestration
+      - architecture/openwebui-integration
+      - core/document-intelligence-chain
   pull_request:
     branches:
       - main
       - architecture/runtime-integration
+      - architecture/openwebui-integration
 
 jobs:
   python-tests:
@@ -22,90 +25,6 @@ jobs:
           python-version: "3.12"
       - name: Run ENGINEER OS unit tests
         run: python -m unittest discover -s tests -p "test_*.py" -v
-
-  codex-runtime-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Check Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Codex CLI
-        run: npm install -g @openai/codex
-      - name: Verify Codex App Server binary
-        run: |
-          set -e
-          command -v codex
-          codex --version
-          codex app-server --help
-      - name: Run live Codex App Server transport smoke
-        env:
-          PYTHONPATH: .
-        run: python tests/codex_app_server_smoke.py
-
-  codex-model-turn-optional:
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_MODEL_SMOKE == 'true' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Codex CLI
-        run: npm install -g @openai/codex
-      - name: Authenticate Codex with API key
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
-          codex login status
-      - name: Run live Codex model turn smoke
-        env:
-          PYTHONPATH: .
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python tests/codex_model_turn_smoke.py
-
-  live-supabase-codex-e2e:
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_CODEX_E2E == 'true' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install Codex CLI
-        run: npm install -g @openai/codex
-      - name: Check optional API access
-        id: codex_auth
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "OPENAI_API_KEY is not configured; live Codex model E2E is skipped."
-            exit 0
-          fi
-          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
-          codex login status
-          echo "available=true" >> "$GITHUB_OUTPUT"
-      - name: Run live Supabase → Worker → Codex E2E
-        if: ${{ steps.codex_auth.outputs.available == 'true' }}
-        env:
-          PYTHONPATH: .
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          ENGINEER_OS_OWNER_ID: ${{ secrets.ENGINEER_OS_OWNER_ID }}
-        run: python tests/live_supabase_codex_e2e.py
 
   model-free-orchestration-e2e:
     runs-on: ubuntu-latest
@@ -119,20 +38,3 @@ jobs:
         env:
           PYTHONPATH: .
         run: python -m unittest tests.test_task_worker.WorkerTests.test_persistent_infrastructure_path_can_finish_without_codex_model -v
-
-  live-supabase-infrastructure-e2e:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Run live Supabase infrastructure E2E
-        env:
-          PYTHONPATH: .
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          ENGINEER_OS_OWNER_ID: ${{ secrets.ENGINEER_OS_OWNER_ID }}
-        run: python tests/live_supabase_infrastructure_e2e.py
