@@ -140,7 +140,12 @@ class TaskWorker:
                 },
             )
 
-        record = self.engine.run(str(task_id), self.runtime_factory())
+        runtime = self.runtime_factory()
+        # The runtime factory may return the unified Hermes/Codex router.
+        # TaskWorker intentionally remains runtime-agnostic: lifecycle and
+        # queue state stay here, while result validation belongs at the
+        # runtime boundary.
+        record = self.engine.run(str(task_id), runtime)
         result_status = record.result_status.value if record.result_status else None
         queue_status = {
             TaskStatus.COMPLETED: "COMPLETED",

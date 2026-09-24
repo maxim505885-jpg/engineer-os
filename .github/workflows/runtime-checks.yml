@@ -5,11 +5,13 @@ on:
   push:
     branches:
       - architecture/runtime-integration
+      - architecture/hermes-adapter
       - architecture/e2e-orchestration
   pull_request:
     branches:
       - main
       - architecture/runtime-integration
+      - architecture/hermes-adapter
 
 jobs:
   python-tests:

@@ -104,6 +104,28 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(calls, ["runtime"])
         self.assertEqual(queue.finished[0][1], "COMPLETED")
 
+
+    def test_worker_accepts_unified_runtime_router(self):
+        from engineering.runtime.router import EngineeringRuntimeRouter, RuntimePolicy
+
+        engine = TaskEngine()
+        engine.submit(self.make_task("router-1"))
+        queue = FakeQueue({
+            "id": "queue-router-1",
+            "attempt_count": 1,
+            "max_attempts": 1,
+            "payload": {"engineer_os_task_id": "router-1"},
+        })
+
+        runtime = EngineeringRuntimeRouter(RuntimePolicy("hermes"), hermes=self.accepted_runtime())
+        worker = TaskWorker(engine, lambda: runtime, config=WorkerConfig(), queue=queue)
+
+        self.assertEqual(worker.run_once(), 1)
+        record = engine.get("router-1")
+        self.assertEqual(record.status, TaskStatus.COMPLETED)
+        self.assertEqual(record.result_status, AgentStatus.ACCEPTED)
+        self.assertEqual(queue.finished[0][1], "COMPLETED")
+
     def test_stale_running_task_is_requeued(self):
         engine = TaskEngine()
         record = TaskRecord(task=self.make_task("stale-1"))
