@@ -80,14 +80,16 @@ def _parse_result(content: str, task: SpecialistTask) -> AgentResult:
         raise OpenWebUIRuntimeError("Unknown ENGINEER OS status returned by Open WebUI") from exc
     findings = payload.get("findings", [])
     evidence_ids = payload.get("evidence_ids", [])
-    if not isinstance(findings, list) or not isinstance(evidence_ids, list):
-        raise OpenWebUIRuntimeError("Open WebUI returned invalid findings/evidence_ids")
+    if not isinstance(findings, list) or not all(isinstance(x, dict) for x in findings):
+        raise OpenWebUIRuntimeError("Open WebUI returned invalid findings")
+    if not isinstance(evidence_ids, list) or not all(isinstance(x, str) and x for x in evidence_ids):
+        raise OpenWebUIRuntimeError("Open WebUI returned invalid evidence_ids")
     return AgentResult(
         task_id=task.task_id,
         agent=task.agent,
         status=status,
-        findings=tuple(x for x in findings if isinstance(x, dict)),
-        evidence_ids=tuple(x for x in evidence_ids if isinstance(x, str)),
+        findings=tuple(findings),
+        evidence_ids=tuple(evidence_ids),
         message=str(payload["message"]) if payload.get("message") is not None else None,
     )
 
