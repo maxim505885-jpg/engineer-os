@@ -50,6 +50,7 @@ class AgentResult:
     findings: tuple[dict[str, Any], ...] = ()
     evidence_ids: tuple[str, ...] = ()
     message: str | None = None
+    checked_agents: tuple[str, ...] = ()
 
     @property
     def blocks_progress(self) -> bool:
@@ -67,4 +68,5 @@ class AgentResult:
             "findings": list(self.findings),
             "evidence_ids": list(self.evidence_ids),
             "message": self.message,
+            "checked_agents": list(self.checked_agents),
         }
