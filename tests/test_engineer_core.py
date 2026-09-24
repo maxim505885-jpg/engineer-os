@@ -100,6 +100,20 @@ class EngineerCoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             EngineerCore().run(self.task, runtime)
 
+    def test_accepted_without_domain_proof_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult(
+                    "demo-001",
+                    "report-audit-agent",
+                    AgentStatus.ACCEPTED,
+                    evidence_ids=self.evidence,
+                )],
+            )
+
     def test_accepted_without_evidence_is_rejected_at_core_boundary(self):
         core = EngineerCore()
         state = core.plan(self.task)
