@@ -34,6 +34,7 @@ echo [2/5] Configuring ENGINEER OS runtime...
 set "PYTHONPATH=%CD%"
 set "ENGINEER_OS_OPEN_WEBUI_URL=http://127.0.0.1:8080"
 if "%ENGINEER_OS_OPEN_WEBUI_MODEL%"=="" set "ENGINEER_OS_OPEN_WEBUI_MODEL=gemini-3-flash-preview"
+if "%ENGINEER_OS_OPEN_WEBUI_FALLBACK_MODELS%"=="" set "ENGINEER_OS_OPEN_WEBUI_FALLBACK_MODELS=qwen3:8b"
 
 echo [3/5] Checking Open WebUI API...
 echo.
