@@ -11,6 +11,7 @@ on:
     branches:
       - main
       - architecture/runtime-integration
+      - architecture/hermes-adapter
 
 jobs:
   python-tests:
