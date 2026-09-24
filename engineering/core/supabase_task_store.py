@@ -64,13 +64,80 @@ class SupabaseTaskStore(TaskRepository):
                     prefer="return=minimal",
                 )
             else:
-                self._request(
+                created = self._request(
                     "POST",
                     "/rest/v1/engineering_tasks",
                     payload,
-                    prefer="return=minimal",
+                    prefer="return=representation",
                 )
+                if created:
+                    self._enqueue_task(created[0], record)
 
+
+
+    def _enqueue_task(self, row: dict[str, Any], record: TaskRecord) -> None:
+        task_uuid = row.get("id")
+        if not self._uuid_or_none(task_uuid):
+            raise RuntimeError(
+                f"Supabase engineering task has invalid UUID: {task_uuid!r}"
+            )
+        existing = self._request(
+            "GET",
+            "/rest/v1/engineering_execution_queue"
+            f"?select=id&task_id=eq.{urllib.parse.quote(str(task_uuid), safe='')}"
+            "&status=in.(QUEUED,RUNNING)",
+        )
+        if existing:
+            return
+        self._request(
+            "POST",
+            "/rest/v1/engineering_execution_queue",
+            {
+                "owner_id": self.owner_id,
+                "project_id": self._uuid_or_none(record.task.metadata.get("project_id")),
+                "task_id": str(task_uuid),
+                "priority": record.task.metadata.get("priority", "NORMAL"),
+                "payload": {
+                    "engineer_os_task_id": record.task.task_id,
+                    "requested_checks": list(record.task.requested_checks),
+                },
+            },
+            prefer="return=minimal",
+        )
+
+    def claim_queue_item(self, stale_after_seconds: int = 900) -> dict[str, Any] | None:
+        rows = self._request(
+            "POST",
+            "/rest/v1/rpc/claim_engineering_execution_queue",
+            {
+                "p_owner_id": self.owner_id,
+                "p_stale_after_seconds": stale_after_seconds,
+            },
+        )
+        return rows[0] if rows else None
+
+    def finish_queue_item(
+        self,
+        queue_id: str,
+        status: str,
+        result: dict[str, Any] | None = None,
+        blocking_reasons: list[str] | None = None,
+        retry: bool = False,
+    ) -> dict[str, Any]:
+        rows = self._request(
+            "POST",
+            "/rest/v1/rpc/finish_engineering_execution_queue",
+            {
+                "p_queue_id": queue_id,
+                "p_status": status,
+                "p_result": result or {},
+                "p_blocking_reasons": blocking_reasons or [],
+                "p_retry": retry,
+            },
+        )
+        if not rows:
+            raise RuntimeError(f"Supabase queue item disappeared: {queue_id}")
+        return rows[0]
     def load(self) -> list[TaskRecord]:
         rows = self._request(
             "GET",
