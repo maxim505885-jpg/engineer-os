@@ -108,6 +108,12 @@ class EngineerCore:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
             return AgentStatus.UNCERTAINTY
+        if any(
+            isinstance(finding, dict) and finding.get("certainty") == "UNCERTAIN"
+            for result in state.results
+            for finding in result.findings
+        ):
+            return AgentStatus.UNCERTAINTY
         conflicts = self.cross_agent_conflicts(state.results)
         if conflicts:
             resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts) if state.results else {"complete": False}
@@ -214,8 +220,6 @@ class EngineerCore:
                 if resolution_status == "RESOLVED":
                     resolved = True
                     break
-                # Explicit unresolved/insufficient-evidence states are accountable,
-                # but they cannot produce an accepting final status.
                 addressed = True
             if not addressed or not resolved:
                 unresolved.append(conflict_id)
