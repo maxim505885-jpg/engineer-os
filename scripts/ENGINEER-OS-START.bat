@@ -39,17 +39,17 @@ if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
   echo.
   echo Open WebUI API key is required.
   echo The key is hidden while you type and is used only for this process.
-  for /f "delims=" %%K in ('powershell -NoProfile -Command "$p=Read-Host ''Open WebUI API key'' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try { [Runtime.InteropServices.Marshal]::PtrToStringBSTR($b) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b) }"') do set "ENGINEER_OS_OPEN_WEBUI_API_KEY=%%K"
+  for /f "delims=" %%K in ('powershell -NoProfile -Command "$p=Read-Host ''Open WebUI API key'' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try { $s=[Runtime.InteropServices.Marshal]::PtrToStringBSTR($b); $bytes=[Text.Encoding]::UTF8.GetBytes($s); [Convert]::ToBase64String($bytes) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b) }"') do set "ENGINEER_OS_OPEN_WEBUI_API_KEY_B64=%%K"
 )
 
-if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
+if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" if "%ENGINEER_OS_OPEN_WEBUI_API_KEY_B64%"=="" (
   echo [ERROR] No Open WebUI API key supplied.
   pause
   exit /b 1
 )
 
 echo [3/5] Checking Open WebUI API...
-powershell -NoProfile -Command "$h=@{Authorization='Bearer ' + $env:ENGINEER_OS_OPEN_WEBUI_API_KEY}; try { $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/models' -Headers $h -TimeoutSec 10; if ($r.StatusCode -eq 200) { exit 0 } else { exit 1 } } catch { Write-Host ('[ERROR] Open WebUI API check failed: ' + $_.Exception.Message); exit 1 }"
+powershell -NoProfile -Command "$ErrorActionPreference='Stop'; try { if ($env:ENGINEER_OS_OPEN_WEBUI_API_KEY_B64) { $bytes=[Convert]::FromBase64String($env:ENGINEER_OS_OPEN_WEBUI_API_KEY_B64); $env:ENGINEER_OS_OPEN_WEBUI_API_KEY=[Text.Encoding]::UTF8.GetString($bytes).Trim() }; if (-not $env:ENGINEER_OS_OPEN_WEBUI_API_KEY) { throw 'Empty API key' }; if ($env:ENGINEER_OS_OPEN_WEBUI_API_KEY -match '[\x00-\x1F\x7F]') { throw 'API key contains control characters' }; $h=@{Authorization='Bearer ' + $env:ENGINEER_OS_OPEN_WEBUI_API_KEY}; $r=Invoke-WebRequest -UseBasicParsing -Uri 'http://127.0.0.1:8080/api/models' -Headers $h -TimeoutSec 10; if ($r.StatusCode -ne 200) { throw ('HTTP ' + $r.StatusCode) }; Write-Host '[OK] Open WebUI API accepted the key.' } catch { Write-Host ('[ERROR] Open WebUI API check failed: ' + $_.Exception.Message); exit 1 }"
 if errorlevel 1 (
   echo [ERROR] Open WebUI API is not accepting the supplied key or connection.
   echo Check Open WebUI Settings ^> Account/Settings ^> API Keys.
@@ -65,7 +65,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-uv run --python 3.11 python scripts/local_openwebui_smoke.py
+powershell -NoProfile -Command "if ($env:ENGINEER_OS_OPEN_WEBUI_API_KEY_B64) { $bytes=[Convert]::FromBase64String($env:ENGINEER_OS_OPEN_WEBUI_API_KEY_B64); $env:ENGINEER_OS_OPEN_WEBUI_API_KEY=[Text.Encoding]::UTF8.GetString($bytes).Trim() }; & uv run --python 3.11 python scripts/local_openwebui_smoke.py; exit $LASTEXITCODE"
 if errorlevel 1 (
   echo.
   echo ==========================================
