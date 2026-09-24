@@ -128,6 +128,18 @@ class OpenWebUIClient:
         except HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise OpenWebUIRuntimeError(f"Open WebUI HTTP {exc.code}: {detail[:1000]}") from exc
+        except ConnectionResetError as exc:
+            raise OpenWebUIRuntimeError(
+                "Open WebUI closed the connection before returning a response "
+                "(Windows WSAECONNRESET/10054). Check the selected model, Open WebUI "
+                "server console, and the configured provider connection."
+            ) from exc
+        except TimeoutError as exc:
+            raise OpenWebUIRuntimeError(
+                f"Open WebUI request timed out after {self.config.timeout_seconds} seconds"
+            ) from exc
+        except OSError as exc:
+            raise OpenWebUIRuntimeError(f"Open WebUI network error: {exc}") from exc
         except URLError as exc:
             raise OpenWebUIRuntimeError(f"Open WebUI connection failed: {exc.reason}") from exc
         try:
