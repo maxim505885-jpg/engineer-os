@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any
 
 from .contracts import AgentResult, AgentStatus, EngineerTask, MaterialRef
 from .task_engine import TaskRecord, TaskStatus
@@ -36,15 +36,6 @@ class RunRecord:
     error: str | None
 
 
-class TaskRepository(Protocol):
-    """Persistence boundary for Task Engine.
-
-    A future Supabase adapter can implement this contract without changing
-    ENGINEER CORE or Task Engine.
-    """
-
-    def save(self, records: tuple[TaskRecord, ...] | list[TaskRecord]) -> None: ...
-    def load(self) -> list[TaskRecord]: ...
 
 
 class TaskStore:
