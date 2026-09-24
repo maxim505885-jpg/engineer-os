@@ -1,1 +1,6 @@
 Runtime CI trigger for Codex smoke validation.
+Open WebUI integration CI trigger.
+
+CI validation trigger for Hermes-based PR workflow.
+Open WebUI runtime factory validation.
+Factory test assertion fix.

@@ -7,7 +7,7 @@ from engineering.core.contracts import AgentResult, AgentStatus, SpecialistTask
 from engineering.core.engineer_core import AgentRuntimeAdapter
 from .result_validator import RuntimeContractError, validate_agent_result
 
-RuntimeBackend = Literal["hermes", "codex"]
+RuntimeBackend = Literal["hermes", "codex", "openwebui"]
 
 
 @dataclass(frozen=True)
@@ -26,14 +26,20 @@ class EngineeringRuntimeRouter(AgentRuntimeAdapter):
         *,
         hermes: AgentRuntimeAdapter | None = None,
         codex: AgentRuntimeAdapter | None = None,
+        openwebui: AgentRuntimeAdapter | None = None,
     ) -> None:
         self.policy = policy
         self.hermes = hermes
         self.codex = codex
+        self.openwebui = openwebui
         super().__init__()
 
     def execute(self, planned: list[SpecialistTask]) -> list[AgentResult]:
-        runtime = self.hermes if self.policy.backend == "hermes" else self.codex
+        runtime = {
+            "hermes": self.hermes,
+            "codex": self.codex,
+            "openwebui": self.openwebui,
+        }[self.policy.backend]
         if runtime is None:
             return [
                 AgentResult(
