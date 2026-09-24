@@ -39,7 +39,7 @@ if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
   echo.
   echo Open WebUI API key is required.
   echo The key is hidden while you type and is used only for this process.
-  powershell -NoProfile -Command "$p=Read-Host 'Open WebUI API key' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try { [Environment]::SetEnvironmentVariable('ENGINEER_OS_OPEN_WEBUI_API_KEY',[Runtime.InteropServices.Marshal]::PtrToStringBSTR($b),'Process') } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b) }"
+  for /f "delims=" %%K in ('powershell -NoProfile -Command "$p=Read-Host ''Open WebUI API key'' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); try { [Runtime.InteropServices.Marshal]::PtrToStringBSTR($b) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b) }"') do set "ENGINEER_OS_OPEN_WEBUI_API_KEY=%%K"
 )
 
 if "%ENGINEER_OS_OPEN_WEBUI_API_KEY%"=="" (
