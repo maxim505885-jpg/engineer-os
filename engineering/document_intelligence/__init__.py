@@ -2,6 +2,7 @@ from .docx import DocxTextExtractor, DocumentExtractionError, ExtractedDocument,
 from .chunking import DocumentChunker, DocumentChunk
 from .pipeline import DocumentIntelligence, DocumentIntelligenceResult
 from .context import EvidenceContext, EvidenceContextError
+from .retrieval import EvidenceContextCatalog, RetrievedEvidence
 
 __all__ = [
     "DocxTextExtractor",
@@ -15,4 +16,6 @@ __all__ = [
     "DocumentIntelligenceResult",
     "EvidenceContext",
     "EvidenceContextError",
+    "EvidenceContextCatalog",
+    "RetrievedEvidence",
 ]
