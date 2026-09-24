@@ -28,13 +28,25 @@ def test_document_intelligence_preserves_block_order_and_evidence(tmp_path) -> N
     path = tmp_path / "sample.docx"
     _write_docx(path)
 
-    result = DocumentIntelligence().ingest(path, material_id="material-1")
+    result = DocumentIntelligence().ingest(path)
 
-    assert result.material.id == "material-1"
+    assert result.material.id == result.document.paragraph_ids[0].split(":paragraph:", 1)[0]
     assert [block.kind for block in result.document.blocks] == ["paragraph", "table", "paragraph"]
     assert result.document.blocks[1].text == "Cell A\tCell B"
     assert [chunk.block_kinds for chunk in result.chunks] == [("paragraph", "table", "paragraph")]
     assert result.chunks[0].evidence_ids == tuple(block.id for block in result.document.blocks)
+
+
+def test_document_intelligence_rejects_mismatched_material_id(tmp_path) -> None:
+    path = tmp_path / "sample.docx"
+    _write_docx(path)
+
+    try:
+        DocumentIntelligence().ingest(path, material_id="external-id")
+    except ValueError as exc:
+        assert "material_id" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError for mismatched material_id")
 
 
 def test_document_intelligence_assigns_stable_ids_for_same_source(tmp_path) -> None:
