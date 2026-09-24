@@ -71,20 +71,7 @@ class TaskWorker:
         task_id = (item.get("payload") or {}).get("engineer_os_task_id")
         if not queue_id or not task_id:
             if queue_id:
-                if run_row is not None and hasattr(self.queue, "finish_task_run"):
-            self.queue.finish_task_run(
-                str(run_row["id"]),
-                record.status.value,
-                {
-                    "result_status": result_status,
-                    "error": record.error,
-                    "results": [r.as_dict() for r in record.state.results] if record.state else [],
-                },
-                validation={"lifecycle_status": record.status.value},
-                blocking_reasons=([record.error] if record.error else []),
-            )
-
-        self.queue.finish_queue_item(
+                self.queue.finish_queue_item(
                     str(queue_id),
                     "FAILED",
                     blocking_reasons=["Queue payload lacks task identity"],
@@ -102,9 +89,6 @@ class TaskWorker:
             )
             return 1
 
-        # Idempotency boundary: if the process died after ENGINEER CORE
-        # completed but before queue acknowledgement, never execute the
-        # engineering task a second time.
         if record.status == TaskStatus.COMPLETED:
             self.queue.finish_queue_item(
                 str(queue_id),
@@ -169,14 +153,25 @@ class TaskWorker:
                 "Retry scheduled after a runtime failure.",
             )
 
+        output_snapshot = {
+            "engineer_os_task_id": str(task_id),
+            "result_status": result_status,
+            "error": record.error,
+            "results": [r.as_dict() for r in record.state.results] if record.state else [],
+        }
+        if run_row is not None and hasattr(self.queue, "finish_task_run"):
+            self.queue.finish_task_run(
+                str(run_row["id"]),
+                record.status.value,
+                output_snapshot,
+                validation={"lifecycle_status": record.status.value},
+                blocking_reasons=([record.error] if record.error else []),
+            )
+
         self.queue.finish_queue_item(
             str(queue_id),
             queue_status,
-            result={
-                "engineer_os_task_id": str(task_id),
-                "result_status": result_status,
-                "error": record.error,
-            },
+            result=output_snapshot,
             blocking_reasons=([record.error] if record.error else []),
             retry=retry,
         )
