@@ -27,14 +27,26 @@ def main() -> int:
     results = runtime.execute(state.planned)
     core.collect(state, results)
 
+    engineering_status = core.final_status(state).value
     output = {
         "task_id": task.task_id,
         "runtime": "openwebui",
         "model": runtime.openwebui.client.config.model,
         "agent_results": [result.as_dict() for result in state.results],
-        "final_status": core.final_status(state).value,
+        "engineering_status": engineering_status,
+        "runtime_health": "PASSED" if state.results else "FAILED",
     }
     print(json.dumps(output, ensure_ascii=False, indent=2))
+
+    if not state.results:
+        print("ENGINEER OS local Open WebUI runtime smoke FAILED: no agent results.")
+        return 1
+
+    print("ENGINEER OS local Open WebUI runtime smoke PASSED.")
+    print(
+        f"Engineering result status: {engineering_status} "
+        "(this is not a transport/runtime health verdict)."
+    )
     return 0
 
 
