@@ -58,12 +58,16 @@ class SupabaseTaskStore(TaskRepository):
             payload = self._task_payload(record)
             row = by_external_id.get(record.task.task_id)
             if row:
-                self._request(
+                updated = self._request(
                     "PATCH",
-                    f"/rest/v1/engineering_tasks?id=eq.{urllib.parse.quote(row['id'], safe='')}",
+                    f"/rest/v1/engineering_tasks?id=eq.{urllib.parse.quote(str(row['id']), safe='')}",
                     payload,
-                    prefer="return=minimal",
+                    prefer="return=representation",
                 )
+                if not updated:
+                    raise RuntimeError(
+                        f"Supabase engineering task update matched no rows: {row['id']}"
+                    )
             else:
                 created = self._request(
                     "POST",
