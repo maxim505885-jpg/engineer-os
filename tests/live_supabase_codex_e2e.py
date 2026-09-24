@@ -40,7 +40,7 @@ def main() -> None:
     )
 
     try:
-        processed = worker.run_once()
+        processed = worker.run_once(task_id=task_id)
         if processed != 1:
             raise RuntimeError("Persistent queue did not yield the E2E task")
         record = engine.get(task_id)
@@ -52,6 +52,10 @@ def main() -> None:
                 "error": record.error,
             }
         )
+        if record.status.value not in {"COMPLETED", "BLOCKED", "FAILED"}:
+            raise RuntimeError(
+                f"ENGINEER OS live E2E did not reach terminal state: {record.status.value}"
+            )
         if record.status.value == "FAILED":
             raise RuntimeError(record.error or "ENGINEER OS live E2E failed")
     finally:
