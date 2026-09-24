@@ -110,13 +110,14 @@ class SupabaseTaskStore(TaskRepository):
             prefer="return=minimal",
         )
 
-    def claim_queue_item(self, stale_after_seconds: int = 900) -> dict[str, Any] | None:
+    def claim_queue_item(self, stale_after_seconds: int = 900, task_id: str | None = None) -> dict[str, Any] | None:
         rows = self._request(
             "POST",
             "/rest/v1/rpc/claim_engineering_execution_queue",
             {
                 "p_owner_id": self.owner_id,
                 "p_stale_after_seconds": stale_after_seconds,
+                "p_task_id": str(task_id) if task_id else None,
             },
         )
         return rows[0] if rows else None
