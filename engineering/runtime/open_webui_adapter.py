@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 
 from engineering.core.contracts import AgentResult, AgentStatus, SpecialistTask
 from engineering.core.engineer_core import AgentRuntimeAdapter
+from engineering.document_intelligence.retrieval import EvidenceContextCatalog
 
 
 class OpenWebUIRuntimeError(RuntimeError):
@@ -34,7 +35,7 @@ class OpenWebUIExecutionConfig:
         )
 
 
-def _build_prompt(task: SpecialistTask) -> str:
+def _build_prompt(task: SpecialistTask, context: str = "") -> str:
     materials = "\n".join(
         f"- {m.id} | {m.kind} | {m.name} | {m.uri or 'no-uri'}"
         for m in task.inputs
@@ -48,7 +49,8 @@ def _build_prompt(task: SpecialistTask) -> str:
         "ТЗ is controlling.\n\n"
         f"task_id: {task.task_id}\nagent: {task.agent}\nskill: {task.skill}\npurpose: {task.purpose}\n"
         f"ТЗ:\n{task.tz}\n\nMATERIALS:\n{materials}\n\n"
-        "Return ONLY one JSON object. Exact schema: {\"task_id\": string, \"agent\": string, \"status\": \"PASS\"|\"ACCEPTED\"|\"ACCEPTED_ALTERNATIVE\"|\"WARNING\"|\"UNCERTAINTY\"|\"ERROR\"|\"BLOCK\", \"findings\": [], \"evidence_ids\": [], \"message\": string|null}.\\n"
+        + (f"EVIDENCE CONTEXT:\n{context}\n\n" if context else "")
+        + "Return ONLY one JSON object. Exact schema: {\"task_id\": string, \"agent\": string, \"status\": \"PASS\"|\"ACCEPTED\"|\"ACCEPTED_ALTERNATIVE\"|\"WARNING\"|\"UNCERTAINTY\"|\"ERROR\"|\"BLOCK\", \"findings\": [], \"evidence_ids\": [], \"message\": string|null}.\\n"
         "IMPORTANT: findings MUST ALWAYS be a JSON ARRAY, never a string. If status is UNCERTAINTY and there is no concrete finding, use findings: [].\\n"
         "Do not return markdown fences, prose, or a bare status word. Repeat the exact task_id and agent values provided above."
     )
@@ -156,14 +158,22 @@ class OpenWebUIClient:
 class OpenWebUIRuntimeAdapter(AgentRuntimeAdapter):
     """ENGINEER OS runtime adapter using Open WebUI as the model gateway."""
 
-    def __init__(self, client: OpenWebUIClient | None = None) -> None:
+    def __init__(self, client: OpenWebUIClient | None = None, context_catalog: EvidenceContextCatalog | None = None) -> None:
         self.client = client or OpenWebUIClient()
+        self.context_catalog = context_catalog
         super().__init__(handlers={})
 
     def execute(self, planned: list[SpecialistTask]) -> list[AgentResult]:
         results: list[AgentResult] = []
         for task in planned:
-            prompt = _build_prompt(task)
+            context = ""
+            if self.context_catalog is not None:
+                chunks = self.context_catalog.retrieve(tuple(material.id for material in task.inputs), f"{task.purpose}\n{task.tz}", limit=8)
+                context = "\n\n".join(
+                    f"[chunk_id={chunk.id}] [evidence_ids={list(chunk.evidence_ids)}]\n{chunk.text}"
+                    for chunk in chunks
+                )
+            prompt = _build_prompt(task, context)
             candidates = []
             for model in (self.client.config.model, *self.client.config.fallback_models):
                 if model and model not in candidates:

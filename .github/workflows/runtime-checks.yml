@@ -7,10 +7,15 @@ on:
       - architecture/runtime-integration
       - architecture/hermes-adapter
       - architecture/e2e-orchestration
+      - architecture/openwebui-integration
+      - core/document-intelligence-chain
+      - architecture/clod-agent-quality-layer
   pull_request:
     branches:
       - main
       - architecture/runtime-integration
+      - architecture/openwebui-integration
+      - core/document-intelligence-chain
 
 jobs:
   python-tests:
