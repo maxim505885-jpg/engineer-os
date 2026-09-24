@@ -73,9 +73,9 @@ def main() -> None:
         queue=store,
     )
 
-    processed = worker.run_once()
+    processed = worker.run_once(task_id=task_id)
     if processed != 1:
-        raise AssertionError(f"Expected one processed queue item, got {processed}")
+        raise AssertionError(f"Expected target queue item to be processed, got {processed}")
 
     record = engine.get(task_id)
     if record is None:
