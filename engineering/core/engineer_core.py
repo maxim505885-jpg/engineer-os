@@ -109,6 +109,10 @@ class EngineerCore:
         if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
             return AgentStatus.UNCERTAINTY
         conflicts = self.cross_agent_conflicts(state.results)
+        if conflicts:
+            resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts) if state.results else {"complete": False}
+            if not resolution["complete"]:
+                return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
 
@@ -119,11 +123,6 @@ class EngineerCore:
 
         if not state.results or state.results[-1].agent != "final-audit-agent":
             return AgentStatus.UNCERTAINTY
-
-        if conflicts:
-            resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts)
-            if not resolution["complete"]:
-                return AgentStatus.UNCERTAINTY
 
         return AgentStatus.ACCEPTED
 
