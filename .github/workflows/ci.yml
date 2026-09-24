@@ -1,0 +1,80 @@
+name: ENGINEER OS CI
+
+on:
+  push:
+    branches: ["main", "ci/**", "architecture/**"]
+  pull_request:
+    branches: ["main"]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engineer-os-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate ENGINEER OS
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f index.html
+          test -f app.js
+          test -f styles.css
+          test -f auth-recovery.js
+          test -f Dockerfile
+          test -f nginx.conf.template
+          test -f tests/regression.js
+          test -f tests/integrity-contract.js
+          echo "Required files: PASS"
+
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check auth-recovery.js
+          node --check tests/regression.js
+          node --check tests/supabase-contract.js
+          node --check tests/integrity-contract.js
+          echo "JavaScript syntax: PASS"
+
+      - name: Run regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/regression.js
+          node tests/supabase-contract.js
+          node tests/integrity-contract.js
+
+      - name: Validate HTML/CSS presence
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '<html' index.html
+          grep -q 'ENGINEER OS' index.html
+          grep -q ':root' styles.css
+          echo "HTML/CSS structural checks: PASS"
+
+      - name: Validate Dockerfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '^FROM nginx:alpine' Dockerfile
+          grep -q 'EXPOSE 8080' Dockerfile
+          echo "Dockerfile checks: PASS"
+
+      - name: Build container
+        run: docker build --tag engineer-os:ci .
