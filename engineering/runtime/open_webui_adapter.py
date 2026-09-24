@@ -20,6 +20,7 @@ class OpenWebUIExecutionConfig:
     base_url: str = "http://127.0.0.1:8080"
     api_key: str | None = None
     model: str = ""
+    fallback_models: tuple[str, ...] = ()
     timeout_seconds: int = 1800
 
     @classmethod
