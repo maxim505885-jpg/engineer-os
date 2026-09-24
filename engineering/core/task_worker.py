@@ -59,8 +59,10 @@ class TaskWorker:
         return self._run_persistent_once()
 
     def _run_local_once(self) -> int:
-        record = self.engine.run_next(self.runtime_factory())
-        return 0 if record is None else 1
+        if not any(record.status == TaskStatus.QUEUED for record in self.engine.list()):
+            return 0
+        self.engine.run_next(self.runtime_factory())
+        return 1
 
     def _run_persistent_once(self) -> int:
         item = self.queue.claim_queue_item(self.config.stale_after_seconds)
