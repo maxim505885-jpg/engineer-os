@@ -35,11 +35,11 @@ class EngineeringRuntimeRouter(AgentRuntimeAdapter):
         super().__init__()
 
     def execute(self, planned: list[SpecialistTask]) -> list[AgentResult]:
-        runtime = {\n            "hermes": self.hermes,\n            "codex": self.codex,\n            "openwebui": self.openwebui,\n        }[self.policy.backend]
-        if runtime is None:
-            return [
-                AgentResult(
-                    task.task_id,
+        runtime = {
+            "hermes": self.hermes,
+            "codex": self.codex,
+            "openwebui": self.openwebui,
+        }[self.policy.backend]
                     task.agent,
                     AgentStatus.UNCERTAINTY,
                     message=f"Runtime backend '{self.policy.backend}' is not configured.",
