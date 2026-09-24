@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Callable, Protocol
 
-from .contracts import AgentRuntimeAdapter, AgentStatus
+from .engineer_core import AgentRuntimeAdapter
 from .task_engine import TaskEngine, TaskStatus
 
 
