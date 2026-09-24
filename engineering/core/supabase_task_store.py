@@ -4,6 +4,7 @@ import json
 import os
 import urllib.error
 import urllib.parse
+from datetime import datetime, timezone
 import urllib.request
 from typing import Any
 from uuid import UUID
@@ -137,6 +138,58 @@ class SupabaseTaskStore(TaskRepository):
         )
         if not rows:
             raise RuntimeError(f"Supabase queue item disappeared: {queue_id}")
+        return rows[0]
+
+
+    def create_task_run(
+        self,
+        task_uuid: str,
+        input_snapshot: dict[str, Any],
+        agent_id: str | None = None,
+    ) -> dict[str, Any]:
+        payload = {
+            "owner_id": self.owner_id,
+            "task_id": task_uuid,
+            "agent_id": self._uuid_or_none(agent_id),
+            "status": "RUNNING",
+            "input_snapshot": input_snapshot,
+            "output_snapshot": {},
+            "validation": {},
+            "blocking_reasons": [],
+        }
+        rows = self._request(
+            "POST",
+            "/rest/v1/engineering_task_runs",
+            payload,
+            prefer="return=representation",
+        )
+        if not rows:
+            raise RuntimeError("Supabase did not create engineering_task_runs row")
+        return rows[0]
+
+    def finish_task_run(
+        self,
+        run_uuid: str,
+        status: str,
+        output_snapshot: dict[str, Any],
+        validation: dict[str, Any] | None = None,
+        blocking_reasons: list[str] | None = None,
+    ) -> dict[str, Any]:
+        rows = self._request(
+            "PATCH",
+            "/rest/v1/engineering_task_runs"
+            f"?id=eq.{urllib.parse.quote(run_uuid, safe='')}",
+            {
+                "status": status,
+                "output_snapshot": output_snapshot,
+                "validation": validation or {},
+                "blocking_reasons": blocking_reasons or [],
+                "completed_at": datetime.now(timezone.utc).isoformat(),
+            },
+            prefer="return=representation",
+        )
+        if not rows:
+            raise RuntimeError(f"Supabase task run disappeared: {run_uuid}")
         return rows[0]
     def load(self) -> list[TaskRecord]:
         rows = self._request(
