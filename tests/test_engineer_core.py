@@ -70,6 +70,36 @@ class EngineerCoreTests(unittest.TestCase):
         self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
         self.assertEqual(len(calls), 4)
 
+    def test_final_acceptance_fails_closed_without_external_gate(self):
+        calls = []
+
+        def accepted(task):
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
+            )
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        core = EngineerCore()
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
     def test_wrong_runtime_result_is_rejected(self):
         def wrong_result(task):
             return AgentResult(task.task_id, "other-agent", AgentStatus.ACCEPTED)
