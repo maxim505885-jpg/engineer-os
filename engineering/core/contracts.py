@@ -51,6 +51,7 @@ class AgentResult:
     evidence_ids: tuple[str, ...] = ()
     message: str | None = None
     checked_agents: tuple[str, ...] = ()
+    acceptance_basis: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def blocks_progress(self) -> bool:
@@ -69,4 +70,7 @@ class AgentResult:
             "evidence_ids": list(self.evidence_ids),
             "message": self.message,
             "checked_agents": list(self.checked_agents),
+            "acceptance_basis": {
+                key: list(value) for key, value in self.acceptance_basis.items()
+            },
         }
