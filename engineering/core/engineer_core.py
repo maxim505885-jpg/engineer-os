@@ -163,6 +163,20 @@ class EngineerCore:
                 "final-audit-agent returned an accepting status without checked_agents"
             )
 
+        required_basis = {
+            CHECK_REGISTRY["report"][0]: "report_quality",
+            CHECK_REGISTRY["normative"][0]: "normative_verification",
+            CHECK_REGISTRY["calculation"][0]: "calculation_verification",
+        }.get(result.agent)
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and required_basis and not result.acceptance_basis.get(required_basis):
+            raise ValueError(
+                f"{result.agent} returned an accepting status without {required_basis} proof"
+            )
+
     @staticmethod
     def _validate(task: EngineerTask) -> None:
         if not task.task_id.strip():
