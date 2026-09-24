@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from .contracts import AgentStatus, EngineerTask
 from .engineer_core import AgentRuntimeAdapter, CoreState, EngineerCore
-from .task_store import TaskRepository
+from .storage_protocol import TaskRepository
 
 
 class TaskStatus(str, Enum):
