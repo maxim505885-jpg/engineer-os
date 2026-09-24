@@ -18,6 +18,14 @@ class ExtractedTable:
 
 
 @dataclass(frozen=True)
+class ExtractedBlock:
+    id: str
+    kind: str
+    text: str = ""
+    metadata: tuple[tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
 class ExtractedDocument:
     source_path: str
     media_type: str
@@ -26,6 +34,11 @@ class ExtractedDocument:
     paragraph_ids: tuple[str, ...] = ()
     tables: tuple[ExtractedTable, ...] = ()
     image_ids: tuple[str, ...] = ()
+    blocks: tuple[ExtractedBlock, ...] = ()
+
+    @property
+    def image_count(self) -> int:
+        return len(self.image_ids)
 
 
 class DocxTextExtractor:
@@ -53,9 +66,16 @@ class DocxTextExtractor:
             raise DocumentExtractionError("Invalid DOCX XML") from exc
 
         document_id = sha256(str(source.resolve()).encode("utf-8")).hexdigest()[:12]
+        body = root.find(self._NS + "body")
+        if body is None:
+            raise DocumentExtractionError("DOCX has no document body")
+
         paragraphs: list[str] = []
         paragraph_ids: list[str] = []
-        for index, paragraph in enumerate(root.iter(self._NS + "p"), start=1):
+        tables: list[ExtractedTable] = []
+        blocks: list[ExtractedBlock] = []
+
+        def paragraph_text(paragraph: ET.Element) -> str:
             parts: list[str] = []
             for node in paragraph.iter():
                 if node.tag == self._NS + "t" and node.text:
@@ -64,27 +84,36 @@ class DocxTextExtractor:
                     parts.append("\\t")
                 elif node.tag in {self._NS + "br", self._NS + "cr"}:
                     parts.append("\\n")
-            value = "".join(parts).strip()
-            if value:
-                paragraphs.append(value)
-                paragraph_ids.append(f"{document_id}:paragraph:{index:04d}")
+            return "".join(parts).strip()
 
-        tables: list[ExtractedTable] = []
-        for table in root.iter(self._NS + "tbl"):
+        def table_rows(table: ET.Element) -> tuple[tuple[str, ...], ...]:
             rows: list[tuple[str, ...]] = []
             for row in table.findall(self._NS + "tr"):
                 cells: list[str] = []
                 for cell in row.findall(self._NS + "tc"):
-                    parts: list[str] = []
-                    for node in cell.iter():
-                        if node.tag == self._NS + "t" and node.text:
-                            parts.append(node.text)
-                        elif node.tag == self._NS + "tab":
-                            parts.append("\\t")
-                    cells.append("".join(parts).strip())
+                    cells.append(paragraph_text(cell))
                 rows.append(tuple(cells))
-            table_index = len(tables) + 1
-            tables.append(ExtractedTable(f"{document_id}:table:{table_index:04d}", tuple(rows)))
+            return tuple(rows)
+
+        paragraph_index = 0
+        table_index = 0
+        for child in list(body):
+            if child.tag == self._NS + "p":
+                value = paragraph_text(child)
+                if not value:
+                    continue
+                paragraph_index += 1
+                paragraph_id = f"{document_id}:paragraph:{paragraph_index:04d}"
+                paragraphs.append(value)
+                paragraph_ids.append(paragraph_id)
+                blocks.append(ExtractedBlock(paragraph_id, "paragraph", value))
+            elif child.tag == self._NS + "tbl":
+                table_index += 1
+                table_id = f"{document_id}:table:{table_index:04d}"
+                rows = table_rows(child)
+                tables.append(ExtractedTable(table_id, rows))
+                table_text = "\\n".join("\\t".join(row) for row in rows)
+                blocks.append(ExtractedBlock(table_id, "table", table_text))
 
         image_ids = tuple(
             f"{document_id}:image:{index:04d}"
@@ -102,4 +131,5 @@ class DocxTextExtractor:
             paragraph_ids=tuple(paragraph_ids),
             tables=tuple(tables),
             image_ids=image_ids,
+            blocks=tuple(blocks),
         )
