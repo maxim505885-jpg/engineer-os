@@ -5,8 +5,7 @@ from typing import Literal
 
 from engineering.core.contracts import AgentResult, AgentStatus, SpecialistTask
 from engineering.core.engineer_core import AgentRuntimeAdapter
-
-from .hermes_adapter import HermesRuntimeAdapter
+from .result_validator import RuntimeContractError, validate_agent_result
 
 RuntimeBackend = Literal["hermes", "codex"]
 
@@ -19,7 +18,7 @@ class RuntimePolicy:
 
 
 class EngineeringRuntimeRouter(AgentRuntimeAdapter):
-    """Routes specialist execution to Hermes or Codex behind one ENGINEER OS boundary."""
+    """Routes specialist execution and enforces one result contract."""
 
     def __init__(
         self,
@@ -45,4 +44,22 @@ class EngineeringRuntimeRouter(AgentRuntimeAdapter):
                 )
                 for task in planned
             ]
-        return runtime.execute(planned)
+
+        raw_results = runtime.execute(planned)
+        if len(raw_results) != len(planned):
+            raise RuntimeContractError("Runtime returned a different number of results than planned tasks")
+
+        validated: list[AgentResult] = []
+        for task, result in zip(planned, raw_results):
+            try:
+                validated.append(validate_agent_result(task, result))
+            except RuntimeContractError as exc:
+                validated.append(
+                    AgentResult(
+                        task.task_id,
+                        task.agent,
+                        AgentStatus.ERROR,
+                        message=f"Runtime contract violation: {exc}",
+                    )
+                )
+        return validated
