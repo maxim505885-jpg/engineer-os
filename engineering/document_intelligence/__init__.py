@@ -1,3 +1,3 @@
-from .docx import DocxTextExtractor, DocumentExtractionError
+from .docx import DocxTextExtractor, DocumentExtractionError, ExtractedDocument, ExtractedTable
 
-__all__ = ["DocxTextExtractor", "DocumentExtractionError"]
+__all__ = ["DocxTextExtractor", "DocumentExtractionError", "ExtractedDocument", "ExtractedTable"]
