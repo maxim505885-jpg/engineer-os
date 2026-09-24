@@ -41,8 +41,8 @@ class TaskWorker:
         self,
         engine: TaskEngine,
         runtime_factory: Callable[[], AgentRuntimeAdapter],
-        queue: PersistentQueue | None = None,
         config: WorkerConfig | None = None,
+        queue: PersistentQueue | None = None,
     ) -> None:
         self.engine = engine
         self.runtime_factory = runtime_factory
