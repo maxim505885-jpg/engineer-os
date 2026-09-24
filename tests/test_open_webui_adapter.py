@@ -147,3 +147,52 @@ def test_openwebui_falls_back_to_configured_model():
     assert calls == ['primary-model', 'qwen3:8b']
     assert result.status is AgentStatus.UNCERTAINTY
     assert result.message.startswith('Runtime model fallback used: qwen3:8b.')
+
+
+def test_openwebui_transport_error_triggers_configured_fallback():
+    from io import BytesIO
+    from urllib.error import HTTPError
+
+    task = SpecialistTask(
+        task_id="transport-fallback-task",
+        agent="inspection-agent",
+        skill="inspection-audit",
+        inputs=(),
+        purpose="runtime fallback after transport error",
+        tz="do not invent missing facts",
+    )
+    calls = []
+
+    def opener(request, timeout):
+        calls.append(json.loads(request.data.decode("utf-8"))["model"])
+        if calls[-1] == "primary-model":
+            raise HTTPError(
+                request.full_url,
+                429,
+                "rate limited",
+                {"Content-Type": "application/json"},
+                BytesIO(b'{"detail":"rate limited"}'),
+            )
+        return FakeResponse({"choices": [{"message": {"content": json.dumps({
+            "task_id": task.task_id,
+            "agent": task.agent,
+            "status": "UNCERTAINTY",
+            "findings": [],
+            "evidence_ids": [],
+            "message": "fallback response",
+        })}}]})
+
+    client = OpenWebUIClient(
+        OpenWebUIExecutionConfig(
+            base_url="http://localhost:8080",
+            model="primary-model",
+            fallback_models=("qwen3:8b",),
+        ),
+        opener=opener,
+    )
+
+    result = OpenWebUIRuntimeAdapter(client).execute([task])[0]
+
+    assert calls == ["primary-model", "qwen3:8b"]
+    assert result.status is AgentStatus.UNCERTAINTY
+    assert result.message.startswith("Runtime model fallback used: qwen3:8b.")
