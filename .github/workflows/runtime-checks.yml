@@ -70,7 +70,7 @@ jobs:
         run: python tests/codex_model_turn_smoke.py
 
   live-supabase-codex-e2e:
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_E2E == 'true' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && vars.ENABLE_LIVE_CODEX_E2E == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -83,13 +83,21 @@ jobs:
           node-version: "22"
       - name: Install Codex CLI
         run: npm install -g @openai/codex
-      - name: Authenticate Codex with API key
+      - name: Check optional API access
+        id: codex_auth
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "OPENAI_API_KEY is not configured; live Codex model E2E is skipped."
+            exit 0
+          fi
           printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
           codex login status
+          echo "available=true" >> "$GITHUB_OUTPUT"
       - name: Run live Supabase → Worker → Codex E2E
+        if: ${{ steps.codex_auth.outputs.available == 'true' }}
         env:
           PYTHONPATH: .
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
