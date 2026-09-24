@@ -23,6 +23,7 @@ class CoreState:
 
 
 AgentHandler = Callable[[SpecialistTask], AgentResult]
+AcceptanceGate = Callable[[CoreState], bool]
 
 
 class AgentRuntimeAdapter:
@@ -60,6 +61,11 @@ class AgentRuntimeAdapter:
 
 class EngineerCore:
     """Deterministic orchestration layer; it does not invent engineering results."""
+
+    def __init__(self, acceptance_gate: AcceptanceGate | None = None) -> None:
+        # Final acceptance is fail-closed until an external, auditable gate
+        # (for example the Supabase traceability/domain gate) explicitly passes.
+        self.acceptance_gate = acceptance_gate
 
     def plan(self, task: EngineerTask) -> CoreState:
         self._validate(task)
@@ -132,6 +138,9 @@ class EngineerCore:
         expected_coverage = expected - {CHECK_REGISTRY["final_audit"][0]}
         covered = set(final_audit.checked_agents)
         if covered != expected_coverage:
+            return AgentStatus.UNCERTAINTY
+
+        if self.acceptance_gate is None or not self.acceptance_gate(state):
             return AgentStatus.UNCERTAINTY
 
         return AgentStatus.ACCEPTED
