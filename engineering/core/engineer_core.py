@@ -53,6 +53,7 @@ class AgentRuntimeAdapter:
             result = handler(task)
             if result.task_id != task.task_id or result.agent != task.agent:
                 raise ValueError("Runtime handler returned a result for the wrong task or agent")
+            EngineerCore._validate_result_contract(result)
             results.append(result)
         return results
 
@@ -89,6 +90,7 @@ class EngineerCore:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
             if result.task_id != state.task.task_id:
                 raise ValueError("Result task_id does not match core task")
+            self._validate_result_contract(result)
             state.results.append(result)
         return state
 
@@ -108,6 +110,24 @@ class EngineerCore:
         if expected - actual:
             return AgentStatus.UNCERTAINTY
         return AgentStatus.ACCEPTED
+
+    @staticmethod
+    def _validate_result_contract(result: AgentResult) -> None:
+        """Fail closed for statuses that claim an accepted engineering conclusion.
+
+        A PASS/ACCEPTED result without traceable evidence is not an acceptable
+        engineering result. The check is deliberately performed both at the
+        runtime boundary and at Core.collect() so alternate runtimes cannot
+        bypass the invariant.
+        """
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.evidence_ids:
+            raise ValueError(
+                f"{result.agent} returned {result.status.value} without evidence_ids"
+            )
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
