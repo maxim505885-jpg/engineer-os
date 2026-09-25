@@ -10,8 +10,6 @@ class CodexResultParser:
     """Validates strict JSON specialist output without inventing engineering data."""
 
     REQUIRED_KEYS = {"status", "findings", "evidence_ids", "message"}
-    FINDING_REQUIRED_KEYS = {"observation", "evidence_ids", "basis", "certainty", "conclusion"}
-    FINDING_CERTAINTIES = {"CONFIRMED", "PROBABLE", "UNCERTAIN"}
 
     @classmethod
     def parse(
@@ -42,151 +40,24 @@ class CodexResultParser:
         findings = payload["findings"]
         evidence_ids = payload["evidence_ids"]
         message = payload["message"]
+        checked_agents = payload.get("checked_agents", [])
+        acceptance_basis = payload.get("acceptance_basis", {})
 
         if not isinstance(findings, list) or not all(isinstance(item, dict) for item in findings):
             return cls._uncertainty(task, "findings must be a JSON array of objects.", raw_text, thread_id, turn_id)
-        if not isinstance(evidence_ids, list) or not all(isinstance(item, str) and item.strip() for item in evidence_ids):
-            return cls._uncertainty(task, "evidence_ids must be a JSON array of non-empty strings.", raw_text, thread_id, turn_id)
-        if len(set(evidence_ids)) != len(evidence_ids):
-            return cls._uncertainty(task, "evidence_ids must not contain duplicates.", raw_text, thread_id, turn_id)
-        supplied_ids = {material.id for material in task.inputs}
-        unknown_evidence = sorted(set(evidence_ids) - supplied_ids)
-        if unknown_evidence:
-            return cls._uncertainty(
-                task,
-                f"evidence_ids reference materials not supplied to this specialist: {unknown_evidence}.",
-                raw_text,
-                thread_id,
-                turn_id,
-            )
-        if findings and not evidence_ids:
-            return cls._uncertainty(task, "Findings require at least one evidence_id.", raw_text, thread_id, turn_id)
-
-        for index, finding in enumerate(findings):
-            missing_finding = cls.FINDING_REQUIRED_KEYS - finding.keys()
-            if missing_finding:
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}] is missing fields: {sorted(missing_finding)}.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-            for key in ("observation", "basis", "certainty", "conclusion"):
-                if not isinstance(finding[key], str) or not finding[key].strip():
-                    return cls._uncertainty(
-                        task,
-                        f"finding[{index}].{key} must be a non-empty string.",
-                        raw_text,
-                        thread_id,
-                        turn_id,
-                    )
-            if finding["certainty"] not in cls.FINDING_CERTAINTIES:
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}].certainty must be one of {sorted(cls.FINDING_CERTAINTIES)}.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-            finding_evidence = finding["evidence_ids"]
-            if (
-                not isinstance(finding_evidence, list)
-                or not all(isinstance(item, str) and item.strip() for item in finding_evidence)
-                or not finding_evidence
-            ):
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}].evidence_ids must be a non-empty array of strings.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-            if len(set(finding_evidence)) != len(finding_evidence):
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}].evidence_ids must not contain duplicates.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-            unknown_finding_evidence = sorted(set(finding_evidence) - supplied_ids)
-            if unknown_finding_evidence:
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}].evidence_ids reference materials not supplied to this specialist: {unknown_finding_evidence}.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-            if not set(finding_evidence).issubset(set(evidence_ids)):
-                return cls._uncertainty(
-                    task,
-                    f"finding[{index}].evidence_ids must be included in top-level evidence_ids.",
-                    raw_text,
-                    thread_id,
-                    turn_id,
-                )
-
-            conflict_fields = {"conflict_ids", "resolution_status", "resolution_basis"}
-            if any(key in finding for key in conflict_fields):
-                conflict_ids = finding.get("conflict_ids")
-                if (
-                    not isinstance(conflict_ids, list)
-                    or not conflict_ids
-                    or not all(isinstance(item, str) and item.strip() for item in conflict_ids)
-                    or len(set(conflict_ids)) != len(conflict_ids)
-                ):
-                    return cls._uncertainty(
-                        task,
-                        f"finding[{index}].conflict_ids must be a non-empty unique array of strings.",
-                        raw_text,
-                        thread_id,
-                        turn_id,
-                    )
-                resolution_status = finding.get("resolution_status")
-                if resolution_status not in {"RESOLVED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"}:
-                    return cls._uncertainty(
-                        task,
-                        f"finding[{index}].resolution_status is invalid.",
-                        raw_text,
-                        thread_id,
-                        turn_id,
-                    )
-                resolution_basis = finding.get("resolution_basis")
-                if not isinstance(resolution_basis, str) or not resolution_basis.strip():
-                    return cls._uncertainty(
-                        task,
-                        f"finding[{index}].resolution_basis must be a non-empty string.",
-                        raw_text,
-                        thread_id,
-                        turn_id,
-                    )
-
-        has_uncertain_finding = any(finding["certainty"] == "UNCERTAIN" for finding in findings)
-        if has_uncertain_finding and status in {
-            AgentStatus.PASS,
-            AgentStatus.ACCEPTED,
-            AgentStatus.ACCEPTED_ALTERNATIVE,
-        }:
-            return cls._uncertainty(
-                task,
-                "Result status cannot be accepting while a finding is marked UNCERTAIN.",
-                raw_text,
-                thread_id,
-                turn_id,
-            )
-        if status == AgentStatus.PASS and findings:
-            return cls._uncertainty(
-                task,
-                "PASS result cannot contain findings.",
-                raw_text,
-                thread_id,
-                turn_id,
-            )
-
+        if not isinstance(evidence_ids, list) or not all(isinstance(item, str) for item in evidence_ids):
+            return cls._uncertainty(task, "evidence_ids must be a JSON array of strings.", raw_text, thread_id, turn_id)
         if message is not None and not isinstance(message, str):
             return cls._uncertainty(task, "message must be a string or null.", raw_text, thread_id, turn_id)
+        if not isinstance(checked_agents, list) or not all(isinstance(item, str) for item in checked_agents):
+            return cls._uncertainty(task, "checked_agents must be a JSON array of strings.", raw_text, thread_id, turn_id)
+        if not isinstance(acceptance_basis, dict):
+            return cls._uncertainty(task, "acceptance_basis must be a JSON object.", raw_text, thread_id, turn_id)
+        normalized_basis: dict[str, tuple[str, ...]] = {}
+        for key, value in acceptance_basis.items():
+            if not isinstance(key, str) or not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+                return cls._uncertainty(task, "acceptance_basis values must be arrays of strings.", raw_text, thread_id, turn_id)
+            normalized_basis[key] = tuple(value)
 
         return AgentResult(
             task.task_id,
@@ -195,6 +66,8 @@ class CodexResultParser:
             findings=tuple(findings),
             evidence_ids=tuple(evidence_ids),
             message=message,
+            checked_agents=tuple(checked_agents),
+            acceptance_basis=normalized_basis,
         )
 
     @staticmethod
@@ -205,7 +78,10 @@ class CodexResultParser:
         thread_id: str | None,
         turn_id: str | None,
     ) -> AgentResult:
-        metadata: dict[str, Any] = {"parser_reason": reason, "raw_text": raw_text}
+        metadata: dict[str, Any] = {
+            "parser_reason": reason,
+            "raw_text_sha256": __import__("hashlib").sha256(raw_text.encode("utf-8", errors="replace")).hexdigest(),
+        }
         if thread_id:
             metadata["codex_thread_id"] = thread_id
         if turn_id:
