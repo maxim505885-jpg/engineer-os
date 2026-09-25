@@ -1,0 +1,69 @@
+name: ENGINEER OS runtime checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - architecture/runtime-integration
+  pull_request:
+    branches:
+      - main
+      - architecture/runtime-integration
+
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run ENGINEER OS unit tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+  codex-runtime-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Codex CLI
+        run: npm install -g @openai/codex
+      - name: Verify Codex App Server binary
+        run: |
+          set -e
+          command -v codex
+          codex --version
+          codex app-server --help
+      - name: Run live Codex App Server transport smoke
+        env:
+          PYTHONPATH: .
+        run: python tests/codex_app_server_smoke.py
+
+  codex-model-turn-optional:
+    if: ${{ github.event_name == 'workflow_dispatch' && vars.ENABLE_LIVE_MODEL_SMOKE == 'true' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Codex CLI
+        run: npm install -g @openai/codex
+      - name: Authenticate Codex with API key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
+          codex login status
+      - name: Run live Codex model turn smoke
+        env:
+          PYTHONPATH: .
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python tests/codex_model_turn_smoke.py

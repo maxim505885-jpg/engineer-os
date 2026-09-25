@@ -23,6 +23,7 @@ class CoreState:
 
 
 AgentHandler = Callable[[SpecialistTask], AgentResult]
+AcceptanceGate = Callable[[CoreState], bool]
 
 
 class AgentRuntimeAdapter:
@@ -53,12 +54,18 @@ class AgentRuntimeAdapter:
             result = handler(task)
             if result.task_id != task.task_id or result.agent != task.agent:
                 raise ValueError("Runtime handler returned a result for the wrong task or agent")
+            EngineerCore._validate_result_contract(result)
             results.append(result)
         return results
 
 
 class EngineerCore:
     """Deterministic orchestration layer; it does not invent engineering results."""
+
+    def __init__(self, acceptance_gate: AcceptanceGate | None = None) -> None:
+        # Final acceptance is fail-closed until an external, auditable gate
+        # (for example the Supabase traceability/domain gate) explicitly passes.
+        self.acceptance_gate = acceptance_gate
 
     def plan(self, task: EngineerTask) -> CoreState:
         self._validate(task)
@@ -75,7 +82,7 @@ class EngineerCore:
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         if "final_audit" not in seen:
             agent, skill, purpose = CHECK_REGISTRY["final_audit"]
-            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose))
+            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
 
     def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
@@ -84,11 +91,16 @@ class EngineerCore:
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
         allowed = {p.agent for p in state.planned}
+        seen: set[str] = set()
         for result in results:
             if result.agent not in allowed:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
             if result.task_id != state.task.task_id:
                 raise ValueError("Result task_id does not match core task")
+            if result.agent in seen:
+                raise ValueError(f"Duplicate result from agent: {result.agent}")
+            self._validate_result_contract(result)
+            seen.add(result.agent)
             state.results.append(result)
         return state
 
@@ -103,11 +115,76 @@ class EngineerCore:
             return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
+
         expected = {p.agent for p in state.planned}
         actual = {r.agent for r in state.results}
         if expected - actual:
             return AgentStatus.UNCERTAINTY
+
+        final_audit = next(
+            (r for r in state.results if r.agent == CHECK_REGISTRY["final_audit"][0]),
+            None,
+        )
+        if final_audit is None:
+            return AgentStatus.UNCERTAINTY
+
+        if final_audit.status not in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        }:
+            return AgentStatus.UNCERTAINTY
+
+        expected_coverage = expected - {CHECK_REGISTRY["final_audit"][0]}
+        covered = set(final_audit.checked_agents)
+        if covered != expected_coverage:
+            return AgentStatus.UNCERTAINTY
+
+        if self.acceptance_gate is None or not self.acceptance_gate(state):
+            return AgentStatus.UNCERTAINTY
+
         return AgentStatus.ACCEPTED
+
+    @staticmethod
+    def _validate_result_contract(result: AgentResult) -> None:
+        """Fail closed for statuses that claim an accepted engineering conclusion.
+
+        A PASS/ACCEPTED result without traceable evidence is not an acceptable
+        engineering result. The check is deliberately performed both at the
+        runtime boundary and at Core.collect() so alternate runtimes cannot
+        bypass the invariant.
+        """
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.evidence_ids:
+            raise ValueError(
+                f"{result.agent} returned {result.status.value} without evidence_ids"
+            )
+
+        if result.agent == CHECK_REGISTRY["final_audit"][0] and result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.checked_agents:
+            raise ValueError(
+                "final-audit-agent returned an accepting status without checked_agents"
+            )
+
+        required_basis = {
+            CHECK_REGISTRY["report"][0]: "report_quality",
+            CHECK_REGISTRY["normative"][0]: "normative_verification",
+            CHECK_REGISTRY["calculation"][0]: "calculation_verification",
+        }.get(result.agent)
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and required_basis and not result.acceptance_basis.get(required_basis):
+            raise ValueError(
+                f"{result.agent} returned an accepting status without {required_basis} proof"
+            )
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:

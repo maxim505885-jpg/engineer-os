@@ -13,6 +13,15 @@ class EngineerCoreTests(unittest.TestCase):
             materials=(MaterialRef("m1", "report", "report.docx"),),
             requested_checks=("report", "normative", "calculation"),
         )
+        self.evidence = ("m1",)
+
+    @staticmethod
+    def _basis(agent):
+        return {
+            "report-audit-agent": {"report_quality": ("report-validation-1",)},
+            "normative-agent": {"normative_verification": ("normative-verification-1",)},
+            "calculation-agent": {"calculation_verification": ("calculation-verification-1",)},
+        }.get(agent, {})
 
     def test_plan_adds_final_audit(self):
         state = EngineerCore().plan(self.task)
@@ -34,7 +43,19 @@ class EngineerCoreTests(unittest.TestCase):
 
         def accepted(task):
             calls.append(task.agent)
-            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
+            )
 
         runtime = AgentRuntimeAdapter(
             {agent: accepted for agent, _, _ in {
@@ -44,9 +65,40 @@ class EngineerCoreTests(unittest.TestCase):
                 "final_audit": ("final-audit-agent", "final-audit", ""),
             }.values()}
         )
-        state = EngineerCore().run(self.task, runtime)
-        self.assertEqual(EngineerCore().final_status(state), AgentStatus.ACCEPTED)
+        core = EngineerCore(acceptance_gate=lambda state: True)
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
         self.assertEqual(len(calls), 4)
+
+    def test_final_acceptance_fails_closed_without_external_gate(self):
+        calls = []
+
+        def accepted(task):
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
+            )
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        core = EngineerCore()
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
 
     def test_wrong_runtime_result_is_rejected(self):
         def wrong_result(task):
@@ -59,11 +111,108 @@ class EngineerCoreTests(unittest.TestCase):
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent)) for p in state.planned]
         results[-1] = AgentResult("demo-001", state.planned[-1].agent, AgentStatus.BLOCK)
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
 
+    def test_accepted_without_evidence_is_rejected_at_runtime_boundary(self):
+        def accepted_without_evidence(task):
+            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted_without_evidence for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        with self.assertRaises(ValueError):
+            EngineerCore().run(self.task, runtime)
+
+    def test_accepted_without_domain_proof_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult(
+                    "demo-001",
+                    "report-audit-agent",
+                    AgentStatus.ACCEPTED,
+                    evidence_ids=self.evidence,
+                )],
+            )
+
+    def test_accepted_without_evidence_is_rejected_at_core_boundary(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned],
+            )
+
+    def test_pass_without_evidence_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", state.planned[0].agent, AgentStatus.PASS)],
+            )
+
+    def test_final_audit_without_coverage_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+            )
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, results)
+
+    def test_final_audit_incomplete_coverage_cannot_accept(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=("report-audit-agent",),
+                acceptance_basis={},
+            )
+        )
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_duplicate_agent_result_cannot_hide_missing_coverage(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        duplicate = AgentResult(
+            "demo-001",
+            "report-audit-agent",
+            AgentStatus.ACCEPTED,
+            evidence_ids=self.evidence,
+            acceptance_basis=self._basis("report-audit-agent"),
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, [duplicate, duplicate])
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
@@ -77,12 +226,6 @@ class EngineerCoreTests(unittest.TestCase):
         config = CodexServerConfig()
         self.assertEqual(config.sandbox, "read-only")
         self.assertEqual(config.approval_policy, "never")
-    def test_all_accepted(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
 
 
 if __name__ == "__main__":
