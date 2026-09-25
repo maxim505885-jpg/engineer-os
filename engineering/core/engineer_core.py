@@ -23,6 +23,7 @@ class CoreState:
 
 
 AgentHandler = Callable[[SpecialistTask], AgentResult]
+AcceptanceGate = Callable[[CoreState], bool]
 
 
 class AgentRuntimeAdapter:
@@ -53,12 +54,18 @@ class AgentRuntimeAdapter:
             result = handler(task)
             if result.task_id != task.task_id or result.agent != task.agent:
                 raise ValueError("Runtime handler returned a result for the wrong task or agent")
+            EngineerCore._validate_result_contract(result)
             results.append(result)
         return results
 
 
 class EngineerCore:
     """Deterministic orchestration layer; it does not invent engineering results."""
+
+    def __init__(self, acceptance_gate: AcceptanceGate | None = None) -> None:
+        # Final acceptance is fail-closed until an external, auditable gate
+        # (for example the Supabase traceability/domain gate) explicitly passes.
+        self.acceptance_gate = acceptance_gate
 
     def plan(self, task: EngineerTask) -> CoreState:
         self._validate(task)
@@ -68,16 +75,14 @@ class EngineerCore:
             key = check.strip().lower()
             if key not in CHECK_REGISTRY:
                 raise ValueError(f"Unknown requested check: {check}")
-            if key == "final_audit":
-                continue
             if key in seen:
                 continue
             seen.add(key)
             agent, skill, purpose = CHECK_REGISTRY[key]
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
-
-        agent, skill, purpose = CHECK_REGISTRY["final_audit"]
-        planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
+        if "final_audit" not in seen:
+            agent, skill, purpose = CHECK_REGISTRY["final_audit"]
+            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
 
     def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
@@ -85,9 +90,8 @@ class EngineerCore:
         return self.collect(state, runtime.execute(state.planned))
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
-        planned_agents = [p.agent for p in state.planned]
-        allowed = set(planned_agents)
-        seen = {r.agent for r in state.results}
+        allowed = {p.agent for p in state.planned}
+        seen: set[str] = set()
         for result in results:
             if result.agent not in allowed:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
@@ -95,8 +99,9 @@ class EngineerCore:
                 raise ValueError("Result task_id does not match core task")
             if result.agent in seen:
                 raise ValueError(f"Duplicate result from agent: {result.agent}")
-            state.results.append(result)
+            self._validate_result_contract(result)
             seen.add(result.agent)
+            state.results.append(result)
         return state
 
     def final_status(self, state: CoreState) -> AgentStatus:
@@ -108,11 +113,6 @@ class EngineerCore:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.UNCERTAINTY for r in state.results):
             return AgentStatus.UNCERTAINTY
-        conflicts = self.cross_agent_conflicts(state.results)
-        if conflicts:
-            resolution = self.final_audit_conflict_resolution(state.results[-1], conflicts) if state.results else {"complete": False}
-            if not resolution["complete"]:
-                return AgentStatus.UNCERTAINTY
         if any(r.status == AgentStatus.WARNING for r in state.results):
             return AgentStatus.WARNING
 
@@ -121,109 +121,70 @@ class EngineerCore:
         if expected - actual:
             return AgentStatus.UNCERTAINTY
 
-        if not state.results or state.results[-1].agent != "final-audit-agent":
+        final_audit = next(
+            (r for r in state.results if r.agent == CHECK_REGISTRY["final_audit"][0]),
+            None,
+        )
+        if final_audit is None:
+            return AgentStatus.UNCERTAINTY
+
+        if final_audit.status not in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        }:
+            return AgentStatus.UNCERTAINTY
+
+        expected_coverage = expected - {CHECK_REGISTRY["final_audit"][0]}
+        covered = set(final_audit.checked_agents)
+        if covered != expected_coverage:
+            return AgentStatus.UNCERTAINTY
+
+        if self.acceptance_gate is None or not self.acceptance_gate(state):
             return AgentStatus.UNCERTAINTY
 
         return AgentStatus.ACCEPTED
 
     @staticmethod
-    def cross_agent_conflicts(results: list[AgentResult]) -> tuple[dict[str, object], ...]:
-        """Return deterministic conflict records tied to the same evidence."""
-        evidence_claims: dict[frozenset[str], dict[str, set[str]]] = {}
-        for result in results:
-            for finding in result.findings:
-                if not isinstance(finding, dict):
-                    continue
-                evidence = finding.get("evidence_ids")
-                certainty = finding.get("certainty")
-                if not isinstance(evidence, list) or not evidence or not isinstance(certainty, str):
-                    continue
-                key = frozenset(item for item in evidence if isinstance(item, str) and item)
-                if not key:
-                    continue
-                claims = evidence_claims.setdefault(key, {})
-                claims.setdefault(certainty, set()).add(result.agent)
+    def _validate_result_contract(result: AgentResult) -> None:
+        """Fail closed for statuses that claim an accepted engineering conclusion.
 
-        conflicts: list[dict[str, object]] = []
-        for index, evidence in enumerate(sorted(evidence_claims, key=lambda item: tuple(sorted(item))), start=1):
-            claims = evidence_claims[evidence]
-            if "CONFIRMED" not in claims or "UNCERTAIN" not in claims:
-                continue
-            conflicts.append({
-                "id": f"conflict-{index:03d}",
-                "evidence_ids": tuple(sorted(evidence)),
-                "agents": {certainty: tuple(sorted(agents)) for certainty, agents in sorted(claims.items())},
-            })
-        return tuple(conflicts)
-
-    @classmethod
-    def _has_cross_agent_conflict(cls, results: list[AgentResult]) -> bool:
-        return bool(cls.cross_agent_conflicts(results))
-
-    @staticmethod
-    def final_audit_covers_conflicts(final_audit: AgentResult, conflicts: tuple[dict[str, object], ...]) -> bool:
-        """Require every detected conflict's evidence set to be explicitly audited."""
-        if final_audit.agent != "final-audit-agent":
-            return False
-        for conflict in conflicts:
-            conflict_evidence = set(conflict["evidence_ids"])
-            covered = any(
-                isinstance(finding, dict)
-                and conflict_evidence.issubset(
-                    set(item for item in finding.get("evidence_ids", []) if isinstance(item, str))
-                )
-                for finding in final_audit.findings
+        A PASS/ACCEPTED result without traceable evidence is not an acceptable
+        engineering result. The check is deliberately performed both at the
+        runtime boundary and at Core.collect() so alternate runtimes cannot
+        bypass the invariant.
+        """
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.evidence_ids:
+            raise ValueError(
+                f"{result.agent} returned {result.status.value} without evidence_ids"
             )
-            if not covered:
-                return False
-        return True
 
-    @staticmethod
-    def final_audit_conflict_resolution(
-        final_audit: AgentResult,
-        conflicts: tuple[dict[str, object], ...],
-    ) -> dict[str, object]:
-        """Evaluate whether FINAL_AUDIT explicitly resolves every detected conflict."""
-        unresolved: list[str] = []
-        if final_audit.agent != "final-audit-agent":
-            return {"complete": False, "unresolved": [str(c["id"]) for c in conflicts]}
+        if result.agent == CHECK_REGISTRY["final_audit"][0] and result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and not result.checked_agents:
+            raise ValueError(
+                "final-audit-agent returned an accepting status without checked_agents"
+            )
 
-        for conflict in conflicts:
-            conflict_id = str(conflict["id"])
-            evidence = set(conflict["evidence_ids"])
-            addressed = False
-            resolved = False
-            for finding in final_audit.findings:
-                if not isinstance(finding, dict):
-                    continue
-                finding_evidence = set(
-                    item for item in finding.get("evidence_ids", [])
-                    if isinstance(item, str)
-                )
-                if not evidence.issubset(finding_evidence):
-                    continue
-                addressed = True
-                if finding.get("conflict_ids") != [conflict_id]:
-                    continue
-                resolution_status = finding.get("resolution_status")
-                resolution_basis = finding.get("resolution_basis")
-                if resolution_status not in {"RESOLVED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"}:
-                    continue
-                if not isinstance(resolution_basis, str) or not resolution_basis.strip():
-                    continue
-                if resolution_status == "RESOLVED":
-                    resolved = True
-                    break
-                # Explicit unresolved/insufficient-evidence states are accountable,
-                # but they cannot produce an accepting final status.
-                addressed = True
-            if not addressed or not resolved:
-                unresolved.append(conflict_id)
-
-        return {
-            "complete": not unresolved,
-            "unresolved": tuple(unresolved),
-        }
+        required_basis = {
+            CHECK_REGISTRY["report"][0]: "report_quality",
+            CHECK_REGISTRY["normative"][0]: "normative_verification",
+            CHECK_REGISTRY["calculation"][0]: "calculation_verification",
+        }.get(result.agent)
+        if result.status in {
+            AgentStatus.PASS,
+            AgentStatus.ACCEPTED,
+            AgentStatus.ACCEPTED_ALTERNATIVE,
+        } and required_basis and not result.acceptance_basis.get(required_basis):
+            raise ValueError(
+                f"{result.agent} returned an accepting status without {required_basis} proof"
+            )
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
