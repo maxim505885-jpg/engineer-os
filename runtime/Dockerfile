@@ -15,5 +15,9 @@ COPY engineering /app/engineering
 COPY skills /app/skills
 COPY runtime /app/runtime
 COPY AGENTS.md /app/AGENTS.md
+COPY e2e /app/e2e
 
-CMD ["python", "-m", "http.server", "8080", "--bind", "0.0.0.0"]
+RUN python -m compileall -q /app/engineering /app/runtime /app/e2e
+
+EXPOSE 8080
+CMD ["python", "-m", "e2e.server"]
