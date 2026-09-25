@@ -18,4 +18,4 @@ jobs:
         with:
           python-version: "3.11"
       - name: Run core regression tests
-        run: python -m unittest tests.test_engineer_core -v
+        run: python -m unittest discover -s tests -p "test_*.py" -v
