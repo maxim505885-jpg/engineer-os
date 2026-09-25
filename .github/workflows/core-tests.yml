@@ -17,5 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run core regression tests
+      - name: Run full Python regression suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Compile runtime
+        run: python -m compileall -q engineering runtime e2e
