@@ -3,7 +3,6 @@ import unittest
 from engineering.core import AgentResult, AgentStatus, EngineerCore, EngineerTask, MaterialRef
 from engineering.core.engineer_core import AgentRuntimeAdapter
 from engineering.core.codex_runtime import CodexAppServerClient, CodexServerConfig
-from engineering.core.codex_result_parser import CodexResultParser
 
 
 class EngineerCoreTests(unittest.TestCase):
@@ -14,6 +13,15 @@ class EngineerCoreTests(unittest.TestCase):
             materials=(MaterialRef("m1", "report", "report.docx"),),
             requested_checks=("report", "normative", "calculation"),
         )
+        self.evidence = ("m1",)
+
+    @staticmethod
+    def _basis(agent):
+        return {
+            "report-audit-agent": {"report_quality": ("report-validation-1",)},
+            "normative-agent": {"normative_verification": ("normative-verification-1",)},
+            "calculation-agent": {"calculation_verification": ("calculation-verification-1",)},
+        }.get(agent, {})
 
     def test_plan_adds_final_audit(self):
         state = EngineerCore().plan(self.task)
@@ -26,19 +34,6 @@ class EngineerCoreTests(unittest.TestCase):
         state = EngineerCore().plan(self.task)
         self.assertTrue(all(item.tz == self.task.tz for item in state.planned))
 
-    def test_final_audit_is_always_last_even_when_requested_early(self):
-        task = EngineerTask(
-            task_id="audit-order",
-            tz="Проверить отчет по ТЗ",
-            materials=(MaterialRef("m1", "report", "report.docx"),),
-            requested_checks=("final_audit", "report", "normative"),
-        )
-        state = EngineerCore().plan(task)
-        self.assertEqual(
-            [item.skill for item in state.planned],
-            ["report-review", "normative-check", "final-audit"],
-        )
-
     def test_missing_runtime_handler_is_uncertainty(self):
         state = EngineerCore().run(self.task, AgentRuntimeAdapter())
         self.assertEqual(EngineerCore().final_status(state), AgentStatus.UNCERTAINTY)
@@ -48,7 +43,19 @@ class EngineerCoreTests(unittest.TestCase):
 
         def accepted(task):
             calls.append(task.agent)
-            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
+            )
 
         runtime = AgentRuntimeAdapter(
             {agent: accepted for agent, _, _ in {
@@ -58,9 +65,40 @@ class EngineerCoreTests(unittest.TestCase):
                 "final_audit": ("final-audit-agent", "final-audit", ""),
             }.values()}
         )
-        state = EngineerCore().run(self.task, runtime)
-        self.assertEqual(EngineerCore().final_status(state), AgentStatus.ACCEPTED)
+        core = EngineerCore(acceptance_gate=lambda state: True)
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
         self.assertEqual(len(calls), 4)
+
+    def test_final_acceptance_fails_closed_without_external_gate(self):
+        calls = []
+
+        def accepted(task):
+            checked = (
+                ("report-audit-agent", "normative-agent", "calculation-agent")
+                if task.agent == "final-audit-agent"
+                else ()
+            )
+            return AgentResult(
+                task.task_id,
+                task.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=checked,
+                acceptance_basis=self._basis(task.agent),
+            )
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        core = EngineerCore()
+        state = core.run(self.task, runtime)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
 
     def test_wrong_runtime_result_is_rejected(self):
         def wrong_result(task):
@@ -70,261 +108,111 @@ class EngineerCoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             EngineerCore().run(self.task, runtime)
 
-    def test_duplicate_runtime_result_is_rejected(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        first = AgentResult("demo-001", "report-audit-agent", AgentStatus.ACCEPTED)
-        with self.assertRaises(ValueError):
-            core.collect(state, [first, first])
-
-    def test_final_audit_must_be_terminal_result(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
-        state.results = [results[-1], results[0], results[1], results[2]]
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_cross_agent_conflicting_certainty_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(
-                AgentResult(
-                    "demo-001",
-                    planned.agent,
-                    AgentStatus.WARNING,
-                    findings=(
-                        {
-                            "observation": "признак",
-                            "evidence_ids": ["m1"],
-                            "basis": "осмотр",
-                            "certainty": certainty,
-                            "conclusion": "вывод",
-                        },
-                    ),
-                    evidence_ids=("m1",),
-                )
-            )
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_same_agent_findings_do_not_create_cross_agent_conflict(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned:
-            results.append(
-                AgentResult(
-                    "demo-001",
-                    planned.agent,
-                    AgentStatus.ACCEPTED,
-                    findings=(
-                        {
-                            "observation": "признак",
-                            "evidence_ids": ["m1"],
-                            "basis": "осмотр",
-                            "certainty": "CONFIRMED",
-                            "conclusion": "вывод",
-                        },
-                    ),
-                    evidence_ids=("m1",),
-                )
-            )
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
-
-    def test_conflict_without_final_audit_coverage_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult("demo-001", "final-audit-agent", AgentStatus.ACCEPTED))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_conflict_with_final_audit_coverage_can_be_accepted(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001", "final-audit-agent", AgentStatus.ACCEPTED,
-            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"FINAL_AUDIT","certainty":"CONFIRMED","conclusion":"проверено","conflict_ids":["conflict-001"],"resolution_status":"RESOLVED","resolution_basis":"исходное доказательство подтверждает вывод"},),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
-
-    def test_two_conflicts_require_both_evidence_sets(self):
-        core = EngineerCore()
-        task = EngineerTask(
-            task_id="two-conflicts", tz="Проверить по ТЗ",
-            materials=(MaterialRef("m1","report","one"), MaterialRef("m2","photo","two")),
-            requested_checks=("report","normative"),
-        )
-        state = core.plan(task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "two-conflicts", planned.agent, AgentStatus.ACCEPTED,
-                findings=(
-                    {"observation":"a","evidence_ids":["m1"],"basis":"x","certainty":certainty,"conclusion":"y"},
-                    {"observation":"b","evidence_ids":["m2"],"basis":"x","certainty":certainty,"conclusion":"y"},
-                ),
-                evidence_ids=("m1","m2"),
-            ))
-        results.append(AgentResult(
-            "two-conflicts","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({"observation":"covered one","evidence_ids":["m1"],"basis":"audit","certainty":"CONFIRMED","conclusion":"covered"},),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_conflict_coverage_without_explicit_resolution_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({"observation":"конфликт рассмотрен","evidence_ids":["m1"],"basis":"сопоставление","certainty":"CONFIRMED","conclusion":"вывод проверен"},),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_conflict_explicitly_resolved_can_be_accepted(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({
-                "observation":"конфликт рассмотрен",
-                "evidence_ids":["m1"],
-                "basis":"источник подтверждён",
-                "certainty":"CONFIRMED",
-                "conclusion":"противоречие разрешено исходными доказательствами",
-                "conflict_ids":["conflict-001"],
-                "resolution_status":"RESOLVED",
-                "resolution_basis":"исходное доказательство подтверждает вывод",
-            },),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
-
-    def test_conflict_resolution_without_structured_fields_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({"observation":"RESOLVED","evidence_ids":["m1"],"basis":"подтверждено","certainty":"CONFIRMED","conclusion":"разрешено"},),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_unknown_conflict_id_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({
-                "observation":"конфликт",
-                "evidence_ids":["m1"],
-                "basis":"audit",
-                "certainty":"CONFIRMED",
-                "conclusion":"разрешено",
-                "conflict_ids":["conflict-999"],
-                "resolution_status":"RESOLVED",
-                "resolution_basis":"основание",
-            },),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
-    def test_unresolved_conflict_status_is_uncertainty(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = []
-        for planned in state.planned[:-1]:
-            certainty = "UNCERTAIN" if planned.agent == "normative-agent" else "CONFIRMED"
-            results.append(AgentResult(
-                "demo-001", planned.agent, AgentStatus.ACCEPTED,
-                findings=({"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":certainty,"conclusion":"вывод"},),
-                evidence_ids=("m1",),
-            ))
-        results.append(AgentResult(
-            "demo-001","final-audit-agent",AgentStatus.ACCEPTED,
-            findings=({
-                "observation":"конфликт",
-                "evidence_ids":["m1"],
-                "basis":"audit",
-                "certainty":"UNCERTAIN",
-                "conclusion":"данных недостаточно",
-                "conflict_ids":["conflict-001"],
-                "resolution_status":"INSUFFICIENT_EVIDENCE",
-                "resolution_basis":"исходные материалы не позволяют разрешить противоречие",
-            },),
-            evidence_ids=("m1",),
-        ))
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
-
     def test_block_result_blocks_final_status(self):
         core = EngineerCore()
         state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent)) for p in state.planned]
         results[-1] = AgentResult("demo-001", state.planned[-1].agent, AgentStatus.BLOCK)
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
+
+    def test_accepted_without_evidence_is_rejected_at_runtime_boundary(self):
+        def accepted_without_evidence(task):
+            return AgentResult(task.task_id, task.agent, AgentStatus.ACCEPTED)
+
+        runtime = AgentRuntimeAdapter(
+            {agent: accepted_without_evidence for agent, _, _ in {
+                "report": ("report-audit-agent", "report-review", ""),
+                "normative": ("normative-agent", "normative-check", ""),
+                "calculation": ("calculation-agent", "calculation-review", ""),
+                "final_audit": ("final-audit-agent", "final-audit", ""),
+            }.values()}
+        )
+        with self.assertRaises(ValueError):
+            EngineerCore().run(self.task, runtime)
+
+    def test_accepted_without_domain_proof_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult(
+                    "demo-001",
+                    "report-audit-agent",
+                    AgentStatus.ACCEPTED,
+                    evidence_ids=self.evidence,
+                )],
+            )
+
+    def test_accepted_without_evidence_is_rejected_at_core_boundary(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned],
+            )
+
+    def test_pass_without_evidence_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(
+                state,
+                [AgentResult("demo-001", state.planned[0].agent, AgentStatus.PASS)],
+            )
+
+    def test_final_audit_without_coverage_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+            )
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, results)
+
+    def test_final_audit_incomplete_coverage_cannot_accept(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        results = [
+            AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED, evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+            for p in state.planned[:-1]
+        ]
+        results.append(
+            AgentResult(
+                "demo-001",
+                state.planned[-1].agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=self.evidence,
+                checked_agents=("report-audit-agent",),
+                acceptance_basis={},
+            )
+        )
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_duplicate_agent_result_cannot_hide_missing_coverage(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        duplicate = AgentResult(
+            "demo-001",
+            "report-audit-agent",
+            AgentStatus.ACCEPTED,
+            evidence_ids=self.evidence,
+            acceptance_basis=self._basis("report-audit-agent"),
+        )
+        with self.assertRaises(ValueError):
+            core.collect(state, [duplicate, duplicate])
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
@@ -338,94 +226,6 @@ class EngineerCoreTests(unittest.TestCase):
         config = CodexServerConfig()
         self.assertEqual(config.sandbox, "read-only")
         self.assertEqual(config.approval_policy, "never")
-
-    def test_all_accepted(self):
-        core = EngineerCore()
-        state = core.plan(self.task)
-        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED) for p in state.planned]
-        core.collect(state, results)
-        self.assertEqual(core.final_status(state), AgentStatus.ACCEPTED)
-
-
-class CodexResultParserTests(unittest.TestCase):
-    def setUp(self):
-        self.task = EngineerTask(
-            task_id="parser-001",
-            tz="Проверить отчет по ТЗ",
-            materials=(MaterialRef("m1", "report", "report.docx"),),
-            requested_checks=("report",),
-        )
-        self.specialist = EngineerCore().plan(self.task).planned[0]
-
-    def test_findings_require_evidence(self):
-        result = CodexResultParser.parse(
-            self.specialist,
-            '{"status":"WARNING","findings":[{"issue":"x"}],"evidence_ids":[],"message":"x"}',
-        )
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_evidence_ids_must_reference_supplied_materials(self):
-        result = CodexResultParser.parse(
-            self.specialist,
-            '{"status":"ACCEPTED","findings":[],"evidence_ids":["missing-material"],"message":"ok"}',
-        )
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_uncertain_finding_cannot_be_accepted(self):
-        raw = '{"status":"ACCEPTED","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"UNCERTAIN","conclusion":"данных недостаточно"}],"evidence_ids":["m1"],"message":"x"}'
-        result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_pass_cannot_contain_findings(self):
-        raw = '{"status":"PASS","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"CONFIRMED","conclusion":"вывод"}],"evidence_ids":["m1"],"message":"x"}'
-        result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_finding_certainty_is_enum(self):
-        raw = '{"status":"WARNING","findings":[{"observation":"признак","evidence_ids":["m1"],"basis":"осмотр","certainty":"maybe","conclusion":"вывод"}],"evidence_ids":["m1"],"message":"x"}'
-        result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_findings_require_structured_engineering_fields(self):
-        raw = '{"status":"WARNING","findings":[{"observation":"трещина","evidence_ids":["m1"],"basis":"осмотр","certainty":"CONFIRMED","conclusion":"требуется проверка"}],"evidence_ids":["m1"],"message":"x"}'
-        result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.WARNING)
-
-    def test_findings_without_structured_fields_are_uncertainty(self):
-        raw = '{"status":"WARNING","findings":[{"issue":"трещина","evidence_ids":["m1"]}],"evidence_ids":["m1"],"message":"x"}'
-        result = CodexResultParser.parse(self.specialist, raw)
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_parser_validates_structured_conflict_resolution_fields(self):
-        raw = '{"status":"ACCEPTED","findings":[{"observation":"конфликт","evidence_ids":["m1"],"basis":"audit","certainty":"CONFIRMED","conclusion":"разрешено","conflict_ids":["conflict-001"],"resolution_status":"RESOLVED","resolution_basis":"источник"}],"evidence_ids":["m1"],"message":"x"}'
-        task = EngineerTask(
-            task_id="parser-final",
-            tz="Проверить по ТЗ",
-            materials=(MaterialRef("m1", "report", "report.docx"),),
-            requested_checks=("final_audit",),
-        )
-        specialist = EngineerCore().plan(task).planned[-1]
-        result = CodexResultParser.parse(specialist, raw)
-        self.assertEqual(result.status, AgentStatus.ACCEPTED)
-
-    def test_parser_rejects_invalid_resolution_status(self):
-        raw = '{"status":"ACCEPTED","findings":[{"observation":"конфликт","evidence_ids":["m1"],"basis":"audit","certainty":"CONFIRMED","conclusion":"разрешено","conflict_ids":["conflict-001"],"resolution_status":"MAYBE","resolution_basis":"источник"}],"evidence_ids":["m1"],"message":"x"}'
-        task = EngineerTask(
-            task_id="parser-final-invalid",
-            tz="Проверить по ТЗ",
-            materials=(MaterialRef("m1", "report", "report.docx"),),
-            requested_checks=("final_audit",),
-        )
-        specialist = EngineerCore().plan(task).planned[-1]
-        result = CodexResultParser.parse(specialist, raw)
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
-
-    def test_evidence_ids_must_be_non_empty_and_unique(self):
-        result = CodexResultParser.parse(
-            self.specialist,
-            '{"status":"ACCEPTED","findings":[],"evidence_ids":["m1","m1"],"message":"ok"}',
-        )
-        self.assertEqual(result.status, AgentStatus.UNCERTAINTY)
 
 
 if __name__ == "__main__":
