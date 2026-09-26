@@ -42,6 +42,17 @@ class GoogleDriveStorageTests(unittest.TestCase):
         self.assertEqual(seen[0][0].full_url, "https://oauth2.googleapis.com/token")
         self.assertNotIn("refresh", seen[0][0].headers)
 
+    def test_refresh_token_exchange_without_client_secret(self):
+        seen = []
+        def opener(req, timeout):
+            seen.append(req.data.decode("ascii"))
+            return _Response(json.dumps({"access_token": "fresh"}).encode())
+        provider = GoogleDriveTokenProvider(
+            GoogleDriveOAuth("client", "", "refresh"), opener
+        )
+        self.assertEqual(provider.access_token(), "fresh")
+        self.assertNotIn("client_secret", seen[0])
+
     def test_metadata_and_download_are_source_hashed(self):
         payload = b"%PDF-1.7 real report"
         metadata = {
