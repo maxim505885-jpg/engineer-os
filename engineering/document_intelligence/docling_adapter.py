@@ -112,7 +112,7 @@ class DoclingDocumentParser:
         visit(exported, "")
         return tuple(blocks)
 
-    def parse(self, source_path: str) -> NormalizedDocument:
+    def parse(self, source_path: str, *, page_range: tuple[int, int] | None = None) -> NormalizedDocument:
         path = Path(source_path)
         if not path.is_file():
             raise DocumentParseError(f"source document not found: {source_path}")
@@ -120,7 +120,8 @@ class DoclingDocumentParser:
             raise DocumentParseError("document intelligence is disabled")
 
         try:
-            result = self._converter().convert(str(path))
+            converter = self._converter()
+            result = converter.convert(str(path), page_range=page_range) if page_range else converter.convert(str(path))
             document = getattr(result, "document", None)
             if document is None or not hasattr(document, "export_to_dict"):
                 raise DocumentParseError("Docling returned no exportable document")
