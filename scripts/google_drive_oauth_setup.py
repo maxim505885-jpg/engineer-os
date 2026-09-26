@@ -1,7 +1,6 @@
 """One-time local Google Drive OAuth setup for ENGINEER OS.
 
-Run on the user's Windows PC. The script opens Google's consent page, receives
-the localhost callback, exchanges the code, and writes a gitignored env file.
+Uses a dynamically selected free loopback port to avoid conflicts with local services.
 """
 
 from __future__ import annotations
@@ -14,9 +13,7 @@ import secrets
 from urllib import parse, request
 import webbrowser
 
-
 SCOPE = "https://www.googleapis.com/auth/drive.readonly"
-REDIRECT_URI = f"http://127.0.0.1:{PORT}/callback"
 
 
 def main() -> None:
@@ -49,14 +46,18 @@ def main() -> None:
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
-            self.wfile.write("Google Drive connected. You can close this tab.".encode("utf-8"))
+            self.wfile.write(b"Google Drive connected. You can close this tab.")
 
         def log_message(self, format, *args):
             return
 
+    server = HTTPServer(("127.0.0.1", 0), Callback)
+    port = server.server_address[1]
+    redirect_uri = f"http://127.0.0.1:{port}/callback"
+
     params = {
         "client_id": client_id,
-        "redirect_uri": REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": SCOPE,
         "access_type": "offline",
@@ -65,25 +66,23 @@ def main() -> None:
         "state": state,
     }
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + parse.urlencode(params)
-    server = HTTPServer(("127.0.0.1", 0), Callback)
-    port = server.server_address[1]
-    redirect_uri = f"http://127.0.0.1:{port}/callback"
 
-    params["redirect_uri"] = redirect_uri
-    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + parse.urlencode(params)
     print(f"OAuth callback listening on free local port {port}")
     print("Opening Google authorization in your browser...")
     webbrowser.open(auth_url)
-    while "code" not in result:
-        server.handle_request()
-    server.server_close()
+
+    try:
+        while "code" not in result:
+            server.handle_request()
+    finally:
+        server.server_close()
 
     token_payload = parse.urlencode({
         "client_id": client_id,
         "client_secret": client_secret,
         "code": result["code"],
         "grant_type": "authorization_code",
-        "redirect_uri": REDIRECT_URI,
+        "redirect_uri": redirect_uri,
     }).encode("ascii")
     req = request.Request(
         "https://oauth2.googleapis.com/token",
@@ -93,6 +92,7 @@ def main() -> None:
     )
     with request.urlopen(req, timeout=30) as response:
         tokens = json.loads(response.read().decode("utf-8"))
+
     refresh_token = tokens.get("refresh_token")
     if not refresh_token:
         raise SystemExit("Google did not return a refresh token. Re-run and approve offline access.")
