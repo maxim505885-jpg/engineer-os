@@ -42,7 +42,8 @@ class EvidencePersistenceTests(unittest.TestCase):
         writer = EvidenceRegisterWriter(lambda table, row, conflict: calls.append((table, row, conflict)) or "ok")
         result = writer.persist(self.document, self.candidate, self.context)
         self.assertEqual(result, "ok")
-        self.assertEqual(calls[0][0], "evidence")\n        self.assertEqual(calls[0][2], ("document_id", "evidence_code"))
+        self.assertEqual(calls[0][0], "evidence")
+        self.assertEqual(calls[0][2], ("document_id", "evidence_code"))
 
     def test_tampered_candidate_cannot_reach_transport(self):
         calls = []
