@@ -39,14 +39,14 @@ class EvidencePersistenceTests(unittest.TestCase):
 
     def test_writer_uses_only_evidence_table(self):
         calls = []
-        writer = EvidenceRegisterWriter(lambda table, row: calls.append((table, row)) or "ok")
+        writer = EvidenceRegisterWriter(lambda table, row, conflict: calls.append((table, row, conflict)) or "ok")
         result = writer.persist(self.document, self.candidate, self.context)
         self.assertEqual(result, "ok")
-        self.assertEqual(calls[0][0], "evidence")
+        self.assertEqual(calls[0][0], "evidence")\n        self.assertEqual(calls[0][2], ("document_id", "evidence_code"))
 
     def test_tampered_candidate_cannot_reach_transport(self):
         calls = []
-        writer = EvidenceRegisterWriter(lambda table, row: calls.append((table, row)))
+        writer = EvidenceRegisterWriter(lambda table, row, conflict: calls.append((table, row, conflict)))
         tampered = replace(self.candidate, text="Подмена")
         with self.assertRaises(ValueError):
             writer.persist(self.document, tampered, self.context)
