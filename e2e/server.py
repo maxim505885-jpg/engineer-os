@@ -13,6 +13,7 @@ from engineering.core.codex_runtime import CodexAppServerClient, CodexRuntimeAda
 from engineering.core.supabase_acceptance_gate import production_acceptance_gate
 from engineering.document_intelligence import DoclingDocumentParser
 from engineering.document_intelligence.document_registration import SourceDocumentIdentity, assert_document_identity
+from engineering.document_intelligence.supabase_document_identity import production_document_identity_verifier
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -97,6 +98,7 @@ class Handler(BaseHTTPRequestHandler):
 
         temp_path: str | None = None
         try:
+            production_document_identity_verifier().verify(identity)
             payload = self.rfile.read(content_length)
             if len(payload) != content_length:
                 self._json(400, {"status": "BLOCK", "reason": "INCOMPLETE_DOCUMENT_BODY"})
