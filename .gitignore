@@ -1,0 +1,14 @@
+# Local secrets and OAuth credentials
+.env
+.env.*
+!.env.example
+client_secret*.json
+credentials*.json
+token*.json
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Local ENGINEER OS state
+.engineer-os/

@@ -40,6 +40,8 @@ class CodexResultParser:
         findings = payload["findings"]
         evidence_ids = payload["evidence_ids"]
         message = payload["message"]
+        checked_agents = payload.get("checked_agents", [])
+        acceptance_basis = payload.get("acceptance_basis", {})
 
         if not isinstance(findings, list) or not all(isinstance(item, dict) for item in findings):
             return cls._uncertainty(task, "findings must be a JSON array of objects.", raw_text, thread_id, turn_id)
@@ -47,6 +49,15 @@ class CodexResultParser:
             return cls._uncertainty(task, "evidence_ids must be a JSON array of strings.", raw_text, thread_id, turn_id)
         if message is not None and not isinstance(message, str):
             return cls._uncertainty(task, "message must be a string or null.", raw_text, thread_id, turn_id)
+        if not isinstance(checked_agents, list) or not all(isinstance(item, str) for item in checked_agents):
+            return cls._uncertainty(task, "checked_agents must be a JSON array of strings.", raw_text, thread_id, turn_id)
+        if not isinstance(acceptance_basis, dict):
+            return cls._uncertainty(task, "acceptance_basis must be a JSON object.", raw_text, thread_id, turn_id)
+        normalized_basis: dict[str, tuple[str, ...]] = {}
+        for key, value in acceptance_basis.items():
+            if not isinstance(key, str) or not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+                return cls._uncertainty(task, "acceptance_basis values must be arrays of strings.", raw_text, thread_id, turn_id)
+            normalized_basis[key] = tuple(value)
 
         return AgentResult(
             task.task_id,
@@ -55,6 +66,8 @@ class CodexResultParser:
             findings=tuple(findings),
             evidence_ids=tuple(evidence_ids),
             message=message,
+            checked_agents=tuple(checked_agents),
+            acceptance_basis=normalized_basis,
         )
 
     @staticmethod
@@ -65,7 +78,10 @@ class CodexResultParser:
         thread_id: str | None,
         turn_id: str | None,
     ) -> AgentResult:
-        metadata: dict[str, Any] = {"parser_reason": reason, "raw_text": raw_text}
+        metadata: dict[str, Any] = {
+            "parser_reason": reason,
+            "raw_text_sha256": __import__("hashlib").sha256(raw_text.encode("utf-8", errors="replace")).hexdigest(),
+        }
         if thread_id:
             metadata["codex_thread_id"] = thread_id
         if turn_id:
