@@ -74,4 +74,4 @@ class EvidenceRegisterWriter:
         context: EvidencePersistenceContext,
     ):
         row = evidence_row(document, candidate, context)
-        return self._insert_row("evidence", row)
+        return self._insert_row("evidence", row, ("document_id", "evidence_code"))
