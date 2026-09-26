@@ -108,7 +108,14 @@ class Handler(BaseHTTPRequestHandler):
                 handle.write(payload)
                 temp_path = handle.name
 
-            document = DoclingDocumentParser().parse(temp_path)
+            page_end_raw = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PAGE_END", "").strip()
+            page_range = None
+            if page_end_raw:
+                page_end = int(page_end_raw)
+                if page_end < 1 or page_end > 100:
+                    raise ValueError("REMOTE_PAGE_END_OUT_OF_RANGE")
+                page_range = (1, page_end)
+            document = DoclingDocumentParser().parse(temp_path, page_range=page_range)
             assert_document_identity(document.source_sha256, identity)
             pages = {
                 page.page_no
@@ -124,6 +131,8 @@ class Handler(BaseHTTPRequestHandler):
                 "bytes": len(payload),
                 "blocks": len(document.blocks),
                 "pages_with_provenance": len(pages),
+                "page_range": list(page_range) if page_range else None,
+                "complete_document": page_range is None,
             })
         except Exception as exc:
             self._json(422, {"status": "BLOCK", "reason": type(exc).__name__})
