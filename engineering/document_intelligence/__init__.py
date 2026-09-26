@@ -8,6 +8,7 @@ from .contracts import (
     PageRef,
 )
 from .docling_adapter import DoclingDocumentParser, document_intelligence_enabled
+from .evidence_bridge import EvidenceCandidate, evidence_candidates
 
 __all__ = [
     "BoundingBox",
@@ -17,4 +18,6 @@ __all__ = [
     "PageRef",
     "DoclingDocumentParser",
     "document_intelligence_enabled",
+    "EvidenceCandidate",
+    "evidence_candidates",
 ]
