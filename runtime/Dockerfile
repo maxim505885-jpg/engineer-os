@@ -5,8 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends nodejs npm ca-certificates \
-    && pip install 'docling>=2,<3' --extra-index-url https://download.pytorch.org/whl/cpu \
+    && apt-get install -y --no-install-recommends nodejs npm ca-certificates libgl1 libglib2.0-0 \
+    && pip install 'docling[rapidocr]>=2,<3' --extra-index-url https://download.pytorch.org/whl/cpu \
     && npm install -g @openai/codex \
     && apt-get purge -y npm \
     && rm -rf /var/lib/apt/lists/*
