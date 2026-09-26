@@ -40,8 +40,8 @@ class NormalizedDocument:
     source_sha256: str
 
     def __post_init__(self) -> None:
-        if not self.source_sha256:
-            raise ValueError("source_sha256 is required")
+        if len(self.source_sha256) != 64 or any(ch not in "0123456789abcdef" for ch in self.source_sha256):
+            raise ValueError("source_sha256 must be 64 lowercase hex characters")
         if not self.blocks:
             raise ValueError("normalized document must contain at least one block")
 
