@@ -21,8 +21,11 @@ SCOPE = "https://www.googleapis.com/auth/drive.readonly"
 
 def main() -> None:
     client_id = os.environ.get("GOOGLE_DRIVE_CLIENT_ID", "").strip()
-    if not client_id:
-        raise SystemExit("Set GOOGLE_DRIVE_CLIENT_ID before running this script.")
+    client_secret = os.environ.get("GOOGLE_DRIVE_CLIENT_SECRET", "").strip()
+    if not client_id or not client_secret:
+        raise SystemExit(
+            "Set GOOGLE_DRIVE_CLIENT_ID and GOOGLE_DRIVE_CLIENT_SECRET before running this script."
+        )
 
     state = secrets.token_urlsafe(32)
     code_verifier = secrets.token_urlsafe(64)
@@ -84,6 +87,7 @@ def main() -> None:
 
     token_payload = parse.urlencode({
         "client_id": client_id,
+        "client_secret": client_secret,
         "code": result["code"],
         "code_verifier": code_verifier,
         "grant_type": "authorization_code",
@@ -114,6 +118,7 @@ def main() -> None:
     output = Path(".env.google-drive")
     output.write_text(
         "GOOGLE_DRIVE_CLIENT_ID=" + client_id + "\n"
+        "GOOGLE_DRIVE_CLIENT_SECRET=" + client_secret + "\n"
         "GOOGLE_DRIVE_REFRESH_TOKEN=" + refresh_token + "\n",
         encoding="utf-8",
     )
