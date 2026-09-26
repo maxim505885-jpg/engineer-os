@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
+from urllib import parse as urlparse, request as urlrequest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from engineering.core import EngineerRunner
@@ -33,6 +34,9 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 self._json(503, {"status": "BLOCK", "service": "engineer-os-runtime", "reason": "DOCLING_UNAVAILABLE"})
             return
+        if self.path == "/document-intelligence/parse-remote":
+            self._run_remote_document_parse()
+            return
         if self.path == "/document-intelligence/health":
             try:
                 import docling  # noqa: F401
@@ -53,6 +57,71 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": "not_found"})
             return
         self._run_e2e()
+
+    def _run_remote_document_parse(self) -> None:
+        if os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PARSE_ENABLED") != "true":
+            self._json(403, {"status": "BLOCK", "reason": "REMOTE_PARSE_DISABLED"})
+            return
+
+        remote_url = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_URL", "")
+        parsed_url = urlparse.urlparse(remote_url)
+        if (
+            parsed_url.scheme != "https"
+            or not parsed_url.hostname
+            or not parsed_url.hostname.endswith(".r2.cloudflarestorage.com")
+        ):
+            self._json(403, {"status": "BLOCK", "reason": "REMOTE_SOURCE_NOT_ALLOWED"})
+            return
+
+        project_id = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PROJECT_ID", "")
+        document_id = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_DOCUMENT_ID", "")
+        source_sha256 = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_SHA256", "")
+        try:
+            identity = SourceDocumentIdentity(project_id, document_id, source_sha256)
+            production_document_identity_verifier().verify(identity)
+        except Exception as exc:
+            self._json(422, {"status": "BLOCK", "reason": type(exc).__name__})
+            return
+
+        max_bytes = int(os.environ.get("ENGINEER_OS_DOCUMENT_MAX_BYTES", str(100 * 1024 * 1024)))
+        temp_path: str | None = None
+        try:
+            req = urlrequest.Request(remote_url, method="GET", headers={"User-Agent": "ENGINEER-OS/1"})
+            with urlrequest.urlopen(req, timeout=120) as response:
+                payload = response.read(max_bytes + 1)
+            if len(payload) > max_bytes:
+                self._json(413, {"status": "BLOCK", "reason": "REMOTE_DOCUMENT_TOO_LARGE"})
+                return
+            if not payload.startswith(b"%PDF-"):
+                self._json(415, {"status": "BLOCK", "reason": "REMOTE_SOURCE_NOT_PDF"})
+                return
+
+            with tempfile.NamedTemporaryFile(prefix="engineer-os-remote-", suffix=".pdf", delete=False) as handle:
+                handle.write(payload)
+                temp_path = handle.name
+
+            document = DoclingDocumentParser().parse(temp_path)
+            assert_document_identity(document.source_sha256, identity)
+            pages = {
+                page.page_no
+                for block in document.blocks
+                for page in block.provenance
+            }
+            self._json(200, {
+                "status": "ok",
+                "document_id": document_id,
+                "project_id": project_id,
+                "parser": document.parser,
+                "source_sha256": document.source_sha256,
+                "bytes": len(payload),
+                "blocks": len(document.blocks),
+                "pages_with_provenance": len(pages),
+            })
+        except Exception as exc:
+            self._json(422, {"status": "BLOCK", "reason": type(exc).__name__})
+        finally:
+            if temp_path:
+                Path(temp_path).unlink(missing_ok=True)
 
     def _run_document_parse(self) -> None:
         if os.environ.get("ENGINEER_OS_DOCUMENT_INGEST_ENABLED") != "true":
