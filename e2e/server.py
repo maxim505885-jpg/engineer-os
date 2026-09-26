@@ -21,7 +21,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         if self.path == "/health":
-            self._json(200, {"status": "ok", "service": "engineer-os-runtime"})
+            try:
+                import docling  # noqa: F401
+                self._json(200, {"status": "ok", "service": "engineer-os-runtime", "docling": "available"})
+            except Exception:
+                self._json(503, {"status": "BLOCK", "service": "engineer-os-runtime", "reason": "DOCLING_UNAVAILABLE"})
             return
         if self.path == "/document-intelligence/health":
             try:
