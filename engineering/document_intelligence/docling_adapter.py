@@ -35,12 +35,24 @@ class DoclingDocumentParser:
         if self._converter_factory is not None:
             return self._converter_factory()
         try:
-            from docling.document_converter import DocumentConverter
+            from docling.datamodel.base_models import InputFormat
+            from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions
+            from docling.document_converter import DocumentConverter, PdfFormatOption
         except ImportError as exc:
             raise DocumentParseError(
                 "Docling is not installed; document intelligence cannot parse this source"
             ) from exc
-        return DocumentConverter()
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = True
+        pipeline_options.ocr_options = RapidOcrOptions(
+            backend="onnxruntime",
+            lang=["iso:ru", "iso:en"],
+        )
+        return DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            }
+        )
 
     @staticmethod
     def _page_ref(prov: Any) -> PageRef | None:
