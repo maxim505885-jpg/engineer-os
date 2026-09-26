@@ -25,8 +25,8 @@ class GoogleDriveOAuth:
     refresh_token: str
 
     def __post_init__(self) -> None:
-        if not all(value.strip() for value in (self.client_id, self.client_secret, self.refresh_token)):
-            raise ValueError("Google Drive OAuth credentials are required")
+        if not self.client_id.strip() or not self.refresh_token.strip():
+            raise ValueError("Google Drive client_id and refresh_token are required")
 
 
 @dataclass(frozen=True)
@@ -57,12 +57,14 @@ class GoogleDriveTokenProvider:
         self._opener = opener or request.urlopen
 
     def access_token(self) -> str:
-        payload = parse.urlencode({
+        fields = {
             "client_id": self._oauth.client_id,
-            "client_secret": self._oauth.client_secret,
             "refresh_token": self._oauth.refresh_token,
             "grant_type": "refresh_token",
-        }).encode("ascii")
+        }
+        if self._oauth.client_secret.strip():
+            fields["client_secret"] = self._oauth.client_secret
+        payload = parse.urlencode(fields).encode("ascii")
         req = request.Request(
             "https://oauth2.googleapis.com/token",
             data=payload,
