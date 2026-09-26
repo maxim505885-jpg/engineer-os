@@ -10,6 +10,9 @@ from .contracts import (
 from .docling_adapter import DoclingDocumentParser, document_intelligence_enabled
 from .evidence_bridge import EvidenceCandidate, evidence_candidates
 from .evidence_persistence import EvidencePersistenceContext, EvidenceRegisterWriter, evidence_row, production_evidence_writer
+from .pipeline import prepare_validated_evidence, persist_selected_evidence
+from .document_registration import SourceDocumentIdentity, assert_document_identity
+from .supabase_document_identity import SupabaseDocumentIdentityVerifier, production_document_identity_verifier
 from .retrieval_adapters import DeepDocRetrievalAdapter, PageIndexRetrievalAdapter, RetrievalAdapterError, RetrievalHit
 from .evidence_validation import (
     EvidenceCandidateStatus,
@@ -32,6 +35,12 @@ __all__ = [
     "EvidenceRegisterWriter",
     "evidence_row",
     "production_evidence_writer",
+    "prepare_validated_evidence",
+    "persist_selected_evidence",
+    "SourceDocumentIdentity",
+    "assert_document_identity",
+    "SupabaseDocumentIdentityVerifier",
+    "production_document_identity_verifier",
     "DeepDocRetrievalAdapter",
     "PageIndexRetrievalAdapter",
     "RetrievalAdapterError",
