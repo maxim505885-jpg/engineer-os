@@ -9,7 +9,7 @@ from .contracts import (
 )
 from .docling_adapter import DoclingDocumentParser, document_intelligence_enabled
 from .evidence_bridge import EvidenceCandidate, evidence_candidates
-from .evidence_persistence import EvidencePersistenceContext, EvidenceRegisterWriter, evidence_row
+from .evidence_persistence import EvidencePersistenceContext, EvidenceRegisterWriter, evidence_row, production_evidence_writer
 from .retrieval_adapters import DeepDocRetrievalAdapter, PageIndexRetrievalAdapter, RetrievalAdapterError, RetrievalHit
 from .evidence_validation import (
     EvidenceCandidateStatus,
@@ -31,6 +31,7 @@ __all__ = [
     "EvidencePersistenceContext",
     "EvidenceRegisterWriter",
     "evidence_row",
+    "production_evidence_writer",
     "DeepDocRetrievalAdapter",
     "PageIndexRetrievalAdapter",
     "RetrievalAdapterError",
