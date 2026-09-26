@@ -4,6 +4,8 @@ import hmac
 import json
 import os
 import tempfile
+import threading
+import time
 from pathlib import Path
 from urllib import parse as urlparse, request as urlrequest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -61,6 +63,12 @@ class Handler(BaseHTTPRequestHandler):
     def _run_remote_document_parse(self) -> None:
         if os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PARSE_ENABLED") != "true":
             self._json(403, {"status": "BLOCK", "reason": "REMOTE_PARSE_DISABLED"})
+            return
+        if (
+            os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PARSE_LOCAL_ONLY") == "true"
+            and self.client_address[0] not in {"127.0.0.1", "::1"}
+        ):
+            self._json(403, {"status": "BLOCK", "reason": "REMOTE_PARSE_LOCAL_ONLY"})
             return
 
         remote_url = os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_URL", "")
@@ -240,8 +248,33 @@ class Handler(BaseHTTPRequestHandler):
             client.close()
 
 
+def _startup_remote_parse(port: int) -> None:
+    if os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PARSE_ON_START") != "true":
+        return
+    time.sleep(2)
+    try:
+        req = urlrequest.Request(
+            f"http://127.0.0.1:{port}/document-intelligence/parse-remote",
+            method="GET",
+            headers={"User-Agent": "ENGINEER-OS-internal/1"},
+        )
+        with urlrequest.urlopen(req, timeout=1800) as response:
+            body = response.read().decode("utf-8", errors="replace")
+        print("ENGINEER_OS_REMOTE_PARSE_RESULT " + body, flush=True)
+    except Exception as exc:
+        print(
+            "ENGINEER_OS_REMOTE_PARSE_RESULT "
+            + json.dumps({"status": "BLOCK", "reason": type(exc).__name__}),
+            flush=True,
+        )
+
+
 def main() -> None:
-    ThreadingHTTPServer(("0.0.0.0", int(os.environ.get("PORT", "8080"))), Handler).serve_forever()
+    port = int(os.environ.get("PORT", "8080"))
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    if os.environ.get("ENGINEER_OS_DOCUMENT_REMOTE_PARSE_ON_START") == "true":
+        threading.Thread(target=_startup_remote_parse, args=(port,), daemon=True).start()
+    server.serve_forever()
 
 
 if __name__ == "__main__":
