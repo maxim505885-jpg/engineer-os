@@ -9,6 +9,12 @@ from .contracts import (
 )
 from .docling_adapter import DoclingDocumentParser, document_intelligence_enabled
 from .evidence_bridge import EvidenceCandidate, evidence_candidates
+from .evidence_validation import (
+    EvidenceCandidateStatus,
+    EvidenceValidation,
+    validate_evidence_candidate,
+    validated_evidence_candidates,
+)
 
 __all__ = [
     "BoundingBox",
@@ -20,4 +26,8 @@ __all__ = [
     "document_intelligence_enabled",
     "EvidenceCandidate",
     "evidence_candidates",
+    "EvidenceCandidateStatus",
+    "EvidenceValidation",
+    "validate_evidence_candidate",
+    "validated_evidence_candidates",
 ]
