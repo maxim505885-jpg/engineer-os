@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import hmac
 import json
 import os
+import tempfile
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from engineering.core import EngineerRunner
 from engineering.core.engineer_core import EngineerCore
 from engineering.core.codex_runtime import CodexAppServerClient, CodexRuntimeAdapter, CodexServerConfig
 from engineering.core.supabase_acceptance_gate import production_acceptance_gate
+from engineering.document_intelligence import DoclingDocumentParser
+from engineering.document_intelligence.document_registration import SourceDocumentIdentity, assert_document_identity
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -40,10 +45,92 @@ class Handler(BaseHTTPRequestHandler):
         self._json(404, {"error": "not_found"})
 
     def do_POST(self) -> None:
+        if self.path == "/document-intelligence/parse":
+            self._run_document_parse()
+            return
         if self.path != "/e2e":
             self._json(404, {"error": "not_found"})
             return
         self._run_e2e()
+
+    def _run_document_parse(self) -> None:
+        if os.environ.get("ENGINEER_OS_DOCUMENT_INGEST_ENABLED") != "true":
+            self._json(403, {"status": "BLOCK", "reason": "DOCUMENT_INGEST_DISABLED"})
+            return
+
+        expected_token = os.environ.get("ENGINEER_OS_DOCUMENT_INGEST_TOKEN", "")
+        supplied_token = self.headers.get("Authorization", "")
+        if not expected_token or not supplied_token.startswith("Bearer ") or not hmac.compare_digest(
+            supplied_token[7:], expected_token
+        ):
+            self._json(401, {"status": "BLOCK", "reason": "UNAUTHORIZED"})
+            return
+
+        if self.headers.get_content_type() != "application/pdf":
+            self._json(415, {"status": "BLOCK", "reason": "PDF_REQUIRED"})
+            return
+
+        try:
+            content_length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            content_length = 0
+        max_bytes = int(os.environ.get("ENGINEER_OS_DOCUMENT_MAX_BYTES", str(100 * 1024 * 1024)))
+        if content_length <= 0 or content_length > max_bytes:
+            self._json(413, {"status": "BLOCK", "reason": "INVALID_DOCUMENT_SIZE"})
+            return
+
+        project_id = self.headers.get("X-Project-ID", "").strip()
+        document_id = self.headers.get("X-Document-ID", "").strip()
+        source_sha256 = self.headers.get("X-Source-SHA256", "").strip()
+        try:
+            identity = SourceDocumentIdentity(
+                project_id=project_id,
+                document_id=document_id,
+                source_sha256=source_sha256,
+            )
+        except ValueError as exc:
+            self._json(400, {"status": "BLOCK", "reason": str(exc)})
+            return
+        if not project_id or not document_id:
+            self._json(400, {"status": "BLOCK", "reason": "DOCUMENT_IDENTITY_REQUIRED"})
+            return
+
+        temp_path: str | None = None
+        try:
+            payload = self.rfile.read(content_length)
+            if len(payload) != content_length:
+                self._json(400, {"status": "BLOCK", "reason": "INCOMPLETE_DOCUMENT_BODY"})
+                return
+            with tempfile.NamedTemporaryFile(prefix="engineer-os-", suffix=".pdf", delete=False) as handle:
+                handle.write(payload)
+                temp_path = handle.name
+
+            document = DoclingDocumentParser().parse(temp_path)
+            assert_document_identity(document.source_sha256, identity)
+            pages = sorted(
+                {
+                    page.page_no
+                    for block in document.blocks
+                    for page in block.provenance
+                }
+            )
+            self._json(
+                200,
+                {
+                    "status": "ok",
+                    "document_id": document_id,
+                    "project_id": project_id,
+                    "parser": document.parser,
+                    "source_sha256": document.source_sha256,
+                    "blocks": len(document.blocks),
+                    "pages_with_provenance": len(pages),
+                },
+            )
+        except Exception as exc:
+            self._json(422, {"status": "BLOCK", "reason": type(exc).__name__})
+        finally:
+            if temp_path:
+                Path(temp_path).unlink(missing_ok=True)
 
     def _run_e2e(self) -> None:
         if os.environ.get("ENGINEER_OS_E2E_ENABLED") != "true":
