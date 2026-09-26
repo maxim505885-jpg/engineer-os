@@ -34,7 +34,7 @@ class Handler(BaseHTTPRequestHandler):
             except Exception:
                 self._json(503, {"status": "BLOCK", "service": "engineer-os-runtime", "reason": "DOCLING_UNAVAILABLE"})
             return
-        if self.path == "/document-intelligence/parse-remote":
+        if self.path in {"/document-intelligence/parse-remote", "/document_intelligence/parse_remote"}:
             self._run_remote_document_parse()
             return
         if self.path == "/document-intelligence/health":
