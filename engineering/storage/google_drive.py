@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import json
+import os
 from pathlib import Path
 from urllib import error, parse, request
 
@@ -162,3 +163,13 @@ class GoogleDriveClient:
             target.unlink(missing_ok=True)
             raise GoogleDriveError("Google Drive download size mismatch")
         return DownloadedDriveFile(metadata, str(target), sha.hexdigest(), written)
+
+
+def production_google_drive_client() -> GoogleDriveClient:
+    """Build the production read-only Drive client from runtime secrets."""
+    oauth = GoogleDriveOAuth(
+        client_id=os.environ.get("GOOGLE_DRIVE_CLIENT_ID", ""),
+        client_secret=os.environ.get("GOOGLE_DRIVE_CLIENT_SECRET", ""),
+        refresh_token=os.environ.get("GOOGLE_DRIVE_REFRESH_TOKEN", ""),
+    )
+    return GoogleDriveClient(GoogleDriveTokenProvider(oauth))
