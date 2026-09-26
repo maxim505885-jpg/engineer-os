@@ -8,6 +8,7 @@ from .google_drive import (
     GoogleDriveFile,
     GoogleDriveOAuth,
     GoogleDriveTokenProvider,
+    production_google_drive_client,
 )
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     "GoogleDriveFile",
     "GoogleDriveOAuth",
     "GoogleDriveTokenProvider",
+    "production_google_drive_client",
     "materialize_registered_drive_document",
 ]
