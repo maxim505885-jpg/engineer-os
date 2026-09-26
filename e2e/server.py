@@ -23,6 +23,13 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self._json(200, {"status": "ok", "service": "engineer-os-runtime"})
             return
+        if self.path == "/document-intelligence/health":
+            try:
+                import docling  # noqa: F401
+                self._json(200, {"status": "ok", "docling": "available"})
+            except Exception:
+                self._json(503, {"status": "BLOCK", "reason": "DOCLING_UNAVAILABLE"})
+            return
         if self.path == "/e2e" and os.environ.get("ENGINEER_OS_E2E_ALLOW_GET") == "true":
             self._run_e2e()
             return
