@@ -35,7 +35,8 @@ class EvidencePersistenceTests(unittest.TestCase):
         )
         self.assertIn("sha256:" + "e" * 64, row["source_ref"])
         self.assertIn("pages:4", row["source_ref"])
-        self.assertEqual(row["data_class"], "ACTUAL")
+        self.assertEqual(row["data_class"], "UNKNOWN")
+        self.assertEqual(row["confidence"], "PROVENANCE_VALIDATED")
 
     def test_writer_uses_only_evidence_table(self):
         calls = []
@@ -52,6 +53,10 @@ class EvidencePersistenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             writer.persist(self.document, tampered, self.context)
         self.assertEqual(calls, [])
+
+    def test_invalid_data_class_is_rejected(self):
+        with self.assertRaises(ValueError):
+            EvidencePersistenceContext(project_id=self.context.project_id, document_id=self.context.document_id, data_class="TRUST_ME")
 
     def test_invalid_database_context_is_rejected(self):
         with self.assertRaises(ValueError):
