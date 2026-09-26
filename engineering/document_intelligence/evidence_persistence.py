@@ -19,8 +19,8 @@ from .evidence_validation import EvidenceCandidateStatus, validate_evidence_cand
 class EvidencePersistenceContext:
     project_id: str
     document_id: str
-    data_class: str = "ACTUAL"
-    confidence: str = "EXTRACTED_VALIDATED"
+    data_class: str = "UNKNOWN"
+    confidence: str = "PROVENANCE_VALIDATED"
 
     def __post_init__(self) -> None:
         for name, value in (("project_id", self.project_id), ("document_id", self.document_id)):
@@ -28,8 +28,9 @@ class EvidencePersistenceContext:
                 UUID(value)
             except (TypeError, ValueError) as exc:
                 raise ValueError(f"{name} must be a UUID") from exc
-        if not self.data_class.strip():
-            raise ValueError("data_class is required")
+        allowed = {"PROJECT", "ACTUAL", "MEASURED", "TESTED", "CALCULATED", "ASSUMED", "INTERPRETED", "UNKNOWN"}
+        if self.data_class not in allowed:
+            raise ValueError("invalid data_class")
 
 
 def evidence_row(
