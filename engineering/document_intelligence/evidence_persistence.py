@@ -76,3 +76,9 @@ class EvidenceRegisterWriter:
     ):
         row = evidence_row(document, candidate, context)
         return self._insert_row("evidence", row, ("document_id", "evidence_code"))
+
+
+def production_evidence_writer():
+    """Build the only production writer for validated document evidence."""
+    from .supabase_evidence_transport import production_evidence_transport
+    return EvidenceRegisterWriter(production_evidence_transport())
