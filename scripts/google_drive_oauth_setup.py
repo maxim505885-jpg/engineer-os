@@ -16,7 +16,6 @@ import webbrowser
 
 
 SCOPE = "https://www.googleapis.com/auth/drive.readonly"
-PORT = 8765
 REDIRECT_URI = f"http://127.0.0.1:{PORT}/callback"
 
 
@@ -66,10 +65,15 @@ def main() -> None:
         "state": state,
     }
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + parse.urlencode(params)
+    server = HTTPServer(("127.0.0.1", 0), Callback)
+    port = server.server_address[1]
+    redirect_uri = f"http://127.0.0.1:{port}/callback"
+
+    params["redirect_uri"] = redirect_uri
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + parse.urlencode(params)
+    print(f"OAuth callback listening on free local port {port}")
     print("Opening Google authorization in your browser...")
     webbrowser.open(auth_url)
-
-    server = HTTPServer(("127.0.0.1", PORT), Callback)
     while "code" not in result:
         server.handle_request()
     server.server_close()
