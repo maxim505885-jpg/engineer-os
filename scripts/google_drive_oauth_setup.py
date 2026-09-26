@@ -1,16 +1,19 @@
 """One-time local Google Drive OAuth setup for ENGINEER OS.
 
-Uses a dynamically selected free loopback port to avoid conflicts with local services.
+Desktop OAuth uses a free loopback port and PKCE. A client secret is not
+required for this installed-app flow.
 """
 
 from __future__ import annotations
 
+import base64
+import hashlib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
 from pathlib import Path
 import secrets
-from urllib import parse, request
+from urllib import error, parse, request
 import webbrowser
 
 SCOPE = "https://www.googleapis.com/auth/drive.readonly"
@@ -18,13 +21,14 @@ SCOPE = "https://www.googleapis.com/auth/drive.readonly"
 
 def main() -> None:
     client_id = os.environ.get("GOOGLE_DRIVE_CLIENT_ID", "").strip()
-    client_secret = os.environ.get("GOOGLE_DRIVE_CLIENT_SECRET", "").strip()
-    if not client_id or not client_secret:
-        raise SystemExit(
-            "Set GOOGLE_DRIVE_CLIENT_ID and GOOGLE_DRIVE_CLIENT_SECRET before running this script."
-        )
+    if not client_id:
+        raise SystemExit("Set GOOGLE_DRIVE_CLIENT_ID before running this script.")
 
     state = secrets.token_urlsafe(32)
+    code_verifier = secrets.token_urlsafe(64)
+    code_challenge = base64.urlsafe_b64encode(
+        hashlib.sha256(code_verifier.encode("ascii")).digest()
+    ).rstrip(b"=").decode("ascii")
     result: dict[str, str] = {}
 
     class Callback(BaseHTTPRequestHandler):
@@ -61,9 +65,10 @@ def main() -> None:
         "response_type": "code",
         "scope": SCOPE,
         "access_type": "offline",
-        "include_granted_scopes": "true",
         "prompt": "consent",
         "state": state,
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
     }
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + parse.urlencode(params)
 
@@ -79,8 +84,8 @@ def main() -> None:
 
     token_payload = parse.urlencode({
         "client_id": client_id,
-        "client_secret": client_secret,
         "code": result["code"],
+        "code_verifier": code_verifier,
         "grant_type": "authorization_code",
         "redirect_uri": redirect_uri,
     }).encode("ascii")
@@ -90,8 +95,17 @@ def main() -> None:
         method="POST",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    with request.urlopen(req, timeout=30) as response:
-        tokens = json.loads(response.read().decode("utf-8"))
+    try:
+        with request.urlopen(req, timeout=30) as response:
+            tokens = json.loads(response.read().decode("utf-8"))
+    except error.HTTPError as exc:
+        try:
+            detail = json.loads(exc.read().decode("utf-8"))
+            safe_error = detail.get("error", "oauth_error")
+            safe_description = detail.get("error_description", "")
+        except Exception:
+            safe_error, safe_description = "oauth_error", ""
+        raise SystemExit(f"Google token exchange failed: {safe_error}: {safe_description}") from None
 
     refresh_token = tokens.get("refresh_token")
     if not refresh_token:
@@ -100,7 +114,6 @@ def main() -> None:
     output = Path(".env.google-drive")
     output.write_text(
         "GOOGLE_DRIVE_CLIENT_ID=" + client_id + "\n"
-        "GOOGLE_DRIVE_CLIENT_SECRET=" + client_secret + "\n"
         "GOOGLE_DRIVE_REFRESH_TOKEN=" + refresh_token + "\n",
         encoding="utf-8",
     )
