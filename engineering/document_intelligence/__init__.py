@@ -9,6 +9,7 @@ from .contracts import (
 )
 from .docling_adapter import DoclingDocumentParser, document_intelligence_enabled
 from .evidence_bridge import EvidenceCandidate, evidence_candidates
+from .evidence_persistence import EvidencePersistenceContext, EvidenceRegisterWriter, evidence_row
 from .evidence_validation import (
     EvidenceCandidateStatus,
     EvidenceValidation,
@@ -26,6 +27,9 @@ __all__ = [
     "document_intelligence_enabled",
     "EvidenceCandidate",
     "evidence_candidates",
+    "EvidencePersistenceContext",
+    "EvidenceRegisterWriter",
+    "evidence_row",
     "EvidenceCandidateStatus",
     "EvidenceValidation",
     "validate_evidence_candidate",
