@@ -23,12 +23,18 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/health":
             self._json(200, {"status": "ok", "service": "engineer-os-runtime"})
             return
+        if self.path == "/e2e" and os.environ.get("ENGINEER_OS_E2E_ALLOW_GET") == "true":
+            self._run_e2e()
+            return
         self._json(404, {"error": "not_found"})
 
     def do_POST(self) -> None:
         if self.path != "/e2e":
             self._json(404, {"error": "not_found"})
             return
+        self._run_e2e()
+
+    def _run_e2e(self) -> None:
         if os.environ.get("ENGINEER_OS_E2E_ENABLED") != "true":
             self._json(403, {"status": "BLOCK", "reason": "E2E_DISABLED"})
             return
