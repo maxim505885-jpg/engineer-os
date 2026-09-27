@@ -26,10 +26,13 @@ def _candidate_id(document: NormalizedDocument, block: DocumentBlock) -> str:
     payload = "\n".join(
         (
             document.source_sha256,
-            block.block_id,
             block.kind,
             block.text,
-            ",".join(str(ref.page_no) for ref in block.provenance),
+            ",".join(
+                f"{ref.page_no}:{ref.bbox.left},{ref.bbox.top},{ref.bbox.right},{ref.bbox.bottom}"
+                if ref.bbox else str(ref.page_no)
+                for ref in block.provenance
+            ),
         )
     ).encode("utf-8")
     return "doc-evidence:" + hashlib.sha256(payload).hexdigest()
