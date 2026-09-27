@@ -21,6 +21,8 @@ def review(directory: Path, page_count: int) -> dict:
     successful_chunks = 0
     blocked_chunks = 0
     total_blocks = 0
+    page_counts = {page: {"blocks": 0, "table_rows": 0} for page in range(1, page_count + 1)}
+    blocked_pages = set()
     for first in range(1, page_count + 1, 2):
         last = min(first + 1, page_count)
         stem = f"pages-{first:04d}-{last:04d}"
@@ -42,6 +44,7 @@ def review(directory: Path, page_count: int) -> dict:
         except (OSError, UnicodeError, ValueError, TypeError) as exc:
             blocked_chunks += 1
             issues.append({"chunk": stem, "reason": str(exc)})
+            blocked_pages.update(range(first, last + 1))
             continue
         successful_chunks += 1
         total_blocks += len(output["blocks"])
@@ -49,12 +52,30 @@ def review(directory: Path, page_count: int) -> dict:
                    for ref in block["provenance"]}
         present_pages.update(located)
         missing_provenance_pages.update(set(range(first, last + 1)) - located)
+        for block in output["blocks"]:
+            for page in {ref["page_no"] for ref in block["provenance"]}:
+                page_counts[page]["blocks"] += 1
+                if block.get("kind") == "table_row":
+                    page_counts[page]["table_rows"] += 1
+    queue = []
+    for page, counts in page_counts.items():
+        if page in blocked_pages:
+            priority, reason = 1, "EXTRACTION_BLOCKED"
+        elif page in missing_provenance_pages:
+            priority, reason = 2, "NO_EXTRACTED_BLOCKS"
+        elif counts["table_rows"]:
+            priority, reason = 3, "TABLE_REQUIRES_VISUAL_REVIEW"
+        else:
+            priority, reason = 4, "TEXT_REQUIRES_SEMANTIC_REVIEW"
+        queue.append({"page": page, "priority": priority, "reason": reason, **counts})
+    queue.sort(key=lambda item: (item["priority"], item["page"]))
     return {
         "source_sha256": SOURCE_SHA256, "project_id": PROJECT_ID,
         "document_id": DOCUMENT_ID, "page_count": page_count,
         "successful_chunks": successful_chunks, "blocked_chunks": blocked_chunks,
         "blocks": total_blocks, "pages_with_extracted_blocks": len(present_pages),
         "pages_without_extracted_blocks": sorted(missing_provenance_pages),
+        "review_queue": queue,
         "issues": issues, "status": "BLOCK" if blocked_chunks else "UNCERTAINTY",
         "note": "Extraction inventory only; pages and engineering conclusions require review",
     }
