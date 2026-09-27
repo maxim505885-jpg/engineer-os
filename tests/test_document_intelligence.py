@@ -95,11 +95,44 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaisesRegex(DocumentParseError, "table"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
-    def test_exported_table_without_cell_provenance_blocks_chunk(self):
+    def test_exported_table_with_empty_cells_blocks_chunk(self):
         source = self._source()
         payload = {"texts": [{"text": "Text", "prov": [{"page_no": 15}]}], "tables": [{"data": {"table_cells": []}}]}
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaisesRegex(DocumentParseError, "table"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
+    def test_complete_table_uses_parent_page_and_preserves_row_meaning(self):
+        source = self._source()
+        cells = []
+        for row, values in enumerate((("Параметр", "Значение", "Обоснование"),
+                                      ("Вес снегового покрова", "0,50 кПа", "СП 131"))):
+            for col, value in enumerate(values):
+                cells.append({"text": value, "start_row_offset_idx": row,
+                              "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                              "end_col_offset_idx": col + 1})
+        payload = {"texts": [{"label": "caption", "text": "Табл. П.2.1.",
+                              "prov": [{"page_no": 15}]}],
+                   "tables": [{"prov": [{"page_no": 15}], "data": {
+                       "num_rows": 2, "num_cols": 3, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            result = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        rows = [block for block in result.blocks if block.kind == "table_row"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].provenance[0].page_no, 15)
+        self.assertIn("Вес снегового покрова", rows[0].text)
+        self.assertIn("Значение: 0,50 кПа", rows[0].text)
+        self.assertIn("Обоснование: СП 131", rows[0].text)
+
+    def test_incomplete_table_grid_is_blocked(self):
+        source = self._source()
+        payload = {"tables": [{"prov": [{"page_no": 15}], "data": {
+            "num_rows": 2, "num_cols": 2, "table_cells": [
+                {"text": "Header", "start_row_offset_idx": 0,
+                 "end_row_offset_idx": 1, "start_col_offset_idx": 0,
+                 "end_col_offset_idx": 1}]}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "missing cells"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
     def test_missing_source_is_rejected(self):
