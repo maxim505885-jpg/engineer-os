@@ -78,11 +78,12 @@ class EngineerCore:
             if key in seen:
                 continue
             seen.add(key)
+            if key == "final_audit":
+                continue
             agent, skill, purpose = CHECK_REGISTRY[key]
             planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
-        if "final_audit" not in seen:
-            agent, skill, purpose = CHECK_REGISTRY["final_audit"]
-            planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
+        agent, skill, purpose = CHECK_REGISTRY["final_audit"]
+        planned.append(SpecialistTask(task.task_id, agent, skill, task.materials, purpose, task.tz))
         return CoreState(task=task, planned=planned, results=[])
 
     def run(self, task: EngineerTask, runtime: AgentRuntimeAdapter) -> CoreState:
@@ -91,8 +92,9 @@ class EngineerCore:
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
         allowed = {p.agent for p in state.planned}
-        seen: set[str] = set()
-        for result in results:
+        seen: set[str] = {result.agent for result in state.results}
+        incoming = tuple(results)
+        for result in incoming:
             if result.agent not in allowed:
                 raise ValueError(f"Result from unplanned agent: {result.agent}")
             if result.task_id != state.task.task_id:
@@ -101,7 +103,7 @@ class EngineerCore:
                 raise ValueError(f"Duplicate result from agent: {result.agent}")
             self._validate_result_contract(result)
             seen.add(result.agent)
-            state.results.append(result)
+        state.results.extend(incoming)
         return state
 
     def final_status(self, state: CoreState) -> AgentStatus:
