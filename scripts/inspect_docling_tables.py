@@ -13,11 +13,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("--page", type=int, required=True)
+    parser.add_argument("--end", type=int, help="Last page (at most two pages total)")
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.page < 1:
-        parser.error("page must be positive")
+    end = args.end or args.page
+    if args.page < 1 or end < args.page or end - args.page > 1:
+        parser.error("choose one or two positive pages")
     with args.source.open("rb") as handle:
         digest = hashlib.file_digest(handle, "sha256").hexdigest()
     if digest != args.sha256.lower():
@@ -26,7 +28,7 @@ def main() -> int:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from engineering.document_intelligence.docling_adapter import DoclingDocumentParser
 
-    result = DoclingDocumentParser()._converter().convert(str(args.source), page_range=(args.page, args.page))
+    result = DoclingDocumentParser()._converter().convert(str(args.source), page_range=(args.page, end))
     exported = result.document.export_to_dict()
     tables = []
     for table in exported.get("tables", []):
@@ -39,7 +41,7 @@ def main() -> int:
                 "start_col_offset_idx", "end_col_offset_idx")}
                 for cell in data.get("table_cells", [])],
         })
-    payload = {"source_sha256": digest, "page": args.page, "tables": tables}
+    payload = {"source_sha256": digest, "page_start": args.page, "page_end": end, "tables": tables}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print("TABLES:", len(tables))
