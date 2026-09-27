@@ -20,8 +20,11 @@ def document_intelligence_enabled() -> bool:
 
 
 class DoclingDocumentParser:
-    def __init__(self, converter_factory: Callable[[], Any] | None = None) -> None:
+    def __init__(self, converter_factory: Callable[[], Any] | None = None, *, table_mode: str = "accurate") -> None:
+        if table_mode not in ("accurate", "fast"):
+            raise ValueError("table_mode must be accurate or fast")
         self._converter_factory = converter_factory
+        self._table_mode = table_mode
 
     @staticmethod
     def _sha256(path: Path) -> str:
@@ -36,13 +39,15 @@ class DoclingDocumentParser:
             return self._converter_factory()
         try:
             from docling.datamodel.base_models import InputFormat
-            from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions
+            from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions, TableFormerMode
             from docling.document_converter import DocumentConverter, PdfFormatOption
         except ImportError as exc:
             raise DocumentParseError(
                 "Docling is not installed; document intelligence cannot parse this source"
             ) from exc
         pipeline_options = PdfPipelineOptions()
+        if self._table_mode == "fast":
+            pipeline_options.table_structure_options.mode = TableFormerMode.FAST
         pipeline_options.do_ocr = True
         pipeline_options.ocr_options = RapidOcrOptions(
             backend="onnxruntime",
