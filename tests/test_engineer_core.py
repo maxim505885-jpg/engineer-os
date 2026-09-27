@@ -208,6 +208,46 @@ class EngineerCoreTests(unittest.TestCase):
         core.collect(state, results)
         self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
 
+    def test_duplicate_final_audit_coverage_cannot_accept(self):
+        core = EngineerCore(acceptance_gate=lambda _: True)
+        state = core.plan(self.task)
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED,
+                    evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+                   for p in state.planned[:-1]]
+        results.append(AgentResult("demo-001", "final-audit-agent", AgentStatus.ACCEPTED,
+            evidence_ids=self.evidence,
+            checked_agents=("report-audit-agent", "normative-agent",
+                            "calculation-agent", "report-audit-agent")))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.UNCERTAINTY)
+
+    def test_unavailable_acceptance_gate_blocks_without_accepting(self):
+        def unavailable(_):
+            raise RuntimeError("unavailable")
+
+        core = EngineerCore(acceptance_gate=unavailable)
+        state = core.plan(self.task)
+        results = [AgentResult("demo-001", p.agent, AgentStatus.ACCEPTED,
+                    evidence_ids=self.evidence, acceptance_basis=self._basis(p.agent))
+                   for p in state.planned[:-1]]
+        results.append(AgentResult("demo-001", "final-audit-agent", AgentStatus.ACCEPTED,
+            evidence_ids=self.evidence,
+            checked_agents=("report-audit-agent", "normative-agent", "calculation-agent")))
+        core.collect(state, results)
+        self.assertEqual(core.final_status(state), AgentStatus.BLOCK)
+
+    def test_blank_evidence_or_domain_proof_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        with self.assertRaises(ValueError):
+            core.collect(state, [AgentResult("demo-001", "report-audit-agent", AgentStatus.PASS,
+                                           evidence_ids=(" ",),
+                                           acceptance_basis={"report_quality": ("proof",)})])
+        with self.assertRaises(ValueError):
+            core.collect(state, [AgentResult("demo-001", "report-audit-agent", AgentStatus.PASS,
+                                           evidence_ids=("e1",),
+                                           acceptance_basis={"report_quality": (" ",)})])
+
     def test_duplicate_agent_result_cannot_hide_missing_coverage(self):
         core = EngineerCore()
         state = core.plan(self.task)
