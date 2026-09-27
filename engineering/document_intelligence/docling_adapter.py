@@ -120,6 +120,58 @@ class DoclingDocumentParser:
         visit(exported, "")
         return tuple(blocks)
 
+    @classmethod
+    def _table_rows(cls, exported: dict[str, Any]) -> tuple[DocumentBlock, ...]:
+        rows: list[DocumentBlock] = []
+        tables = exported.get("tables") or []
+        if not isinstance(tables, list):
+            raise DocumentParseError("table export is not a list")
+        for table_index, table in enumerate(tables):
+            if not isinstance(table, dict):
+                raise DocumentParseError("table export is not a mapping")
+            provenance = table.get("prov") or []
+            if not isinstance(provenance, list):
+                raise DocumentParseError("table provenance is invalid")
+            refs = tuple(ref for ref in (cls._page_ref(p) for p in provenance) if ref is not None)
+            if len(refs) != 1:
+                raise DocumentParseError("table requires exactly one source page")
+            # Table provenance bounds the entire table, not an individual row.
+            row_ref = PageRef(page_no=refs[0].page_no)
+            data = table.get("data") or {}
+            if not isinstance(data, dict):
+                raise DocumentParseError("table data is invalid")
+            count_rows, count_cols = data.get("num_rows"), data.get("num_cols")
+            if (not isinstance(count_rows, int) or not isinstance(count_cols, int)
+                    or count_rows < 2 or count_cols < 2):
+                raise DocumentParseError("table dimensions are invalid")
+            cells = data.get("table_cells")
+            if not isinstance(cells, list):
+                raise DocumentParseError("table cells are missing")
+            grid: dict[tuple[int, int], str] = {}
+            for cell in cells:
+                if not isinstance(cell, dict):
+                    raise DocumentParseError("table cell is invalid")
+                r, c = cell.get("start_row_offset_idx"), cell.get("start_col_offset_idx")
+                if (not isinstance(r, int) or not isinstance(c, int)
+                        or r < 0 or r >= count_rows or c < 0 or c >= count_cols
+                        or cell.get("end_row_offset_idx") != r + 1
+                        or cell.get("end_col_offset_idx") != c + 1
+                        or (r, c) in grid or not isinstance(cell.get("text"), str)
+                        or not cell["text"].strip()):
+                    raise DocumentParseError("table cell is missing, merged or ambiguous")
+                grid[r, c] = cell["text"].strip()
+            if len(grid) != count_rows * count_cols:
+                raise DocumentParseError("table grid has missing cells")
+            headings = [grid[0, c] for c in range(count_cols)]
+            for r in range(1, count_rows):
+                rows.append(DocumentBlock(
+                    block_id=f"docling:table:{table_index}:row:{r}:page:{refs[0].page_no}",
+                    kind="table_row",
+                    text=" | ".join(f"{headings[c]}: {grid[r, c]}" for c in range(count_cols)),
+                    provenance=(row_ref,),
+                ))
+        return tuple(rows)
+
     def parse(self, source_path: str, *, page_range: tuple[int, int] | None = None) -> NormalizedDocument:
         path = Path(source_path)
         if not path.is_file():
@@ -144,8 +196,15 @@ class DoclingDocumentParser:
                 block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
                 for block in blocks
             )
-            if exported.get("tables") or has_table_caption:
-                raise DocumentParseError("table extraction lacks verified cell provenance")
+            table_rows = self._table_rows(exported)
+            table_pages = {ref.page_no for row in table_rows for ref in row.provenance}
+            if has_table_caption and any(
+                ref.page_no not in table_pages for block in blocks
+                if block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
+                for ref in block.provenance
+            ):
+                raise DocumentParseError("table caption lacks verified table rows")
+            blocks += table_rows
         except DocumentParseError:
             raise
         except Exception as exc:
