@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 3  # Bump when extraction or completeness checks change.
+CHECK_VERSION = 4  # Bump when extraction or completeness checks change.
 
 
 def ranges(start: int, end: int, chunk_size: int):
