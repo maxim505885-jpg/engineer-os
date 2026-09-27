@@ -11,6 +11,34 @@ from pathlib import Path
 CHECK_VERSION = 4  # Bump when extraction or completeness checks change.
 
 
+def reusable_output(output: Path, *, first: int, last: int, sha256: str,
+                    project_id: str, document_id: str) -> bool:
+    """Only reuse a complete, source-bound extraction for the exact page range."""
+    try:
+        data = json.loads(output.read_text(encoding="utf-8"))
+        if not isinstance(data, dict) or any((data.get(key) != value) for key, value in (
+            ("source_sha256", sha256.lower()), ("project_id", project_id),
+            ("document_id", document_id), ("page_start", first),
+            ("page_end", last), ("status", "UNCERTAINTY"),
+        )):
+            return False
+        blocks = data.get("blocks")
+        if not isinstance(blocks, list) or not blocks:
+            return False
+        for block in blocks:
+            if not isinstance(block, dict) or not isinstance(block.get("text"), str):
+                return False
+            refs = block.get("provenance")
+            if not isinstance(refs, list) or not refs or any(
+                not isinstance(ref, dict) or type(ref.get("page_no")) is not int
+                or not first <= ref["page_no"] <= last for ref in refs
+            ):
+                return False
+        return True
+    except (OSError, UnicodeError, ValueError, TypeError):
+        return False
+
+
 def ranges(start: int, end: int, chunk_size: int):
     if start < 1 or end < start or end - start + 1 > 20 or chunk_size < 1 or chunk_size > 5:
         raise ValueError("select at most 20 pages and chunks of 1–5 pages")
@@ -40,13 +68,23 @@ def main() -> int:
         output = args.output_dir / f"{stem}.json"
         audit = args.output_dir / f"{stem}.audit.json"
         if audit.exists():
-            prior = json.loads(audit.read_text(encoding="utf-8"))
+            try:
+                prior = json.loads(audit.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, ValueError):
+                print(f"BLOCK {stem}: existing audit is unreadable", file=sys.stderr)
+                return 2
+            if not isinstance(prior, dict):
+                print(f"BLOCK {stem}: existing audit is invalid", file=sys.stderr)
+                return 2
             if (prior.get("source_sha256") != args.sha256.lower()
                     or prior.get("document_id") != args.document_id
                     or prior.get("project_id") != args.project_id):
                 print(f"BLOCK {stem}: existing audit belongs to another source", file=sys.stderr)
                 return 2
-            if prior.get("exit_code") == 0 and prior.get("check_version") == CHECK_VERSION and output.exists():
+            if (prior.get("exit_code") == 0 and prior.get("check_version") == CHECK_VERSION
+                    and reusable_output(output, first=first, last=last,
+                        sha256=args.sha256, project_id=args.project_id,
+                        document_id=args.document_id)):
                 print(f"SKIP {stem}: already extracted; semantic review still required")
                 continue
         output.unlink(missing_ok=True)  # Never leave a prior successful extraction beside a new BLOCK.
