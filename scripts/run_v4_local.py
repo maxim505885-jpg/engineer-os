@@ -59,8 +59,10 @@ def main() -> int:
     summary_path = output_dir / "v4-extraction-summary.json"
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"SUMMARY: {summary_path}", flush=True)
-    print(f"STATUS: {summary['status']}", flush=True)
-    return 2 if blocked else 0
+    review = subprocess.run([sys.executable, str(Path(__file__).with_name("v4_extraction_review.py")),
+                             str(output_dir), "--pages", str(count)], text=True)
+    print(f"STATUS: {'BLOCK' if blocked or review.returncode else 'UNCERTAINTY'}", flush=True)
+    return 2 if blocked or review.returncode else 0
 
 
 if __name__ == "__main__":
