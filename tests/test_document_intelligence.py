@@ -135,6 +135,20 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaisesRegex(DocumentParseError, "missing cells"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
+    def test_bottom_title_stamp_is_excluded_without_blocking_real_table(self):
+        stamp = {"prov": [{"page_no": 16, "bbox": {
+            "l": 44, "t": 60, "r": 580, "b": 15, "coord_origin": "BOTTOMLEFT"}}],
+            "data": {"num_rows": 3, "num_cols": 7, "table_cells": [
+                {"text": label} for label in (
+                    "Изм.", "Кол.уч", "№ док. Лист", "Подп.", "Дата",
+                    "ОСК-ССК-22/0526-1", "Лист", "16") ]}}
+        source = self._source()
+        payload = {"texts": [{"text": "Body", "prov": [{"page_no": 16}]}],
+                   "tables": [stamp]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            result = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        self.assertEqual([b.text for b in result.blocks], ["Body"])
+
     def test_missing_source_is_rejected(self):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaises(DocumentParseError):
