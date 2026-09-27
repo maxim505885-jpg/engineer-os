@@ -28,6 +28,10 @@ class _FakeConverter:
 
 
 class DocumentIntelligenceTests(unittest.TestCase):
+    def test_unknown_table_mode_is_rejected(self):
+        with self.assertRaises(ValueError):
+            DoclingDocumentParser(table_mode="unknown")
+
     def _source(self):
         handle = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
         handle.write(b"synthetic engineering fixture")
