@@ -6,6 +6,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 
 SOURCE_SHA256 = "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916"
@@ -40,7 +41,14 @@ def main() -> int:
     finally:
         pdf.close()
     output_dir.mkdir(parents=True, exist_ok=True)
-    print(f"V4 SOURCE OK; PAGES={count}; serial chunks of 2 pages", flush=True)
+    log_path = output_dir / "v4-runner-progress.log"
+    def progress(message: str) -> None:
+        print(message, flush=True)
+        with log_path.open("a", encoding="utf-8") as log:
+            log.write(message + "\n")
+
+    progress("RUN START")
+    progress(f"V4 SOURCE OK; PAGES={count}; serial chunks of 2 pages")
     blocked = []
     for start, end in windows(count):
         command = [sys.executable, str(Path(__file__).with_name("local_docling_batch.py")),
@@ -48,20 +56,25 @@ def main() -> int:
                    "--chunk-size", "2", "--sha256", SOURCE_SHA256,
                    "--project-id", PROJECT_ID, "--document-id", DOCUMENT_ID,
                    "--output-dir", str(output_dir)]
-        result = subprocess.run(command, text=True)
-        if result.returncode:
+        try:
+            result = subprocess.run(command, text=True)
+            code = result.returncode
+        except Exception:
+            code = 2
+            progress(f"RUNNER ERROR {start}-{end}: {traceback.format_exc()}")
+        if code:
             blocked.append([start, end])
-        print(f"WINDOW {start}-{end}: {'BLOCK' if result.returncode else 'UNCERTAINTY'}", flush=True)
+        progress(f"WINDOW {start}-{end}: {'BLOCK' if code else 'UNCERTAINTY'}")
     summary = {"source_sha256": SOURCE_SHA256, "project_id": PROJECT_ID,
                "document_id": DOCUMENT_ID, "page_count": count,
                "blocked_windows": blocked, "status": "BLOCK" if blocked else "UNCERTAINTY",
                "note": "Extraction only; no evidence acceptance or final audit"}
     summary_path = output_dir / "v4-extraction-summary.json"
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"SUMMARY: {summary_path}", flush=True)
+    progress(f"SUMMARY: {summary_path}")
     review = subprocess.run([sys.executable, str(Path(__file__).with_name("v4_extraction_review.py")),
                              str(output_dir), "--pages", str(count)], text=True)
-    print(f"STATUS: {'BLOCK' if blocked or review.returncode else 'UNCERTAINTY'}", flush=True)
+    progress(f"STATUS: {'BLOCK' if blocked or review.returncode else 'UNCERTAINTY'}")
     return 2 if blocked or review.returncode else 0
 
 
