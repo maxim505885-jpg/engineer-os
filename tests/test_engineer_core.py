@@ -30,6 +30,13 @@ class EngineerCoreTests(unittest.TestCase):
             ["report-review", "normative-check", "calculation-review", "final-audit"],
         )
 
+    def test_requested_final_audit_still_runs_after_specialists(self):
+        task = EngineerTask(self.task.task_id, self.task.tz, self.task.materials,
+                            ("final_audit", "report", "normative"))
+        planned = EngineerCore().plan(task).planned
+        self.assertEqual([item.agent for item in planned],
+                         ["report-audit-agent", "normative-agent", "final-audit-agent"])
+
     def test_planned_specialists_receive_controlling_tz(self):
         state = EngineerCore().plan(self.task)
         self.assertTrue(all(item.tz == self.task.tz for item in state.planned))
@@ -213,6 +220,23 @@ class EngineerCoreTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             core.collect(state, [duplicate, duplicate])
+
+    def test_duplicate_agent_result_across_collect_calls_is_rejected(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        result = AgentResult("demo-001", "report-audit-agent", AgentStatus.UNCERTAINTY)
+        core.collect(state, [result])
+        with self.assertRaises(ValueError):
+            core.collect(state, [result])
+
+    def test_invalid_batch_does_not_partially_update_state(self):
+        core = EngineerCore()
+        state = core.plan(self.task)
+        valid = AgentResult("demo-001", "report-audit-agent", AgentStatus.UNCERTAINTY)
+        invalid = AgentResult("different-task", "normative-agent", AgentStatus.UNCERTAINTY)
+        with self.assertRaises(ValueError):
+            core.collect(state, [valid, invalid])
+        self.assertEqual(state.results, [])
 
     def test_codex_extracts_final_agent_message_item(self):
         message = {"params": {"item": {"type": "agentMessage", "text": "FINAL RESULT"}}}
