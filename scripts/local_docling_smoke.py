@@ -28,6 +28,7 @@ def main() -> int:
     parser.add_argument("--start", type=int, default=1)
     parser.add_argument("--end", type=int, default=1)
     parser.add_argument("--sha256", help="Expected source SHA-256")
+    parser.add_argument("--table-mode", choices=("accurate", "fast"), default="accurate")
     args = parser.parse_args()
     if args.start < 1 or args.end < args.start or args.end - args.start > 9:
         parser.error("use a page range of at most 10 pages")
@@ -41,11 +42,12 @@ def main() -> int:
     root_logger = logging.getLogger()
     root_logger.addHandler(monitor)
     try:
-        document = DoclingDocumentParser().parse(str(args.source), page_range=(args.start, args.end))
+        document = DoclingDocumentParser(table_mode=args.table_mode).parse(str(args.source), page_range=(args.start, args.end))
     finally:
         root_logger.removeHandler(monitor)
     pages = sorted({ref.page_no for block in document.blocks for ref in block.provenance})
     print("SHA256:", document.source_sha256)
+    print("TABLE_MODE:", args.table_mode)
     print("BLOCKS:", len(document.blocks))
     print("PAGES:", pages)
     print("KINDS:", dict(collections.Counter(block.kind for block in document.blocks)))
