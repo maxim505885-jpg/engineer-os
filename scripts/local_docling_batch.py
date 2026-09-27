@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+CHECK_VERSION = 2  # Bump when extraction or completeness checks change.
+
 
 def ranges(start: int, end: int, chunk_size: int):
     if start < 1 or end < start or end - start + 1 > 20 or chunk_size < 1 or chunk_size > 5:
@@ -44,15 +46,17 @@ def main() -> int:
                     or prior.get("project_id") != args.project_id):
                 print(f"BLOCK {stem}: existing audit belongs to another source", file=sys.stderr)
                 return 2
-            if prior.get("exit_code") == 0 and output.exists():
+            if prior.get("exit_code") == 0 and prior.get("check_version") == CHECK_VERSION and output.exists():
                 print(f"SKIP {stem}: already extracted; semantic review still required")
                 continue
+        output.unlink(missing_ok=True)  # Never leave a prior successful extraction beside a new BLOCK.
         command = [sys.executable, str(Path(__file__).with_name("local_docling_smoke.py")),
                    str(args.source), "--start", str(first), "--end", str(last),
                    "--sha256", args.sha256, "--project-id", args.project_id,
                    "--document-id", args.document_id, "--output-json", str(output)]
         result = subprocess.run(command, capture_output=True, text=True)
-        audit.write_text(json.dumps({"project_id": args.project_id, "document_id": args.document_id,
+        audit.write_text(json.dumps({"check_version": CHECK_VERSION,
+            "project_id": args.project_id, "document_id": args.document_id,
             "source_sha256": args.sha256.lower(), "page_start": first, "page_end": last,
             "exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr},
             ensure_ascii=False, indent=2), encoding="utf-8")
