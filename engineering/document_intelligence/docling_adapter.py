@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 from pathlib import Path
 from typing import Any, Callable
 
@@ -136,6 +137,15 @@ class DoclingDocumentParser:
             if not isinstance(exported, dict):
                 raise DocumentParseError("Docling export is not a mapping")
             blocks = self._normalize(exported)
+            # The generic text walker does not preserve table cell/page
+            # relationships. A table can also be silently omitted while its
+            # caption survives, so both signals must block the chunk.
+            has_table_caption = any(
+                block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
+                for block in blocks
+            )
+            if exported.get("tables") or has_table_caption:
+                raise DocumentParseError("table extraction lacks verified cell provenance")
         except DocumentParseError:
             raise
         except Exception as exc:
