@@ -12,6 +12,23 @@ from scripts.local_docling_batch import CHECK_VERSION, reusable_output
 from scripts.run_v4_local import DOCUMENT_ID, PROJECT_ID, SOURCE_SHA256
 
 
+def load_chunk(directory: Path, first: int, last: int) -> dict:
+    stem = f"pages-{first:04d}-{last:04d}"
+    audit = json.loads((directory / f"{stem}.audit.json").read_text(encoding="utf-8"))
+    if not isinstance(audit, dict) or any(audit.get(key) != value for key, value in (
+        ("source_sha256", SOURCE_SHA256), ("project_id", PROJECT_ID),
+        ("document_id", DOCUMENT_ID), ("page_start", first),
+        ("page_end", last), ("check_version", CHECK_VERSION),
+        ("exit_code", 0),
+    )):
+        raise ValueError("audit mismatch or failed extraction")
+    path = directory / f"{stem}.json"
+    if not reusable_output(path, first=first, last=last, sha256=SOURCE_SHA256,
+                           project_id=PROJECT_ID, document_id=DOCUMENT_ID):
+        raise ValueError("output invalid or missing")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def review(directory: Path, page_count: int) -> dict:
     if page_count < 1:
         raise ValueError("page count must be positive")
@@ -23,40 +40,33 @@ def review(directory: Path, page_count: int) -> dict:
     total_blocks = 0
     page_counts = {page: {"blocks": 0, "table_rows": 0} for page in range(1, page_count + 1)}
     blocked_pages = set()
+    isolated_pages = []
     for first in range(1, page_count + 1, 2):
         last = min(first + 1, page_count)
-        stem = f"pages-{first:04d}-{last:04d}"
-        audit_path = directory / f"{stem}.audit.json"
-        output_path = directory / f"{stem}.json"
         try:
-            audit = json.loads(audit_path.read_text(encoding="utf-8"))
-            if not isinstance(audit, dict) or any(audit.get(key) != value for key, value in (
-                ("source_sha256", SOURCE_SHA256), ("project_id", PROJECT_ID),
-                ("document_id", DOCUMENT_ID), ("page_start", first),
-                ("page_end", last), ("check_version", CHECK_VERSION),
-                ("exit_code", 0),
-            )):
-                raise ValueError("audit mismatch or failed extraction")
-            if not reusable_output(output_path, first=first, last=last,
-                    sha256=SOURCE_SHA256, project_id=PROJECT_ID, document_id=DOCUMENT_ID):
-                raise ValueError("output invalid or missing")
-            output = json.loads(output_path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, ValueError, TypeError) as exc:
-            blocked_chunks += 1
-            issues.append({"chunk": stem, "reason": str(exc)})
-            blocked_pages.update(range(first, last + 1))
-            continue
-        successful_chunks += 1
-        total_blocks += len(output["blocks"])
-        located = {ref["page_no"] for block in output["blocks"]
-                   for ref in block["provenance"]}
-        present_pages.update(located)
-        missing_provenance_pages.update(set(range(first, last + 1)) - located)
-        for block in output["blocks"]:
-            for page in {ref["page_no"] for ref in block["provenance"]}:
-                page_counts[page]["blocks"] += 1
-                if block.get("kind") == "table_row":
-                    page_counts[page]["table_rows"] += 1
+            chunks = [(first, last, load_chunk(directory, first, last))]
+        except (OSError, UnicodeError, ValueError, TypeError):
+            chunks = []
+            for page in range(first, last + 1):
+                try:
+                    chunks.append((page, page, load_chunk(directory, page, page)))
+                    isolated_pages.append(page)
+                except (OSError, UnicodeError, ValueError, TypeError) as exc:
+                    blocked_chunks += 1
+                    blocked_pages.add(page)
+                    issues.append({"chunk": f"pages-{page:04d}-{page:04d}", "reason": str(exc)})
+        for chunk_first, chunk_last, output in chunks:
+            successful_chunks += 1
+            total_blocks += len(output["blocks"])
+            located = {ref["page_no"] for block in output["blocks"]
+                       for ref in block["provenance"]}
+            present_pages.update(located)
+            missing_provenance_pages.update(set(range(chunk_first, chunk_last + 1)) - located)
+            for block in output["blocks"]:
+                for page in {ref["page_no"] for ref in block["provenance"]}:
+                    page_counts[page]["blocks"] += 1
+                    if block.get("kind") == "table_row":
+                        page_counts[page]["table_rows"] += 1
     queue = []
     for page, counts in page_counts.items():
         if page in blocked_pages:
@@ -75,6 +85,7 @@ def review(directory: Path, page_count: int) -> dict:
         "successful_chunks": successful_chunks, "blocked_chunks": blocked_chunks,
         "blocks": total_blocks, "pages_with_extracted_blocks": len(present_pages),
         "pages_without_extracted_blocks": sorted(missing_provenance_pages),
+        "isolated_pages": isolated_pages,
         "review_queue": queue,
         "issues": issues, "status": "BLOCK" if blocked_chunks else "UNCERTAINTY",
         "note": "Extraction inventory only; pages and engineering conclusions require review",
