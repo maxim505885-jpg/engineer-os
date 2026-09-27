@@ -70,6 +70,20 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaises(DocumentParseError):
                 parser.parse(source)
 
+    def test_unlocated_nested_text_is_not_emitted_as_evidence_block(self):
+        source = self._source()
+        payload = {"texts": [{"text": "Located", "prov": [{"page_no": 2}]},
+                             {"text": "Unlocated table cell"}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            document = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        self.assertEqual([(b.text, b.provenance[0].page_no) for b in document.blocks], [("Located", 2)])
+
+    def test_only_unlocated_text_is_rejected(self):
+        source = self._source()
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaises(DocumentParseError):
+                DoclingDocumentParser(lambda: _FakeConverter({"texts": [{"text": "Unlocated"}]})).parse(source)
+
     def test_missing_source_is_rejected(self):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaises(DocumentParseError):
