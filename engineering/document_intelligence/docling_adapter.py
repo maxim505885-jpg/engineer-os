@@ -93,7 +93,9 @@ class DoclingDocumentParser:
                         if ref is not None
                     ) if isinstance(raw_prov, (list, tuple)) else ()
                     key = (kind, text.strip(), refs)
-                    if key not in seen:
+                    # Nested table cells and duplicated export fields may have no
+                    # page provenance. They cannot serve as evidence blocks.
+                    if refs and key not in seen:
                         seen.add(key)
                         blocks.append(
                             DocumentBlock(
