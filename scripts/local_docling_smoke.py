@@ -20,6 +20,7 @@ def main() -> int:
     if args.start < 1 or args.end < args.start or args.end - args.start > 9:
         parser.error("use a page range of at most 10 pages")
 
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     os.environ["ENGINEER_OS_DOCUMENT_INTELLIGENCE"] = "true"
     from engineering.document_intelligence.docling_adapter import DoclingDocumentParser
 
