@@ -139,11 +139,17 @@ class EngineerCore:
 
         expected_coverage = expected - {CHECK_REGISTRY["final_audit"][0]}
         covered = set(final_audit.checked_agents)
-        if covered != expected_coverage:
+        if (covered != expected_coverage
+                or len(final_audit.checked_agents) != len(expected_coverage)):
             return AgentStatus.UNCERTAINTY
 
-        if self.acceptance_gate is None or not self.acceptance_gate(state):
+        if self.acceptance_gate is None:
             return AgentStatus.UNCERTAINTY
+        try:
+            if self.acceptance_gate(state) is not True:
+                return AgentStatus.UNCERTAINTY
+        except Exception:
+            return AgentStatus.BLOCK
 
         return AgentStatus.ACCEPTED
 
@@ -160,7 +166,9 @@ class EngineerCore:
             AgentStatus.PASS,
             AgentStatus.ACCEPTED,
             AgentStatus.ACCEPTED_ALTERNATIVE,
-        } and not result.evidence_ids:
+        } and (not result.evidence_ids or any(
+            not isinstance(item, str) or not item.strip() for item in result.evidence_ids
+        )):
             raise ValueError(
                 f"{result.agent} returned {result.status.value} without evidence_ids"
             )
@@ -183,7 +191,11 @@ class EngineerCore:
             AgentStatus.PASS,
             AgentStatus.ACCEPTED,
             AgentStatus.ACCEPTED_ALTERNATIVE,
-        } and required_basis and not result.acceptance_basis.get(required_basis):
+        } and required_basis and (
+            not result.acceptance_basis.get(required_basis)
+            or any(not isinstance(item, str) or not item.strip()
+                   for item in result.acceptance_basis[required_basis])
+        ):
             raise ValueError(
                 f"{result.agent} returned an accepting status without {required_basis} proof"
             )
