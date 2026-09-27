@@ -39,6 +39,14 @@ class EvidenceBridgeTests(unittest.TestCase):
             evidence_candidates(right)[0].evidence_id,
         )
 
+    def test_chunk_local_block_number_does_not_change_evidence_identity(self):
+        first = DocumentBlock("docling:4", "text", "Один фрагмент", (PageRef(15),))
+        second = DocumentBlock("docling:19", "text", "Один фрагмент", (PageRef(15),))
+        left = NormalizedDocument("v4.pdf", "docling", (first,), "a" * 64)
+        right = NormalizedDocument("v4.pdf", "docling", (second,), "a" * 64)
+        self.assertEqual(evidence_candidates(left)[0].evidence_id,
+                         evidence_candidates(right)[0].evidence_id)
+
 
 if __name__ == "__main__":
     unittest.main()
