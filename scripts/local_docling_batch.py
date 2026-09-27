@@ -105,7 +105,25 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     blocked = False
     for first, last in planned:
-        result = run_chunk(args, first, last)
+        result = None
+        if first < last:
+            parent = args.output_dir / f"pages-{first:04d}-{last:04d}.audit.json"
+            children = [args.output_dir / f"pages-{page:04d}-{page:04d}.audit.json"
+                        for page in range(first, last + 1)]
+            if parent.is_file() and all(child.is_file() for child in children):
+                try:
+                    prior = json.loads(parent.read_text(encoding="utf-8"))
+                    if (isinstance(prior, dict) and prior.get("exit_code") != 0
+                            and prior.get("check_version") == CHECK_VERSION
+                            and prior.get("source_sha256") == args.sha256.lower()
+                            and prior.get("document_id") == args.document_id
+                            and prior.get("project_id") == args.project_id):
+                        result = 2
+                        print(f"SKIP pages-{first:04d}-{last:04d}: already isolated")
+                except (OSError, UnicodeError, ValueError):
+                    pass
+        if result is None:
+            result = run_chunk(args, first, last)
         if result and first < last:
             print(f"ISOLATE {first}-{last}: checking each page separately")
             for page in range(first, last + 1):
