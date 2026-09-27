@@ -88,6 +88,20 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaises(DocumentParseError):
                 DoclingDocumentParser(lambda: _FakeConverter({"texts": [{"text": "Unlocated"}]})).parse(source)
 
+    def test_table_caption_without_verified_cells_blocks_chunk(self):
+        source = self._source()
+        payload = {"texts": [{"label": "caption", "text": "Табл. П.2.1.", "prov": [{"page_no": 15}]}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "table"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
+    def test_exported_table_without_cell_provenance_blocks_chunk(self):
+        source = self._source()
+        payload = {"texts": [{"text": "Text", "prov": [{"page_no": 15}]}], "tables": [{"data": {"table_cells": []}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "table"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
     def test_missing_source_is_rejected(self):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaises(DocumentParseError):
