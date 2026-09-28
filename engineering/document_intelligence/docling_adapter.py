@@ -180,18 +180,24 @@ class DoclingDocumentParser:
             grid: dict[tuple[int, int], str] = {}
             for cell in cells:
                 if not isinstance(cell, dict):
-                    raise DocumentParseError("table cell is invalid")
+                    raise DocumentParseError(f"table page {row_ref.page_no} table {table_index} invalid cell")
                 r, c = cell.get("start_row_offset_idx"), cell.get("start_col_offset_idx")
                 if (not isinstance(r, int) or not isinstance(c, int)
-                        or r < 0 or r >= count_rows or c < 0 or c >= count_cols
-                        or cell.get("end_row_offset_idx") != r + 1
-                        or cell.get("end_col_offset_idx") != c + 1
-                        or (r, c) in grid or not isinstance(cell.get("text"), str)
-                        or not cell["text"].strip()):
-                    raise DocumentParseError("table cell is missing, merged or ambiguous")
+                        or r < 0 or r >= count_rows or c < 0 or c >= count_cols):
+                    raise DocumentParseError(f"table page {row_ref.page_no} table {table_index} invalid cell coordinates")
+                location = f"table page {row_ref.page_no} table {table_index}"
+                if cell.get("end_row_offset_idx") != r + 1 or cell.get("end_col_offset_idx") != c + 1:
+                    raise DocumentParseError(f"{location} merged cell row {r} col {c}")
+                if (r, c) in grid:
+                    raise DocumentParseError(f"{location} duplicate cell row {r} col {c}")
+                if not isinstance(cell.get("text"), str) or not cell["text"].strip():
+                    raise DocumentParseError(f"{location} empty cell row {r} col {c}")
                 grid[r, c] = cell["text"].strip()
             if len(grid) != count_rows * count_cols:
-                raise DocumentParseError("table grid has missing cells")
+                raise DocumentParseError(
+                    f"table page {row_ref.page_no} table {table_index} grid has missing cells "
+                    f"({count_rows * count_cols - len(grid)} missing of {count_rows * count_cols})"
+                )
             headings = [grid[0, c] for c in range(count_cols)]
             for r in range(1, count_rows):
                 rows.append(DocumentBlock(
