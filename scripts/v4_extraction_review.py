@@ -12,6 +12,32 @@ from scripts.local_docling_batch import CHECK_VERSION, reusable_output
 from scripts.run_v4_local import DOCUMENT_ID, PROJECT_ID, SOURCE_SHA256
 
 
+def blocked_reason(directory: Path, page: int) -> str:
+    """Classify a failed page from its source-bound audit without changing its status."""
+    try:
+        data = json.loads((directory / f"pages-{page:04d}-{page:04d}.audit.json").read_text(encoding="utf-8"))
+        if (not isinstance(data, dict) or data.get("source_sha256") != SOURCE_SHA256
+                or data.get("project_id") != PROJECT_ID or data.get("document_id") != DOCUMENT_ID
+                or data.get("page_start") != page or data.get("page_end") != page):
+            return "AUDIT_MISSING_OR_INVALID"
+        error = data.get("stderr", "")
+        if not isinstance(error, str):
+            return "AUDIT_MISSING_OR_INVALID"
+    except (OSError, UnicodeError, ValueError):
+        return "AUDIT_MISSING_OR_INVALID"
+    if "merged cell" in error:
+        return "MERGED_TABLE_CELL"
+    if "grid has missing cells" in error:
+        return "MISSING_TABLE_CELLS"
+    if "empty cell" in error:
+        return "EMPTY_TABLE_CELL"
+    if "dropped table cells" in error:
+        return "DROPPED_TABLE_CELLS"
+    if "table cell is missing, merged or ambiguous" in error:
+        return "AMBIGUOUS_TABLE_CELL_OLD_AUDIT"
+    return "OTHER_EXTRACTION_FAILURE"
+
+
 def load_chunk(directory: Path, first: int, last: int) -> dict:
     stem = f"pages-{first:04d}-{last:04d}"
     audit = json.loads((directory / f"{stem}.audit.json").read_text(encoding="utf-8"))
@@ -40,6 +66,7 @@ def review(directory: Path, page_count: int) -> dict:
     total_blocks = 0
     page_counts = {page: {"blocks": 0, "table_rows": 0} for page in range(1, page_count + 1)}
     blocked_pages = set()
+    blocked_reasons: dict[str, list[int]] = {}
     isolated_pages = []
     for first in range(1, page_count + 1, 2):
         last = min(first + 1, page_count)
@@ -54,7 +81,9 @@ def review(directory: Path, page_count: int) -> dict:
                 except (OSError, UnicodeError, ValueError, TypeError) as exc:
                     blocked_chunks += 1
                     blocked_pages.add(page)
-                    issues.append({"chunk": f"pages-{page:04d}-{page:04d}", "reason": str(exc)})
+                    reason = blocked_reason(directory, page)
+                    blocked_reasons.setdefault(reason, []).append(page)
+                    issues.append({"chunk": f"pages-{page:04d}-{page:04d}", "reason": str(exc), "category": reason})
         for chunk_first, chunk_last, output in chunks:
             successful_chunks += 1
             total_blocks += len(output["blocks"])
@@ -86,6 +115,7 @@ def review(directory: Path, page_count: int) -> dict:
         "blocks": total_blocks, "pages_with_extracted_blocks": len(present_pages),
         "pages_without_extracted_blocks": sorted(missing_provenance_pages),
         "isolated_pages": isolated_pages,
+        "blocked_reasons": blocked_reasons,
         "review_queue": queue,
         "issues": issues, "status": "BLOCK" if blocked_chunks else "UNCERTAINTY",
         "note": "Extraction inventory only; pages and engineering conclusions require review",
@@ -105,6 +135,7 @@ def main() -> int:
     print(f"REVIEW: {path}")
     print(f"CHUNKS: {result['successful_chunks']} passed, {result['blocked_chunks']} blocked")
     print(f"PAGES_WITH_BLOCKS: {result['pages_with_extracted_blocks']}/{result['page_count']}")
+    print("BLOCKED_REASONS:", {reason: len(pages) for reason, pages in result["blocked_reasons"].items()})
     print(f"STATUS: {result['status']}")
     return 2 if result["blocked_chunks"] else 0
 
