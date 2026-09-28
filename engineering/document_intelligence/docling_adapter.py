@@ -126,7 +126,7 @@ class DoclingDocumentParser:
         prov = table.get("prov") or []
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
-                or data.get("num_rows") != 3 or data.get("num_cols") != 7):
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -135,13 +135,19 @@ class DoclingDocumentParser:
                 or not 0 <= bbox["b"] < bbox["t"] <= 80):
             return False
         cells = data.get("table_cells")
-        if not isinstance(cells, list) or not 7 <= len(cells) <= 12:
+        one_row = data.get("num_rows") == 1
+        if not isinstance(cells, list) or not (len(cells) == 6 if one_row else 7 <= len(cells) <= 12):
             return False
         values = [c.get("text", "").strip() for c in cells if isinstance(c, dict)]
         if len(values) != len(cells):
             return False
         required = {"Изм.", "Кол.уч", "Подп.", "Дата", "Лист"}
         if not required.issubset(values):
+            return False
+        if one_row and (set(values) != required | {"№ док."} or
+                        {(c.get("start_row_offset_idx"), c.get("end_row_offset_idx"),
+                          c.get("start_col_offset_idx"), c.get("end_col_offset_idx"))
+                         for c in cells} != {(0, 1, col, col + 1) for col in range(6)}):
             return False
         allowed = required | {"№ док.", "№ док. Лист", "Лист №", "Пояснения"}
         return all(v in allowed or v.isdigit() or re.fullmatch(
