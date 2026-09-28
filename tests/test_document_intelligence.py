@@ -135,6 +135,18 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaisesRegex(DocumentParseError, "missing cells"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
+    def test_merged_figure_legend_identifies_page_and_cell_without_accepting_it(self):
+        source = self._source()
+        payload = {"texts": [{"text": "Рисунок Ж.9", "prov": [{"page_no": 500}]}],
+                   "tables": [{"prov": [{"page_no": 500}], "data": {
+                       "num_rows": 14, "num_cols": 3, "table_cells": [
+                           {"text": "Лист", "start_row_offset_idx": 11,
+                            "end_row_offset_idx": 12, "start_col_offset_idx": 0,
+                            "end_col_offset_idx": 3}]}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, r"page 500.*table 0.*merged.*row 11.*col 0"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
     def test_bottom_title_stamp_is_excluded_without_blocking_real_table(self):
         stamp = {"prov": [{"page_no": 16, "bbox": {
             "l": 44, "t": 60, "r": 580, "b": 15, "coord_origin": "BOTTOMLEFT"}}],
