@@ -35,9 +35,13 @@ async function loadProjects(){
 async function counts(){
   const p=state.projectId;if(!p)return {};
   const names=["documents","evidence","engineering_findings","engineering_tasks","engineering_measurements","structural_elements","technical_assignment_items"];
-  const out={};
-  for(const n of names){try{out[n]=(await db(n,{projectId:p,select:"id",limit:1000})).length}catch{out[n]=0}}
-  return out;
+  const values=await Promise.all(names.map(async n=>{
+    const {count,error}=await supabase.from(n).select("id",{count:"exact",head:true}).eq("project_id",p);
+    if(error)throw error;
+    if(!Number.isInteger(count))throw new Error(`Не удалось получить количество записей: ${n}`);
+    return count;
+  }));
+  return Object.fromEntries(names.map((name,index)=>[name,values[index]]));
 }
 
 const pageNames={dashboard:"Обзор",case:"Инженерный кейс",documents:"Документы",tasks:"Задачи",agents:"Агенты",calculations:"Расчёты",audit:"Аудит",pipeline:"Pipeline / v28 Recovery"};
@@ -197,6 +201,7 @@ async function runModelTest(){
 }
 
 async function runRecovery(){
+  if(!confirm("Запустить восстановление зависших задач проекта?"))return;
   const btn=$("#recoverBtn");btn.disabled=true;btn.textContent="Выполняется…";
   try{const {data,error}=await supabase.functions.invoke("autonomous-recovery-v28",{body:{stale_minutes:10}});if(error)throw error;toast(`Recovery: обнаружено ${data?.stale_detected??0}, восстановлено ${data?.recovered?.length??0}`);await renderPipeline();}
   catch(e){toast("Recovery error: "+e.message)}finally{btn.disabled=false;btn.textContent="Запустить recovery"}
