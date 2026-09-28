@@ -9,6 +9,18 @@ from scripts.v4_extraction_review import review
 
 
 class ExtractionReviewTests(unittest.TestCase):
+    def test_groups_blocked_pages_by_diagnostic_without_accepting_them(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            audit = {"source_sha256": SOURCE_SHA256, "project_id": PROJECT_ID,
+                     "document_id": DOCUMENT_ID, "page_start": 1, "page_end": 1,
+                     "check_version": CHECK_VERSION, "exit_code": 1,
+                     "stderr": "DocumentParseError: table page 1 table 0 merged cell row 11 col 0"}
+            (root / "pages-0001-0001.audit.json").write_text(json.dumps(audit))
+            result = review(root, 1)
+            self.assertEqual(result["status"], "BLOCK")
+            self.assertEqual(result["blocked_reasons"], {"MERGED_TABLE_CELL": [1]})
+
     def test_reports_missing_chunk_and_page_without_blocks(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
