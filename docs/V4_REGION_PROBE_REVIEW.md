@@ -1,6 +1,6 @@
 # V4 region probe: six blocked pages
 
-Reviewed 2026-09-29. Input: `v4-region-probe.zip`, containing six Docling page exports and a manifest, compared visually with previously supplied rendered page images. Manifest source SHA-256: `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`. All six JSON files have matching source hash, page range, and page-bound provenance; the manifest lists no failed conversions. This verifies the archive's internal identity only; the original PDF was not independently rehashed here.
+Reviewed 2026-09-29. Input: `v4-region-probe.zip`, containing six Docling page exports and a manifest, compared visually with previously supplied rendered page images. Manifest source SHA-256: `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`. All six JSON files have matching source hash, page range, and page-bound provenance; the manifest lists no failed conversions. The original PDF was subsequently obtained from the connected Google Drive, independently hashed to the same SHA-256 and confirmed to contain 534 pages. Its text layer and rendered pages corroborate the six page comparisons. This verifies source identity, not engineering correctness.
 
 | PDF page | Exported regions | Comparison with page image | Disposition |
 | ---: | --- | --- | --- |
@@ -12,5 +12,7 @@ Reviewed 2026-09-29. Input: `v4-region-probe.zip`, containing six Docling page e
 | 401 | One `12×4` table, 48/48 cells; 3 text blocks. | The same bottom-row stamp contamination occurs on another reinforcement comparison page. The image distinguishes red and green calculated values, but the JSON carries only plain text. | `BLOCK`: verify the edge row and colour-coded meaning against the page. |
 
 The two `DROPPED_TABLE_CELLS` cases at 397 and 401 demonstrate a grid that looks numerically complete while the contents are wrong. Pages 78 and 109 show a different failure: real cards with photographs span multiple table/text regions. Pages 57 and 58 have legitimate illustrated table captions without a verified body table. These are observed extraction defects, not findings about the engineering correctness of the underlying report.
+
+The parser previously emitted 11 `table_row` evidence blocks for each contaminated 397/401 table when given the probe cells directly. A targeted guard now raises `DocumentParseError` when a body table extends into the bottom stamp and contains the stamp labels `№ док.`, `Подп.`, and `Лист`. The guard was confirmed against both supplied JSON exports and a synthetic regression test. It prevents this particular false acceptance; it does not reconstruct the obscured row or resolve any existing `BLOCK`.
 
 The six pages remain in the original extraction review queue. Any parser change should be tested against these exact source-bound cases and retain `BLOCK` until table cells, text, images, colour distinctions, and page edge boundaries are verified. No automatic acceptance or engineering conclusion follows from this probe.
