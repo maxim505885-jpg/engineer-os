@@ -124,6 +124,19 @@ class DocumentIntelligenceTests(unittest.TestCase):
         self.assertIn("Значение: 0,50 кПа", rows[0].text)
         self.assertIn("Обоснование: СП 131", rows[0].text)
 
+    def test_numbered_continuation_has_no_header_on_current_page(self):
+        source = self._source()
+        cells = [{"text": value, "start_row_offset_idx": row,
+                  "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                  "end_col_offset_idx": col + 1}
+                 for row, values in enumerate((("6", "Load A"), ("7", "Load B")))
+                 for col, value in enumerate(values)]
+        payload = {"tables": [{"prov": [{"page_no": 254}], "data": {
+            "num_rows": 2, "num_cols": 2, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "continuation table requires verified header"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
     def test_incomplete_table_grid_is_blocked(self):
         source = self._source()
         payload = {"tables": [{"prov": [{"page_no": 15}], "data": {
