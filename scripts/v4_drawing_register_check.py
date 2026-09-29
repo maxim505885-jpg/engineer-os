@@ -21,12 +21,18 @@ def compare_rows(rows: list, claims: dict[str, str]) -> list[dict]:
     mismatches = []
     for locator, claimed in claims.items():
         figure = int(locator)
-        matches = [row[1] for row in rows if isinstance(row, list) and len(row) >= 2
+        matches = [row for row in rows if isinstance(row, list) and len(row) >= 2
                    and str(row[0]) == locator and isinstance(row[1], str)]
         if len(matches) != 1:
             mismatches.append({"figure": figure, "reason": f"SOURCE_ROW_COUNT_{len(matches)}"})
-        elif _normalized(claimed) != _normalized(matches[0]):
+        elif _normalized(claimed) != _normalized(matches[0][1]):
             mismatches.append({"figure": figure, "reason": "TEXT_MISMATCH"})
+        if len(matches) == 1 and len(matches[0]) >= 3 and str(matches[0][2] or "").strip():
+            mismatches.append({"figure": figure, "reason": "NONEMPTY_NOTE"})
+    for row in rows:
+        if (isinstance(row, list) and row and str(row[0]).isdigit()
+                and str(row[0]) not in claims):
+            mismatches.append({"figure": int(row[0]), "reason": "UNPLANNED_SOURCE_ROW"})
     return mismatches
 
 
