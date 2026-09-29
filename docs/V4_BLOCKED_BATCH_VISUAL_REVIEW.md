@@ -9,7 +9,7 @@ Input: `v4-blocked-pages.rar`, received 2026-09-29; seven embedded ZIP portions 
 
 Each embedded ZIP manifest names the same source SHA-256 and 534-page source. The portions contain 20, 20, 20, 20, 20, 20 and 5 PNGs. Their union is 125 distinct page numbers; it exactly equals the 137 pages listed under `blocked_reasons` in the extraction report minus the 12 pages in the earlier visual sample. There are no duplicate, missing, or extra page numbers in this union. The input is a container of ZIP portions, so a simple archive listing can expose only the last portion; inventory verification must enumerate all seven.
 
-The 125 supplied PNGs were inspected visually for **layout triage**. Together with the earlier sample, all 137 blocked page images have a visual route. This establishes neither correct extraction nor engineering validity. A PNG manifest's source hash is a claim about the PDF used to render it; the original PDF was not independently rehashed in this review.
+The 125 supplied PNGs were inspected visually for **layout triage**. Together with the earlier sample, all 137 blocked page images have a visual route. This establishes neither correct extraction nor engineering validity. The original PDF was subsequently obtained from the connected Google Drive and independently hashed to the same SHA-256; it contains 534 pages.
 
 ## Visual routes
 
