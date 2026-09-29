@@ -214,6 +214,11 @@ class DoclingDocumentParser:
                     f"table page {row_ref.page_no} table {table_index} grid has missing cells "
                     f"({count_rows * count_cols - len(grid)} missing of {count_rows * count_cols})"
                 )
+            if (count_cols == 2 and count_rows >= 2
+                    and grid[0, 0] == "Условный номер"
+                    and grid[1, 0] == "Степень значимости"):
+                raise DocumentParseError(
+                    f"table page {row_ref.page_no} table {table_index} defect card requires verified regions")
             headings = [grid[0, c] for c in range(count_cols)]
             for r in range(1, count_rows):
                 rows.append(DocumentBlock(
