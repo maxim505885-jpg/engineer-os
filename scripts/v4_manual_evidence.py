@@ -26,6 +26,8 @@ def validate(source: Path, review_path: Path, evidence: dict) -> dict:
         raise ValueError("manual evidence needs pages")
     seen_pages = set()
     count = 0
+    required_count = 0
+    missing_by_page = {}
     for entry in pages:
         if not isinstance(entry, dict) or not isinstance(entry.get("page"), int):
             raise ValueError("manual evidence page is invalid")
@@ -36,19 +38,29 @@ def validate(source: Path, review_path: Path, evidence: dict) -> dict:
         claims = entry.get("claims")
         if not isinstance(claims, list) or not claims:
             raise ValueError(f"page {page} has no claims")
+        required = entry.get("required_locators")
+        if (not isinstance(required, list) or not required
+                or any(not isinstance(item, str) or not item.strip() for item in required)
+                or len(set(required)) != len(required)):
+            raise ValueError(f"page {page} has invalid required locators")
+        required_count += len(required)
         locators = set()
         for claim in claims:
             if not isinstance(claim, dict):
                 raise ValueError("claim is invalid")
             locator, value = claim.get("locator"), claim.get("transcription")
             if (not isinstance(locator, str) or not locator.strip() or locator in locators
+                    or locator not in required
                     or claim.get("source") != "rendered_pdf" or not isinstance(value, str)
                     or (not value.strip() and claim.get("observed_blank") is not True)
                     or (value.strip() and claim.get("observed_blank") is True)):
                 raise ValueError(f"page {page} has invalid or duplicate claim")
             locators.add(locator)
             count += 1
-    return {"pages": len(seen_pages), "claims": count, "status": "BLOCK"}
+        missing_by_page[str(page)] = [item for item in required if item not in locators]
+    return {"pages": len(seen_pages), "claims": count, "required": required_count,
+            "missing": required_count - count, "status": "BLOCK",
+            "missing_by_page": missing_by_page}
 
 
 def main() -> int:
