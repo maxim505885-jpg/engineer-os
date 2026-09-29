@@ -1,0 +1,471 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "parser": "manual_register_verified_by_pdf_table_cells",
+  "page_start": 490,
+  "page_end": 491,
+  "status": "BLOCK",
+  "region_status": "UNCERTAINTY",
+  "scope": "drawing register text only; other page regions and drawings remain blocked",
+  "blocks": [
+    {
+      "block_id": "manual:register:490:register_heading",
+      "kind": "section_heading",
+      "text": "Приложение Ж. Графические материалы обследования. Ведомость чертежей",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:category_heading",
+      "kind": "section_heading",
+      "text": "Обмерные чертежи. Схемы дефектов и повреждений. Результаты инструментальных исследований.",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:1",
+      "kind": "table_row",
+      "text": "Рисунок Ж.1. План подвала на отм. −4.200; План балок на отм. −0.450; План перекрытия на отм. −0.450",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:2",
+      "kind": "table_row",
+      "text": "Рисунок Ж.2. План 1-го этажа на отм. −0.200; План балок на отм. +5.000; План перекрытия на отм. +5.000",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:3",
+      "kind": "table_row",
+      "text": "Рисунок Ж.3. План 2-го этажа на отм. +5.400; План балок на отм. +9.200; План перекрытия на отм. +9.200",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:4",
+      "kind": "table_row",
+      "text": "Рисунок Ж.4. План 3-го этажа на отм. +9.600; План балок на отм. +13.400; План перекрытия на отм. +13.400",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:5",
+      "kind": "table_row",
+      "text": "Рисунок Ж.5. План 4-го этажа на отм. +14.100; План балок на отм. +17.600; План перекрытия на отм. +17.600",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:6",
+      "kind": "table_row",
+      "text": "Рисунок Ж.6. Металлические конструкции на отм. +13.600. План колонн на отм. +13.600; Схема расположения ферм и ригелей рам на отм. +17,340; Схема расположения прогонов на отм. +18,976; План стоек коробов вентшахт на отм. +18,976; План стоек парапетов",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:7",
+      "kind": "table_row",
+      "text": "Рисунок Ж.7. Разрезы 1-1, 2-2, 3-3, 4-4, 5-5, 6-6, 7-7, 8-8, 9-9, 10-10, 11-11, 12-12, 13-13, 14-14, 15-15, 16-16, 17-17, 18-18, 19-19, 20-20, Ведомость элементов, Техническая спецификация металлопроката",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:8",
+      "kind": "table_row",
+      "text": "Рисунок Ж.8. Геометрические схемы стропильных ферм",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:9",
+      "kind": "table_row",
+      "text": "Рисунок Ж.9. План 5-го этажа на отм. +18.000; План балок на отм. +21.800; План перекрытия на отм. +21.800",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:10",
+      "kind": "table_row",
+      "text": "Рисунок Ж.10. План 6-го этажа на отм. +22.200; План балок на отм. +26.000; План перекрытия на отм. +26.000",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:11",
+      "kind": "table_row",
+      "text": "Рисунок Ж.11. План 7-го этажа на отм. +26.400; План балок на отм. +30.200; План перекрытия на отм. +30.200",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:12",
+      "kind": "table_row",
+      "text": "Рисунок Ж.12. План 8-го этажа на отм. +30.600; План балок на отм. +34.400; План перекрытия на отм. +34.400",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:13",
+      "kind": "table_row",
+      "text": "Рисунок Ж.13. План 9-го этажа на отм. +34.800; План балок на отм. +38.600; План перекрытия на отм. +38.600",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:14",
+      "kind": "table_row",
+      "text": "Рисунок Ж.14. План 10-го этажа на отм. +39.300; План балок на отм. +42.650; План перекрытия на отм. +42.650; План кровли на отм. +42.850; План кровли на отм. +45.750",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:15",
+      "kind": "table_row",
+      "text": "Рисунок Ж.15. Фасады в осях В-И, 16-14, И-Ж, 13-1",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:16",
+      "kind": "table_row",
+      "text": "Рисунок Ж.16. Фасады в осях Ж-В, 1-16",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:17",
+      "kind": "table_row",
+      "text": "Рисунок Ж.17. Фасады в осях Ж-В, 1-16",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:490:row:18",
+      "kind": "table_row",
+      "text": "Рисунок Ж.18. Разрез 1-1",
+      "provenance": [
+        {
+          "page_no": 490
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:category_heading",
+      "kind": "section_heading",
+      "text": "Результаты геодезических измерений",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:19",
+      "kind": "table_row",
+      "text": "Рисунок Ж.19. Разрезы 2-2, 3-3",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:20",
+      "kind": "table_row",
+      "text": "Рисунок Ж.20. Разрез 4-4",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:21",
+      "kind": "table_row",
+      "text": "Рисунок Ж.21. Разрез 5-5",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:22",
+      "kind": "table_row",
+      "text": "Рисунок Ж.22. Изополя высотных отметок пола подвала",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:23",
+      "kind": "table_row",
+      "text": "Рисунок Ж.23. Изополя высотных отметок перекрытия над подвалом",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:24",
+      "kind": "table_row",
+      "text": "Рисунок Ж.24. Изополя высотных отметок пола 1-го этажа на отм. -0.200",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:25",
+      "kind": "table_row",
+      "text": "Рисунок Ж.25. Изополя высотных отметок перекрытия 1-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:26",
+      "kind": "table_row",
+      "text": "Рисунок Ж.26. Изополя высотных отметок перекрытия 2-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:27",
+      "kind": "table_row",
+      "text": "Рисунок Ж.27. Изополя высотных отметок перекрытия 3-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:28",
+      "kind": "table_row",
+      "text": "Рисунок Ж.28. Изополя высотных отметок перекрытия 4-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:29",
+      "kind": "table_row",
+      "text": "Рисунок Ж.29. Изополя высотных отметок перекрытия 5-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:30",
+      "kind": "table_row",
+      "text": "Рисунок Ж.30. Изополя высотных отметок перекрытия 6-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:31",
+      "kind": "table_row",
+      "text": "Рисунок Ж.31. Изополя высотных отметок перекрытия 7-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:32",
+      "kind": "table_row",
+      "text": "Рисунок Ж.32. Изополя высотных отметок перекрытия 8-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:33",
+      "kind": "table_row",
+      "text": "Рисунок Ж.33. Изополя высотных отметок перекрытия 9-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:34",
+      "kind": "table_row",
+      "text": "Рисунок Ж.34. Изополя высотных отметок перекрытия 10-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:35",
+      "kind": "table_row",
+      "text": "Рисунок Ж.35. Плановая исполнительная съемка несущих конструкций подвала",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:36",
+      "kind": "table_row",
+      "text": "Рисунок Ж.36. Плановая исполнительная съемка несущих конструкций 1-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:37",
+      "kind": "table_row",
+      "text": "Рисунок Ж.37. Плановая исполнительная съемка несущих конструкций 2-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:38",
+      "kind": "table_row",
+      "text": "Рисунок Ж.38. Плановая исполнительная съемка несущих конструкций 3-го этажа",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:39",
+      "kind": "table_row",
+      "text": "Рисунок Ж.39. Плановая исполнительная съемка несущих конструкций 4-го, 5-го, 6-го, 7-го этажей",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:40",
+      "kind": "table_row",
+      "text": "Рисунок Ж.40. Плановая исполнительная съемка несущих конструкций 8-го, 9-го, 10-го этажей",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:41",
+      "kind": "table_row",
+      "text": "Рисунок Ж.41. Исполнительная съемка лифтовых шахт №1, №2",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:42",
+      "kind": "table_row",
+      "text": "Рисунок Ж.42. Исполнительная съемка лифтовых шахт №3, №4",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    },
+    {
+      "block_id": "manual:register:491:row:43",
+      "kind": "table_row",
+      "text": "Рисунок Ж.43. Исполнительная съемка лифтовых шахт №5, №6, №7",
+      "provenance": [
+        {
+          "page_no": 491
+        }
+      ]
+    }
+  ]
+}
