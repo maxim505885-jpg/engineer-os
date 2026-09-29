@@ -16,6 +16,12 @@ class DrawingRegisterCheckTests(unittest.TestCase):
                          [{"figure": 1, "reason": "SOURCE_ROW_COUNT_2"},
                           {"figure": 2, "reason": "SOURCE_ROW_COUNT_0"}])
 
+    def test_extra_numbered_row_or_nonempty_note_remains_blocked(self):
+        rows = [["1", "Рисунок Ж.1. A", "note"], ["2", "Рисунок Ж.2. B", ""]]
+        self.assertEqual(compare_rows(rows, {"1": "Рисунок Ж.1. A"}),
+                         [{"figure": 1, "reason": "NONEMPTY_NOTE"},
+                          {"figure": 2, "reason": "UNPLANNED_SOURCE_ROW"}])
+
 
 if __name__ == "__main__":
     unittest.main()
