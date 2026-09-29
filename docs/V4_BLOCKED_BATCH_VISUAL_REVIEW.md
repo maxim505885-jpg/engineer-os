@@ -13,6 +13,10 @@ The 125 supplied PNGs were inspected visually for **layout triage**. Together wi
 
 A separate read of the PDF's embedded text layer found text on 136 of these 137 blocked pages. Page 500 has no extractable text in that layer and is a drawing sheet in the rendered image; it needs image/drawing review. The presence of an embedded text layer on the other pages is not evidence that Docling preserved their tables, photographs, ordering, colours or formulas.
 
+### Page 500: drawing-only route
+
+The rendered sheet has four plan views arranged as two upper views and two lower views. It also has a defect/damage legend, a condition legend, coloured markers and a drawing title block. These are separate evidence regions: a parser's table detection in the legend or title block cannot stand in for the plan annotations. The text layer is empty, so no searchable text from this page is available as a cross-check. Keep the page `BLOCK` until the plan labels, axes, marked locations, legend keys and title block are read at sufficient resolution and linked to their exact source regions. This is a visual inventory, not a transcription of the drawing or a verified engineering finding.
+
 ## Visual routes
 
 | Pages and examples | Observed layout | Required comparison before resolving a block |
