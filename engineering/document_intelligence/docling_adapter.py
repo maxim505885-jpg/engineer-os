@@ -183,6 +183,16 @@ class DoclingDocumentParser:
             cells = data.get("table_cells")
             if not isinstance(cells, list):
                 raise DocumentParseError("table cells are missing")
+            bbox = provenance[0].get("bbox") if isinstance(provenance[0], dict) else None
+            if (isinstance(bbox, dict) and bbox.get("coord_origin") == "BOTTOMLEFT"
+                    and isinstance(bbox.get("b"), (int, float))
+                    and isinstance(bbox.get("t"), (int, float))
+                    and bbox["b"] <= 80 < bbox["t"]):
+                values = " ".join(cell.get("text", "") for cell in cells
+                                  if isinstance(cell, dict) and isinstance(cell.get("text"), str))
+                if "№ док." in values and "Подп." in values and "Лист" in values:
+                    raise DocumentParseError(
+                        f"table page {row_ref.page_no} table {table_index} footer stamp overlaps body table")
             grid: dict[tuple[int, int], str] = {}
             for cell in cells:
                 if not isinstance(cell, dict):
