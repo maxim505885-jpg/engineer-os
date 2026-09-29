@@ -1,0 +1,16 @@
+# V4 PDF page 254: full-page source review
+
+Source: `15.09.2026 ТЗК БЦ ул. Набережная 28А V4 сшито с графикой.pdf`, SHA-256 `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`, PDF page 254 of 534. Reviewed the rendered sheet, text layer, pages 253 and 255, the supplied Docling table export, and independent `pdfplumber` table extraction. This is a transcription and arithmetic check, not approval of the geotechnical calculation.
+
+| Region | Verification | Result |
+| --- | --- | --- |
+| Continuing load table at top | 14 rows, numbers 6–19, five columns. All 70 Docling cells match independent PDF table extraction. Actual five headings are on page 253. The sequence and source layout were checked visually. | Region recovered in `v4_load_continuation_253_254.json`; `UNCERTAINTY`. |
+| Loading 1 paragraph | Printed text says self-weight is considered automatically with load factor 1,1. The preceding page's row 1 gives factor 1. Their relationship in the model cannot be verified from this page. | Wording recorded; model check open. |
+| Loading 2 input table | Three rows: γ = 1,8 т/м³; φ = 14 degrees; c = 0,7 т/м². All 9 Docling cells match independent PDF extraction. Printed pressure height is 4,0 m. | Printed values verified, source of input data unverified. |
+| Active pressure coefficient | The equation shown in the rendered sheet uses φ, θ, δ, β. It states Kₐ = 0,547. The values of θ, δ, β and the substitution yielding 0,547 are not provided on this page. | Coefficient derivation unverified. |
+| Pressure arithmetic | Printed substitution: `0.547 × (1.8 × 1.15 × z) − 2 × 0.7 × √0.547`. At z = 4,0 m it gives 3,493727723… т/м², consistent with the printed 3,5 at one decimal place. At z = 3,4 m it gives 2,814353723… т/м², consistent with the printed 2,81 at two decimal places. The 1,15 factor matches loading 2 on page 253. | Arithmetic matches; the selection of z = 3,4 m is not explained on page 254. |
+| Remaining text and page frame | The page ends with the heading for loading 3; its floor-layer table begins on page 255. The bottom title stamp, page number 254 and side inventory/signature fields were visually checked and are separate from the load table. | Continuation boundary and frame identified, subsequent calculation not checked here. |
+
+The coefficient equation contains graphical/vector content. The PDF text layer and the two extracted tables alone cannot verify it. The full rendered sheet was checked for the regions above, including its formula and page frame. The arithmetic consistency does not establish that the input soil parameters, pressure coefficient, model load factor, or depths are justified.
+
+**Disposition:** page `UNCERTAINTY`; document `BLOCK`. Three open engineering checks are the derivation of Kₐ = 0,547, the basis for z = 3,4 m, and the apparent difference between the self-weight factor 1 on page 253 and 1,1 in the page 254 narrative. These require calculation/model or source-input evidence. No `PASS` or `ACCEPTED` follows from this review.
