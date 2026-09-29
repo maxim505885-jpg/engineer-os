@@ -11,6 +11,8 @@ Each embedded ZIP manifest names the same source SHA-256 and 534-page source. Th
 
 The 125 supplied PNGs were inspected visually for **layout triage**. Together with the earlier sample, all 137 blocked page images have a visual route. This establishes neither correct extraction nor engineering validity. The original PDF was subsequently obtained from the connected Google Drive and independently hashed to the same SHA-256; it contains 534 pages.
 
+A separate read of the PDF's embedded text layer found text on 136 of these 137 blocked pages. Page 500 has no extractable text in that layer and is a drawing sheet in the rendered image; it needs image/drawing review. The presence of an embedded text layer on the other pages is not evidence that Docling preserved their tables, photographs, ordering, colours or formulas.
+
 ## Visual routes
 
 | Pages and examples | Observed layout | Required comparison before resolving a block |
