@@ -219,6 +219,13 @@ class DoclingDocumentParser:
                     and grid[1, 0] == "Степень значимости"):
                 raise DocumentParseError(
                     f"table page {row_ref.page_no} table {table_index} defect card requires verified regions")
+            # A continued numbered table starts with data, so its first row
+            # cannot be used as the column headings for the remaining rows.
+            if (count_rows >= 2 and re.fullmatch(r"\d+", grid[0, 0])
+                    and re.fullmatch(r"\d+", grid[1, 0])
+                    and int(grid[1, 0]) == int(grid[0, 0]) + 1):
+                raise DocumentParseError(
+                    f"table page {row_ref.page_no} table {table_index} continuation table requires verified header")
             headings = [grid[0, c] for c in range(count_cols)]
             for r in range(1, count_rows):
                 rows.append(DocumentBlock(
