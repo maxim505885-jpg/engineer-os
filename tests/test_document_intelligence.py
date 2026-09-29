@@ -150,6 +150,21 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaisesRegex(DocumentParseError, "footer stamp overlaps body table"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
+    def test_defect_card_is_not_misread_as_header_and_data_rows(self):
+        source = self._source()
+        cells = [{"text": value, "start_row_offset_idx": row,
+                  "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                  "end_col_offset_idx": col + 1}
+                 for row, entries in enumerate((("Условный номер", "П 6"),
+                                                ("Степень значимости", "Значительный"),
+                                                ("Описание", "Трещины")))
+                 for col, value in enumerate(entries)]
+        payload = {"tables": [{"prov": [{"page_no": 78}], "data": {
+            "num_rows": 3, "num_cols": 2, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "defect card requires verified regions"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
     def test_merged_figure_legend_identifies_page_and_cell_without_accepting_it(self):
         source = self._source()
         payload = {"texts": [{"text": "Рисунок Ж.9", "prov": [{"page_no": 500}]}],
