@@ -1,0 +1,48 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "status": "BLOCK",
+  "pages": [
+    {
+      "page": 488,
+      "claims": [
+        {"locator": "extract_number", "transcription": "6150032997-20260806-1802", "source": "rendered_pdf"},
+        {"locator": "1.1", "transcription": "6150032997", "source": "rendered_pdf"},
+        {"locator": "1.2", "transcription": "Общество с ограниченной ответственностью «Строительно-производственное управление»", "source": "rendered_pdf"},
+        {"locator": "1.3", "transcription": "ООО «СПУ»", "source": "rendered_pdf"},
+        {"locator": "1.6", "transcription": "П-033-006150032997-0861", "source": "rendered_pdf"},
+        {"locator": "1.7", "transcription": "11.07.2017", "source": "rendered_pdf"},
+        {"locator": "1.8", "transcription": "", "observed_blank": true, "source": "rendered_pdf"},
+        {"locator": "2.1", "transcription": "Да, 11.07.2017", "source": "rendered_pdf"},
+        {"locator": "2.2", "transcription": "Да, 16.01.2023", "source": "rendered_pdf"},
+        {"locator": "2.3", "transcription": "Нет", "source": "rendered_pdf"}
+      ]
+    },
+    {
+      "page": 489,
+      "claims": [
+        {"locator": "3.1", "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)", "source": "rendered_pdf"},
+        {"locator": "3.2", "transcription": "", "observed_blank": true, "source": "rendered_pdf"},
+        {"locator": "4.1", "transcription": "26.07.2017", "source": "rendered_pdf"},
+        {"locator": "4.2", "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)", "source": "rendered_pdf"},
+        {"locator": "4.3", "transcription": "17.09.2025", "source": "rendered_pdf"},
+        {"locator": "4.4", "transcription": "", "observed_blank": true, "source": "rendered_pdf"}
+      ]
+    },
+    {
+      "page": 490,
+      "claims": [
+        {"locator": "register_heading", "transcription": "Приложение Ж. Графические материалы обследования. Ведомость чертежей", "source": "rendered_pdf"},
+        {"locator": "entry_numbers", "transcription": "1–18", "source": "rendered_pdf"},
+        {"locator": "9", "transcription": "Рисунок Ж.9. План 5-го этажа на отм. +18.000; План балок на отм. +21.800; План перекрытия на отм. +21.800", "source": "rendered_pdf"}
+      ]
+    },
+    {
+      "page": 491,
+      "claims": [
+        {"locator": "entry_numbers", "transcription": "19–43", "source": "rendered_pdf"},
+        {"locator": "category_heading", "transcription": "Результаты геодезических измерений", "source": "rendered_pdf"},
+        {"locator": "43", "transcription": "Рисунок Ж.43. Исполнительная съемка лифтовых шахт №5, №6, №7", "source": "rendered_pdf"}
+      ]
+    }
+  ]
+}
