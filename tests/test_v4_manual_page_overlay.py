@@ -22,10 +22,11 @@ class ManualPageOverlayTests(unittest.TestCase):
 
     def test_overlay_keeps_global_block_and_does_not_mutate_original(self):
         result = overlay(self.review, self.recovered, self.texts, expected_rows=2)
-        self.assertEqual(result["remaining_blocked_pages"], 1)
+        self.assertEqual(result["remaining_blocked_pages"], 3)
         self.assertEqual(result["manual_page_status"], {"490": "UNCERTAINTY",
                                                          "491": "UNCERTAINTY"})
         self.assertEqual(result["status"], "BLOCK")
+        self.assertEqual(result["remaining_manual_review_pages"], 1)
         self.assertEqual(self.review["blocked_reasons"]["MERGED_TABLE_CELL"], [490])
 
     def test_missing_page_shell_or_row_blocks_transition(self):
