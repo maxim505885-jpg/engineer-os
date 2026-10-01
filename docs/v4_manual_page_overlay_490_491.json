@@ -1,12 +1,13 @@
 {
   "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
   "original_blocked_pages": 137,
-  "remaining_blocked_pages": 135,
+  "remaining_blocked_pages": 137,
   "manual_page_status": {
     "490": "UNCERTAINTY",
     "491": "UNCERTAINTY"
   },
   "status": "BLOCK",
   "review_path": "docs/V4_PAGE_488_MANUAL_REVIEW.md",
-  "note": "Additive manual route; original Docling audits remain blocked and unchanged."
+  "note": "Additive manual route; original Docling audits remain blocked and unchanged.",
+  "remaining_manual_review_pages": 135
 }
