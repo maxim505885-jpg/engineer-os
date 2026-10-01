@@ -1,0 +1,2402 @@
+{
+  "status": "UNCERTAINTY",
+  "scope": "Targeted load-table arithmetic screening on PDF pages18–25 plus image review of cited mismatches; not full verification of 1013 calculation-book pages. Normative applicability and solver input/output not checked.",
+  "books": [
+    {
+      "source_name": "АГП-371_23-КР.РР1.pdf",
+      "source_sha256": "c48fd61a899c6f15b71f71851d570cf2fbaa47227d44553cfad38ac92664e80a",
+      "classification": "PROJECT",
+      "status": "UNCERTAINTY",
+      "tables": [
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            124.07999225000003,
+            569.759994375,
+            307.5599975
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Нормати\nв.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Топпинг Monopol\n=7 кг/м2; δ =7 мм",
+              "normative_kg_m2": "7",
+              "factor": "1.3",
+              "printed_design_kg_m2": "9.1",
+              "computed_design_kg_m2": "9.1",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Бетонная стяжка В15, армированная сеткой\n200х200 Вр-1 =2100 кг/м3; δ =50 мм",
+              "normative_kg_m2": "105",
+              "factor": "1.3",
+              "printed_design_kg_m2": "136.5",
+              "computed_design_kg_m2": "136.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Щебень М600 фр. 20-40 =1400 кг/м3; δ =50 мм",
+              "normative_kg_m2": "70",
+              "factor": "1.3",
+              "printed_design_kg_m2": "91",
+              "computed_design_kg_m2": "91.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Щебень М600 фр. 5-20 =1600 кг/м3; δ =93 мм",
+              "normative_kg_m2": "148.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "193.44",
+              "computed_design_kg_m2": "193.44",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            349.4399945,
+            569.759994375,
+            764.759990375
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка из натурального камня δ =80мм,\n=2600 кг/м3",
+              "normative_kg_m2": "208",
+              "factor": "1.1",
+              "printed_design_kg_m2": "228.8",
+              "computed_design_kg_m2": "228.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная смесь δ =160 мм, =2000\nкг/м3",
+              "normative_kg_m2": "320",
+              "factor": "1.3",
+              "printed_design_kg_m2": "416",
+              "computed_design_kg_m2": "416.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Проникающая гидроизололяция Пенетрон\n=1,1 кг/м2;",
+              "normative_kg_m2": "1.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.43",
+              "computed_design_kg_m2": "1.43",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Бетонная плита армированная сеткой 200х200\n=2500 кг/м3; δ =100 мм",
+              "normative_kg_m2": "250",
+              "factor": "1.1",
+              "printed_design_kg_m2": "275",
+              "computed_design_kg_m2": "275.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Геотекстиль иглопробивной =0,6 кг/м2;",
+              "normative_kg_m2": "0.6",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.78",
+              "computed_design_kg_m2": "0.78",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Техноэласт ЭПП =4,95 кг/м2; δ =2 мм",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "387",
+              "factor": "1.3",
+              "printed_design_kg_m2": "503",
+              "computed_design_kg_m2": "503.1",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "9",
+              "description": "Керамзитобетон М300 =1800 кг/м3; δ =300\nмм",
+              "normative_kg_m2": "540",
+              "factor": "1.3",
+              "printed_design_kg_m2": "702",
+              "computed_design_kg_m2": "702.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "10",
+              "description": "Утеплиnель экструзионный пенополистирол\nТехнониколь =30 кг/м3; δ =100 мм",
+              "normative_kg_m2": "3",
+              "factor": "1.2",
+              "printed_design_kg_m2": "3.6",
+              "computed_design_kg_m2": "3.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "11",
+              "description": "Унифлекс =4,95 кг/м2",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "12",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 20,
+          "printed_sheet": 19,
+          "bbox_pdf_top_left": [
+            68.11090844318181,
+            63.479995625000015,
+            569.8090865113637,
+            457.56000875
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка керамогранитная δ =10мм, =2400\nкг/м3",
+              "normative_kg_m2": "24",
+              "factor": "1.1",
+              "printed_design_kg_m2": "26.4",
+              "computed_design_kg_m2": "26.4",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Обмазочная гидроизоляция =5 кг/м2;",
+              "normative_kg_m2": "5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.5",
+              "computed_design_kg_m2": "6.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Уклонообразующая стяжка из цементно-\nпесчаного раствора М100, армированная\nметаллической сеткой 5ВрI ш.100х100мм.\n=1800 кг/м3; δ =120 мм",
+              "normative_kg_m2": "216",
+              "factor": "1.3",
+              "printed_design_kg_m2": "280.8",
+              "computed_design_kg_m2": "280.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Пеноплекс Основа =35 кг/м3; δ =50 мм",
+              "normative_kg_m2": "1.75",
+              "factor": "1.2",
+              "printed_design_kg_m2": "2.1",
+              "computed_design_kg_m2": "2.100",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Техноэласт ЭПП =4,95 кг/м2;",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.435",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.0005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "9",
+              "description": "Утеплиnель минераловатная плита\nТехнониколь =120 кг/м3; δ =50 мм",
+              "normative_kg_m2": "6",
+              "factor": "1.3",
+              "printed_design_kg_m2": "7.8",
+              "computed_design_kg_m2": "7.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "10",
+              "description": "Гидроветрозащитная мембрана =1,5 кг/м2",
+              "normative_kg_m2": "1.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.95",
+              "computed_design_kg_m2": "1.95",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "11",
+              "description": "Плитка керамогранитная δ =10мм, =2400\nкг/м3",
+              "normative_kg_m2": "24",
+              "factor": "1.1",
+              "printed_design_kg_m2": "26.4",
+              "computed_design_kg_m2": "26.4",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            77.27999675000001,
+            569.759994375,
+            427.04181445454543
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Террасная доска δ =20 мм, =600 кг/м3",
+              "normative_kg_m2": "12",
+              "factor": "1.3",
+              "printed_design_kg_m2": "15.6",
+              "computed_design_kg_m2": "15.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =250\nмм",
+              "normative_kg_m2": "75",
+              "factor": "1.3",
+              "printed_design_kg_m2": "97.5",
+              "computed_design_kg_m2": "97.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Утеплиnель экструзионный пенополистирол\n=30 кг/м3; δ =100 мм",
+              "normative_kg_m2": "3",
+              "factor": "1.2",
+              "printed_design_kg_m2": "3.6",
+              "computed_design_kg_m2": "3.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "9",
+              "description": "Пароизоляция Паробарьер =1 кг/м2",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            446.879993375,
+            569.759994375,
+            767.400005375
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =176\nмм",
+              "normative_kg_m2": "52.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "68.64",
+              "computed_design_kg_m2": "68.64",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Утеплиnель экструзионный пенополистирол\n=30 кг/м3; δ =150 мм",
+              "normative_kg_m2": "4.5",
+              "factor": "1.2",
+              "printed_design_kg_m2": "5.4",
+              "computed_design_kg_m2": "5.40",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Пароизоляция Паробарьер =1 кг/м2",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            84.239995625,
+            569.759994375,
+            233.75999037500006
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Керамогранитная плитка, толщиной δ =20мм,\n=2400 кг/м3",
+              "normative_kg_m2": "48",
+              "factor": "1.1",
+              "printed_design_kg_m2": "52.8",
+              "computed_design_kg_m2": "52.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Железобетонная ступень 1250х300х150(h),\n=2500 кг/м3",
+              "normative_kg_m2": "187.5",
+              "factor": "1.1",
+              "printed_design_kg_m2": "206.25",
+              "computed_design_kg_m2": "206.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            303.240001625,
+            569.759994375,
+            596.15999975
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонный блок D500, δ=100 мм, =500\nкг/м3",
+              "normative_kg_m2": "50.0",
+              "factor": "1.3",
+              "printed_design_kg_m2": "65.0",
+              "computed_design_kg_m2": "65.00",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            637.919994125,
+            569.759994375,
+            761.5199851250001
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            274.79999150000003,
+            569.759994375,
+            509.75999037500003
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        }
+      ],
+      "density_thickness_discrepancies": [
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            349.4399945,
+            569.759994375,
+            764.759990375
+          ],
+          "row_label": "8",
+          "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+          "printed_normative_kg_m2": "387",
+          "density_kg_m3": "1800",
+          "thickness_mm": "50",
+          "computed_normative_kg_m2": "90",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            637.919994125,
+            569.759994375,
+            761.5199851250001
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            274.79999150000003,
+            569.759994375,
+            509.75999037500003
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        }
+      ],
+      "source_page_count": 429,
+      "checked_rows": 58,
+      "product_mismatches": 0,
+      "soil_pressure_check": {
+        "pdf_page": 18,
+        "printed_sheet": 17,
+        "printed_factor": 1.0,
+        "factor_in_load_table_page_17": 1.152,
+        "printed_result_t_m2": 4.3,
+        "computed_for_printed_substitution_t_m2": 3.592187723122368,
+        "computed_with_table_factor_t_m2": 4.295585963122367,
+        "status": "ERROR",
+        "scope": "Printed equation arithmetic only; actual solver load is unverified."
+      }
+    },
+    {
+      "source_name": "АГП-371_23-КР.РР2.pdf",
+      "source_sha256": "c149c0d5446ddf136fd450de44b14de73c2f0312bf69eac4aebbf63bd793edc4",
+      "classification": "PROJECT",
+      "status": "UNCERTAINTY",
+      "tables": [
+        {
+          "pdf_page": 18,
+          "printed_sheet": 17,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            478.43998325,
+            569.4299925937501,
+            661.919994125
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Нормати\nв.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Топпинг Monopol\n=7 кг/м2; δ =7 мм",
+              "normative_kg_m2": "7",
+              "factor": "1.3",
+              "printed_design_kg_m2": "9.1",
+              "computed_design_kg_m2": "9.1",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Бетонная стяжка В15, армированная сеткой\n200х200 Вр-1 =2100 кг/м3; δ =50 мм",
+              "normative_kg_m2": "105",
+              "factor": "1.3",
+              "printed_design_kg_m2": "136.5",
+              "computed_design_kg_m2": "136.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Щебень М600 фр. 20-40 =1400 кг/м3; δ =50 мм",
+              "normative_kg_m2": "70",
+              "factor": "1.3",
+              "printed_design_kg_m2": "91",
+              "computed_design_kg_m2": "91.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Щебень М600 фр. 5-20 =1600 кг/м3; δ =93 мм",
+              "normative_kg_m2": "148.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "193.44",
+              "computed_design_kg_m2": "193.44",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            63.479995625000015,
+            569.759994375,
+            478.79999150000003
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка из натурального камня δ =80мм,\n=2600 кг/м3",
+              "normative_kg_m2": "208",
+              "factor": "1.1",
+              "printed_design_kg_m2": "228.8",
+              "computed_design_kg_m2": "228.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная смесь δ =160 мм, =2000\nкг/м3",
+              "normative_kg_m2": "320",
+              "factor": "1.3",
+              "printed_design_kg_m2": "416",
+              "computed_design_kg_m2": "416.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Проникающая гидроизололяция Пенетрон\n=1,1 кг/м2;",
+              "normative_kg_m2": "1.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.43",
+              "computed_design_kg_m2": "1.43",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Бетонная плита армированная сеткой 200х200\n=2500 кг/м3; δ =100 мм",
+              "normative_kg_m2": "250",
+              "factor": "1.1",
+              "printed_design_kg_m2": "275",
+              "computed_design_kg_m2": "275.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Геотекстиль иглопробивной =0,6 кг/м2;",
+              "normative_kg_m2": "0.6",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.78",
+              "computed_design_kg_m2": "0.78",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Техноэласт ЭПП =4,95 кг/м2; δ =2 мм",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "387",
+              "factor": "1.3",
+              "printed_design_kg_m2": "503",
+              "computed_design_kg_m2": "503.1",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "9",
+              "description": "Керамзитобетон М300 =1800 кг/м3; δ =300\nмм",
+              "normative_kg_m2": "540",
+              "factor": "1.3",
+              "printed_design_kg_m2": "702",
+              "computed_design_kg_m2": "702.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "10",
+              "description": "Утеплиnель экструзионный пенополистирол\nТехнониколь =30 кг/м3; δ =100 мм",
+              "normative_kg_m2": "3",
+              "factor": "1.2",
+              "printed_design_kg_m2": "3.6",
+              "computed_design_kg_m2": "3.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "11",
+              "description": "Унифлекс =4,95 кг/м2",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "12",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            500.03999675,
+            569.759994375,
+            754.82999778125
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка керамогранитная δ =10мм, =2400\nкг/м3",
+              "normative_kg_m2": "24",
+              "factor": "1.1",
+              "printed_design_kg_m2": "26.4",
+              "computed_design_kg_m2": "26.4",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Обмазочная гидроизоляция =5 кг/м2;",
+              "normative_kg_m2": "5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.5",
+              "computed_design_kg_m2": "6.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Уклонообразующая стяжка из цементно-\nпесчаного раствора М100, армированная\nметаллической сеткой 5ВрI ш.100х100мм.\n=1800 кг/м3; δ =120 мм",
+              "normative_kg_m2": "216",
+              "factor": "1.3",
+              "printed_design_kg_m2": "280.8",
+              "computed_design_kg_m2": "280.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Пеноплекс Основа =35 кг/м3; δ =50 мм",
+              "normative_kg_m2": "1.75",
+              "factor": "1.2",
+              "printed_design_kg_m2": "2.1",
+              "computed_design_kg_m2": "2.100",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Техноэласт ЭПП =4,95 кг/м2;",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.435",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.0005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 20,
+          "printed_sheet": 19,
+          "bbox_pdf_top_left": [
+            68.1085708392857,
+            515.640010625,
+            569.8114242321428,
+            752.58000340625
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Террасная доска δ =20 мм, =600 кг/м3",
+              "normative_kg_m2": "12",
+              "factor": "1.3",
+              "printed_design_kg_m2": "15.6",
+              "computed_design_kg_m2": "15.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =250\nмм",
+              "normative_kg_m2": "75",
+              "factor": "1.3",
+              "printed_design_kg_m2": "97.5",
+              "computed_design_kg_m2": "97.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            176.51999075000003,
+            569.759994375,
+            497.03999675000006
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =176\nмм",
+              "normative_kg_m2": "52.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "68.64",
+              "computed_design_kg_m2": "68.64",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Утеплиnель экструзионный пенополистирол\n=30 кг/м3; δ =150 мм",
+              "normative_kg_m2": "4.5",
+              "factor": "1.2",
+              "printed_design_kg_m2": "5.4",
+              "computed_design_kg_m2": "5.40",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Пароизоляция Паробарьер =1 кг/м2",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            538.919994125,
+            569.759994375,
+            688.4399832500001
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Керамогранитная плитка, толщиной δ =20мм,\n=2400 кг/м3",
+              "normative_kg_m2": "48",
+              "factor": "1.1",
+              "printed_design_kg_m2": "52.8",
+              "computed_design_kg_m2": "52.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Железобетонная ступень 1250х300х150(h),\n=2500 кг/м3",
+              "normative_kg_m2": "187.5",
+              "factor": "1.1",
+              "printed_design_kg_m2": "206.25",
+              "computed_design_kg_m2": "206.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            87.59999825,
+            569.759994375,
+            380.51999675
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонный блок D500, δ=100 мм, =500\nкг/м3",
+              "normative_kg_m2": "50.0",
+              "factor": "1.3",
+              "printed_design_kg_m2": "65.0",
+              "computed_design_kg_m2": "65.00",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            422.40000537500003,
+            569.759994375,
+            715.320003125
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            63.479995625000015,
+            569.759994375,
+            298.4399945
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        }
+      ],
+      "density_thickness_discrepancies": [
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            63.479995625000015,
+            569.759994375,
+            478.79999150000003
+          ],
+          "row_label": "8",
+          "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+          "printed_normative_kg_m2": "387",
+          "density_kg_m3": "1800",
+          "thickness_mm": "50",
+          "computed_normative_kg_m2": "90",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            422.40000537500003,
+            569.759994375,
+            715.320003125
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            63.479995625000015,
+            569.759994375,
+            298.4399945
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        }
+      ],
+      "source_page_count": 286,
+      "checked_rows": 53,
+      "product_mismatches": 0,
+      "soil_pressure_check": {
+        "pdf_page": 18,
+        "printed_sheet": 17,
+        "printed_factor": 1.0,
+        "factor_in_load_table_page_17": 1.152,
+        "printed_result_t_m2": 4.3,
+        "computed_for_printed_substitution_t_m2": 3.592187723122368,
+        "computed_with_table_factor_t_m2": 4.295585963122367,
+        "status": "ERROR",
+        "scope": "Printed equation arithmetic only; actual solver load is unverified."
+      }
+    },
+    {
+      "source_name": "АГП-371_23-КР.РР3.pdf",
+      "source_sha256": "18145f6d47d44e559040b9559d5b6f9af1648ea34f194f8e3683be761afb5797",
+      "classification": "PROJECT",
+      "status": "UNCERTAINTY",
+      "tables": [
+        {
+          "pdf_page": 18,
+          "printed_sheet": 17,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            457.79999150000003,
+            569.4959929500001,
+            641.2799795
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Нормати\nв.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Топпинг Monopol\n=7 кг/м2; δ =7 мм",
+              "normative_kg_m2": "7",
+              "factor": "1.3",
+              "printed_design_kg_m2": "9.1",
+              "computed_design_kg_m2": "9.1",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Бетонная стяжка В15, армированная сеткой\n200х200 Вр-1 =2100 кг/м3; δ =50 мм",
+              "normative_kg_m2": "105",
+              "factor": "1.3",
+              "printed_design_kg_m2": "136.5",
+              "computed_design_kg_m2": "136.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Щебень М600 фр. 20-40 =1400 кг/м3; δ =50 мм",
+              "normative_kg_m2": "70",
+              "factor": "1.3",
+              "printed_design_kg_m2": "91",
+              "computed_design_kg_m2": "91.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Щебень М600 фр. 5-20 =1600 кг/м3; δ =93 мм",
+              "normative_kg_m2": "148.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "193.44",
+              "computed_design_kg_m2": "193.44",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            63.479995625000015,
+            569.759994375,
+            478.79999150000003
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка из натурального камня δ =80мм,\n=2600 кг/м3",
+              "normative_kg_m2": "208",
+              "factor": "1.1",
+              "printed_design_kg_m2": "228.8",
+              "computed_design_kg_m2": "228.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная смесь δ =160 мм, =2000\nкг/м3",
+              "normative_kg_m2": "320",
+              "factor": "1.3",
+              "printed_design_kg_m2": "416",
+              "computed_design_kg_m2": "416.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Проникающая гидроизололяция Пенетрон\n=1,1 кг/м2;",
+              "normative_kg_m2": "1.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.43",
+              "computed_design_kg_m2": "1.43",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Бетонная плита армированная сеткой 200х200\n=2500 кг/м3; δ =100 мм",
+              "normative_kg_m2": "250",
+              "factor": "1.1",
+              "printed_design_kg_m2": "275",
+              "computed_design_kg_m2": "275.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Геотекстиль иглопробивной =0,6 кг/м2;",
+              "normative_kg_m2": "0.6",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.78",
+              "computed_design_kg_m2": "0.78",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Техноэласт ЭПП =4,95 кг/м2; δ =2 мм",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "387",
+              "factor": "1.3",
+              "printed_design_kg_m2": "503",
+              "computed_design_kg_m2": "503.1",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "9",
+              "description": "Керамзитобетон М300 =1800 кг/м3; δ =300\nмм",
+              "normative_kg_m2": "540",
+              "factor": "1.3",
+              "printed_design_kg_m2": "702",
+              "computed_design_kg_m2": "702.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "10",
+              "description": "Утеплиnель экструзионный пенополистирол\nТехнониколь =30 кг/м3; δ =100 мм",
+              "normative_kg_m2": "3",
+              "factor": "1.2",
+              "printed_design_kg_m2": "3.6",
+              "computed_design_kg_m2": "3.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "11",
+              "description": "Унифлекс =4,95 кг/м2",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.44",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "12",
+              "description": "Праймер битумный ТЕХНОНИКОЛЬ =900\nкг/м3; δ =2 мм",
+              "normative_kg_m2": "1.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "2.34",
+              "computed_design_kg_m2": "2.34",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            500.03999675,
+            569.759994375,
+            754.82999778125
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Плитка керамогранитная δ =10мм, =2400\nкг/м3",
+              "normative_kg_m2": "24",
+              "factor": "1.1",
+              "printed_design_kg_m2": "26.4",
+              "computed_design_kg_m2": "26.4",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Обмазочная гидроизоляция =5 кг/м2;",
+              "normative_kg_m2": "5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.5",
+              "computed_design_kg_m2": "6.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Уклонообразующая стяжка из цементно-\nпесчаного раствора М100, армированная\nметаллической сеткой 5ВрI ш.100х100мм.\n=1800 кг/м3; δ =120 мм",
+              "normative_kg_m2": "216",
+              "factor": "1.3",
+              "printed_design_kg_m2": "280.8",
+              "computed_design_kg_m2": "280.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Пеноплекс Основа =35 кг/м3; δ =50 мм",
+              "normative_kg_m2": "1.75",
+              "factor": "1.2",
+              "printed_design_kg_m2": "2.1",
+              "computed_design_kg_m2": "2.100",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Техноэласт ЭПП =4,95 кг/м2;",
+              "normative_kg_m2": "4.95",
+              "factor": "1.3",
+              "printed_design_kg_m2": "6.435",
+              "computed_design_kg_m2": "6.435",
+              "rounding_tolerance": "0.0005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 20,
+          "printed_sheet": 19,
+          "bbox_pdf_top_left": [
+            68.1085708392857,
+            515.640010625,
+            569.8114242321428,
+            752.58000340625
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Террасная доска δ =20 мм, =600 кг/м3",
+              "normative_kg_m2": "12",
+              "factor": "1.3",
+              "printed_design_kg_m2": "15.6",
+              "computed_design_kg_m2": "15.6",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =250\nмм",
+              "normative_kg_m2": "75",
+              "factor": "1.3",
+              "printed_design_kg_m2": "97.5",
+              "computed_design_kg_m2": "97.5",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            176.51999075000003,
+            569.759994375,
+            497.03999675000006
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "ПВХ мембрана Plastfoil classic δ =2 мм, =2,5\nкг/м2",
+              "normative_kg_m2": "2.5",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.25",
+              "computed_design_kg_m2": "3.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Геотекстиль =0,3 кг/м2",
+              "normative_kg_m2": "0.3",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.39",
+              "computed_design_kg_m2": "0.39",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Диагностические слои Контролит δ =0,2 мм,\n=0,1 кг/м2",
+              "normative_kg_m2": "0.1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "0.13",
+              "computed_design_kg_m2": "0.13",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+              "normative_kg_m2": "90",
+              "factor": "1.3",
+              "printed_design_kg_m2": "117",
+              "computed_design_kg_m2": "117.0",
+              "rounding_tolerance": "0.5",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Уклонообразующая стяжка из\nпенополистиролбетона =300 кг/м3; δ =176\nмм",
+              "normative_kg_m2": "52.8",
+              "factor": "1.3",
+              "printed_design_kg_m2": "68.64",
+              "computed_design_kg_m2": "68.64",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "6",
+              "description": "ПЭ-пленка =1 кг/м2; δ =0.2 мм",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "7",
+              "description": "Утеплиnель экструзионный пенополистирол\n=30 кг/м3; δ =150 мм",
+              "normative_kg_m2": "4.5",
+              "factor": "1.2",
+              "printed_design_kg_m2": "5.4",
+              "computed_design_kg_m2": "5.40",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "8",
+              "description": "Пароизоляция Паробарьер =1 кг/м2",
+              "normative_kg_m2": "1",
+              "factor": "1.3",
+              "printed_design_kg_m2": "1.3",
+              "computed_design_kg_m2": "1.3",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 21,
+          "printed_sheet": 20,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            538.919994125,
+            569.759994375,
+            688.4399832500001
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/ м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Керамогранитная плитка, толщиной δ =20мм,\n=2400 кг/м3",
+              "normative_kg_m2": "48",
+              "factor": "1.1",
+              "printed_design_kg_m2": "52.8",
+              "computed_design_kg_m2": "52.8",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Клей из сухих смесей, толщиной δ =10 мм,\n=1300 кг/м3",
+              "normative_kg_m2": "13",
+              "factor": "1.3",
+              "printed_design_kg_m2": "16.9",
+              "computed_design_kg_m2": "16.9",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Железобетонная ступень 1250х300х150(h),\n=2500 кг/м3",
+              "normative_kg_m2": "187.5",
+              "factor": "1.1",
+              "printed_design_kg_m2": "206.25",
+              "computed_design_kg_m2": "206.25",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            87.59999825,
+            569.759994375,
+            380.51999675
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонный блок D500, δ=100 мм, =500\nкг/м3",
+              "normative_kg_m2": "50.0",
+              "factor": "1.3",
+              "printed_design_kg_m2": "65.0",
+              "computed_design_kg_m2": "65.00",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            422.40000537500003,
+            569.759994375,
+            715.320003125
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "4",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "5",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            }
+          ]
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            63.479995625000015,
+            569.759994375,
+            298.4399945
+          ],
+          "header": [
+            "№ п/п",
+            "НАИМЕНОВАНИЕ",
+            "Норматив.\nкг/м2",
+            "\nf",
+            "Расчетная\nкг/м2"
+          ],
+          "rows": [
+            {
+              "row_label": "1",
+              "description": "Выравнивающий слой сухими смесями,\nтолщиной δ=5 мм, =600 кг/м3",
+              "normative_kg_m2": "3.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "3.90",
+              "computed_design_kg_m2": "3.900",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "2",
+              "description": "Цементно-песчаная штукатурка толщиной\nδ=25 мм, =1600 кг/м3",
+              "normative_kg_m2": "40.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "52.00",
+              "computed_design_kg_m2": "52.000",
+              "rounding_tolerance": "0.005",
+              "product_matches_rounding": true
+            },
+            {
+              "row_label": "3",
+              "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+              "normative_kg_m2": "100.00",
+              "factor": "1.3",
+              "printed_design_kg_m2": "130.0",
+              "computed_design_kg_m2": "130.000",
+              "rounding_tolerance": "0.05",
+              "product_matches_rounding": true
+            }
+          ]
+        }
+      ],
+      "density_thickness_discrepancies": [
+        {
+          "pdf_page": 19,
+          "printed_sheet": 18,
+          "bbox_pdf_top_left": [
+            68.159998125,
+            63.479995625000015,
+            569.759994375,
+            478.79999150000003
+          ],
+          "row_label": "8",
+          "description": "Стяжка из цементно-песчаного раствора\nМ150, армированная сеткой 100х100мм из\nарматуры Вр5. =1800 кг/м3; δ =50 мм",
+          "printed_normative_kg_m2": "387",
+          "density_kg_m3": "1800",
+          "thickness_mm": "50",
+          "computed_normative_kg_m2": "90",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 22,
+          "printed_sheet": 21,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            422.40000537500003,
+            569.759994375,
+            715.320003125
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        },
+        {
+          "pdf_page": 23,
+          "printed_sheet": 22,
+          "bbox_pdf_top_left": [
+            68.15999812499999,
+            63.479995625000015,
+            569.759994375,
+            298.4399945
+          ],
+          "row_label": "3",
+          "description": "Газобетонные блоки D500, δ=200 мм, =600\nкг/м3",
+          "printed_normative_kg_m2": "100.00",
+          "density_kg_m3": "600",
+          "thickness_mm": "200",
+          "computed_normative_kg_m2": "120",
+          "status": "UNCERTAINTY",
+          "image_checked": true,
+          "note": "Printed inputs and normative load disagree. Correct material, thickness or load and model usage remain unknown."
+        }
+      ],
+      "source_page_count": 298,
+      "checked_rows": 53,
+      "product_mismatches": 0,
+      "soil_pressure_check": {
+        "pdf_page": 18,
+        "printed_sheet": 17,
+        "printed_factor": 1.0,
+        "factor_in_load_table_page_17": 1.152,
+        "printed_result_t_m2": 4.3,
+        "computed_for_printed_substitution_t_m2": 3.592187723122368,
+        "computed_with_table_factor_t_m2": 4.295585963122367,
+        "status": "ERROR",
+        "scope": "Printed equation arithmetic only; actual solver load is unverified."
+      }
+    }
+  ]
+}

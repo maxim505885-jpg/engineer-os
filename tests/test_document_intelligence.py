@@ -124,6 +124,19 @@ class DocumentIntelligenceTests(unittest.TestCase):
         self.assertIn("Значение: 0,50 кПа", rows[0].text)
         self.assertIn("Обоснование: СП 131", rows[0].text)
 
+    def test_numbered_continuation_has_no_header_on_current_page(self):
+        source = self._source()
+        cells = [{"text": value, "start_row_offset_idx": row,
+                  "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                  "end_col_offset_idx": col + 1}
+                 for row, values in enumerate((("6", "Load A"), ("7", "Load B")))
+                 for col, value in enumerate(values)]
+        payload = {"tables": [{"prov": [{"page_no": 254}], "data": {
+            "num_rows": 2, "num_cols": 2, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "continuation table requires verified header"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
     def test_incomplete_table_grid_is_blocked(self):
         source = self._source()
         payload = {"tables": [{"prov": [{"page_no": 15}], "data": {
@@ -133,6 +146,36 @@ class DocumentIntelligenceTests(unittest.TestCase):
                  "end_col_offset_idx": 1}]}}]}
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaisesRegex(DocumentParseError, "missing cells"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
+    def test_complete_grid_contaminated_by_bottom_stamp_is_blocked(self):
+        source = self._source()
+        values = (("Колонна 1", "25 см²"),
+                  ("№ док. Лист Колонна 2", "Подп. ОСК-ССК-22/0526-1 25 см²"))
+        cells = [{"text": value, "start_row_offset_idx": row,
+                  "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                  "end_col_offset_idx": col + 1}
+                 for row, entries in enumerate(values) for col, value in enumerate(entries)]
+        payload = {"tables": [{"prov": [{"page_no": 397, "bbox": {
+            "l": 40, "t": 830, "r": 580, "b": 18, "coord_origin": "BOTTOMLEFT"}}],
+            "data": {"num_rows": 2, "num_cols": 2, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "footer stamp overlaps body table"):
+                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+
+    def test_defect_card_is_not_misread_as_header_and_data_rows(self):
+        source = self._source()
+        cells = [{"text": value, "start_row_offset_idx": row,
+                  "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
+                  "end_col_offset_idx": col + 1}
+                 for row, entries in enumerate((("Условный номер", "П 6"),
+                                                ("Степень значимости", "Значительный"),
+                                                ("Описание", "Трещины")))
+                 for col, value in enumerate(entries)]
+        payload = {"tables": [{"prov": [{"page_no": 78}], "data": {
+            "num_rows": 3, "num_cols": 2, "table_cells": cells}}]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            with self.assertRaisesRegex(DocumentParseError, "defect card requires verified regions"):
                 DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
 
     def test_merged_figure_legend_identifies_page_and_cell_without_accepting_it(self):
@@ -160,6 +203,28 @@ class DocumentIntelligenceTests(unittest.TestCase):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             result = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
         self.assertEqual([b.text for b in result.blocks], ["Body"])
+
+    def test_single_row_footer_stamp_is_excluded_but_body_table_remains(self):
+        stamp = {"prov": [{"page_no": 100, "bbox": {
+            "l": 44, "t": 59, "r": 234, "b": 15, "coord_origin": "BOTTOMLEFT"}}],
+            "data": {"num_rows": 1, "num_cols": 6, "table_cells": [
+                {"text": label, "start_row_offset_idx": 0, "end_row_offset_idx": 1,
+                 "start_col_offset_idx": col, "end_col_offset_idx": col + 1}
+                for col, label in enumerate(
+                    ("Изм.", "Кол.уч", "Лист", "№ док.", "Подп.", "Дата"))]}}
+        body = {"prov": [{"page_no": 100}], "data": {
+            "num_rows": 2, "num_cols": 2, "table_cells": [
+                {"text": value, "start_row_offset_idx": r, "end_row_offset_idx": r + 1,
+                 "start_col_offset_idx": c, "end_col_offset_idx": c + 1}
+                for r, row in enumerate((("Условный номер", "К 4"),
+                                         ("Описание", "Армирование")))
+                for c, value in enumerate(row)]}}
+        source = self._source()
+        payload = {"texts": [{"text": "Body", "prov": [{"page_no": 100}]}],
+                   "tables": [body, stamp]}
+        with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
+            result = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        self.assertEqual(len([b for b in result.blocks if b.kind == "table_row"]), 1)
 
     def test_missing_source_is_rejected(self):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):

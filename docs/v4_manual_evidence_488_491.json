@@ -1,0 +1,483 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "status": "BLOCK",
+  "pages": [
+    {
+      "page": 488,
+      "claims": [
+        {
+          "locator": "extract_number",
+          "transcription": "6150032997-20260806-1802",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.1",
+          "transcription": "6150032997",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.2",
+          "transcription": "Общество с ограниченной ответственностью «Строительно-производственное управление»",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.3",
+          "transcription": "ООО «СПУ»",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.6",
+          "transcription": "П-033-006150032997-0861",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.7",
+          "transcription": "11.07.2017",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.8",
+          "transcription": "",
+          "observed_blank": true,
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "2.1",
+          "transcription": "Да, 11.07.2017",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "2.2",
+          "transcription": "Да, 16.01.2023",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "2.3",
+          "transcription": "Нет",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "extract_date",
+          "transcription": "06.08.2026",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "organization",
+          "transcription": "ООО «Строительно-производственное управление»",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "ogrn",
+          "transcription": "1026102234509",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.4",
+          "transcription": "346400, Россия, Ростовская область, г. Новочеркасск, ул. Крупской, д. 76",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1.5",
+          "transcription": "Ассоциация «Объединение проектировщиков Южного и Северо-Кавказского округов» (СРО-П-033-30092009)",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "sheet_stamp",
+          "transcription": "488",
+          "source": "rendered_pdf"
+        }
+      ],
+      "required_locators": [
+        "extract_number",
+        "extract_date",
+        "organization",
+        "ogrn",
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4",
+        "1.5",
+        "1.6",
+        "1.7",
+        "1.8",
+        "2.1",
+        "2.2",
+        "2.3",
+        "qr",
+        "sheet_stamp"
+      ]
+    },
+    {
+      "page": 489,
+      "claims": [
+        {
+          "locator": "3.1",
+          "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "3.2",
+          "transcription": "",
+          "observed_blank": true,
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "4.1",
+          "transcription": "26.07.2017",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "4.2",
+          "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "4.3",
+          "transcription": "17.09.2025",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "4.4",
+          "transcription": "",
+          "observed_blank": true,
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "signature_mark",
+          "transcription": "Документ подписан усиленной квалифицированной электронной подписью",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "sheet_stamp",
+          "transcription": "489",
+          "source": "rendered_pdf"
+        }
+      ],
+      "required_locators": [
+        "3.1",
+        "3.2",
+        "4.1",
+        "4.2",
+        "4.3",
+        "4.4",
+        "signature_mark",
+        "qr",
+        "sheet_stamp"
+      ]
+    },
+    {
+      "page": 490,
+      "claims": [
+        {
+          "locator": "register_heading",
+          "transcription": "Приложение Ж. Графические материалы обследования. Ведомость чертежей",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "entry_numbers",
+          "transcription": "1–18",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "9",
+          "transcription": "Рисунок Ж.9. План 5-го этажа на отм. +18.000; План балок на отм. +21.800; План перекрытия на отм. +21.800",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "category_heading",
+          "transcription": "Обмерные чертежи. Схемы дефектов и повреждений. Результаты инструментальных исследований.",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "sheet_stamp",
+          "transcription": "490",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "1",
+          "transcription": "Рисунок Ж.1. План подвала на отм. −4.200; План балок на отм. −0.450; План перекрытия на отм. −0.450",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "2",
+          "transcription": "Рисунок Ж.2. План 1-го этажа на отм. −0.200; План балок на отм. +5.000; План перекрытия на отм. +5.000",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "3",
+          "transcription": "Рисунок Ж.3. План 2-го этажа на отм. +5.400; План балок на отм. +9.200; План перекрытия на отм. +9.200",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "4",
+          "transcription": "Рисунок Ж.4. План 3-го этажа на отм. +9.600; План балок на отм. +13.400; План перекрытия на отм. +13.400",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "5",
+          "transcription": "Рисунок Ж.5. План 4-го этажа на отм. +14.100; План балок на отм. +17.600; План перекрытия на отм. +17.600",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "6",
+          "transcription": "Рисунок Ж.6. Металлические конструкции на отм. +13.600. План колонн на отм. +13.600; Схема расположения ферм и ригелей рам на отм. +17,340; Схема расположения прогонов на отм. +18,976; План стоек коробов вентшахт на отм. +18,976; План стоек парапетов",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "7",
+          "transcription": "Рисунок Ж.7. Разрезы 1-1, 2-2, 3-3, 4-4, 5-5, 6-6, 7-7, 8-8, 9-9, 10-10, 11-11, 12-12, 13-13, 14-14, 15-15, 16-16, 17-17, 18-18, 19-19, 20-20, Ведомость элементов, Техническая спецификация металлопроката",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "8",
+          "transcription": "Рисунок Ж.8. Геометрические схемы стропильных ферм",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "10",
+          "transcription": "Рисунок Ж.10. План 6-го этажа на отм. +22.200; План балок на отм. +26.000; План перекрытия на отм. +26.000",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "11",
+          "transcription": "Рисунок Ж.11. План 7-го этажа на отм. +26.400; План балок на отм. +30.200; План перекрытия на отм. +30.200",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "12",
+          "transcription": "Рисунок Ж.12. План 8-го этажа на отм. +30.600; План балок на отм. +34.400; План перекрытия на отм. +34.400",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "13",
+          "transcription": "Рисунок Ж.13. План 9-го этажа на отм. +34.800; План балок на отм. +38.600; План перекрытия на отм. +38.600",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "14",
+          "transcription": "Рисунок Ж.14. План 10-го этажа на отм. +39.300; План балок на отм. +42.650; План перекрытия на отм. +42.650; План кровли на отм. +42.850; План кровли на отм. +45.750",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "15",
+          "transcription": "Рисунок Ж.15. Фасады в осях В-И, 16-14, И-Ж, 13-1",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "16",
+          "transcription": "Рисунок Ж.16. Фасады в осях Ж-В, 1-16",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "17",
+          "transcription": "Рисунок Ж.17. Фасады в осях Ж-В, 1-16",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "18",
+          "transcription": "Рисунок Ж.18. Разрез 1-1",
+          "source": "rendered_pdf"
+        }
+      ],
+      "required_locators": [
+        "register_heading",
+        "category_heading",
+        "entry_numbers",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "sheet_stamp"
+      ]
+    },
+    {
+      "page": 491,
+      "claims": [
+        {
+          "locator": "entry_numbers",
+          "transcription": "19–43",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "category_heading",
+          "transcription": "Результаты геодезических измерений",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "43",
+          "transcription": "Рисунок Ж.43. Исполнительная съемка лифтовых шахт №5, №6, №7",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "sheet_stamp",
+          "transcription": "491",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "19",
+          "transcription": "Рисунок Ж.19. Разрезы 2-2, 3-3",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "20",
+          "transcription": "Рисунок Ж.20. Разрез 4-4",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "21",
+          "transcription": "Рисунок Ж.21. Разрез 5-5",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "22",
+          "transcription": "Рисунок Ж.22. Изополя высотных отметок пола подвала",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "23",
+          "transcription": "Рисунок Ж.23. Изополя высотных отметок перекрытия над подвалом",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "24",
+          "transcription": "Рисунок Ж.24. Изополя высотных отметок пола 1-го этажа на отм. -0.200",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "25",
+          "transcription": "Рисунок Ж.25. Изополя высотных отметок перекрытия 1-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "26",
+          "transcription": "Рисунок Ж.26. Изополя высотных отметок перекрытия 2-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "27",
+          "transcription": "Рисунок Ж.27. Изополя высотных отметок перекрытия 3-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "28",
+          "transcription": "Рисунок Ж.28. Изополя высотных отметок перекрытия 4-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "29",
+          "transcription": "Рисунок Ж.29. Изополя высотных отметок перекрытия 5-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "30",
+          "transcription": "Рисунок Ж.30. Изополя высотных отметок перекрытия 6-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "31",
+          "transcription": "Рисунок Ж.31. Изополя высотных отметок перекрытия 7-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "32",
+          "transcription": "Рисунок Ж.32. Изополя высотных отметок перекрытия 8-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "33",
+          "transcription": "Рисунок Ж.33. Изополя высотных отметок перекрытия 9-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "34",
+          "transcription": "Рисунок Ж.34. Изополя высотных отметок перекрытия 10-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "35",
+          "transcription": "Рисунок Ж.35. Плановая исполнительная съемка несущих конструкций подвала",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "36",
+          "transcription": "Рисунок Ж.36. Плановая исполнительная съемка несущих конструкций 1-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "37",
+          "transcription": "Рисунок Ж.37. Плановая исполнительная съемка несущих конструкций 2-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "38",
+          "transcription": "Рисунок Ж.38. Плановая исполнительная съемка несущих конструкций 3-го этажа",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "39",
+          "transcription": "Рисунок Ж.39. Плановая исполнительная съемка несущих конструкций 4-го, 5-го, 6-го, 7-го этажей",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "40",
+          "transcription": "Рисунок Ж.40. Плановая исполнительная съемка несущих конструкций 8-го, 9-го, 10-го этажей",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "41",
+          "transcription": "Рисунок Ж.41. Исполнительная съемка лифтовых шахт №1, №2",
+          "source": "rendered_pdf"
+        },
+        {
+          "locator": "42",
+          "transcription": "Рисунок Ж.42. Исполнительная съемка лифтовых шахт №3, №4",
+          "source": "rendered_pdf"
+        }
+      ],
+      "required_locators": [
+        "entry_numbers",
+        "category_heading",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "sheet_stamp"
+      ]
+    }
+  ]
+}

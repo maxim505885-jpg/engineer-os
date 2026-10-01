@@ -1,0 +1,43 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "status": "BLOCK",
+  "pages": [
+    {
+      "page": 486,
+      "required_locators": ["appendix", "extract_number", "extract_date", "organization", "ogrn", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8", "2.1", "2.2", "2.3", "qr", "sheet_stamp"],
+      "claims": [
+        {"locator": "appendix", "transcription": "Приложение Е. Выписки из реестра членов СРО", "source": "rendered_pdf"},
+        {"locator": "extract_number", "transcription": "6150032997-20260703-1447", "source": "rendered_pdf"},
+        {"locator": "extract_date", "transcription": "03.07.2026", "source": "rendered_pdf"},
+        {"locator": "organization", "transcription": "ООО «Строительно-производственное управление»", "source": "rendered_pdf"},
+        {"locator": "ogrn", "transcription": "1026102234509", "source": "rendered_pdf"},
+        {"locator": "1.1", "transcription": "6150032997", "source": "rendered_pdf"},
+        {"locator": "1.2", "transcription": "Общество с ограниченной ответственностью «Строительно-производственное управление»", "source": "rendered_pdf"},
+        {"locator": "1.3", "transcription": "ООО «СПУ»", "source": "rendered_pdf"},
+        {"locator": "1.4", "transcription": "346400, Россия, Ростовская область, г. Новочеркасск, ул. Крупской, д. 76", "source": "rendered_pdf"},
+        {"locator": "1.5", "transcription": "Ассоциация «Объединение изыскателей Южного и Северо-Кавказского округов» (СРО-И-020-11012010)", "source": "rendered_pdf"},
+        {"locator": "1.6", "transcription": "И-020-006150032997-0583", "source": "rendered_pdf"},
+        {"locator": "1.7", "transcription": "23.12.2019", "source": "rendered_pdf"},
+        {"locator": "1.8", "transcription": "", "observed_blank": true, "source": "rendered_pdf"},
+        {"locator": "2.1", "transcription": "Да, 23.12.2019", "source": "rendered_pdf"},
+        {"locator": "2.2", "transcription": "Да, 17.01.2023", "source": "rendered_pdf"},
+        {"locator": "2.3", "transcription": "Нет", "source": "rendered_pdf"},
+        {"locator": "sheet_stamp", "transcription": "486", "source": "rendered_pdf"}
+      ]
+    },
+    {
+      "page": 487,
+      "required_locators": ["3.1", "3.2", "4.1", "4.2", "4.3", "4.4", "signature_mark", "qr", "sheet_stamp"],
+      "claims": [
+        {"locator": "3.1", "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)", "source": "rendered_pdf"},
+        {"locator": "3.2", "transcription": "", "observed_blank": true, "source": "rendered_pdf"},
+        {"locator": "4.1", "transcription": "16.09.2020", "source": "rendered_pdf"},
+        {"locator": "4.2", "transcription": "Второй уровень ответственности (не превышает пятидесяти миллионов рублей)", "source": "rendered_pdf"},
+        {"locator": "4.3", "transcription": "20.08.2025", "source": "rendered_pdf"},
+        {"locator": "4.4", "transcription": "", "observed_blank": true, "source": "rendered_pdf"},
+        {"locator": "signature_mark", "transcription": "Документ подписан усиленной квалифицированной электронной подписью", "source": "rendered_pdf"},
+        {"locator": "sheet_stamp", "transcription": "487", "source": "rendered_pdf"}
+      ]
+    }
+  ]
+}

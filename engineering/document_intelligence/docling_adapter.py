@@ -126,7 +126,7 @@ class DoclingDocumentParser:
         prov = table.get("prov") or []
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
-                or data.get("num_rows") != 3 or data.get("num_cols") != 7):
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -135,13 +135,19 @@ class DoclingDocumentParser:
                 or not 0 <= bbox["b"] < bbox["t"] <= 80):
             return False
         cells = data.get("table_cells")
-        if not isinstance(cells, list) or not 7 <= len(cells) <= 12:
+        one_row = data.get("num_rows") == 1
+        if not isinstance(cells, list) or not (len(cells) == 6 if one_row else 7 <= len(cells) <= 12):
             return False
         values = [c.get("text", "").strip() for c in cells if isinstance(c, dict)]
         if len(values) != len(cells):
             return False
         required = {"Изм.", "Кол.уч", "Подп.", "Дата", "Лист"}
         if not required.issubset(values):
+            return False
+        if one_row and (set(values) != required | {"№ док."} or
+                        {(c.get("start_row_offset_idx"), c.get("end_row_offset_idx"),
+                          c.get("start_col_offset_idx"), c.get("end_col_offset_idx"))
+                         for c in cells} != {(0, 1, col, col + 1) for col in range(6)}):
             return False
         allowed = required | {"№ док.", "№ док. Лист", "Лист №", "Пояснения"}
         return all(v in allowed or v.isdigit() or re.fullmatch(
@@ -177,6 +183,16 @@ class DoclingDocumentParser:
             cells = data.get("table_cells")
             if not isinstance(cells, list):
                 raise DocumentParseError("table cells are missing")
+            bbox = provenance[0].get("bbox") if isinstance(provenance[0], dict) else None
+            if (isinstance(bbox, dict) and bbox.get("coord_origin") == "BOTTOMLEFT"
+                    and isinstance(bbox.get("b"), (int, float))
+                    and isinstance(bbox.get("t"), (int, float))
+                    and bbox["b"] <= 80 < bbox["t"]):
+                values = " ".join(cell.get("text", "") for cell in cells
+                                  if isinstance(cell, dict) and isinstance(cell.get("text"), str))
+                if "№ док." in values and "Подп." in values and "Лист" in values:
+                    raise DocumentParseError(
+                        f"table page {row_ref.page_no} table {table_index} footer stamp overlaps body table")
             grid: dict[tuple[int, int], str] = {}
             for cell in cells:
                 if not isinstance(cell, dict):
@@ -198,6 +214,18 @@ class DoclingDocumentParser:
                     f"table page {row_ref.page_no} table {table_index} grid has missing cells "
                     f"({count_rows * count_cols - len(grid)} missing of {count_rows * count_cols})"
                 )
+            if (count_cols == 2 and count_rows >= 2
+                    and grid[0, 0] == "Условный номер"
+                    and grid[1, 0] == "Степень значимости"):
+                raise DocumentParseError(
+                    f"table page {row_ref.page_no} table {table_index} defect card requires verified regions")
+            # A continued numbered table starts with data, so its first row
+            # cannot be used as the column headings for the remaining rows.
+            if (count_rows >= 2 and re.fullmatch(r"\d+", grid[0, 0])
+                    and re.fullmatch(r"\d+", grid[1, 0])
+                    and int(grid[1, 0]) == int(grid[0, 0]) + 1):
+                raise DocumentParseError(
+                    f"table page {row_ref.page_no} table {table_index} continuation table requires verified header")
             headings = [grid[0, c] for c in range(count_cols)]
             for r in range(1, count_rows):
                 rows.append(DocumentBlock(
