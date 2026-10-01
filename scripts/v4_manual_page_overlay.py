@@ -52,7 +52,8 @@ def overlay(review: dict, recovered: dict, page_texts: dict[int, str],
             raise ValueError(f"page {page} shell text is incomplete")
     return {"source_sha256": recovered["source_sha256"],
             "original_blocked_pages": len(blocked),
-            "remaining_blocked_pages": len(blocked - {490, 491}),
+            "remaining_blocked_pages": len(blocked),
+            "remaining_manual_review_pages": len(blocked - {490, 491}),
             "manual_page_status": {"490": "UNCERTAINTY", "491": "UNCERTAINTY"},
             "status": "BLOCK", "review_path": "docs/V4_PAGE_488_MANUAL_REVIEW.md",
             "note": "Additive manual route; original Docling audits remain blocked and unchanged."}
@@ -83,6 +84,7 @@ def main() -> int:
                            encoding="utf-8")
     print("MANUAL_PAGE_STATUS:", outcome["manual_page_status"])
     print("REMAINING_BLOCKED:", outcome["remaining_blocked_pages"])
+    print("REMAINING_MANUAL_REVIEW:", outcome["remaining_manual_review_pages"])
     print("DOCUMENT_STATUS:", outcome["status"])
     return 0
 
