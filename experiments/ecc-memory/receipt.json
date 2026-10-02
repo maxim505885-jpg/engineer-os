@@ -1,0 +1,199 @@
+{
+  "status": "passed",
+  "ecc_commit": "ef648e01899ba3e8dc6371642deaaf64b4477775",
+  "ajv_version": "8.20.0",
+  "ajv_package_json_sha256": "1f9033ee5a6515e7d76938b7072941862d1ed228a6879cc7fe10cdeb75107989",
+  "upstream_evidence": {
+    "status": "passed",
+    "checks": 27,
+    "boundary": "Synthetic in-memory evidence checks; no authentication or runtime-service verification."
+  },
+  "upstream_cli_mcp_conformance": {
+    "schemaVersion": "ecc.memory.conformance.receipt.v1",
+    "status": "passed",
+    "startedAt": "2026-10-02T20:02:32.566Z",
+    "completedAt": "2026-10-02T20:02:37.638Z",
+    "nodeVersion": "v24.19.0",
+    "source": {
+      "head": "ef648e01899ba3e8dc6371642deaaf64b4477775",
+      "files": {
+        "scripts/memory.js": "c5266a07230d5917c84665fff55c4f17a50a6f74bc55bf403d3d4a6b9cc2620c",
+        "scripts/memory-mcp.mjs": "5c549220aa8a6b2d8ed60d99b7f3c688b6ee36f3c76e464f0f8767667c6e2ecc",
+        "scripts/lib/memory-vault.js": "83461fea071d2a96ca29a9e9767df770a0363b98721e3eebd2b371ddc48453ab",
+        "scripts/lib/memory-vault-format.js": "a5589f0cd0fd8a414436775e74243c39b068c86ddc99a4732d71ee54409a50c2",
+        "scripts/lib/path-safety.js": "542126cf47247161dd26713a1f33d34af2881db46435ac8ecef76a8be31c062c",
+        "scripts/lib/missing-dependency.js": "63e18316c1e0ffbac1315fccd8e085df067970fda9d2372a69d09af4666a9ee7",
+        "schemas/memory.schema.json": "2cdcca95f32fda44a1fffda0137a62857d0e2b8ba8a14d982295f36389a43eb6",
+        "package.json": "d658518a714b2834340704ca0d7eeb383fe1f061a00e66f001f58915a3de7c19",
+        "examples/unified-memory/evidence.cjs": "cb8cfb858cae1404e8d75e8edb42aedd5fb5e7cf3b7c339f6ba6606f8b1aef72"
+      },
+      "executionMode": "local source files with existing dependencies; no fetch performed",
+      "identityBoundary": "File digests identify executed source; HEAD alone does not establish a clean tree."
+    },
+    "exampleSha256": "076b6218777718b3ade2175fb66d218a7d1b99dbc333d176dda31344ecd70f3b",
+    "checks": [
+      {
+        "name": "codex: CLI/MCP ordered search parity",
+        "passed": true
+      },
+      {
+        "name": "codex: read preserves provenance and unreviewed trust",
+        "passed": true
+      },
+      {
+        "name": "codex: direct target visibility enforced by MCP",
+        "passed": true
+      },
+      {
+        "name": "codex: scope elevation, identity spoofing and trust promotion rejected",
+        "passed": true
+      },
+      {
+        "name": "codex: query reproducible across process restart",
+        "passed": true
+      },
+      {
+        "name": "claude: CLI/MCP ordered search parity",
+        "passed": true
+      },
+      {
+        "name": "claude: read preserves provenance and unreviewed trust",
+        "passed": true
+      },
+      {
+        "name": "claude: direct target visibility enforced by MCP",
+        "passed": true
+      },
+      {
+        "name": "claude: scope elevation, identity spoofing and trust promotion rejected",
+        "passed": true
+      },
+      {
+        "name": "claude: query reproducible across process restart",
+        "passed": true
+      },
+      {
+        "name": "hermes: CLI/MCP ordered search parity",
+        "passed": true
+      },
+      {
+        "name": "hermes: read preserves provenance and unreviewed trust",
+        "passed": true
+      },
+      {
+        "name": "hermes: direct target visibility enforced by MCP",
+        "passed": true
+      },
+      {
+        "name": "hermes: scope elevation, identity spoofing and trust promotion rejected",
+        "passed": true
+      },
+      {
+        "name": "hermes: query reproducible across process restart",
+        "passed": true
+      },
+      {
+        "name": "MCP write identity and evidence survive CLI handoff read",
+        "passed": true
+      },
+      {
+        "name": "operator opt-in enables only explicit user recall",
+        "passed": true
+      },
+      {
+        "name": "separate project root excludes alpha records",
+        "passed": true
+      },
+      {
+        "name": "CLI direct read is operator access, not target authorization",
+        "passed": true
+      },
+      {
+        "name": "missing configured identity prevents MCP startup",
+        "passed": true
+      },
+      {
+        "name": "recalled evidence rejects tamper, unavailable source and foreign context",
+        "passed": true
+      },
+      {
+        "name": "stored altered content and digest fail evidence verification after MCP recall",
+        "passed": true
+      },
+      {
+        "name": "synthetic private-key marker rejected without changing recalled dataset",
+        "passed": true
+      },
+      {
+        "name": "source files and HEAD unchanged after execution",
+        "passed": true
+      }
+    ],
+    "evidenceBoundary": "Synthetic real CLI/stdio execution. No live harness, Graphiti, OAuth, replication or deployment verification."
+  },
+  "engineer_os_boundary": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "UNVERIFIED memory stays non-evidentiary",
+        "passed": true
+      },
+      {
+        "name": "CONFIRMED_REFERENCE memory stays non-evidentiary",
+        "passed": true
+      },
+      {
+        "name": "PASS without evidence rejected",
+        "passed": true
+      },
+      {
+        "name": "ACCEPTED without evidence rejected",
+        "passed": true
+      }
+    ],
+    "boundary": "Synthetic metadata and result-contract checks only; no automatic ECC adapter, model prompt-injection test, persistence, production database or engineering acceptance."
+  },
+  "context_monitor": {
+    "status": "passed",
+    "checks": [
+      {
+        "name": "four repeats do not warn",
+        "passed": true
+      },
+      {
+        "name": "five identical calls warn",
+        "passed": true
+      },
+      {
+        "name": "same tool with different arguments does not warn",
+        "passed": true
+      },
+      {
+        "name": "no recent tool data does not warn",
+        "passed": true
+      },
+      {
+        "name": "35 percent context triggers warning",
+        "passed": true
+      },
+      {
+        "name": "25 percent context triggers critical warning",
+        "passed": true
+      },
+      {
+        "name": "disabling API cost estimates preserves loop detection",
+        "passed": true
+      }
+    ],
+    "boundary": "Synthetic pure-function thresholds only; no live tool-event bridge, hook installation, automatic recovery or Codex integration."
+  },
+  "context_monitor_source_sha256": "6c9399ca4e1bd0162cf824fd4c94f5c05e580bb3146e6e365f38b6f7bd14e5ec",
+  "total_checks": 62,
+  "limitations": [
+    "Linux execution only; native Windows untested.",
+    "Codex/Claude/Hermes are synthetic MCP host labels, not live app integrations.",
+    "Ajv package manifest digest is recorded; this is not a dependency security audit.",
+    "No production memory backend, actual report data, LLM, OAuth, sync or acceptance RPC used.",
+    "No ECC data automatically enters ENGINEER OS or its Evidence Register."
+  ]
+}
