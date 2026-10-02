@@ -78,8 +78,9 @@ class TaskEngine:
         if record.status not in {TaskStatus.RUNNING, TaskStatus.FAILED}:
             raise ValueError(f"Task {task_id} cannot be requeued from {record.status.value}")
         record.status = TaskStatus.QUEUED
-        if reason:
-            record.error = reason
+        record.error = reason
+        record.state = None
+        record.result_status = None
         record.started_at = None
         record.finished_at = None
         self._persist()
@@ -98,6 +99,12 @@ class TaskEngine:
 
         record.status = TaskStatus.RUNNING
         record.started_at = datetime.now(timezone.utc).isoformat()
+        try:
+            self._persist()
+        except Exception:
+            record.status = TaskStatus.QUEUED
+            record.started_at = None
+            raise
         try:
             state = self.core.run(record.task, runtime)
             result_status = self.core.final_status(state)
