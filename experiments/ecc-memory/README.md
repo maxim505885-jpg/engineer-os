@@ -77,3 +77,19 @@ python experiments/ecc-memory/check_adapter_cli.py ./ecc-probe-source ./adapter-
 ```
 
 The disposable fixture is removed after execution. Only Linux was tested. Production callbacks, native Windows, live MCP/app integration, authenticated identities and persistent task checkpoint writes remain unconfigured. Search + one full read per result also has a per-record I/O cost; evaluate vault size before deploying rather than adding an unverified cache.
+
+## Explicit CLI connection and Windows smoke runner
+
+`engineering/memory/ecc_cli_transport.py` binds the callbacks to a local, clean ECC checkout at the reviewed commit. `ECCCLITransport(ecc_checkout, project).adapter()` uses a vault at `<project>/.engineer-os/ecc-memory`; an alternate vault must resolve inside that project and cannot be the project root itself. Project/team scopes are explicit; user recall is unavailable. Checkout path and Node/Git executable selection are trusted operator configuration, not memory-record fields.
+
+The transport only invokes ECC search/read, with argument arrays and `shell=False`, a 30-second subprocess timeout and response validation. Ambient credentials, HOME, USERPROFILE, NODE_OPTIONS and NODE_PATH are not inherited; only PATH, essential OS/temp variables and explicit ECC partition variables are forwarded. Responses exceeding 1 MiB are rejected after collection; this is not an OS-enforced process-memory limit. Git revision/clean-tree checks are performed on construction, not an authentication or filesystem-race guarantee. Keep the operator-owned checkout immutable during a recall session. Search/read does not create or populate working memory.
+
+`scripts/local_ecc_memory_recall.py` provides an explicit recall command and emits only a `NOT_EVIDENCE` envelope. An empty vault returns empty context, never acceptance. Failure returns code 2 with BLOCK and no raw backend error text. There is no automatic inclusion in prompts, chat, evidence or final audit.
+
+`scripts/test_ecc_memory_windows.ps1` checks the project's existing virtualenv, Node and Git; if necessary it clones ECC into the sibling `engineer-os-ecc-runtime` directory and checks out the reviewed commit. It never resets or switches an existing checkout. The probe creates only disposable synthetic vault records and writes a diagnostic report to `.engineer-os/ecc-memory-windows-check.json`. No npm dependency or model/API is needed for this CLI-only test. If an earlier download leaves an unusable checkout, supply a fresh directory explicitly with `-ECCCheckout`; the script will not overwrite it.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$HOME\engineer-os\scripts\test_ecc_memory_windows.ps1"
+```
+
+Latest local validation: **178 unit tests passed**; the **6 real CLI scenarios** now exercise the actual production read transport. The explicit recall script was checked against an empty synthetic project vault and produced `NOT_EVIDENCE` with zero records. The receipt records platform, Node version and execution time. PowerShell/native Windows execution is still pending; no Windows PASS is claimed from Linux results. The next user input is the generated Windows diagnostic JSON, before enabling persistent working memory.
