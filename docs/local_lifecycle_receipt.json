@@ -1,0 +1,32 @@
+{
+  "test_status": "passed",
+  "completed_at": "2026-10-02T20:25:42.316957+00:00",
+  "checks": [
+    {
+      "name": "real loopback HTTP and Open WebUI result parsing",
+      "passed": true
+    },
+    {
+      "name": "queued task survives a new engine instance",
+      "passed": true
+    },
+    {
+      "name": "worker executes queued task through HTTP model adapter",
+      "passed": true
+    },
+    {
+      "name": "full plan/results/status reopen with non-acceptance retained",
+      "passed": true
+    },
+    {
+      "name": "interrupted execution remains durably RUNNING",
+      "passed": true
+    },
+    {
+      "name": "explicit retry completes with a newly persisted result",
+      "passed": true
+    }
+  ],
+  "engineering_acceptance": "NOT_TESTED",
+  "limitations": "Synthetic HTTP responses on Linux; no actual Ollama/Open WebUI, Windows launcher, browser chat/history, production Supabase or document verification."
+}
