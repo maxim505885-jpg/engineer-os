@@ -1,15 +1,17 @@
 """Synthetic real ECC CLI check of ENGINEER OS's opt-in read adapter."""
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from engineering.memory.ecc_memory_adapter import ECCMemoryAdapter
+from engineering.memory.ecc_cli_transport import ECCCLITransport
 from engineering.memory.external_memory import MemoryBoundaryError, memory_context
 
 PIN = 'ef648e01899ba3e8dc6371642deaaf64b4477775'
@@ -35,10 +37,8 @@ def check(repo: Path) -> dict:
         for target, title in (('all', 'adapter shared'), ('codex', 'adapter targeted'), ('claude', 'adapter foreign')):
             cli(['save', '--scope', 'project', '--title', title, '--target', target, '--stdin'],
                 'Synthetic adapter checkpoint: status BLOCK, не проверено.')
-        adapter = ECCMemoryAdapter(
-            lambda query: cli(['search', query, '--scope', 'project', '--target-harness', 'codex']),
-            lambda memory_id, scope: cli(['read', memory_id, '--scope', scope]),
-            harness='codex', scopes=('project',))
+        adapter = ECCCLITransport(repo, Path(root), vault=vault,
+                                  harness='codex', scopes=('project',)).adapter()
         records = adapter.search('adapter')
         assert len(records) == 2
         checks.append({'name': 'real CLI search returns only shared/codex records', 'passed': True})
@@ -62,7 +62,10 @@ def check(repo: Path) -> dict:
             checks.append({'name': 'malformed on-disk vault blocks whole recall', 'passed': True})
         else: raise AssertionError('Malformed vault did not block recall')
     return {'status': 'passed', 'ecc_commit': PIN, 'checks': checks,
-            'boundary': 'Real local CLI with synthetic disposable data on Linux; not production or native Windows verification.'}
+            'platform': platform.platform(),
+            'completed_at': datetime.now(timezone.utc).isoformat(),
+            'node_version': subprocess.check_output(['node', '--version'], env=env, text=True).strip(),
+            'boundary': 'Real local CLI with synthetic disposable data on the reported platform; not production or live app verification.'}
 
 
 if __name__ == '__main__':
