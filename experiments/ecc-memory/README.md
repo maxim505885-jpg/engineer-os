@@ -45,3 +45,35 @@ python experiments/ecc-memory/run_probe.py ./ecc-probe-source ./ecc-probe-deps/n
 The runner forwards only PATH, NODE_PATH and essential Windows OS variables to subprocesses. Source examples use disposable synthetic memory roots and remove them after the run. Package manifest hashes are recorded, but the receipt is not a dependency-security audit or a proof of identical transitive dependencies; dependency installation must be reviewed separately for deployment.
 
 No real documents, account credentials, OAuth, production database, external model or live harness were used. The probe does not register ECC output as ENGINEER OS evidence or alter production code.
+
+## Opt-in ENGINEER OS read adapter
+
+`engineering/memory/ecc_memory_adapter.py` now provides `ECCMemoryAdapter` through the existing `ExternalMemoryAdapter` interface. It does not install ECC, run shell commands, write memory, register evidence or change acceptance status. No default runtime enables it.
+
+The host supplies two callbacks bound to the same authorized vault:
+
+```python
+adapter = ECCMemoryAdapter(
+    search_transport,       # query -> ECC search response
+    read_transport,         # (memory_id, scope) -> ECC read response
+    harness="codex",
+    scopes=("project", "team"),
+)
+context = memory_context(adapter.search("checkpoint"))
+```
+
+Search summaries are validated before full-body reads. The adapter rejects unknown schema/fields, promoted trust, inactive records, disallowed scopes/targets, invalid identifiers/timestamps/control characters, excessive sizes, duplicate IDs, changed read metadata, failed reads and diagnostic reports of invalid/symlink/truncated scans. A single bad entry rejects the whole batch; no partial result or excerpt fallback is returned. User-scope recall is deliberately unavailable in this adapter.
+
+Returned records always have `UNVERIFIED` trust. Their context locator contains scope, claimed originating harness, ECC ID and exact body SHA-256; this is a context-integrity locator, not an evidence reference, proof of authorship, or verification of the body against an external source. ECC records do not contain a project identity that authenticates the callback's selected vault: project partition isolation is the host's responsibility. Callbacks must not silently change vaults or accept client-selected paths/credentials.
+
+There is no transaction spanning search and read. Matching metadata detects ordinary record changes; body SHA-256 binds the bytes actually read, not an earlier body snapshot. No automatic trust promotion, factual freshness claim, model instruction execution or output caching occurs.
+
+Fresh validation: **173 ENGINEER OS unit tests passed**, including 10 adapter tests. The separate real CLI probe passed **6 checks**: shared/target visibility, full Cyrillic body, non-evidentiary context, reproducibility across subprocesses, body digest and whole-recall rejection after an invalid file was added to the synthetic vault. See `adapter-receipt.json`.
+
+Reproduce the real CLI adapter check without Ajv/MCP dependencies:
+
+```bash
+python experiments/ecc-memory/check_adapter_cli.py ./ecc-probe-source ./adapter-receipt.json
+```
+
+The disposable fixture is removed after execution. Only Linux was tested. Production callbacks, native Windows, live MCP/app integration, authenticated identities and persistent task checkpoint writes remain unconfigured. Search + one full read per result also has a per-record I/O cost; evaluate vault size before deploying rather than adding an unverified cache.
