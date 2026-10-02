@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "ecc_commit": "ef648e01899ba3e8dc6371642deaaf64b4477775",
+  "checks": [
+    {
+      "name": "real CLI search returns only shared/codex records",
+      "passed": true
+    },
+    {
+      "name": "full Cyrillic body preserved across search/read",
+      "passed": true
+    },
+    {
+      "name": "all recalled records remain non-evidentiary",
+      "passed": true
+    },
+    {
+      "name": "recall stable across fresh CLI subprocesses",
+      "passed": true
+    },
+    {
+      "name": "context locators bind exact body digest",
+      "passed": true
+    },
+    {
+      "name": "malformed on-disk vault blocks whole recall",
+      "passed": true
+    }
+  ],
+  "boundary": "Real local CLI with synthetic disposable data on Linux; not production or native Windows verification."
+}
