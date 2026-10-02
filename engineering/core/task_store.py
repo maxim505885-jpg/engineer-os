@@ -211,9 +211,10 @@ class TaskStore:
         )
         state_raw = item.get("state")
         if state_raw is not None:
-            from .engineer_core import CoreState
+            from .engineer_core import EngineerCore
 
-            core_state = CoreState(task=task, planned=[], results=[])
+            core = EngineerCore()
+            core_state = core.plan(task)
             for raw in state_raw.get("results", []):
                 core_state.results.append(
                     AgentResult(
@@ -225,5 +226,8 @@ class TaskStore:
                         message=raw.get("message"),
                     )
                 )
+            results = list(core_state.results)
+            core_state.results.clear()
+            core.collect(core_state, results)
             record.state = core_state
         return record
