@@ -1,0 +1,150 @@
+"""Recheck declared table-recovery candidates against original PDF text regions.
+
+This is a local audit, not automatic recovery, evidence persistence or acceptance.
+CLI uses optional PyMuPDF; the core verifier has no third-party dependencies.
+"""
+from __future__ import annotations
+import argparse
+from datetime import datetime
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+
+
+def require(condition, reason):
+    if not condition:
+        raise ValueError(reason)
+
+
+def normalize(text):
+    return ' '.join(text.split())
+
+
+def verify(source: Path, manifest: dict, *, page_sizes: dict, read_text) -> dict:
+    require(isinstance(manifest, dict), 'manifest must be an object')
+    sha = manifest.get('source_sha256')
+    require(isinstance(sha, str) and re.fullmatch('[0-9a-f]{64}', sha), 'invalid source SHA256')
+    with Path(source).open('rb') as handle:
+        require(hashlib.file_digest(handle, 'sha256').hexdigest() == sha, 'source hash mismatch')
+    review = manifest.get('review')
+    require(isinstance(review, dict), 'declared source review required')
+    require(all(isinstance(review.get(k), str) and review[k].strip()
+                for k in ('reviewer', 'reviewed_at', 'scope')), 'incomplete source review')
+    require(datetime.fromisoformat(review['reviewed_at'].replace('Z', '+00:00')).utcoffset() is not None,
+            'review timestamp requires timezone')
+
+    def fragment(f):
+        require(isinstance(f, dict) and f.get('source_sha256') == sha, 'fragment source mismatch')
+        page, box = f.get('source_page'), f.get('bbox')
+        require(type(page) is int and page >= 1 and page in page_sizes, 'invalid source page')
+        require(f.get('coordinate_origin') == 'TOPLEFT', 'coordinate origin must be TOPLEFT')
+        require(isinstance(box, list) and len(box) == 4 and all(
+            type(v) in (int, float) and math.isfinite(v) for v in box), 'invalid source bbox')
+        width, height = page_sizes[page]
+        require(0 <= box[0] < box[2] <= width and 0 <= box[1] < box[3] <= height,
+                'source bbox outside page')
+        require(isinstance(f.get('text'), str), 'invalid fragment text')
+        actual = read_text(page, box)
+        require(isinstance(actual, str) and normalize(actual) == normalize(f['text']),
+                'fragment text differs from original source')
+        return page
+
+    contexts = manifest.get('context_fragments')
+    require(isinstance(contexts, list) and bool(contexts), 'source header/section context required')
+    for f in contexts:
+        require(isinstance(f, dict) and isinstance(f.get('text'), str) and f['text'].strip(),
+                'source header/section context cannot be empty')
+        fragment(f)
+    rows = manifest.get('rows')
+    require(isinstance(rows, list) and bool(rows), 'no recovery candidates')
+    ids, pages, count = set(), set(), 0
+    for row in rows:
+        require(isinstance(row, dict), 'invalid row candidate')
+        identity = row.get('candidate_id')
+        require(isinstance(identity, str) and identity.strip() and identity not in ids,
+                'duplicate or missing candidate ID')
+        ids.add(identity)
+        require(row.get('status') == 'UNCERTAINTY' and row.get('evidentiary_status') == 'NOT_EVIDENCE'
+                and row.get('acceptance_granted') is False, 'candidate must remain unaccepted')
+        require(type(row.get('header_source_page')) is int and any(
+            f['source_page'] == row['header_source_page'] for f in contexts), 'missing source header context')
+        section = row.get('section')
+        require(isinstance(section, dict) and isinstance(section.get('text'), str) and any(
+            f['source_page'] == section.get('source_page') and normalize(f['text']) == normalize(section['text'])
+            for f in contexts), 'missing source section context')
+        declared_pages = row.get('source_pages')
+        require(isinstance(declared_pages, list) and 1 <= len(declared_pages) <= 2
+                and all(type(p) is int and p >= 1 for p in declared_pages)
+                and (len(declared_pages) == 1 or declared_pages[1] == declared_pages[0] + 1),
+                'invalid reviewed page relation')
+        cells = row.get('cells')
+        require(isinstance(cells, list) and len(cells) == 6, 'six source columns required')
+        row_boxes = {}
+        previous_right = {}
+        for i, cell in enumerate(cells):
+            require(isinstance(cell, dict) and type(cell.get('column_index')) is int
+                    and cell['column_index'] == i and isinstance(cell.get('text'), str), 'invalid cell')
+            fragments = cell.get('source_fragments')
+            require(isinstance(fragments, list) and len(fragments) == len(declared_pages),
+                    'missing cell source fragments')
+            cell_pages = [fragment(f) for f in fragments]
+            require(cell_pages == declared_pages, 'cell page relation mismatch')
+            for f in fragments:
+                page, box = f['source_page'], f['bbox']
+                if page in row_boxes:
+                    require(max(abs(box[j] - row_boxes[page][j]) for j in (1, 3)) <= .01,
+                            'cell does not belong to source row band')
+                else:
+                    row_boxes[page] = box
+                if page in previous_right:
+                    require(abs(previous_right[page] - box[0]) <= .01, 'noncontiguous source columns')
+                previous_right[page] = box[2]
+            if len(fragments) == 2:
+                require(max(abs(fragments[0]['bbox'][j] - fragments[1]['bbox'][j]) for j in (0,2)) <= .01,
+                        'cross-page columns do not align')
+            require(normalize(' '.join(f['text'] for f in fragments)) == normalize(cell['text']),
+                    'joined cell text mismatch')
+            pages.update(cell_pages)
+            count += len(fragments)
+    return dict(status='PASS', scope='Original PDF text-region binding only; semantics and completeness not accepted',
+                source_sha256=sha, verified_rows=len(rows), verified_cells=len(rows)*6,
+                verified_fragments=count, source_pages=sorted(pages),
+                document_status='BLOCK', evidentiary_status='NOT_EVIDENCE', acceptance_granted=False)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source', type=Path)
+    parser.add_argument('manifest', type=Path)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    if args.output.resolve() in {args.source.resolve(), args.manifest.resolve()} or (
+            args.output.exists() and any(path.exists() and args.output.samefile(path)
+                                        for path in (args.source, args.manifest))):
+        parser.error('output must not overwrite source or manifest')
+    try:
+        import fitz
+        with fitz.open(args.source) as doc:
+            require(doc.is_pdf, 'source must be a PDF document')
+            page_sizes = {i+1: (p.rect.width, p.rect.height) for i,p in enumerate(doc)}
+            words = {}
+            def read_text(page, box):
+                if page not in words:
+                    words[page] = doc[page-1].get_text('words', sort=True)
+                return ' '.join(w[4] for w in words[page] if
+                    box[0] <= (w[0]+w[2])/2 < box[2] and box[1] <= (w[1]+w[3])/2 < box[3])
+            result = verify(args.source, json.loads(args.manifest.read_text(encoding='utf-8')),
+                            page_sizes=page_sizes, read_text=read_text)
+    except (ImportError, ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+        result = dict(status='BLOCK', reason=str(exc), scope='Source-region audit failed',
+                      document_status='BLOCK', evidentiary_status='NOT_EVIDENCE', acceptance_granted=False)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+    print(json.dumps(result, ensure_ascii=False))
+    return 0 if result['status'] == 'PASS' else 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

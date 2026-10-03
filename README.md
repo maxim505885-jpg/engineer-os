@@ -32,3 +32,7 @@ ENGINEER OS — проект системы интеллектуальных а�
 [Проверка извлечения PDF по эталону и checkpoint](docs/development/ecc-adaptation.md)
 — локальные инструменты без внешних API. Сравнение извлечения не заменяет
 регистрацию доказательств и FINAL AUDIT.
+
+[Фактическое состояние приложения и оставшаяся работа](docs/development/application-status-2026-10-03.md)
+
+[Локальная проверка восстановленных строк PDF](docs/development/reviewed-pdf-recovery.md)

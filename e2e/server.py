@@ -132,7 +132,12 @@ class Handler(BaseHTTPRequestHandler):
                 "blocks": len(document.blocks),
                 "pages_with_provenance": len(pages),
                 "page_range": list(page_range) if page_range else None,
-                "complete_document": page_range is None,
+                "requested_full_document": page_range is None,
+                # An unrestricted conversion request proves neither page
+                # coverage nor OCR/table/visual-review completeness.
+                "complete_document": False,
+                "verification_status": "UNCERTAINTY",
+                "acceptance_granted": False,
             })
         except Exception as exc:
             self._json(422, {"status": "BLOCK", "reason": type(exc).__name__})
@@ -212,6 +217,10 @@ class Handler(BaseHTTPRequestHandler):
                     "source_sha256": document.source_sha256,
                     "blocks": len(document.blocks),
                     "pages_with_provenance": len(pages),
+                    "requested_full_document": True,
+                    "complete_document": False,
+                    "verification_status": "UNCERTAINTY",
+                    "acceptance_granted": False,
                 },
             )
         except Exception as exc:
