@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 5  # Require explicit table headers; reject mixed stamp cells.
+CHECK_VERSION = 6  # Also reject falsely flagged headers containing rebar body data.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,

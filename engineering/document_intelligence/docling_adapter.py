@@ -206,6 +206,13 @@ class DoclingDocumentParser:
                    for cell in cells):
                 raise DocumentParseError("table column header metadata is missing or ambiguous")
             headings = [grid[0, c] for c in range(count_cols)]
+            # A cropped continuation can have a complete grid and still be
+            # incorrectly labelled as a header by the model. Rebar quantities
+            # observed in body rows require source review, even with True flags.
+            # This is a conservative supplementary guard, not semantic proof.
+            if any(re.search(r"\b\d+\s*[dDдД]\s*\d+\s*=\s*\d", heading)
+                   for heading in headings):
+                raise DocumentParseError("table header contains suspected rebar body data")
             if len(set(headings)) != count_cols:
                 raise DocumentParseError("table column headers are duplicated")
             for r in range(1, count_rows):

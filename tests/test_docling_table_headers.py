@@ -71,3 +71,12 @@ class DoclingTableHeaderTests(unittest.TestCase):
         rows=DoclingDocumentParser._table_rows(replay)
         self.assertEqual([row.text for row in rows],['Параметр: Снег | Значение: 0,50 кПа'])
         self.assertEqual(diagnostic['cells'][0]['bbox'],{'l':10,'t':20,'r':30,'b':40})
+
+    def test_false_model_header_with_rebar_data_blocks_even_without_stamp(self):
+        # Observed after clipping the V4 table: no stamp labels, complete grid,
+        # but the model puts first-row body text and an area calculation in headers.
+        raw=table([('Ко-', 'лонна в осях 14/Д', 'Км1-6 8d20=25.133 см²', '8d20=25.133 см²'),
+                   ('Колонна 15/Д', 'Км1-5', '4d20=12.566 см²', '4d20=12.566 см²')],
+                  [(True,True,True,True),(False,False,False,False)])
+        with self.assertRaisesRegex(DocumentParseError,'header'):
+            DoclingDocumentParser._table_rows({'tables':[raw]})
