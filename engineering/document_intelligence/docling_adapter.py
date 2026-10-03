@@ -192,7 +192,22 @@ class DoclingDocumentParser:
                 grid[r, c] = cell["text"].strip()
             if len(grid) != count_rows * count_cols:
                 raise DocumentParseError("table grid has missing cells")
+            # A complete grid can still contain the bottom drawing stamp
+            # merged into body cells (observed in the V4 continuation export).
+            stamp_labels = ("№ док.", "Подп.", "Кол.уч", "Изм.")
+            if sum(any(label in value for value in grid.values())
+                   for label in stamp_labels) >= 2:
+                raise DocumentParseError("table contains mixed page stamp labels")
+            # Never promote the first data row of a continuation to headings.
+            # Support only one explicit, complete column-header row. Missing
+            # metadata and multi-row/partial headers require source review.
+            if any(type(cell.get("column_header")) is not bool
+                   or cell["column_header"] != (cell["start_row_offset_idx"] == 0)
+                   for cell in cells):
+                raise DocumentParseError("table column header metadata is missing or ambiguous")
             headings = [grid[0, c] for c in range(count_cols)]
+            if len(set(headings)) != count_cols:
+                raise DocumentParseError("table column headers are duplicated")
             for r in range(1, count_rows):
                 rows.append(DocumentBlock(
                     block_id=f"docling:table:{table_index}:row:{r}:page:{refs[0].page_no}",

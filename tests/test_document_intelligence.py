@@ -110,7 +110,7 @@ class DocumentIntelligenceTests(unittest.TestCase):
             for col, value in enumerate(values):
                 cells.append({"text": value, "start_row_offset_idx": row,
                               "end_row_offset_idx": row + 1, "start_col_offset_idx": col,
-                              "end_col_offset_idx": col + 1})
+                              "end_col_offset_idx": col + 1, "column_header": row == 0})
         payload = {"texts": [{"label": "caption", "text": "Табл. П.2.1.",
                               "prov": [{"page_no": 15}]}],
                    "tables": [{"prov": [{"page_no": 15}], "data": {
