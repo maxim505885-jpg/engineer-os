@@ -141,9 +141,14 @@ class DoclingDocumentParser:
         if len(values) != len(cells):
             return False
         required = {"Изм.", "Кол.уч", "Подп.", "Дата", "Лист"}
-        if not required.issubset(values):
+        # Measured page-11 export joins adjacent stamp labels in one cell.
+        # Expand only this exact known label pair; never split body text.
+        labels = set(values)
+        if "Кол.уч Лист" in labels:
+            labels.update(("Кол.уч", "Лист"))
+        if not required.issubset(labels):
             return False
-        allowed = required | {"№ док.", "№ док. Лист", "Лист №", "Пояснения"}
+        allowed = required | {"№ док.", "№ док. Лист", "Кол.уч Лист", "Лист №", "Пояснения"}
         return all(v in allowed or v.isdigit() or re.fullmatch(
             r"[A-ZА-ЯЁ]{2,5}-[A-ZА-ЯЁ]{2,5}-\d{2}/\d{4}-\d+", v
         ) for v in values)
@@ -206,6 +211,13 @@ class DoclingDocumentParser:
                    for cell in cells):
                 raise DocumentParseError("table column header metadata is missing or ambiguous")
             headings = [grid[0, c] for c in range(count_cols)]
+            # A cropped continuation can have a complete grid and still be
+            # incorrectly labelled as a header by the model. Rebar quantities
+            # observed in body rows require source review, even with True flags.
+            # This is a conservative supplementary guard, not semantic proof.
+            if any(re.search(r"\b\d+\s*[dDдД]\s*\d+\s*=\s*\d", heading)
+                   for heading in headings):
+                raise DocumentParseError("table header contains suspected rebar body data")
             if len(set(headings)) != count_cols:
                 raise DocumentParseError("table column headers are duplicated")
             for r in range(1, count_rows):
