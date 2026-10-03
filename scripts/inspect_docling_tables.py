@@ -9,6 +9,19 @@ import sys
 from pathlib import Path
 
 
+def table_diagnostics(exported: dict) -> list[dict]:
+    """Keep upstream cell flags and bounds; do not infer missing metadata."""
+    tables = []
+    for table in exported.get("tables", []):
+        data = table.get("data") or {}
+        tables.append({
+            "provenance": table.get("prov", []),
+            "num_rows": data.get("num_rows"), "num_cols": data.get("num_cols"),
+            "cells": [dict(cell) for cell in data.get("table_cells", [])],
+        })
+    return tables
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
@@ -30,17 +43,7 @@ def main() -> int:
 
     result = DoclingDocumentParser()._converter().convert(str(args.source), page_range=(args.page, end))
     exported = result.document.export_to_dict()
-    tables = []
-    for table in exported.get("tables", []):
-        data = table.get("data") or {}
-        tables.append({
-            "provenance": table.get("prov", []),
-            "num_rows": data.get("num_rows"), "num_cols": data.get("num_cols"),
-            "cells": [{key: cell.get(key) for key in (
-                "text", "start_row_offset_idx", "end_row_offset_idx",
-                "start_col_offset_idx", "end_col_offset_idx")}
-                for cell in data.get("table_cells", [])],
-        })
+    tables = table_diagnostics(exported)
     payload = {"source_sha256": digest, "page_start": args.page, "page_end": end, "tables": tables}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

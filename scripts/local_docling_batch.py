@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 4  # Bump when extraction or completeness checks change.
+CHECK_VERSION = 5  # Require explicit table headers; reject mixed stamp cells.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,

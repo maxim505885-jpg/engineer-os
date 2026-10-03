@@ -9,6 +9,21 @@ from scripts.v4_extraction_review import review
 
 
 class ExtractionReviewTests(unittest.TestCase):
+    def test_pre_header_gate_cache_is_not_counted_as_current_extraction(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = {"source_sha256": SOURCE_SHA256, "project_id": PROJECT_ID,
+                    "document_id": DOCUMENT_ID, "page_start": 1, "page_end": 1}
+            audit = dict(base, check_version=4, exit_code=0)
+            output = dict(base, status="UNCERTAINTY", blocks=[
+                {"block_id": "docling:1", "kind": "table_row", "text": "old inferred heading",
+                 "provenance": [{"page_no": 1}]}])
+            (root / "pages-0001-0001.audit.json").write_text(json.dumps(audit))
+            (root / "pages-0001-0001.json").write_text(json.dumps(output))
+            result = review(root, 1)
+            self.assertEqual(result["successful_chunks"], 0)
+            self.assertEqual(result["status"], "BLOCK")
+
     def test_reports_missing_chunk_and_page_without_blocks(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
