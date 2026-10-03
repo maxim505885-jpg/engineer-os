@@ -149,6 +149,17 @@ class DocumentIntelligenceTests(unittest.TestCase):
             result = DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
         self.assertEqual([b.text for b in result.blocks], ["Body"])
 
+    def test_measured_stamp_with_combined_col_count_and_sheet_label_is_excluded(self):
+        stamp = {"prov": [{"page_no": 11, "bbox": {
+            "l": 44, "t": 60, "r": 580, "b": 15, "coord_origin": "BOTTOMLEFT"}}],
+            "data": {"num_rows": 3, "num_cols": 7, "table_cells": [
+                {"text": label} for label in (
+                    "Изм.", "Кол.уч Лист", "№ док.", "Подп.", "Дата",
+                    "ОСК-ССК-22/0526-1", "Лист", "11") ]}}
+        self.assertTrue(DoclingDocumentParser._is_page_stamp(stamp))
+        stamp["data"]["table_cells"].append({"text": "8d20=25.133 см²"})
+        self.assertFalse(DoclingDocumentParser._is_page_stamp(stamp))
+
     def test_missing_source_is_rejected(self):
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
             with self.assertRaises(DocumentParseError):
