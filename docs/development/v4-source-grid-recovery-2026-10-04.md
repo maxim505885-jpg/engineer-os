@@ -1,37 +1,39 @@
-# V4 source-bound merged table recovery — 2026-10-04
+# V4 source recovery and restored full export — 2026-10-04
 
-Docling's strict table adapter still blocks ambiguous or merged cells. It must not be weakened merely to mark the document accepted. The existing reviewed-region verifier now accepts an explicit schema-2 physical grid: source coordinates, row/column spans, original text, table/cell identities and review context. Schema-1 six-column continuation recovery remains unchanged.
+## Confirmed result
 
-The verifier hashes the original source, checks native word-region text, bounds and exact declared grid coverage, and rejects holes, overlaps, altered text and invalid spans. Merged cells are exported once with their original span. This PASS is limited to declared grid coverage and native text binding. It does not prove visual content, calculation correctness, actual PDF rulings or full extraction completeness. Candidate exports remain UNCERTAINTY / NOT_EVIDENCE, complete_document=false, document_status=BLOCK, acceptance_granted=false. This schema is a standalone recovery export and is not integrated into the Docling batch acceptance path.
+- Original PDF rehashed: 74,522,583 bytes, 534 pages, SHA256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916.
+- All 534 raw exports are now retained. Restored pages1–495; freshly regenerated pages496–534.
+- Current adapter diagnostic: 147 BLOCK, 387 UNCERTAINTY; 37 pages with explicit dropped-cell warnings. No document acceptance.
+- Block reasons: 80 missing/merged/ambiguous cells; 46 missing grids; 13 ambiguous header metadata; 3 mixed page stamps; 2 table captions without verified rows; 3 otherwise parseable pages with explicit loss warnings. Loss warnings on other blocked pages overlap these categories.
+- The previous page15–16 conversion blocker is absent in a fresh accurate-mode run: 43 blocks, seven table rows, zero unlocated blocks, zero table-loss warnings, 27.0 seconds; reviewed baseline 8/8 PASS.
+- Fresh offline source page1 conversion: 18 blocks, 17 with Cyrillic, all located with bounding boxes; no table loss warnings; 18.9 seconds.
+- Fresh page499 export still fails two captions (ФС3 and ФС6), baseline9/11. Do not silently rewrite raw OCR.
 
-## Fresh source result
+## Code changes
 
-- Original PDF: 74,522,583 bytes; 534 pages.
-- SHA256: b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916.
-- Page 259 visually inspected; seven eight-column tables.
-- Seven merged total cells each span the first five columns.
-- 220 physical cells cover 248 declared logical grid slots.
-- Original native text-region binding audit: PASS, acceptance remains false.
-- Includes previously omitted total: Итого | 1,071 | 1,3 | 1,393.
-- Native strings are preserved, including potentially visually clipped labels. No normalization into invented engineering labels or calculation acceptance.
+The reviewed PDF recovery verifier formerly supported only six-column continuation rows. Schema2 now preserves explicit physical grids and row/column spans, rehashes the source, compares native word-region text, checks bounds and exact declared grid coverage, and rejects holes, overlaps, altered text and invalid spans. Merged cells export once with their original span and unambiguous table/cell identity encoding. Schema1 remains compatible.
 
-## Verification and review
+PASS means declared grid coverage and native text binding only. It does not prove visual content, PDF rulings, calculations or full extraction completeness. Exports remain UNCERTAINTY / NOT_EVIDENCE, complete_document=false, document_status=BLOCK, acceptance_granted=false. This standalone export is not integrated into the Docling batch acceptance path.
 
-- Baseline: 169 Python unit tests pass.
-- Added merged-grid positive/negative tests and a regression for ambiguous table/cell identity concatenation. The regression failed before its fix.
-- Final: 172 unit tests pass; browser JavaScript syntax and engineering/runtime/e2e compilation pass.
-- Focused code review found the identity collision; exports now encode table/cell pairs unambiguously.
+Independently normalized pages previously reused text IDs such as docling:1. Text IDs now include original page identity, preventing collisions when combining disjoint page chunks; table row IDs already contain the page. CHECK_VERSION9 invalidates prior batch caches.
 
-## Restored environment and unresolved stage
+## Source-bound recovery
 
-The execution environment reverted to an earlier snapshot. The saved archive was restored with results for pages 1–495. A separate benchmark export for page 499 is not a replacement for the missing full-pass results of pages 496–534. The prior observed full-pass totals (534 exports, 147 BLOCK and 387 UNCERTAINTY) are historical results, not a fresh rerun in this restored environment. An archived intermediate adapter report covers 331 pages.
+Page259 was visually inspected: seven eight-column tables, 220 physical cells covering248 logical slots. Each total row merges the first five columns. Native source binding PASS; includes the formerly omitted Итого | 1,071 | 1,3 | 1,393. Original native strings, including potentially clipped labels, are preserved. Engineering meaning and arithmetic are not accepted.
 
-The project virtual environment retained Docling packages but lost its Python executable link. The link was restored to the existing compatible Python 3.12.14 interpreter; isolated Docling import succeeds. No global installation was performed. The full-pass model files and derivative page PDFs are absent from the restored archive. Original derivative hashes cannot be reused for newly generated PDFs without fresh copy verification.
+Legacy pages396–404 were freshly rechecked against the original PDF: 91 logical rows, 546 cells, 570 source fragments PASS for source binding; remain NOT_EVIDENCE/documentBLOCK.
 
-Remaining: restore model artifacts and source-verified page copies before regenerating missing exports; triage blocked tables using explicit source grids; visually verify pages 492–531 vector drawings and OCR disagreements; account for all 534 pages and warnings; run full extraction completeness gates before evidence promotion or FINAL AUDIT. No evidence database writes, main changes or merges.
+## Environment restoration and limits
 
-## Follow-up: independent page block identities
+The execution environment reverted to an earlier snapshot. The saved495-page archive was restored; its separate benchmark page499 was not counted as a tail completion. The project venv retained packages but lost its Python executable link. Restored that link to the compatible existing Python3.12.14 interpreter; isolated Docling import succeeds, without global installation.
 
-Combining independently normalized pages 15 and 16 exposed duplicate text block IDs (both began at docling:1). Text IDs now include original source page numbers; table row IDs already include the page. CHECK_VERSION is 9 so stale batch output is not reused. A regression failed before the fix. All 174 unit tests, JavaScript syntax and compilation pass. Re-evaluation of stored raw pages15–16 with the current adapter now passes all eight baseline checks. Freshly regenerated page499 still fails two of eleven captions (ФС3/ФС6): retain BLOCK for that baseline and do not silently rewrite OCR.
+Official layout/table model files were restored and matched retained SHA256 checksums. Three OCR models were also hash-checked. An initial retry failed because OCR files were absent at the explicit artifacts path; the failure log was preserved and files copied to that path before rerun. All39 regenerated tail page copies passed original native-word and RGB72dpi identity checks, with fresh derivative hashes. Tail conversions exported39/39 pages in737.54 summed seconds, peakRSS3,371,964KiB (~3.22GiB).
 
-Model files were freshly restored from official repositories and matched the retained SHA256 checksums. All 39 regenerated source page copies (496–534) passed original native-word and RGB72dpi image identity tests; derivative hashes were recorded afresh. The resumed Docling conversion is tracked separately in tail-pass.log. An initial attempt lacked OCR models at the explicit artifacts path; its failure log is preserved as tail-pass-missing-ocr.log, and the files were then copied to the required path and hash-checked before retrying. A diagnostic adapter recheck marks pages1–495 as archived-copy-attestation-only, since the original derivatives were not retained; it must not be mistaken for fresh physical derivative verification.
+The diagnostic adapter recheck distinguishes archived copy attestations for pages1–495 from fresh physical derivative hashes for pages496–534. Original page-copy files for the first495 remain unavailable; do not label their physical derivative identity freshly reverified. Original source identity is freshly checked. No OCR, visual or document completeness acceptance.
+
+## Verification and remaining work
+
+174 Python unit tests pass; browser JavaScript syntax and engineering/runtime/e2e compilation pass. Positive merged-grid and chunk-identity regressions failed before fixes. Focused review identified the first identity collision, which was fixed with a regression; follow-up review found no important issues in the page identity/cache changes.
+
+Remaining: integrate reviewed source grids into an explicit extraction-completeness audit without overriding unresolved regions; source-check all147 blocked pages and37 loss warnings; verify outlined vector drawings492–531, including OCR disagreements; account for all source regions across534 pages before evidence promotion/FINAL AUDIT. The seven recovered tables on page259 are candidates, not a declaration that its entire page is complete. Windows checkout/Ollama remain unverified from this environment. No main changes, merges, deployments or evidence database writes.
