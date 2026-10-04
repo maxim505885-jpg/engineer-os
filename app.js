@@ -34,9 +34,15 @@ async function loadProjects(){
 
 async function counts(){
   const p=state.projectId;if(!p)return {};
-  const names=["documents","evidence","engineering_findings","engineering_tasks","engineering_measurements","structural_elements","technical_assignment_items"];
+  const names=["documents","evidence","engineering_findings","engineering_tasks"];
+  const results=await Promise.allSettled(names.map(n=>supabase.from(n)
+    .select("id",{count:"exact",head:true}).eq("project_id",p)));
   const out={};
-  for(const n of names){try{out[n]=(await db(n,{projectId:p,select:"id",limit:1000})).length}catch{out[n]=0}}
+  results.forEach((result,i)=>{
+    const response=result.status==="fulfilled"?result.value:null;
+    out[names[i]]=response && !response.error && Number.isSafeInteger(response.count)
+      && response.count>=0?response.count:null;
+  });
   return out;
 }
 
@@ -63,7 +69,7 @@ async function renderDashboard(){
   const c=await counts();
   let latest=[];try{latest=await db("orchestration_runs",{projectId:state.projectId,select:"id,status,current_stage,progress,updated_at,last_error",order:"updated_at",limit:5})}catch{}
   $("#page").innerHTML=`
-    <div class="grid cards">${[['Документы',c.documents],['Доказательства',c.evidence],['Находки',c.engineering_findings],['Задачи',c.engineering_tasks],['ТЗ / требования',c.technical_assignment_items]].slice(0,4).map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="metric">${x[1]}</div><div class="label">текущий проект</div></div>`).join("")}</div>
+    <div class="grid cards">${[['Документы',c.documents],['Доказательства',c.evidence],['Находки',c.engineering_findings],['Задачи',c.engineering_tasks]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="metric">${x[1]??"—"}</div><div class="label">${x[1]===null?"Не удалось получить данные":"текущий проект"}</div></div>`).join("")}</div>
     <div class="section-title"><h2>Сквозной pipeline</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="launchEngineeringBtn" class="btn primary">Запустить ENGINEER OS</button><button id="pipelineBtn" class="btn secondary">Открыть pipeline</button></div></div><div id="launchResult" class="card" style="display:none;margin-bottom:14px"></div>
     <div class="pipeline">${["AUTH","PROJECT","ТЗ","DOCUMENT","EVIDENCE","TASK","ORCHESTRATOR","QUEUE","WORKER","AGENT","RESULT","VALIDATION","HANDOFF","RECOVERY","FINAL"].map(x=>`<div class="stage"><b>${x}</b><span>контур</span></div>`).join("")}</div>
     <div class="section-title"><h2>Последние orchestration runs</h2></div>
