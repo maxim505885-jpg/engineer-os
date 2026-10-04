@@ -92,6 +92,17 @@ def ranges(start: int, end: int, chunk_size: int):
 def reviewed_scope(manifest: dict, *, first: int, last: int, sha256: str) -> bool:
     if not isinstance(manifest, dict) or manifest.get('source_sha256') != sha256.lower():
         raise ValueError('reviewed map belongs to another source')
+    schema = manifest.get('schema_version', 1)
+    if type(schema) is not int or schema not in (1, 2):
+        raise ValueError('unsupported reviewed map schema')
+    if schema == 2:
+        tables = manifest.get('tables')
+        if not isinstance(tables, list) or not tables:
+            raise ValueError('reviewed map has no grids')
+        if any(not isinstance(table, dict) or type(table.get('source_page')) is not int
+               or not first <= table['source_page'] <= last for table in tables):
+            raise ValueError('reviewed grid regions outside requested batch')
+        return True
     rows = manifest.get('rows')
     if not isinstance(rows, list) or not rows:
         raise ValueError('reviewed map has no rows')
@@ -101,6 +112,44 @@ def reviewed_scope(manifest: dict, *, first: int, last: int, sha256: str) -> boo
                 type(page) is not int or not first <= page <= last for page in pages):
             raise ValueError('reviewed body regions outside requested batch')
     return True
+
+
+def reviewed_coverage(exported, args):
+    """Summarize source-verified declared regions; never imply full-page coverage."""
+    expected = dict(project_id=args.project_id, document_id=args.document_id,
+                    status='UNCERTAINTY', document_status='BLOCK',
+                    evidentiary_status='NOT_EVIDENCE', complete_document=False,
+                    acceptance_granted=False)
+    if any(type(exported.get(k)) is not type(v) or exported[k] != v for k,v in expected.items()):
+        raise ValueError('reviewed export identity or unaccepted status mismatch')
+    audit = exported.get('source_binding_audit')
+    if not isinstance(audit, dict) or audit.get('status') != 'PASS' or any(
+        type(audit.get(k)) is not type(v) or audit[k] != v for k,v in dict(
+            source_sha256=args.sha256.lower(), document_status='BLOCK',
+            evidentiary_status='NOT_EVIDENCE', acceptance_granted=False).items()):
+        raise ValueError('missing or invalid source binding audit')
+    schema = exported.get('schema_version', 1)
+    regions = exported['tables'] if schema == 2 else exported['rows']
+    count = sum(len(region['cells']) for region in regions)
+    pages = sorted({region['source_page'] for region in regions} if schema == 2 else
+                   {p for region in regions for p in region['source_pages']})
+    if type(audit.get('verified_cells')) is not int or count < 1 or audit['verified_cells'] != count:
+        raise ValueError('source binding cell count mismatch')
+    if audit.get('source_pages') != pages:
+        raise ValueError('source binding page scope mismatch')
+    coverage = dict(level='DECLARED_REGIONS_ONLY', source_pages=pages,
+                    verified_cells=count, complete_page=False, complete_document=False,
+                    acceptance_granted=False)
+    key = 'verified_tables' if schema == 2 else 'verified_rows'
+    if type(audit.get(key)) is not int or audit[key] != len(regions):
+        raise ValueError('source binding region count mismatch')
+    coverage[key] = audit[key]
+    if schema == 2:
+        slots = audit.get('verified_grid_slots')
+        if type(slots) is not int or slots < count:
+            raise ValueError('invalid verified grid slot count')
+        coverage['verified_grid_slots'] = slots
+    return coverage
 
 
 def review_outputs(args):
@@ -136,10 +185,12 @@ def export_reviewed_regions(args) -> dict:
         # Scope-check the actual export too, in case the map changed during the subprocess.
         exported = json.loads(candidates.read_text(encoding='utf-8'))
         reviewed_scope(exported, first=args.start, last=args.end, sha256=args.sha256)
+        coverage = reviewed_coverage(exported, args)
         return dict(status='UNCERTAINTY', source_binding_status='PASS',
+                    coverage=coverage,
                     audit_file=audit.name, candidate_file=candidates.name,
                     note='Reviewed table regions only; no full-page coverage or evidence acceptance')
-    except (OSError, UnicodeError, ValueError, TypeError) as exc:
+    except (OSError, UnicodeError, ValueError, TypeError, KeyError) as exc:
         failure['reason'] = str(exc)
         for path in (audit, candidates):
             path.write_text(json.dumps(failure, ensure_ascii=False, indent=2), encoding='utf-8')

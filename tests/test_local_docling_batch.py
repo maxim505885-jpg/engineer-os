@@ -7,6 +7,58 @@ from scripts.local_docling_batch import ranges, reusable_output
 
 
 class LocalDoclingBatchTests(unittest.TestCase):
+    def test_reviewed_grid_scope_supports_schema2_without_accepting_other_pages(self):
+        from scripts.local_docling_batch import reviewed_scope
+        manifest = dict(schema_version=2, source_sha256='a'*64,
+                        tables=[dict(source_page=259)])
+        self.assertTrue(reviewed_scope(manifest, first=259, last=259, sha256='a'*64))
+        for page in (258, 260, True):
+            manifest['tables'][0]['source_page'] = page
+            with self.assertRaises(ValueError):
+                reviewed_scope(manifest, first=259, last=259, sha256='a'*64)
+        manifest.update(schema_version=99, rows=[dict(source_pages=[259])])
+        with self.assertRaises(ValueError):
+            reviewed_scope(manifest, first=259, last=259, sha256='a'*64)
+
+    def test_grid_export_reports_source_coverage_without_promoting_completeness(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from scripts.local_docling_batch import export_reviewed_regions
+        with tempfile.TemporaryDirectory() as directory:
+            dest = Path(directory)
+            manifest = dest/'map.json'
+            manifest.write_text(json.dumps(dict(schema_version=2, source_sha256='a'*64,
+                tables=[dict(source_page=259)])))
+            args = SimpleNamespace(source=dest/'source.pdf', reviewed_manifest=manifest,
+                output_dir=dest, start=259, end=259, sha256='a'*64,
+                project_id='project', document_id='document')
+            payload = dict(schema_version=2, source_sha256='a'*64,
+                project_id='project', document_id='document', status='UNCERTAINTY',
+                document_status='BLOCK', evidentiary_status='NOT_EVIDENCE',
+                acceptance_granted=False, complete_document=False,
+                tables=[dict(source_page=259, cells=[{},{}])],
+                source_binding_audit=dict(status='PASS', source_sha256='a'*64,
+                    verified_tables=1, verified_cells=2, verified_grid_slots=3,
+                    source_pages=[259], document_status='BLOCK',
+                    evidentiary_status='NOT_EVIDENCE', acceptance_granted=False))
+            def subprocess(*_, **__):
+                (dest/'reviewed-regions.candidates.json').write_text(json.dumps(payload))
+                return SimpleNamespace(returncode=0)
+            with patch('scripts.local_docling_batch.subprocess.run', side_effect=subprocess):
+                result = export_reviewed_regions(args)
+                self.assertEqual(result['source_binding_status'], 'PASS')
+                self.assertEqual(result['coverage']['verified_cells'], 2)
+                self.assertEqual(result['coverage']['verified_tables'], 1)
+                self.assertEqual(result['coverage']['level'], 'DECLARED_REGIONS_ONLY')
+                self.assertFalse(result['coverage']['complete_page'])
+                for changes in [dict(acceptance_granted=True),dict(project_id='other'),
+                                dict(complete_document=True),dict(document_status='ACCEPTED')]:
+                    original = dict(payload)
+                    payload.update(changes)
+                    self.assertEqual(export_reviewed_regions(args)['status'], 'BLOCK')
+                    self.assertEqual(json.loads((dest/'reviewed-regions.candidates.json').read_text())['blocks'], [])
+                    payload.clear();payload.update(original)
+
     def test_reviewed_region_scope_requires_matching_hash_and_body_pages(self):
         from scripts.local_docling_batch import reviewed_scope
         manifest = {'source_sha256':'a'*64, 'rows':[{'source_pages':[396,397]}]}
