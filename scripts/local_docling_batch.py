@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 7  # Also recognize the measured combined page-stamp label variant.
+CHECK_VERSION = 8  # Six-label bottom stamp row and normalized TOPLEFT text boxes.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,

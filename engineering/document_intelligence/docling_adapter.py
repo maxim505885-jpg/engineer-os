@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import math
 import re
 from pathlib import Path
 from typing import Any, Callable
@@ -66,7 +67,7 @@ class DoclingDocumentParser:
         )
 
     @staticmethod
-    def _page_ref(prov: Any) -> PageRef | None:
+    def _page_ref(prov: Any, page_heights: dict[int, float] | None = None) -> PageRef | None:
         if not isinstance(prov, dict):
             return None
         page_no = prov.get("page_no")
@@ -76,12 +77,19 @@ class DoclingDocumentParser:
         bbox = None
         if isinstance(bbox_data, dict):
             try:
-                bbox = BoundingBox(
-                    float(bbox_data["l"]),
-                    float(bbox_data["t"]),
-                    float(bbox_data["r"]),
-                    float(bbox_data["b"]),
-                )
+                left, top, right, bottom = (float(bbox_data[k]) for k in ("l", "t", "r", "b"))
+                origin = bbox_data.get("coord_origin", "TOPLEFT")
+                if origin == "BOTTOMLEFT":
+                    height = (page_heights or {}).get(page_no)
+                    if height is None:
+                        raise ValueError("source page height required for bottom-left coordinates")
+                    top, bottom = height - top, height - bottom
+                elif origin != "TOPLEFT":
+                    raise ValueError("unknown coordinate origin")
+                if (not all(math.isfinite(v) for v in (left, top, right, bottom))
+                        or not 0 <= left < right or not 0 <= top < bottom):
+                    raise ValueError("invalid source bbox")
+                bbox = BoundingBox(left, top, right, bottom)
             except (KeyError, TypeError, ValueError):
                 bbox = None
         return PageRef(page_no=page_no, bbox=bbox)
@@ -90,6 +98,18 @@ class DoclingDocumentParser:
     def _normalize(cls, exported: dict[str, Any]) -> tuple[DocumentBlock, ...]:
         blocks: list[DocumentBlock] = []
         seen: set[tuple[str, str, tuple[PageRef, ...]]] = set()
+        page_heights = {}
+        pages = exported.get("pages")
+        if isinstance(pages, dict):
+            for key, page in pages.items():
+                try:
+                    height = page["size"]["height"]
+                    page_no = int(key)
+                    if (page_no >= 1 and type(height) in (int, float)
+                            and math.isfinite(height) and height > 0):
+                        page_heights[page_no] = float(height)
+                except (KeyError, TypeError, ValueError):
+                    continue
 
         def visit(node: Any, path: str) -> None:
             if isinstance(node, dict):
@@ -100,7 +120,7 @@ class DoclingDocumentParser:
                     if isinstance(raw_prov, dict):
                         raw_prov = (raw_prov,)
                     refs = tuple(
-                        ref for ref in (cls._page_ref(item) for item in raw_prov)
+                        ref for ref in (cls._page_ref(item, page_heights) for item in raw_prov)
                         if ref is not None
                     ) if isinstance(raw_prov, (list, tuple)) else ()
                     key = (kind, text.strip(), refs)
@@ -131,7 +151,7 @@ class DoclingDocumentParser:
         prov = table.get("prov") or []
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
-                or data.get("num_rows") != 3 or data.get("num_cols") != 7):
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -140,6 +160,27 @@ class DoclingDocumentParser:
                 or not 0 <= bbox["b"] < bbox["t"] <= 80):
             return False
         cells = data.get("table_cells")
+        # Pages 34/51 export only the six labels of the same bottom stamp.
+        # Require the complete literal row with unambiguous offsets; never
+        # generalize the engineering table guard to arbitrary one-row tables.
+        if (data["num_rows"], data["num_cols"]) == (1, 6):
+            if not isinstance(cells, list) or len(cells) != 6:
+                return False
+            labels = ("Изм.", "Кол.уч", "Лист", "№ док.", "Подп.", "Дата")
+            positions = {}
+            for cell in cells:
+                if not isinstance(cell, dict):
+                    return False
+                col = cell.get("start_col_offset_idx")
+                if (type(col) is not int or not 0 <= col < 6 or col in positions
+                        or cell.get("start_row_offset_idx") != 0
+                        or cell.get("end_row_offset_idx") != 1
+                        or cell.get("end_col_offset_idx") != col + 1
+                        or cell.get("column_header") is not False
+                        or cell.get("text") != labels[col]):
+                    return False
+                positions[col] = cell["text"]
+            return len(positions) == 6
         if not isinstance(cells, list) or not 7 <= len(cells) <= 12:
             return False
         values = [c.get("text", "").strip() for c in cells if isinstance(c, dict)]

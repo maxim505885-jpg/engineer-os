@@ -1,3 +1,4 @@
+import copy
 import os
 import tempfile
 import unittest
@@ -28,6 +29,52 @@ class _FakeConverter:
 
 
 class DocumentIntelligenceTests(unittest.TestCase):
+    def test_bottom_left_text_bbox_is_converted_using_source_page_height(self):
+        payload = {'pages': {'15': {'size': {'width': 595, 'height': 842}}},
+                   'texts': [{'text': 'Источник', 'prov': [{'page_no': 15, 'bbox': {
+                       'l': 40, 't': 700, 'r': 120, 'b': 680, 'coord_origin': 'BOTTOMLEFT'}}]}]}
+        ref = DoclingDocumentParser._normalize(payload)[0].provenance[0]
+        self.assertEqual((ref.bbox.left, ref.bbox.top, ref.bbox.right, ref.bbox.bottom),
+                         (40, 142, 120, 162))
+
+    def test_bottom_left_bbox_without_page_height_keeps_only_page_provenance(self):
+        payload = {'texts': [{'text': 'Источник', 'prov': [{'page_no': 15, 'bbox': {
+            'l': 40, 't': 700, 'r': 120, 'b': 680, 'coord_origin': 'BOTTOMLEFT'}}]}]}
+        ref = DoclingDocumentParser._normalize(payload)[0].provenance[0]
+        self.assertEqual(ref.page_no, 15)
+        self.assertIsNone(ref.bbox)
+
+    def _label_only_stamp(self):
+        return {"prov": [{"page_no": 34, "bbox": {
+            "l": 44.319, "t": 59.647, "r": 234.332, "b": 15.270,
+            "coord_origin": "BOTTOMLEFT"}}], "data": {
+            "num_rows": 1, "num_cols": 6, "table_cells": [
+                {"text": text, "start_row_offset_idx": 0, "end_row_offset_idx": 1,
+                 "start_col_offset_idx": i, "end_col_offset_idx": i + 1,
+                 "column_header": False}
+                for i, text in enumerate(("Изм.", "Кол.уч", "Лист", "№ док.", "Подп.", "Дата"))]}}
+
+    def test_measured_single_row_stamp_labels_are_not_engineering_table_rows(self):
+        self.assertTrue(DoclingDocumentParser._is_page_stamp(self._label_only_stamp()))
+        self.assertEqual(DoclingDocumentParser._table_rows({"tables": [self._label_only_stamp()]}), ())
+
+    def test_single_row_stamp_requires_exact_complete_label_geometry(self):
+        original = self._label_only_stamp()
+        mutations = [
+            lambda t: t['data']['table_cells'].pop(),
+            lambda t: t['data']['table_cells'][2].update(text='8d20=25.133 см²'),
+            lambda t: t['data']['table_cells'][2].update(start_col_offset_idx=1),
+            lambda t: t['data']['table_cells'][2].update(end_col_offset_idx=4),
+            lambda t: t['data']['table_cells'][2].update(column_header=True),
+            lambda t: t['prov'][0]['bbox'].update(t=180, b=120),
+        ]
+        for mutation in mutations:
+            table = copy.deepcopy(original)
+            mutation(table)
+            with self.subTest(table=table):
+                with self.assertRaises(DocumentParseError):
+                    DoclingDocumentParser._table_rows({'tables': [table]})
+
     def test_missing_explicit_model_folder_blocks_before_initialization(self):
         with self.assertRaisesRegex(DocumentParseError, 'artifacts'):
             DoclingDocumentParser(artifacts_path='/missing/model-artifacts')._converter()
