@@ -7,6 +7,53 @@ from scripts.local_docling_batch import ranges, reusable_output
 
 
 class LocalDoclingBatchTests(unittest.TestCase):
+    def test_raw_recovery_outputs_cannot_alias_raw_input_or_docling_result(self):
+        import sys
+        from unittest.mock import patch
+        from scripts.local_docling_batch import main
+        for mode in ('raw-sidecar','combined-docling'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+                out=Path(directory);raw=out/'raw.json'
+                target=out/('reviewed-regions.candidates.json' if mode=='raw-sidecar' else 'pages-0001-0001.json')
+                target.write_text('original')
+                if mode=='raw-sidecar':raw=target
+                else:(out/'combined-extraction.json').symlink_to(target)
+                args=['batch','source.pdf','--start','1','--end','1','--sha256','a'*64,
+                      '--project-id','p','--document-id','d','--output-dir',str(out),
+                      '--raw-export',str(raw),'--reviewed-manifest','missing-map.json','--reviewed-only']
+                with patch.object(sys,'argv',args):
+                    try:main()
+                    except SystemExit:pass
+                self.assertEqual(target.read_text(),'original')
+
+    def test_raw_recovery_requires_a_single_reviewed_only_page(self):
+        import sys
+        from unittest.mock import patch
+        from scripts.local_docling_batch import main
+        args=['batch','source.pdf','--start','1','--end','2','--sha256','a'*64,
+              '--project-id','p','--document-id','d','--output-dir','out',
+              '--raw-export','raw.json','--reviewed-manifest','map.json','--reviewed-only']
+        with patch.object(sys,'argv',args):
+            with self.assertRaises(SystemExit) as exit_result:main()
+        self.assertEqual(exit_result.exception.code,2)
+
+    def test_raw_recovery_failure_writes_a_blocked_combined_export(self):
+        import sys
+        from unittest.mock import patch
+        from scripts.local_docling_batch import main
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)/'out'
+            args=['batch','source.pdf','--start','1','--end','1','--sha256','a'*64,
+                  '--project-id','p','--document-id','d','--output-dir',str(out),
+                  '--raw-export','missing-raw.json','--reviewed-manifest','missing-map.json','--reviewed-only']
+            with patch.object(sys,'argv',args):
+                try:code=main()
+                except SystemExit:self.fail('raw recovery is not integrated into the existing batch')
+            self.assertEqual(code,2)
+            result=json.loads((out/'combined-extraction.json').read_text())
+            self.assertEqual(result['status'],'BLOCK')
+            self.assertEqual(result['blocks'],[])
+
     def test_reviewed_grid_scope_supports_schema2_without_accepting_other_pages(self):
         from scripts.local_docling_batch import reviewed_scope
         manifest = dict(schema_version=2, source_sha256='a'*64,

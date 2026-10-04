@@ -156,6 +156,8 @@ def review_outputs(args):
     outputs = [args.output_dir / name for name in
                ('reviewed-regions.audit.json', 'reviewed-regions.candidates.json', 'batch-review-summary.json')]
     checked = [args.source, args.reviewed_manifest, *args.output_dir.glob('pages-*.json')]
+    if getattr(args,'raw_export',None) is not None:
+        checked.append(args.raw_export)
     for output in outputs:
         if any(output.resolve() == path.resolve() or
                (output.exists() and path.exists() and output.samefile(path)) for path in checked):
@@ -212,13 +214,22 @@ def main() -> int:
                         help='Explicit reviewed table map; source-checked candidates are separate sidecars')
     parser.add_argument('--reviewed-only', action='store_true',
                         help='Only recheck/export reviewed regions; Docling NOT_RUN and document remains BLOCK')
+    parser.add_argument('--raw-export',type=Path,
+                        help='Original single-page archived Docling export to normalize with mapped source grids')
     args = parser.parse_args()
     if args.reviewed_only and not args.reviewed_manifest:
         parser.error('--reviewed-only requires --reviewed-manifest')
+    if args.raw_export and (not args.reviewed_only or args.start!=args.end):
+        parser.error('--raw-export requires --reviewed-only and a single source page')
     try:
         planned = list(ranges(args.start, args.end, args.chunk_size))
         if args.reviewed_manifest:
             review_outputs(args)
+        if args.raw_export:
+            combined=args.output_dir/'combined-extraction.json'
+            for path in (args.source,args.reviewed_manifest,args.raw_export,*review_outputs(args),*args.output_dir.glob('pages-*.json')):
+                if combined.resolve()==path.resolve() or (combined.exists() and path.exists() and combined.samefile(path)):
+                    raise ValueError('combined output must not alias inputs or sidecars')
     except ValueError as exc:
         parser.error(str(exc))
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -263,6 +274,28 @@ def main() -> int:
                        reviewed_regions=reviewed, status='BLOCK' if blocked else 'UNCERTAINTY',
                        document_status='BLOCK', evidentiary_status='NOT_EVIDENCE',
                        complete_document=False, acceptance_granted=False)
+        if args.raw_export:
+            combined=args.output_dir/'combined-extraction.json'
+            failure=dict(status='BLOCK',document_status='BLOCK',complete_page=False,
+                         complete_document=False,acceptance_granted=False,evidentiary_status='NOT_EVIDENCE',blocks=[])
+            combined.write_text(json.dumps(failure),encoding='utf-8')
+            try:
+                raw=json.loads(args.raw_export.read_text(encoding='utf-8'))
+                if not isinstance(raw,dict) or raw.get('source_sha256')!=args.sha256.lower() or type(raw.get('page')) is not int or raw['page']!=args.start:
+                    raise ValueError('archived raw export source/page mismatch')
+                if reviewed.get('source_binding_status')!='PASS':
+                    raise ValueError('source recovery sidecar failed')
+                command=[sys.executable,str(Path(__file__).with_name('recover_docling_export.py')),
+                         str(args.source),str(args.raw_export),str(args.reviewed_manifest),
+                         '--project-id',args.project_id,'--document-id',args.document_id,'--output',str(combined)]
+                process=subprocess.run(command,capture_output=True,text=True)
+                payload=json.loads(combined.read_text(encoding='utf-8'))
+                if process.returncode not in (0,2):raise ValueError('combined recovery process failed')
+                summary['combined_extraction']=dict(status=payload['status'],output_file=combined.name,
+                    table_recovery=payload.get('table_recovery',{}))
+            except (OSError,UnicodeError,ValueError,TypeError,KeyError) as exc:
+                failure['reason']=str(exc);combined.write_text(json.dumps(failure),encoding='utf-8')
+                summary['combined_extraction']=dict(status='BLOCK',output_file=combined.name,reason=str(exc))
         review_outputs(args)[2].write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
     if args.reviewed_only:
         print('BLOCK: reviewed regions exported or blocked; Docling NOT_RUN, document completeness unverified')
