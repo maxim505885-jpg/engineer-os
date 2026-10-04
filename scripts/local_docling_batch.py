@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 8  # Six-label bottom stamp row and normalized TOPLEFT text boxes.
+CHECK_VERSION = 10  # Recognize source-reviewed alternate bottom-stamp export shapes.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,
@@ -92,6 +92,17 @@ def ranges(start: int, end: int, chunk_size: int):
 def reviewed_scope(manifest: dict, *, first: int, last: int, sha256: str) -> bool:
     if not isinstance(manifest, dict) or manifest.get('source_sha256') != sha256.lower():
         raise ValueError('reviewed map belongs to another source')
+    schema = manifest.get('schema_version', 1)
+    if type(schema) is not int or schema not in (1, 2):
+        raise ValueError('unsupported reviewed map schema')
+    if schema == 2:
+        tables = manifest.get('tables')
+        if not isinstance(tables, list) or not tables:
+            raise ValueError('reviewed map has no grids')
+        if any(not isinstance(table, dict) or type(table.get('source_page')) is not int
+               or not first <= table['source_page'] <= last for table in tables):
+            raise ValueError('reviewed grid regions outside requested batch')
+        return True
     rows = manifest.get('rows')
     if not isinstance(rows, list) or not rows:
         raise ValueError('reviewed map has no rows')
@@ -103,10 +114,50 @@ def reviewed_scope(manifest: dict, *, first: int, last: int, sha256: str) -> boo
     return True
 
 
+def reviewed_coverage(exported, args):
+    """Summarize source-verified declared regions; never imply full-page coverage."""
+    expected = dict(project_id=args.project_id, document_id=args.document_id,
+                    status='UNCERTAINTY', document_status='BLOCK',
+                    evidentiary_status='NOT_EVIDENCE', complete_document=False,
+                    acceptance_granted=False)
+    if any(type(exported.get(k)) is not type(v) or exported[k] != v for k,v in expected.items()):
+        raise ValueError('reviewed export identity or unaccepted status mismatch')
+    audit = exported.get('source_binding_audit')
+    if not isinstance(audit, dict) or audit.get('status') != 'PASS' or any(
+        type(audit.get(k)) is not type(v) or audit[k] != v for k,v in dict(
+            source_sha256=args.sha256.lower(), document_status='BLOCK',
+            evidentiary_status='NOT_EVIDENCE', acceptance_granted=False).items()):
+        raise ValueError('missing or invalid source binding audit')
+    schema = exported.get('schema_version', 1)
+    regions = exported['tables'] if schema == 2 else exported['rows']
+    count = sum(len(region['cells']) for region in regions)
+    pages = sorted({region['source_page'] for region in regions} if schema == 2 else
+                   {p for region in regions for p in region['source_pages']})
+    if type(audit.get('verified_cells')) is not int or count < 1 or audit['verified_cells'] != count:
+        raise ValueError('source binding cell count mismatch')
+    if audit.get('source_pages') != pages:
+        raise ValueError('source binding page scope mismatch')
+    coverage = dict(level='DECLARED_REGIONS_ONLY', source_pages=pages,
+                    verified_cells=count, complete_page=False, complete_document=False,
+                    acceptance_granted=False)
+    key = 'verified_tables' if schema == 2 else 'verified_rows'
+    if type(audit.get(key)) is not int or audit[key] != len(regions):
+        raise ValueError('source binding region count mismatch')
+    coverage[key] = audit[key]
+    if schema == 2:
+        slots = audit.get('verified_grid_slots')
+        if type(slots) is not int or slots < count:
+            raise ValueError('invalid verified grid slot count')
+        coverage['verified_grid_slots'] = slots
+    return coverage
+
+
 def review_outputs(args):
     outputs = [args.output_dir / name for name in
                ('reviewed-regions.audit.json', 'reviewed-regions.candidates.json', 'batch-review-summary.json')]
     checked = [args.source, args.reviewed_manifest, *args.output_dir.glob('pages-*.json')]
+    if getattr(args,'raw_export',None) is not None:
+        checked.append(args.raw_export)
     for output in outputs:
         if any(output.resolve() == path.resolve() or
                (output.exists() and path.exists() and output.samefile(path)) for path in checked):
@@ -136,10 +187,12 @@ def export_reviewed_regions(args) -> dict:
         # Scope-check the actual export too, in case the map changed during the subprocess.
         exported = json.loads(candidates.read_text(encoding='utf-8'))
         reviewed_scope(exported, first=args.start, last=args.end, sha256=args.sha256)
+        coverage = reviewed_coverage(exported, args)
         return dict(status='UNCERTAINTY', source_binding_status='PASS',
+                    coverage=coverage,
                     audit_file=audit.name, candidate_file=candidates.name,
                     note='Reviewed table regions only; no full-page coverage or evidence acceptance')
-    except (OSError, UnicodeError, ValueError, TypeError) as exc:
+    except (OSError, UnicodeError, ValueError, TypeError, KeyError) as exc:
         failure['reason'] = str(exc)
         for path in (audit, candidates):
             path.write_text(json.dumps(failure, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -161,13 +214,22 @@ def main() -> int:
                         help='Explicit reviewed table map; source-checked candidates are separate sidecars')
     parser.add_argument('--reviewed-only', action='store_true',
                         help='Only recheck/export reviewed regions; Docling NOT_RUN and document remains BLOCK')
+    parser.add_argument('--raw-export',type=Path,
+                        help='Original single-page archived Docling export to normalize with mapped source grids')
     args = parser.parse_args()
     if args.reviewed_only and not args.reviewed_manifest:
         parser.error('--reviewed-only requires --reviewed-manifest')
+    if args.raw_export and (not args.reviewed_only or args.start!=args.end):
+        parser.error('--raw-export requires --reviewed-only and a single source page')
     try:
         planned = list(ranges(args.start, args.end, args.chunk_size))
         if args.reviewed_manifest:
             review_outputs(args)
+        if args.raw_export:
+            combined=args.output_dir/'combined-extraction.json'
+            for path in (args.source,args.reviewed_manifest,args.raw_export,*review_outputs(args),*args.output_dir.glob('pages-*.json')):
+                if combined.resolve()==path.resolve() or (combined.exists() and path.exists() and combined.samefile(path)):
+                    raise ValueError('combined output must not alias inputs or sidecars')
     except ValueError as exc:
         parser.error(str(exc))
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -212,6 +274,28 @@ def main() -> int:
                        reviewed_regions=reviewed, status='BLOCK' if blocked else 'UNCERTAINTY',
                        document_status='BLOCK', evidentiary_status='NOT_EVIDENCE',
                        complete_document=False, acceptance_granted=False)
+        if args.raw_export:
+            combined=args.output_dir/'combined-extraction.json'
+            failure=dict(status='BLOCK',document_status='BLOCK',complete_page=False,
+                         complete_document=False,acceptance_granted=False,evidentiary_status='NOT_EVIDENCE',blocks=[])
+            combined.write_text(json.dumps(failure),encoding='utf-8')
+            try:
+                raw=json.loads(args.raw_export.read_text(encoding='utf-8'))
+                if not isinstance(raw,dict) or raw.get('source_sha256')!=args.sha256.lower() or type(raw.get('page')) is not int or raw['page']!=args.start:
+                    raise ValueError('archived raw export source/page mismatch')
+                if reviewed.get('source_binding_status')!='PASS':
+                    raise ValueError('source recovery sidecar failed')
+                command=[sys.executable,str(Path(__file__).with_name('recover_docling_export.py')),
+                         str(args.source),str(args.raw_export),str(args.reviewed_manifest),
+                         '--project-id',args.project_id,'--document-id',args.document_id,'--output',str(combined)]
+                process=subprocess.run(command,capture_output=True,text=True)
+                payload=json.loads(combined.read_text(encoding='utf-8'))
+                if process.returncode not in (0,2):raise ValueError('combined recovery process failed')
+                summary['combined_extraction']=dict(status=payload['status'],output_file=combined.name,
+                    table_recovery=payload.get('table_recovery',{}))
+            except (OSError,UnicodeError,ValueError,TypeError,KeyError) as exc:
+                failure['reason']=str(exc);combined.write_text(json.dumps(failure),encoding='utf-8')
+                summary['combined_extraction']=dict(status='BLOCK',output_file=combined.name,reason=str(exc))
         review_outputs(args)[2].write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
     if args.reviewed_only:
         print('BLOCK: reviewed regions exported or blocked; Docling NOT_RUN, document completeness unverified')

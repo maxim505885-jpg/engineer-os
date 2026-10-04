@@ -128,9 +128,12 @@ class DoclingDocumentParser:
                     # page provenance. They cannot serve as evidence blocks.
                     if refs and key not in seen:
                         seen.add(key)
+                        # Independent page exports restart their local counters.
+                        # Keep original page identity when combining bounded chunks.
+                        page_identity = ','.join(str(p) for p in sorted({ref.page_no for ref in refs}))
                         blocks.append(
                             DocumentBlock(
-                                block_id=f"docling:{len(blocks) + 1}",
+                                block_id=f"docling:pages:{page_identity}:block:{len(blocks) + 1}",
                                 kind=kind,
                                 text=text.strip(),
                                 provenance=refs,
@@ -151,7 +154,8 @@ class DoclingDocumentParser:
         prov = table.get("prov") or []
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
-                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6))):
+                or any(type(data.get(k)) is not int for k in ('num_rows','num_cols'))
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6), (3, 8), (2, 7), (2, 6))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -183,8 +187,17 @@ class DoclingDocumentParser:
             return len(positions) == 6
         if not isinstance(cells, list) or not 7 <= len(cells) <= 12:
             return False
-        values = [c.get("text", "").strip() for c in cells if isinstance(c, dict)]
-        if len(values) != len(cells):
+        if any(not isinstance(c,dict) or not isinstance(c.get('text'),str) for c in cells):
+            return False
+        values = [c['text'].strip() for c in cells]
+        variant=(data['num_rows'],data['num_cols']) in ((3,8),(2,7),(2,6))
+        page=prov[0].get('page_no')
+        if variant and (type(page) is not int or page<1):
+            return False
+        if variant and (any(type(bbox.get(k)) not in (int,float) or not math.isfinite(bbox[k])
+                            for k in ('l','t','r','b'))
+                        or not (40<=bbox['l']<=50 and 570<=bbox['r']<=585
+                                and 50<=bbox['t']<=70 and 10<=bbox['b']<=20)):
             return False
         required = {"Изм.", "Кол.уч", "Подп.", "Дата", "Лист"}
         # Measured page-11 export joins adjacent stamp labels in one cell.
@@ -192,9 +205,26 @@ class DoclingDocumentParser:
         labels = set(values)
         if "Кол.уч Лист" in labels:
             labels.update(("Кол.уч", "Лист"))
+        if variant and 'Кол.уч Дата' in labels:
+            labels.update(('Кол.уч','Дата'))
+        if variant and '№ док. Лист' in labels:
+            labels.add('№ док.')
+        if variant:
+            required=required|{'№ док.'}
         if not required.issubset(labels):
             return False
         allowed = required | {"№ док.", "№ док. Лист", "Кол.уч Лист", "Лист №", "Пояснения"}
+        if variant:
+            allowed=allowed|{'Кол.уч Дата'}
+            code=r'[A-ZА-ЯЁ]{2,5}-[A-ZА-ЯЁ]{2,5}-\d{2}/\d{4}-\d+'
+            if not any(re.fullmatch(code,v) or re.fullmatch(code+' '+str(page),v) for v in values):
+                return False
+            # New measured shapes must carry the actual source sheet number;
+            # arbitrary numerical engineering values cannot be stamp cells.
+            if not any(v==str(page) or re.fullmatch(code+' '+str(page),v) for v in values):
+                return False
+            return all(v in allowed or v==str(page) or re.fullmatch(code,v)
+                       or re.fullmatch(code+' '+str(page),v) for v in values)
         return all(v in allowed or v.isdigit() or re.fullmatch(
             r"[A-ZА-ЯЁ]{2,5}-[A-ZА-ЯЁ]{2,5}-\d{2}/\d{4}-\d+", v
         ) for v in values)
