@@ -128,9 +128,12 @@ class DoclingDocumentParser:
                     # page provenance. They cannot serve as evidence blocks.
                     if refs and key not in seen:
                         seen.add(key)
+                        # Independent page exports restart their local counters.
+                        # Keep original page identity when combining bounded chunks.
+                        page_identity = ','.join(str(p) for p in sorted({ref.page_no for ref in refs}))
                         blocks.append(
                             DocumentBlock(
-                                block_id=f"docling:{len(blocks) + 1}",
+                                block_id=f"docling:pages:{page_identity}:block:{len(blocks) + 1}",
                                 kind=kind,
                                 text=text.strip(),
                                 provenance=refs,
