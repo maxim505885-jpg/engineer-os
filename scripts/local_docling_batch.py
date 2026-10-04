@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 7  # Also recognize the measured combined page-stamp label variant.
+CHECK_VERSION = 8  # Six-label bottom stamp row and normalized TOPLEFT text boxes.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,
@@ -68,6 +68,8 @@ def run_chunk(args, first: int, last: int) -> int:
                str(args.source), "--start", str(first), "--end", str(last),
                "--sha256", args.sha256, "--project-id", args.project_id,
                "--document-id", args.document_id, "--output-json", str(output)]
+    if getattr(args, 'artifacts_path', None) is not None:
+        command.extend(['--artifacts-path', str(args.artifacts_path)])
     result = subprocess.run(command, capture_output=True, text=True)
     audit.write_text(json.dumps({"check_version": CHECK_VERSION,
         "project_id": args.project_id, "document_id": args.document_id,
@@ -154,6 +156,7 @@ def main() -> int:
     parser.add_argument("--project-id", required=True)
     parser.add_argument("--document-id", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument('--artifacts-path', type=Path, help='Existing local Docling model folder')
     parser.add_argument('--reviewed-manifest', type=Path,
                         help='Explicit reviewed table map; source-checked candidates are separate sidecars')
     parser.add_argument('--reviewed-only', action='store_true',
