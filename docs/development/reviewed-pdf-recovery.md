@@ -40,3 +40,28 @@ PASS относится только к проверке привязки тек
 фрагментов; все привязки совпали с исходным PDF. Карта и результат сохранены в
 приватных материалах проверки. Это позволяет воспроизводить извлечение этой
 таблицы, сохраняя блокировку инженерного принятия и всего документа.
+
+## Экспорт кандидатов в формат ENGINEER OS
+
+Опциональный `--candidate-output` повторно проверяет исходный PDF и выдаёт
+`blocks` с существующей структурой `block_id/kind/text/provenance`. Для каждого
+столбца сохраняется отдельный `table_cell`, включая пустые ячейки и обе страницы
+разорванной строки. Заголовки/разделы остаются `table_context`; исходные `rows`,
+`context_fragments` и объявление review также сохраняются без изменения.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\verify_pdf_recovery.py .\.engineer-os\v4-drive-source.pdf recovery-source-manifest.json --output recovery-source-verification.json --candidate-output recovered-table-candidates.json --project-id 2c436f43-98e4-43ad-b3b1-533c6ef4f8b2 --document-id f5e7c759-721f-48c3-8e0e-ced590eecce8
+```
+
+Экспорт имеет `parser=reviewed_pdf_regions_v1`, `status=UNCERTAINTY`,
+`document_status=BLOCK`, `complete_document=false`, `acceptance_granted=false`.
+Диапазон `page_start/page_end` обозначает страницы объявленных регионов, а не
+проверку всего содержимого этих страниц. Верхние метаданные задают TOPLEFT и
+SHA256 для всех блоков. ID проекта/документа назначает вызывающая сторона;
+команда не проверяет их в БД. Оба выходных файла должны отличаться от входов и
+друг друга, включая жёсткие ссылки. Неуспешная повторная проверка заменяет старый
+экспорт пустым BLOCK. Ошибка аргументов не запускает проверку и не меняет файлы.
+
+Это отдельный локальный вход для очереди review. Он не заменяет ошибки Docling
+на PASS и не вызывается автоматически из batch/runtime или Evidence Register.
+Для подключения к UI ещё нужен просмотр и инженерное подтверждение кандидатов.
