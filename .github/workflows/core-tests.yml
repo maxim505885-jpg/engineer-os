@@ -16,9 +16,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check browser JavaScript syntax
         run: node --check app.js
+      - name: Check dashboard behavior
+        run: node --test tests/dashboard_counts.test.cjs
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install pinned PDF review dependency
+        run: python -m pip install -r requirements-pdf-review.txt
       - name: Run full Python regression suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Compile runtime
