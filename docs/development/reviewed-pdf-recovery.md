@@ -65,3 +65,34 @@ SHA256 для всех блоков. ID проекта/документа наз
 Это отдельный локальный вход для очереди review. Он не заменяет ошибки Docling
 на PASS и не вызывается автоматически из batch/runtime или Evidence Register.
 Для подключения к UI ещё нужен просмотр и инженерное подтверждение кандидатов.
+
+## Использование из bounded batch
+
+`local_docling_batch.py --reviewed-manifest recovery-source-manifest.json`
+выполняет обычные Docling chunks и дополнительно запускает повторную проверку
+карты. Исходные `pages-*.json` и `pages-*.audit.json` не заменяются кандидатами.
+Ошибки Docling остаются BLOCK; восстановление отдельных регионов не доказывает
+полноту страниц. Все body pages карты должны входить в выбранный диапазон
+batch (максимум 20 страниц); header context может быть на более ранней странице.
+SHA256 карты должен совпадать с `--sha256` batch.
+
+Чтобы повторно проверить только карту без дорогого запуска Docling:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\local_docling_batch.py .\.engineer-os\v4-drive-source.pdf --start 396 --end 404 --sha256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916 --project-id 2c436f43-98e4-43ad-b3b1-533c6ef4f8b2 --document-id f5e7c759-721f-48c3-8e0e-ced590eecce8 --output-dir .\.engineer-os\reviewed-regions --reviewed-manifest recovery-source-manifest.json --reviewed-only
+```
+
+Нужна optional зависимость из `requirements-pdf-review.txt` в том же окружении.
+В `.venv-docling` текущего Linux checkout PyMuPDF отсутствует; контрольный
+reviewed-only запуск выполнен системным Python с уже установленным PyMuPDF.
+В нём не запускался Docling. На Windows наличие пакетов следует проверять.
+
+Выход: `reviewed-regions.audit.json`, `reviewed-regions.candidates.json` и
+`batch-review-summary.json`. Summary сохраняет результат Docling, заблокированные
+диапазоны, результат recovery и флаги неполноты/непринятия. Reviewed-only всегда
+возвращает код 2 и `docling_status=NOT_RUN`, даже при успешной привязке источника:
+это сигнал незавершённого документа, а не ошибка восстановленной таблицы.
+Обычный batch без новых флагов сохраняет прежнее поведение.
+
+Этот локальный batch теперь умеет потреблять проверенную карту. Автоматическое
+обнаружение новых повреждённых таблиц, UI review и runtime-подключение ещё не выполнены.
