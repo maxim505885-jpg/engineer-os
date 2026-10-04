@@ -5,6 +5,7 @@ CLI uses optional PyMuPDF; the core verifier has no third-party dependencies.
 """
 from __future__ import annotations
 import argparse
+import copy
 from datetime import datetime
 import hashlib
 import json
@@ -114,16 +115,59 @@ def verify(source: Path, manifest: dict, *, page_sizes: dict, read_text) -> dict
                 document_status='BLOCK', evidentiary_status='NOT_EVIDENCE', acceptance_granted=False)
 
 
+def recover(source: Path, manifest: dict, *, project_id: str, document_id: str,
+            page_sizes: dict, read_text) -> dict:
+    """Export source-rechecked regions as candidates; never replace a full parse."""
+    require(all(isinstance(value, str) and value.strip() for value in (project_id, document_id)),
+            'candidate export requires project and document IDs')
+    audit = verify(source, manifest, page_sizes=page_sizes, read_text=read_text)
+    blocks = []
+
+    def add_block(identity, kind, text, fragments):
+        blocks.append(dict(block_id=identity, kind=kind, text=text, provenance=[
+            dict(page_no=f['source_page'], bbox=dict(zip(('left','top','right','bottom'), f['bbox'])))
+            for f in fragments]))
+
+    for i, context in enumerate(manifest['context_fragments']):
+        add_block(f'reviewed-context:{i}', 'table_context', context['text'], [context])
+    for row in manifest['rows']:
+        for cell in row['cells']:
+            add_block(f"reviewed-cell:{row['candidate_id']}:{cell['column_index']}",
+                      'table_cell', cell['text'], cell['source_fragments'])
+    pages = [p['page_no'] for b in blocks for p in b['provenance']]
+    return dict(schema_version=1, parser='reviewed_pdf_regions_v1',
+                project_id=project_id, document_id=document_id,
+                source_sha256=audit['source_sha256'], source_path=str(source),
+                page_start=min(pages), page_end=max(pages), coordinate_origin='TOPLEFT',
+                status='UNCERTAINTY', document_status='BLOCK', evidentiary_status='NOT_EVIDENCE',
+                complete_document=False, acceptance_granted=False,
+                scope='Declared reviewed table regions only; not a full page or document extraction',
+                source_binding_audit=audit, blocks=blocks,
+                rows=copy.deepcopy(manifest['rows']),
+                context_fragments=copy.deepcopy(manifest['context_fragments']),
+                review=copy.deepcopy(manifest['review']))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
     parser.add_argument('manifest', type=Path)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--candidate-output', type=Path,
+                        help='Export only source-rechecked table candidates, retaining BLOCK document status')
+    parser.add_argument('--project-id')
+    parser.add_argument('--document-id')
     args = parser.parse_args()
-    if args.output.resolve() in {args.source.resolve(), args.manifest.resolve()} or (
-            args.output.exists() and any(path.exists() and args.output.samefile(path)
-                                        for path in (args.source, args.manifest))):
-        parser.error('output must not overwrite source or manifest')
+    if args.candidate_output and not (args.project_id and args.document_id):
+        parser.error('candidate output requires --project-id and --document-id')
+    outputs = [args.output] + ([args.candidate_output] if args.candidate_output else [])
+    checked = [args.source, args.manifest]
+    for output in outputs:
+        if any(output.resolve() == path.resolve() or
+               (output.exists() and path.exists() and output.samefile(path)) for path in checked):
+            parser.error('outputs must not overwrite inputs or each other')
+        checked.append(output)
+    candidates = None
     try:
         import fitz
         with fitz.open(args.source) as doc:
@@ -135,13 +179,23 @@ def main():
                     words[page] = doc[page-1].get_text('words', sort=True)
                 return ' '.join(w[4] for w in words[page] if
                     box[0] <= (w[0]+w[2])/2 < box[2] and box[1] <= (w[1]+w[3])/2 < box[3])
-            result = verify(args.source, json.loads(args.manifest.read_text(encoding='utf-8')),
-                            page_sizes=page_sizes, read_text=read_text)
+            manifest = json.loads(args.manifest.read_text(encoding='utf-8'))
+            if args.candidate_output:
+                candidates = recover(args.source, manifest, project_id=args.project_id,
+                                     document_id=args.document_id, page_sizes=page_sizes, read_text=read_text)
+                result = candidates['source_binding_audit']
+            else:
+                result = verify(args.source, manifest, page_sizes=page_sizes, read_text=read_text)
     except (ImportError, ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
         result = dict(status='BLOCK', reason=str(exc), scope='Source-region audit failed',
                       document_status='BLOCK', evidentiary_status='NOT_EVIDENCE', acceptance_granted=False)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+    if args.candidate_output:
+        # A failed rerun replaces old candidates with an explicit empty BLOCK, never stale success.
+        payload = candidates if candidates is not None else dict(result, blocks=[], complete_document=False)
+        args.candidate_output.parent.mkdir(parents=True, exist_ok=True)
+        args.candidate_output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False))
     return 0 if result['status'] == 'PASS' else 2
 

@@ -71,6 +71,78 @@ class PdfRecoveryVerificationTests(unittest.TestCase):
             verify(self.source, self.manifest, page_sizes={1:(100,100),2:(100,100)},
                    read_text=lambda page,box: '' if page==1 else self.read(page,box))
 
+    def test_recovery_exports_all_cells_and_source_context_without_acceptance(self):
+        from scripts.verify_pdf_recovery import recover
+        row = self.manifest['rows'][0]
+        row['source_pages'] = [2, 3]
+        for cell in row['cells']:
+            cell['source_fragments'].append(dict(cell['source_fragments'][0], source_page=3, text=''))
+        result = recover(self.source, self.manifest, project_id='project', document_id='document',
+                         page_sizes={1:(100,100),2:(100,100),3:(100,100)},
+                         read_text=lambda page,box: '' if page==3 else self.read(page,box))
+        self.assertEqual(result['status'], 'UNCERTAINTY')
+        self.assertEqual(result['document_status'], 'BLOCK')
+        self.assertFalse(result['complete_document'])
+        self.assertFalse(result['acceptance_granted'])
+        self.assertEqual(result['evidentiary_status'], 'NOT_EVIDENCE')
+        self.assertEqual((result['page_start'], result['page_end']), (1,3))
+        self.assertEqual(len(result['blocks']), 7)
+        cells = [b for b in result['blocks'] if b['kind']=='table_cell']
+        self.assertEqual(len(cells), 6)
+        self.assertEqual(sum(b['text']=='' for b in cells), 5)
+        self.assertEqual([p['page_no'] for p in cells[1]['provenance']], [2,3])
+        self.assertEqual(cells[1]['provenance'][0]['bbox']['left'], 11)
+        self.assertEqual(result['rows'][0], row)
+        self.assertEqual(result['context_fragments'], self.manifest['context_fragments'])
+        self.assertEqual(result['project_id'], 'project')
+        self.assertEqual(result['document_id'], 'document')
+
+    def test_recovery_cannot_export_stale_or_altered_manifest(self):
+        from scripts.verify_pdf_recovery import recover
+        self.manifest['rows'][0]['cells'][1]['source_fragments'][0]['text'] = 'invented'
+        with self.assertRaises(ValueError):
+            recover(self.source, self.manifest, project_id='project', document_id='document',
+                    page_sizes={1:(100,100),2:(100,100)}, read_text=self.read)
+
+    def test_cli_failed_rerun_invalidates_old_candidates(self):
+        import io, json, sys
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from scripts.verify_pdf_recovery import main
+        manifest = Path(self.temp.name)/'manifest.json'
+        manifest.write_text(json.dumps(self.manifest))
+        output = Path(self.temp.name)/'audit.json'
+        candidates = Path(self.temp.name)/'candidates.json'
+        candidates.write_text(json.dumps({'status':'UNCERTAINTY', 'blocks':[{'text':'stale'}]}))
+        def opening(*args): raise RuntimeError('invalid PDF structure')
+        argv = ['verify', str(self.source), str(manifest), '--output', str(output),
+                '--candidate-output', str(candidates), '--project-id','project','--document-id','doc']
+        with patch.dict(sys.modules, {'fitz':SimpleNamespace(open=opening)}), patch.object(sys,'argv',argv), patch('sys.stdout',io.StringIO()):
+            self.assertEqual(main(),2)
+        failed = json.loads(candidates.read_text())
+        self.assertEqual(failed['blocks'], [])
+        self.assertEqual(failed['status'], 'BLOCK')
+        self.assertFalse(failed['complete_document'])
+
+    def test_cli_candidate_output_cannot_alias_inputs_or_audit(self):
+        import io, json, os, sys
+        from unittest.mock import patch
+        from scripts.verify_pdf_recovery import main
+        manifest = Path(self.temp.name)/'manifest.json'
+        manifest.write_text(json.dumps(self.manifest))
+        output = Path(self.temp.name)/'audit.json'
+        output.write_text('existing audit')
+        hardlink = Path(self.temp.name)/'hardlink.json'
+        os.link(manifest, hardlink)
+        for candidate in (self.source, manifest, output, hardlink):
+            argv = ['verify', str(self.source), str(manifest), '--output', str(output),
+                    '--candidate-output', str(candidate), '--project-id','project','--document-id','doc']
+            with patch.object(sys,'argv',argv), patch('sys.stderr',io.StringIO()):
+                with self.assertRaises(SystemExit) as exc: main()
+            self.assertEqual(exc.exception.code,2)
+        self.assertEqual(output.read_text(), 'existing audit')
+        self.assertEqual(json.loads(manifest.read_text()), self.manifest)
+
     def test_cli_rejects_output_hardlinked_to_manifest(self):
         import io, json, os, sys
         from unittest.mock import patch
