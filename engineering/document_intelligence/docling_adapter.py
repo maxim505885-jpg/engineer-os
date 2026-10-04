@@ -21,11 +21,14 @@ def document_intelligence_enabled() -> bool:
 
 
 class DoclingDocumentParser:
-    def __init__(self, converter_factory: Callable[[], Any] | None = None, *, table_mode: str = "accurate") -> None:
+    def __init__(self, converter_factory: Callable[[], Any] | None = None, *, table_mode: str = "accurate",
+                 artifacts_path: str | Path | None = None) -> None:
         if table_mode not in ("accurate", "fast"):
             raise ValueError("table_mode must be accurate or fast")
         self._converter_factory = converter_factory
         self._table_mode = table_mode
+        selected = artifacts_path if artifacts_path is not None else os.environ.get('ENGINEER_OS_DOCLING_ARTIFACTS_PATH')
+        self._artifacts_path = Path(selected) if selected else None
 
     @staticmethod
     def _sha256(path: Path) -> str:
@@ -38,6 +41,8 @@ class DoclingDocumentParser:
     def _converter(self) -> Any:
         if self._converter_factory is not None:
             return self._converter_factory()
+        if self._artifacts_path is not None and not self._artifacts_path.is_dir():
+            raise DocumentParseError(f'Docling model artifacts folder not found: {self._artifacts_path}')
         try:
             from docling.datamodel.base_models import InputFormat
             from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions, TableFormerMode
@@ -46,7 +51,7 @@ class DoclingDocumentParser:
             raise DocumentParseError(
                 "Docling is not installed; document intelligence cannot parse this source"
             ) from exc
-        pipeline_options = PdfPipelineOptions()
+        pipeline_options = PdfPipelineOptions(artifacts_path=self._artifacts_path)
         if self._table_mode == "fast":
             pipeline_options.table_structure_options.mode = TableFormerMode.FAST
         pipeline_options.do_ocr = True

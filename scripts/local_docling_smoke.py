@@ -30,6 +30,7 @@ def main() -> int:
     parser.add_argument("--end", type=int, default=1)
     parser.add_argument("--sha256", help="Expected source SHA-256")
     parser.add_argument("--table-mode", choices=("accurate", "fast"), default="accurate")
+    parser.add_argument('--artifacts-path', type=Path, help='Existing local Docling model folder')
     parser.add_argument("--output-json", type=Path, help="Write page-located blocks after bounded checks")
     parser.add_argument("--document-id")
     parser.add_argument("--project-id")
@@ -48,7 +49,7 @@ def main() -> int:
     root_logger = logging.getLogger()
     root_logger.addHandler(monitor)
     try:
-        document = DoclingDocumentParser(table_mode=args.table_mode).parse(str(args.source), page_range=(args.start, args.end))
+        document = DoclingDocumentParser(table_mode=args.table_mode, artifacts_path=args.artifacts_path).parse(str(args.source), page_range=(args.start, args.end))
     finally:
         root_logger.removeHandler(monitor)
     pages = sorted({ref.page_no for block in document.blocks for ref in block.provenance})

@@ -9,6 +9,19 @@ from scripts.v4_extraction_review import review
 
 
 class ExtractionReviewTests(unittest.TestCase):
+    def test_successful_pair_with_one_unlocated_page_remains_blocked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            base=dict(source_sha256=SOURCE_SHA256,project_id=PROJECT_ID,
+                      document_id=DOCUMENT_ID,page_start=1,page_end=2)
+            (root/'pages-0001-0002.audit.json').write_text(json.dumps(dict(base,check_version=CHECK_VERSION,exit_code=0)))
+            (root/'pages-0001-0002.json').write_text(json.dumps(dict(base,status='UNCERTAINTY',blocks=[
+                dict(block_id='one',kind='text',text='page one',provenance=[{'page_no':1}]) ])))
+            result=review(root,2)
+            self.assertEqual(result['blocked_chunks'],0)
+            self.assertEqual(result['status'],'BLOCK')
+            self.assertEqual(result['pages_without_extracted_blocks'],[2])
+
     def test_pre_header_gate_cache_is_not_counted_as_current_extraction(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

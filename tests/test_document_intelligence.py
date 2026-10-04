@@ -28,6 +28,17 @@ class _FakeConverter:
 
 
 class DocumentIntelligenceTests(unittest.TestCase):
+    def test_missing_explicit_model_folder_blocks_before_initialization(self):
+        with self.assertRaisesRegex(DocumentParseError, 'artifacts'):
+            DoclingDocumentParser(artifacts_path='/missing/model-artifacts')._converter()
+
+    def test_model_folder_uses_explicit_path_before_environment(self):
+        with tempfile.TemporaryDirectory() as explicit, tempfile.TemporaryDirectory() as environmental:
+            with patch.dict(os.environ, {'ENGINEER_OS_DOCLING_ARTIFACTS_PATH':environmental}):
+                parser=DoclingDocumentParser(artifacts_path=explicit)
+                self.assertEqual(str(parser._artifacts_path),explicit)
+                self.assertEqual(str(DoclingDocumentParser()._artifacts_path),environmental)
+
     def test_unknown_table_mode_is_rejected(self):
         with self.assertRaises(ValueError):
             DoclingDocumentParser(table_mode="unknown")

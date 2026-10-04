@@ -87,7 +87,8 @@ def review(directory: Path, page_count: int) -> dict:
         "pages_without_extracted_blocks": sorted(missing_provenance_pages),
         "isolated_pages": isolated_pages,
         "review_queue": queue,
-        "issues": issues, "status": "BLOCK" if blocked_chunks else "UNCERTAINTY",
+        "issues": issues, "status": "BLOCK" if blocked_chunks or missing_provenance_pages else "UNCERTAINTY",
+        "complete_document": False, "acceptance_granted": False,
         "note": "Extraction inventory only; pages and engineering conclusions require review",
     }
 
@@ -106,7 +107,7 @@ def main() -> int:
     print(f"CHUNKS: {result['successful_chunks']} passed, {result['blocked_chunks']} blocked")
     print(f"PAGES_WITH_BLOCKS: {result['pages_with_extracted_blocks']}/{result['page_count']}")
     print(f"STATUS: {result['status']}")
-    return 2 if result["blocked_chunks"] else 0
+    return 2 if result["status"] == 'BLOCK' else 0
 
 
 if __name__ == "__main__":
