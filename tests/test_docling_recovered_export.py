@@ -43,9 +43,12 @@ class RecoveredExportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory)/'source.pdf'
             pdf=fitz.open();p=pdf.new_page(width=100,height=100)
+            p.draw_rect(fitz.Rect(0,10,30,30),width=.2)
+            p.draw_line((0,20),(30,20),width=.2)
+            for x in (10,20):p.draw_line((x,20),(x,30),width=.2)
             p.insert_text((5,8),'Context',fontsize=5)
             p.insert_text((2,18),'Header',fontsize=5)
-            p.insert_text((12,28),'Value',fontsize=5)
+            p.insert_text((12,28),'Value',fontsize=3)
             pdf.save(source);pdf.close()
             sha=hashlib.sha256(source.read_bytes()).hexdigest()
             def f(box,text):
@@ -78,3 +81,35 @@ class RecoveredExportTests(unittest.TestCase):
                     self.assertEqual(failed['status'],'BLOCK')
                     self.assertFalse(failed['acceptance_granted'])
                     self.assertFalse(failed['complete_document'])
+            repaired_raw=copy.deepcopy(raw)
+            repaired_raw['tables'][0]['data']['table_cells'][0]['text']='OCRWrong'
+            corrected=copy.deepcopy(manifest)
+            corrected['tables'][0].update(replacement_mode='SOURCE_VECTOR_GRID',source_detection_clip=[0,10,30,30],docling_table_sha256=hashlib.sha256(json.dumps(repaired_raw['tables'][0],sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest())
+            corrected_result=module.recover_export(source,repaired_raw,corrected,project_id='p',document_id='d')
+            self.assertEqual(corrected_result['status'],'UNCERTAINTY',corrected_result.get('reason'))
+            self.assertTrue(any(b['kind']=='table_cell' and b['text']=='Header' for b in corrected_result['blocks']))
+            self.assertFalse(corrected_result['complete_document'])
+            oversized_raw=copy.deepcopy(repaired_raw)
+            oversized_raw['tables'][0]['prov'][0]['bbox']['l']=10**400
+            oversized_manifest=copy.deepcopy(corrected)
+            oversized_manifest['tables'][0]['docling_table_sha256']=hashlib.sha256(json.dumps(oversized_raw['tables'][0],sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+            oversized_result=module.recover_export(source,oversized_raw,oversized_manifest,project_id='p',document_id='d')
+            self.assertEqual(oversized_result['status'],'BLOCK')
+            self.assertEqual(oversized_result['blocks'],[])
+            invalid_clip=copy.deepcopy(corrected)
+            invalid_clip['tables'][0]['source_detection_clip']=[0,11,29,29]
+            self.assertEqual(module.recover_export(source,repaired_raw,invalid_clip,project_id='p',document_id='d')['status'],'BLOCK')
+            ink_source=Path(directory)/'ink.pdf'
+            with fitz.open(source) as ink_pdf:
+                ink_pdf[0].draw_line((2,23),(7,28),width=.3)
+                ink_pdf.save(ink_source)
+            ink_manifest=copy.deepcopy(corrected)
+            ink_sha=hashlib.sha256(ink_source.read_bytes()).hexdigest()
+            ink_manifest['source_sha256']=ink_sha
+            for fragment in ink_manifest['context_fragments']:
+                fragment['source_sha256']=ink_sha
+            for cell in ink_manifest['tables'][0]['cells']:
+                cell['source_fragment']['source_sha256']=ink_sha
+            ink_result=module.recover_export(ink_source,repaired_raw,ink_manifest,project_id='p',document_id='d')
+            self.assertEqual(ink_result['status'],'BLOCK')
+            self.assertIn('visible ink',ink_result['reason'])

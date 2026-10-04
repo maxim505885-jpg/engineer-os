@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 9  # Preserve original page identity in independently normalized chunk block IDs.
+CHECK_VERSION = 10  # Recognize source-reviewed alternate bottom-stamp export shapes.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,

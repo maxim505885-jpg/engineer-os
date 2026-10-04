@@ -6,6 +6,7 @@ import argparse
 import copy
 import hashlib
 import json
+import math
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -21,6 +22,46 @@ from scripts.verify_pdf_recovery import recover, normalize
 def table_digest(table):
     return hashlib.sha256(json.dumps(table,sort_keys=True,ensure_ascii=False,
                                     separators=(',',':'),allow_nan=False).encode()).hexdigest()
+
+
+def verify_vector_replacement(source,grid,target):
+    """Re-detect original vector cells; no image/text or engineering acceptance."""
+    import fitz
+    with fitz.open(source) as pdf:
+        page=pdf[grid['source_page']-1]
+        clip=grid.get('source_detection_clip')
+        if (not isinstance(clip,list) or len(clip)!=4
+                or any(type(v) not in (int,float) or not math.isfinite(v) for v in clip)
+                or not 0<=clip[0]<clip[2]<=page.rect.width
+                or not 0<=clip[1]<clip[3]<=page.rect.height):
+            raise ValueError('invalid source grid detection clip')
+        boxes={tuple(round(v,5) for v in c['source_fragment']['bbox']) for c in grid['cells']}
+        detected=page.find_tables(clip=fitz.Rect(clip)).tables
+        matches=[t for t in detected if {tuple(round(v,5) for v in b) for b in t.cells if b is not None}==boxes]
+        if len(matches)!=1:raise ValueError('declared cells do not match original vector grid')
+        box=fitz.Rect(grid['x_boundaries'][0],grid['y_boundaries'][0],grid['x_boundaries'][-1],grid['y_boundaries'][-1])
+        b=target['prov'][0]['bbox']
+        if any(type(b.get(k)) not in (int,float) or not 0<=b[k]<=limit
+               for k,limit in [('l',page.rect.width),('r',page.rect.width),('t',page.rect.height),('b',page.rect.height)]):
+            raise ValueError('target bbox outside original page')
+        if b.get('coord_origin')=='BOTTOMLEFT':
+            target_box=fitz.Rect(b['l'],page.rect.height-b['t'],b['r'],page.rect.height-b['b'])
+        elif b.get('coord_origin')=='TOPLEFT':target_box=fitz.Rect(b['l'],b['t'],b['r'],b['b'])
+        else:raise ValueError('invalid target coordinate origin')
+        intersection=(box&target_box).get_area()
+        union=box.get_area()+target_box.get_area()-intersection
+        if union<=0 or intersection/union<.95:
+            raise ValueError('target/source table regions differ')
+        if any((fitz.Rect(image['bbox'])&box).get_area()>0 for image in page.get_image_info()):
+            raise ValueError('source table contains unverified image content')
+        for cell in grid['cells']:
+            f=cell['source_fragment']
+            if f['text'].strip():continue
+            inner=fitz.Rect(f['bbox']);inner=fitz.Rect(inner.x0+1.5,inner.y0+1.5,inner.x1-1.5,inner.y1-1.5)
+            if inner.is_empty:raise ValueError('empty cell too small for source blank verification')
+            pix=page.get_pixmap(matrix=fitz.Matrix(2,2),clip=inner,colorspace=fitz.csGRAY,alpha=False)
+            if any(v<220 for v in pix.samples):
+                raise ValueError('native-empty source cell contains visible ink')
 
 
 def recover_export(source, raw, manifest, *, project_id, document_id):
@@ -57,6 +98,12 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
             if len(prov)!=1 or prov[0].get('page_no')!=grid['source_page']:
                 raise ValueError('target source page mismatch')
             data=target.get('data') or {}
+            mode=grid.get('replacement_mode','MATCH_MODEL_GRID')
+            if mode=='SOURCE_VECTOR_GRID':
+                verify_vector_replacement(source,grid,target)
+                mappings[index]=grid['table_id']
+                continue
+            if mode!='MATCH_MODEL_GRID':raise ValueError('unsupported source replacement mode')
             if any(type(data.get(k)) is not int for k in ('num_rows','num_cols')):
                 raise ValueError('invalid model dimensions')
             if data.get('num_rows')!=len(grid['y_boundaries'])-1 or data.get('num_cols')!=len(grid['x_boundaries'])-1:
@@ -101,7 +148,7 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
             result['status']='UNCERTAINTY'
         result['source_binding_audit']=checked['source_binding_audit']
         result['scope']='Mapped table normalization only; page/document completeness and semantics unverified'
-    except (ImportError,OSError,ValueError,KeyError,TypeError,AttributeError,RuntimeError,DocumentParseError) as exc:
+    except (ImportError,OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError,RuntimeError,DocumentParseError) as exc:
         result.update(status='BLOCK',blocks=[],reason=str(exc))
         result['table_recovery']['resolved_table_indices']=[]
     return result
