@@ -23,8 +23,71 @@ def normalize(text):
     return ' '.join(text.split())
 
 
+def verify_grids(manifest, fragment):
+    """Check declared physical cells, including spans; no visual or semantic acceptance."""
+    require(manifest.get('status') == 'UNCERTAINTY'
+            and manifest.get('evidentiary_status') == 'NOT_EVIDENCE'
+            and manifest.get('acceptance_granted') is False, 'candidate must remain unaccepted')
+    tables = manifest.get('tables')
+    require(isinstance(tables, list) and bool(tables), 'no recovery grids')
+    ids, pages, count, slots = set(), set(), 0, 0
+    for table in tables:
+        require(isinstance(table, dict), 'invalid grid table')
+        identity = table.get('table_id')
+        require(isinstance(identity, str) and identity.strip() and identity not in ids,
+                'duplicate or missing table ID')
+        ids.add(identity)
+        axes = [table.get('x_boundaries'), table.get('y_boundaries')]
+        for axis in axes:
+            require(isinstance(axis, list) and 2 <= len(axis) <= 10000 and all(
+                type(v) in (int, float) and math.isfinite(v) for v in axis)
+                and all(a < b for a, b in zip(axis, axis[1:])), 'invalid grid boundaries')
+        x, y = axes
+        require((len(x)-1)*(len(y)-1) <= 100000, 'grid exceeds audit size limit')
+        require(type(table.get('source_page')) is int and any(
+            f['source_page'] == table['source_page'] for f in manifest['context_fragments']),
+            'missing source grid context')
+        cells = table.get('cells')
+        require(isinstance(cells, list) and bool(cells), 'missing grid cells')
+        occupied, cell_ids = set(), set()
+        for cell in cells:
+            require(isinstance(cell, dict), 'invalid grid cell')
+            identity = cell.get('cell_id')
+            require(isinstance(identity, str) and identity.strip() and identity not in cell_ids,
+                    'duplicate or missing cell ID')
+            cell_ids.add(identity)
+            span = [cell.get(k) for k in ('row_start','row_end','col_start','col_end')]
+            require(all(type(v) is int for v in span), 'invalid cell span')
+            rs, re_, cs, ce = span
+            require(0 <= rs < re_ < len(y) and 0 <= cs < ce < len(x), 'cell span outside grid')
+            f = cell.get('source_fragment')
+            page = fragment(f)
+            require(page == table['source_page'], 'grid source page mismatch')
+            expected = [x[cs], y[rs], x[ce], y[re_]]
+            require(max(abs(a-b) for a,b in zip(expected, f['bbox'])) <= .01,
+                    'cell bbox differs from declared grid')
+            for r in range(rs, re_):
+                for c in range(cs, ce):
+                    require((r,c) not in occupied, 'overlapping grid cells')
+                    occupied.add((r,c))
+            pages.add(page)
+            count += 1
+        total = (len(x)-1)*(len(y)-1)
+        require(len(occupied) == total, 'grid has missing cells')
+        slots += total
+    return dict(status='PASS', scope='Declared grid coverage and original PDF text-region binding only; '
+                'rulings, visual content, semantics and full extraction completeness not accepted',
+                source_sha256=manifest['source_sha256'], verified_tables=len(tables),
+                verified_cells=count, verified_fragments=count, verified_grid_slots=slots,
+                source_pages=sorted(pages), document_status='BLOCK',
+                evidentiary_status='NOT_EVIDENCE', acceptance_granted=False)
+
+
 def verify(source: Path, manifest: dict, *, page_sizes: dict, read_text) -> dict:
     require(isinstance(manifest, dict), 'manifest must be an object')
+    require('schema_version' not in manifest or
+            (type(manifest['schema_version']) is int and manifest['schema_version'] in (1,2)),
+            'unsupported recovery schema')
     sha = manifest.get('source_sha256')
     require(isinstance(sha, str) and re.fullmatch('[0-9a-f]{64}', sha), 'invalid source SHA256')
     with Path(source).open('rb') as handle:
@@ -58,6 +121,8 @@ def verify(source: Path, manifest: dict, *, page_sizes: dict, read_text) -> dict
         require(isinstance(f, dict) and isinstance(f.get('text'), str) and f['text'].strip(),
                 'source header/section context cannot be empty')
         fragment(f)
+    if manifest.get('schema_version') == 2:
+        return verify_grids(manifest, fragment)
     rows = manifest.get('rows')
     require(isinstance(rows, list) and bool(rows), 'no recovery candidates')
     ids, pages, count = set(), set(), 0
@@ -130,12 +195,26 @@ def recover(source: Path, manifest: dict, *, project_id: str, document_id: str,
 
     for i, context in enumerate(manifest['context_fragments']):
         add_block(f'reviewed-context:{i}', 'table_context', context['text'], [context])
-    for row in manifest['rows']:
-        for cell in row['cells']:
-            add_block(f"reviewed-cell:{row['candidate_id']}:{cell['column_index']}",
-                      'table_cell', cell['text'], cell['source_fragments'])
+    schema = manifest.get('schema_version', 1)
+    if schema == 2:
+        for table in manifest['tables']:
+            for cell in table['cells']:
+                f = cell['source_fragment']
+                identity = json.dumps([table['table_id'], cell['cell_id']],
+                                      ensure_ascii=False, separators=(',', ':'))
+                add_block(f'reviewed-cell:{identity}',
+                          'table_cell', f['text'], [f])
+                blocks[-1]['grid_span'] = {k:cell[k] for k in
+                    ('row_start','row_end','col_start','col_end')}
+                blocks[-1]['table_id'] = table['table_id']
+                blocks[-1]['cell_id'] = cell['cell_id']
+    else:
+        for row in manifest['rows']:
+            for cell in row['cells']:
+                add_block(f"reviewed-cell:{row['candidate_id']}:{cell['column_index']}",
+                          'table_cell', cell['text'], cell['source_fragments'])
     pages = [p['page_no'] for b in blocks for p in b['provenance']]
-    return dict(schema_version=1, parser='reviewed_pdf_regions_v1',
+    result = dict(schema_version=schema, parser=f'reviewed_pdf_regions_v{schema}',
                 project_id=project_id, document_id=document_id,
                 source_sha256=audit['source_sha256'], source_path=str(source),
                 page_start=min(pages), page_end=max(pages), coordinate_origin='TOPLEFT',
@@ -143,9 +222,11 @@ def recover(source: Path, manifest: dict, *, project_id: str, document_id: str,
                 complete_document=False, acceptance_granted=False,
                 scope='Declared reviewed table regions only; not a full page or document extraction',
                 source_binding_audit=audit, blocks=blocks,
-                rows=copy.deepcopy(manifest['rows']),
                 context_fragments=copy.deepcopy(manifest['context_fragments']),
                 review=copy.deepcopy(manifest['review']))
+    key = 'tables' if schema == 2 else 'rows'
+    result[key] = copy.deepcopy(manifest[key])
+    return result
 
 
 def main():
