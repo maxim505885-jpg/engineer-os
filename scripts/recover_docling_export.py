@@ -64,7 +64,7 @@ def verify_vector_replacement(source,grid,target):
                 raise ValueError('native-empty source cell contains visible ink')
 
 
-def preserve_source_context(source, grid, target, source_sha256):
+def _capture_source_context(source, grid, target, source_sha256):
     """Keep source pixels and outside words when neural bounds merge regions.
 
     This alternative does not certify the neural table or whole-page coverage.
@@ -90,8 +90,6 @@ def preserve_source_context(source, grid, target, source_sha256):
             raise ValueError('target does not intersect source grid')
         if max(intersection/box.get_area(),intersection/target_box.get_area())<.95:
             raise ValueError('target and source grid lack substantial containment')
-        exact=dict(prov=[dict(page_no=grid['source_page'],bbox=dict(l=box.x0,t=box.y0,r=box.x1,b=box.y1,coord_origin='TOPLEFT'))])
-        verify_vector_replacement(source,grid,exact)
         # Preserve the entire bounding union, including symbols, pictures and
         # ink that the text layer cannot describe. Never call outside words blank.
         union=box|target_box
@@ -111,6 +109,42 @@ def preserve_source_context(source, grid, target, source_sha256):
                         rendered_pixel_origin=[pix.x,pix.y],width_px=pix.width,height_px=pix.height,annotations_rendered=True),
                     source_capture_status='PASS',interpretation_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',
                     complete_page=False,acceptance_granted=False)
+
+
+def preserve_source_context(source, grid, target, source_sha256):
+    context = _capture_source_context(source, grid, target, source_sha256)
+    box = context['source_grid_bbox']
+    exact = dict(prov=[dict(page_no=grid['source_page'],bbox=dict(
+        l=box[0],t=box[1],r=box[2],b=box[3],coord_origin='TOPLEFT'))])
+    verify_vector_replacement(source,grid,exact)
+    return context
+
+
+def _capture_mixed_replacement(source, manifest, grid, target, *, project_id, document_id):
+    """Independently verify physical cells and embed every source visual.
+
+    Native-empty cells retain their pixels; visual semantics remain uncertain.
+    """
+    import base64
+    import tempfile
+    from scripts.capture_pdf_grid_assets import capture_grid_assets
+    # Validate the target/union and bounded render before cell captures.
+    context = _capture_source_context(source,grid,target,manifest['source_sha256'])
+    one = copy.deepcopy(manifest)
+    one['tables'] = [grid]
+    with tempfile.TemporaryDirectory() as directory:
+        captured = capture_grid_assets(source,one,Path(directory),
+            project_id=project_id,document_id=document_id)
+        if captured['status']=='BLOCK':
+            raise ValueError(captured.get('reason','mixed grid source verification failed'))
+        blocks = [b for b in captured['blocks'] if b.get('kind')=='table_cell']
+        for block in blocks:
+            asset = block['visual_asset']
+            data = (Path(directory)/asset.pop('path')).read_bytes()
+            if hashlib.sha256(data).hexdigest()!=asset['sha256']:
+                raise ValueError('mixed cell capture digest mismatch')
+            asset.update(png_base64=base64.b64encode(data).decode('ascii'),mime_type='image/png')
+        return context, blocks
 
 
 def recover_export(source, raw, manifest, *, project_id, document_id):
@@ -137,6 +171,7 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
         if not isinstance(tables,list):raise ValueError('invalid raw tables')
         mappings={}
         contexts=[]
+        mixed_blocks={}
         for grid in checked['tables']:
             index=grid.get('docling_table_index')
             if type(index) is not int or not 0<=index<len(tables) or index in mappings:
@@ -149,6 +184,13 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
                 raise ValueError('target source page mismatch')
             data=target.get('data') or {}
             mode=grid.get('replacement_mode','MATCH_MODEL_GRID')
+            if mode=='SOURCE_MIXED_GRID_CONTEXT':
+                context, cell_blocks = _capture_mixed_replacement(source,manifest,grid,target,
+                    project_id=project_id,document_id=document_id)
+                contexts.append(context)
+                mixed_blocks[index]=cell_blocks
+                mappings[index]=grid['table_id']
+                continue
             if mode=='SOURCE_VECTOR_CONTEXT':
                 contexts.append(preserve_source_context(source,grid,target,manifest['source_sha256']))
                 mappings[index]=grid['table_id']
@@ -181,7 +223,7 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
                     raise ValueError('raw block outside source page')
         for index,table in enumerate(tables):
             if index in mappings:
-                result['blocks'].extend(dict(b,source_binding_status='PASS') for b in checked['blocks'] if b.get('table_id')==mappings[index])
+                result['blocks'].extend(dict(b,source_binding_status='PASS') for b in (mixed_blocks[index] if index in mixed_blocks else checked['blocks']) if b.get('table_id')==mappings[index])
                 result['table_recovery']['resolved_table_indices'].append(index)
                 continue
             try:
@@ -196,7 +238,7 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
                 result['table_recovery']['unresolved_tables'].append(dict(table_index=index,reason=str(exc)))
         result['blocks'].extend(contexts)
         if contexts:
-            result['table_recovery']['preserved_context_indices']=[g['docling_table_index'] for g in checked['tables'] if g.get('replacement_mode')=='SOURCE_VECTOR_CONTEXT']
+            result['table_recovery']['preserved_context_indices']=[g['docling_table_index'] for g in checked['tables'] if g.get('replacement_mode') in ('SOURCE_VECTOR_CONTEXT','SOURCE_MIXED_GRID_CONTEXT')]
         if not tables or not result['blocks']:
             raise ValueError('no tables or extracted content for recovery')
         # Captions and body extraction outside these table regions are not

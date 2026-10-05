@@ -63,6 +63,35 @@ class PdfGridAssetsTests(unittest.TestCase):
                 '--project-id','p','--document-id','d','--output-dir',str(collision)],capture_output=True,text=True)
             self.assertEqual(run.returncode,2,run.stderr)
             self.assertEqual(input_manifest.read_bytes(),original_manifest)
+            # Break caught: recovery must retain actual image cell pixels,
+            # never export a native-empty image as a verified blank cell.
+            from scripts.recover_docling_export import recover_export, table_digest
+            target=dict(prov=[dict(page_no=1,bbox=dict(l=10,t=20,r=90,b=80,coord_origin='TOPLEFT'))],
+                        data=dict(num_rows=3,num_cols=2,table_cells=[]))
+            grid=manifest['tables'][0]
+            grid.update(docling_table_index=0,docling_table_sha256=table_digest(target),replacement_mode='SOURCE_MIXED_GRID_CONTEXT')
+            mapped=recover_export(source,dict(tables=[target]),manifest,project_id='p',document_id='d')
+            self.assertEqual(mapped['status'],'UNCERTAINTY',mapped.get('reason'))
+            cells=[b for b in mapped['blocks'] if b['kind']=='table_cell']
+            self.assertEqual(len(cells),2)
+            visual=cells[1]['visual_asset']
+            import base64
+            payload=base64.b64decode(visual['png_base64'],validate=True)
+            self.assertEqual(hashlib.sha256(payload).hexdigest(),visual['sha256'])
+            self.assertTrue(visual['contains_source_image'])
+            self.assertFalse(visual['native_empty_is_visual_blank'])
+            self.assertEqual(cells[1]['content_interpretation_status'],'UNCERTAINTY')
+            self.assertFalse(mapped['acceptance_granted'])
+            self.assertFalse(mapped['complete_page'])
+            self.assertEqual(mapped['document_status'],'BLOCK')
+            grid['replacement_mode']='SOURCE_VECTOR_CONTEXT'
+            self.assertEqual(recover_export(source,dict(tables=[target]),manifest,project_id='p',document_id='d')['status'],'BLOCK')
+            grid['replacement_mode']='SOURCE_MIXED_GRID_CONTEXT'
+            grid['source_detection_clip']=[0,0,9,9]
+            rejected=recover_export(source,dict(tables=[target]),manifest,project_id='p',document_id='d')
+            self.assertEqual(rejected['status'],'BLOCK')
+            self.assertEqual(rejected['blocks'],[])
+            grid['source_detection_clip']=[0,0,100,100]
             manifest['tables'][0]['cells'][1]['source_fragment']['text']='invented measurement'
             invalid=module.capture_grid_assets(source,manifest,root/'invalid',project_id='p',document_id='d')
             self.assertEqual(invalid['status'],'BLOCK')

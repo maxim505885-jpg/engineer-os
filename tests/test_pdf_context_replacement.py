@@ -26,6 +26,21 @@ class ContextReplacementTests(unittest.TestCase):
             if mutation=='body_position':changed['prov'][0]['bbox']['t']=300
             self.assertFalse(DoclingDocumentParser._is_page_stamp(changed))
 
+    def test_two_row_eight_column_stamp_requires_source_sheet_and_code(self):
+        # Measured p136/p225 exports add a duplicate "Лист" stamp column.
+        values=['Изм.','Кол.уч','№ док.','Подп.','Дата','ОСК-ССК-22/0526-1','Лист','136','Лист']
+        table=dict(prov=[dict(page_no=136,bbox=dict(l=43.33,t=60.64,r=582.59,b=14.76,coord_origin='BOTTOMLEFT'))],
+                   data=dict(num_rows=2,num_cols=8,table_cells=[dict(text=v) for v in values]))
+        self.assertTrue(DoclingDocumentParser._is_page_stamp(table))
+        for field,value in [('page_no',135),('t',300)]:
+            changed=copy.deepcopy(table)
+            if field=='page_no':changed['prov'][0][field]=value
+            else:changed['prov'][0]['bbox'][field]=value
+            self.assertFalse(DoclingDocumentParser._is_page_stamp(changed))
+        for altered in [values+['31.4'],[v for v in values if v!='ОСК-ССК-22/0526-1']]:
+            changed=copy.deepcopy(table);changed['data']['table_cells']=[dict(text=v) for v in altered]
+            self.assertFalse(DoclingDocumentParser._is_page_stamp(changed))
+
     # Catch loss of the footer when a neural table contains both grid and margin.
     def test_verified_grid_preserves_oversized_model_region(self):
         import fitz

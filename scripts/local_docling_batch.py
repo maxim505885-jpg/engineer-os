@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 10  # Recognize source-reviewed alternate bottom-stamp export shapes.
+CHECK_VERSION = 11  # Recheck the measured 2x8 stamp shape; invalidate prior normalization cache.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,

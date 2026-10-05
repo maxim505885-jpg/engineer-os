@@ -155,7 +155,7 @@ class DoclingDocumentParser:
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
                 or any(type(data.get(k)) is not int for k in ('num_rows','num_cols'))
-                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6), (3, 8), (2, 7), (2, 6))):
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6), (3, 8), (2, 7), (2, 6), (2, 8))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -190,7 +190,7 @@ class DoclingDocumentParser:
         if any(not isinstance(c,dict) or not isinstance(c.get('text'),str) for c in cells):
             return False
         values = [c['text'].strip() for c in cells]
-        variant=(data['num_rows'],data['num_cols']) in ((3,8),(2,7),(2,6))
+        variant=(data['num_rows'],data['num_cols']) in ((3,8),(2,7),(2,6),(2,8))
         split_number_stamp=((data['num_rows'],data['num_cols'])==(3,8)
                             and '№ Лист' in values and 'док.' in values)
         page=prov[0].get('page_no')
