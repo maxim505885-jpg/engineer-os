@@ -1,0 +1,650 @@
+{
+  "status": "UNCERTAINTY",
+  "document_status": "BLOCK",
+  "acceptance_granted": false,
+  "source_count": 8,
+  "source_identity_status": "PASS",
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "mixed_grid_pages": [
+    10,
+    78,
+    86,
+    99,
+    106,
+    171
+  ],
+  "visual_asset_count": 102,
+  "image_containing_cells": 15,
+  "independent_asset_verification": "PASS",
+  "native_grid_text_only_recovery_unchanged": "BLOCK_ON_IMAGES",
+  "ocr_page171_blocks": 234,
+  "ocr_page171_low_confidence_blocks": 110,
+  "load_table_agreement_cells": 125,
+  "coordinate_formula_checks_passed": 4,
+  "legacy_doc_main_text_chars": 16010,
+  "source_pdf_pages": 43,
+  "python_tests": 191,
+  "node_tests": 4,
+  "remaining": [
+    {
+      "code": "V4_PAGE_COMPLETENESS",
+      "status": "BLOCK",
+      "reason": "Selected grids and assets do not demonstrate complete extraction of all 534 pages; archived 103 page-normalization blocks are a different scope."
+    },
+    {
+      "code": "RASTER_NUMERIC_REVIEW",
+      "status": "UNCERTAINTY",
+      "reason": "Page171 OCR includes 110 blocks below confidence0.9; physical raster table rows and numeric meanings are not fully verified. DOCX provides readable comparison source."
+    },
+    {
+      "code": "TOR_SOURCE_READABILITY",
+      "status": "BLOCK",
+      "reason": "Low-resolution ToR on V4 pages5–6 lacks a separately confirmed legible original."
+    },
+    {
+      "code": "CALC_MODEL_SEMANTICS",
+      "status": "BLOCK",
+      "reason": "Two LIRA2013 binaries are present; geometry, units, supports, loads, combinations, solver logs and results are not parsed/validated."
+    },
+    {
+      "code": "SELF_WEIGHT_CONSISTENCY",
+      "status": "WARNING",
+      "reason": "Table coefficient1 versus prose1.1; actual model factor stage unverified."
+    },
+    {
+      "code": "LOAD_TABLE_ROUNDING",
+      "status": "WARNING",
+      "reason": "Floor permanent displayed rows sum2.31/2.72 versus totals2.32/2.73; may reflect independent rounding."
+    },
+    {
+      "code": "COORDINATE_FRAME",
+      "status": "UNCERTAINTY",
+      "reason": "Formula arithmetic passes; units/reference frame and numeric strings need verified import."
+    },
+    {
+      "code": "FINAL_AUDIT",
+      "status": "BLOCK",
+      "reason": "Not run; no evidence acceptance is granted."
+    }
+  ],
+  "sources": [
+    {
+      "name": "Расчет  .doc",
+      "size": 3029504,
+      "sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "compound_document": true,
+      "structured_extraction": "MAIN_TEXT_PIECE_TABLE_ONLY",
+      "library_file_id": "libfile_637be2a58f3081918f9cef00d8172918",
+      "main_text_characters": 16010
+    },
+    {
+      "name": "Таблицы.xlsx",
+      "size": 10004,
+      "sha256": "305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "sheets": [
+        {
+          "name": "Лист1",
+          "max_row": 25,
+          "max_column": 5,
+          "nonempty": 125,
+          "formula_count": 0,
+          "error_count": 0,
+          "missing_formula_caches": [],
+          "missing_cache_count": 0,
+          "preview": [
+            [
+              [
+                "A1",
+                "№ п/п"
+              ],
+              [
+                "B1",
+                "Наименование загружений"
+              ],
+              [
+                "C1",
+                "Тип загружений"
+              ],
+              [
+                "D1",
+                "Доля длительности"
+              ],
+              [
+                "E1",
+                "Коэф. Надежности"
+              ]
+            ],
+            [
+              [
+                "A2",
+                "1"
+              ],
+              [
+                "B2",
+                "Собственный вес"
+              ],
+              [
+                "C2",
+                "Постоянные"
+              ],
+              [
+                "D2",
+                "1"
+              ],
+              [
+                "E2",
+                "1"
+              ]
+            ],
+            [
+              [
+                "A3",
+                "2"
+              ],
+              [
+                "B3",
+                "Давление грунта"
+              ],
+              [
+                "C3",
+                "Постоянные"
+              ],
+              [
+                "D3",
+                "1"
+              ],
+              [
+                "E3",
+                "1.15"
+              ]
+            ],
+            [
+              [
+                "A4",
+                "3"
+              ],
+              [
+                "B4",
+                "Полы и перекрытие"
+              ],
+              [
+                "C4",
+                "Постоянные"
+              ],
+              [
+                "D4",
+                "1"
+              ],
+              [
+                "E4",
+                "1.3"
+              ]
+            ],
+            [
+              [
+                "A5",
+                "4"
+              ],
+              [
+                "B5",
+                "Стены и перегородки"
+              ],
+              [
+                "C5",
+                "Постоянные"
+              ],
+              [
+                "D5",
+                "1"
+              ],
+              [
+                "E5",
+                "1.3"
+              ]
+            ],
+            [
+              [
+                "A6",
+                "5"
+              ],
+              [
+                "B6",
+                "Проезды кратковременная"
+              ],
+              [
+                "C6",
+                "Кратковременные"
+              ],
+              [
+                "D6",
+                "0.5"
+              ],
+              [
+                "E6",
+                "1.2"
+              ]
+            ],
+            [
+              [
+                "A7",
+                "6"
+              ],
+              [
+                "B7",
+                "Полезная уf=1,2"
+              ],
+              [
+                "C7",
+                "Кратковременные"
+              ],
+              [
+                "D7",
+                "0.35"
+              ],
+              [
+                "E7",
+                "1.2"
+              ]
+            ],
+            [
+              [
+                "A8",
+                "7"
+              ],
+              [
+                "B8",
+                "Полезная уf=1,3"
+              ],
+              [
+                "C8",
+                "Кратковременные"
+              ],
+              [
+                "D8",
+                "0.35"
+              ],
+              [
+                "E8",
+                "1.3"
+              ]
+            ],
+            [
+              [
+                "A9",
+                "8"
+              ],
+              [
+                "B9",
+                "Снеговая нагрузка"
+              ],
+              [
+                "C9",
+                "Кратковременные"
+              ],
+              [
+                "D9",
+                "0.5"
+              ],
+              [
+                "E9",
+                "1.4"
+              ]
+            ],
+            [
+              [
+                "A10",
+                "9"
+              ],
+              [
+                "B10",
+                "Снеговая на паркинг"
+              ],
+              [
+                "C10",
+                "Кратковременные"
+              ],
+              [
+                "D10",
+                "0.5"
+              ],
+              [
+                "E10",
+                "1.4"
+              ]
+            ],
+            [
+              [
+                "A11",
+                "10"
+              ],
+              [
+                "B11",
+                "Пожарная машина"
+              ],
+              [
+                "C11",
+                "Особое"
+              ],
+              [
+                "D11",
+                "0"
+              ],
+              [
+                "E11",
+                "1"
+              ]
+            ],
+            [
+              [
+                "A12",
+                "11 (А1;А2)"
+              ],
+              [
+                "B12",
+                "Ветровая Х+"
+              ],
+              [
+                "C12",
+                "Мгновенное"
+              ],
+              [
+                "D12",
+                "0"
+              ],
+              [
+                "E12",
+                "1.4"
+              ]
+            ]
+          ]
+        }
+      ],
+      "external_links_recomputed": false,
+      "library_file_id": "libfile_6b76db0d434c81918f6ae9065a345c37"
+    },
+    {
+      "name": "048 секция 1_А2_011123.lir",
+      "size": 42047193,
+      "sha256": "a753162adf1f1b2de8ab92ab1355eac4d0c23e9241bf6e0e97f39d3ee6205ca9",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "header": "LIRA-SAPR 2013 software ver.13.0.0.a\u0000FileAnsiCP=1251 / 866\u0000\u0000",
+      "bytes_after_header": "4517e90100000000c932000025c80100000000004fe701001200000005000000000000000100000001000000",
+      "model_geometry_parsed": false,
+      "solver_run": false,
+      "engineering_audit": "NOT_RUN",
+      "library_file_id": "libfile_0007bef655d481919c103cd207b005bf"
+    },
+    {
+      "name": "Расчет  .docx",
+      "size": 2754000,
+      "sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "paragraphs": 490,
+      "tables": 6,
+      "embedded_media": 31,
+      "first_text": "Приложение Поверочный расчет каркаса здания\nБлок №1 \nЦелями расчета являются:\n- определение прочности и устойчивости существующих рассчитываемых конструкций здания при эксплуатационных нагрузках по СП 20.13330.2016 «Нагрузки и воздействия» (расчетным методом);\n- анализ результатов.\nРасчет выполнен в соответствии с:\n- СП 20.13330.2016 – Нагрузки и воздействия;\n- СП 22.13330.2016 – Основания зданий и сооружений;\n- СП 24.13330.2021 – Свайный фундамент;\n- СП 63.13330.2018 –Бетонные и железобетонные конструкции;\n- СП 14.13330.2018 –Строительство в сейсмических районах;\n- ГОСТ 27751-2014 – Надежность строительных конструкций и оснований.\nЗадание на расчет \nВыполнить динамический и конструктивный расчет: Бизнес-центр;\nКомплекс: Бизнес-центр по адресу: Республика Крым, г. Симферополь, ул. Набережная, 28А;\nОбъект: Блок 1 в осях 1-5;\nРайон строительства: Россия, г. Симферополь;\nУсловия строительства:\nНормативное значение ветрового давления для II района строительства согласно СП20.13330.2016 - 30 кгс/м² (0,30 кПа). Коэффициент надежности по ветровой нагрузке: 1,4;\nНормативное значение веса снегового покрова для I района строительства согласно СП20.13330.2016 – 50 кгс/м² (0,5 кПа). Коэффициент надежности по снеговой нагрузке: 1,4;\nКласс сооружения согласно ГОСТ 27751-2014: КС2;\nУровень ответственности согласно ГОСТ 27751-2014: Нормальный;\nКоэффициент надежности по ответственности: γn=1;\nРекомендуемый срок службы: 50 лет;\nНормативная глубина сезонного промерзания грунта dfn = 0,7 м; г. Симферополь;\nРасчетная глубина сезонного промерзания грунта df = khdfn; = 0,77 м; г. Симферополь;\nГрунты основания и их нормативные и расчетные характеристики:\nСГК I - современные техногенные образования (t Qh)\nСлой Н – насыпной грунт представлен суглинком бурым, серым, тугопластичным, к подошве мягкопластичным, с включением строительного мусора, обломков известняка, бетона, песка, неоднородный, слежавшийся; встречен всеми скважинами, мощность изменяется от 1,2 до 8,4 м.\nСГК II– аллювиально-пролювиальные отложения, поздненеоплейстоценголоценового возраста (а-pQN 3 -Qh)\nИГЭ 1 – суглинок серый, мягкопластичный,с включением гравия и гальки до 5%, с линзами песка средней крупности, тяжелый песчанистый, непросадочный, ненабухающий; встречен всеми скважинами, кроме скважины №7 (арх. № 4537); мощность изменяется от 0,4 до 1,5 м; в архивной скважине №8 (арх. №5791) мощность составила 5,4 м.\nСГК III– аллювиальные отложения поздненеоплейстоцен-голоценового возраста (а 1QN 3-Qh)\nИГЭ 2 – гравийный грунт из гравия и гальки известняка, песчаника, кварца с пластичным супесчаным и песчаным заполнителем, водонасыщенный, невыветрелый, очень прочный; вскрыт всеми скважинами, кроме скважины №8 (арх. № 5791); мощность изменяется от 0,4 до 1,4 м.\nСГК IV – морские отложения позднего эоцена (Р2 3)\nИГЭ 3 – известняк голубовато-серый, серый полускальный низкой прочности, с прослоями известняка полускального очень низкой прочности, глинистый, средней плотности, среднепористый, сильновыветрелый, размягчаемый, труднорастворимый, коржистый, слабокавернозный; встречен всеми скважинами; мощность изменяется от 0,8 до 11,8 м.",
+      "sections": 1,
+      "library_file_id": "libfile_f76be12d5ab881919442aec1e98c2704"
+    },
+    {
+      "name": "Геодезические измерения 03.09 пакетная печать(1).pdf",
+      "size": 7563047,
+      "sha256": "6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "pages": 22,
+      "native_chars": 128,
+      "text_pages": 3,
+      "page_sizes": [
+        [
+          595.0,
+          842.0
+        ],
+        [
+          842.0,
+          1191.0
+        ],
+        [
+          1191.0,
+          842.0
+        ],
+        [
+          1684.0,
+          1191.0
+        ]
+      ],
+      "first_text": "",
+      "library_file_id": "libfile_90fceada4e30819185bde0b819452ce0",
+      "content_type": "Vector drawings; outlined text requires region OCR",
+      "all_pages_visually_inspected_at_full_resolution": false,
+      "thumbnail_contact_sheet_reviewed": true
+    },
+    {
+      "name": "привязки секций к модулю грунт.xlsx",
+      "size": 665732,
+      "sha256": "d04e2fc60d7110d3b1a13095c1e50c67c2bdd24fd7d4eac60cc2e1145510139e",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "sheets": [
+        {
+          "name": "Лист1",
+          "max_row": 40,
+          "max_column": 24,
+          "nonempty": 44,
+          "formula_count": 4,
+          "error_count": 0,
+          "missing_formula_caches": [],
+          "missing_cache_count": 0,
+          "preview": [
+            [
+              [
+                "A2",
+                "Секция 1"
+              ],
+              [
+                "B2",
+                "ЛИРА"
+              ],
+              [
+                "C2",
+                "ГРУНТ"
+              ],
+              [
+                "F2",
+                "участок привязки секции 1"
+              ],
+              [
+                "X2",
+                "ОТМЕТКИ ПЛИТЫ ПО ПРОЕКТУ"
+              ]
+            ],
+            [
+              [
+                "A3",
+                "Точка 1"
+              ],
+              [
+                "B3",
+                "24.2749996185303"
+              ],
+              [
+                "C3",
+                "5.23166"
+              ]
+            ],
+            [
+              [
+                "B4",
+                "-0.649999976158142"
+              ],
+              [
+                "C4",
+                "23.6059"
+              ]
+            ],
+            [
+              [
+                "A5",
+                "Азимут"
+              ],
+              [
+                "B5",
+                "77.25"
+              ]
+            ],
+            [
+              [
+                "A6",
+                "Высота"
+              ],
+              [
+                "B6",
+                "0"
+              ],
+              [
+                "C6",
+                "237.9"
+              ]
+            ],
+            [
+              [
+                "F18",
+                "участок привязки секции 2"
+              ]
+            ],
+            [
+              [
+                "A19",
+                "Секция 2"
+              ],
+              [
+                "B19",
+                "ЛИРА"
+              ],
+              [
+                "C19",
+                "ГРУНТ"
+              ]
+            ],
+            [
+              [
+                "A20",
+                "Точка 1"
+              ],
+              [
+                "B20",
+                "0"
+              ],
+              [
+                "C20",
+                "=C3+0.32"
+              ],
+              [
+                "D20",
+                "ЕСЛИ А/1х6, взять за 0.0.0."
+              ]
+            ],
+            [
+              [
+                "B21",
+                "0"
+              ],
+              [
+                "C21",
+                "=C4+0.65"
+              ]
+            ],
+            [
+              [
+                "A22",
+                "Азимут"
+              ],
+              [
+                "B22",
+                "77.25"
+              ]
+            ],
+            [
+              [
+                "A23",
+                "Высота"
+              ],
+              [
+                "B23",
+                "0"
+              ],
+              [
+                "C23",
+                "СМ Модель и отметки плиты по проекту"
+              ]
+            ],
+            [
+              [
+                "F35",
+                "участок привязки секции 3"
+              ]
+            ]
+          ]
+        }
+      ],
+      "external_links_recomputed": false,
+      "library_file_id": "libfile_fd03f79fbbe08191a1395f17ef38c292"
+    },
+    {
+      "name": "Секция 3 _S 011123.lir",
+      "size": 32397127,
+      "sha256": "fd300a06f23f455a00d120276c2daed3e6142de4abe9edb39d036c2a50f990ca",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "header": "LIRA-SAPR 2013 software ver.13.0.0.a\u0000FileAnsiCP=1251 / 866\u0000Preview=0000000001E32B7F\u0000\u0000",
+      "bytes_after_header": "f8f7660100000000c93200007545010000000000d37301000f00000005000000000000000100000001000000",
+      "model_geometry_parsed": false,
+      "solver_run": false,
+      "engineering_audit": "NOT_RUN",
+      "library_file_id": "libfile_36185a34fd148191bdddf7f373c469c4"
+    },
+    {
+      "name": "Графика 03.09.2026.pdf",
+      "size": 10793106,
+      "sha256": "fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c",
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "pages": 21,
+      "native_chars": 0,
+      "text_pages": 0,
+      "page_sizes": [
+        [
+          1191.0,
+          1684.0
+        ],
+        [
+          1684.0,
+          1191.0
+        ],
+        [
+          1684.0,
+          2384.0
+        ],
+        [
+          2384.0,
+          1684.0
+        ],
+        [
+          2384.0,
+          3370.0
+        ]
+      ],
+      "first_text": "",
+      "library_file_id": "libfile_732da9d5816081919c693aa8b0fb1f91",
+      "content_type": "Vector drawings; outlined text requires region OCR",
+      "all_pages_visually_inspected_at_full_resolution": false,
+      "thumbnail_contact_sheet_reviewed": true
+    }
+  ]
+}

@@ -155,7 +155,7 @@ class DoclingDocumentParser:
         data = table.get("data") or {}
         if (not isinstance(prov, list) or len(prov) != 1 or not isinstance(data, dict)
                 or any(type(data.get(k)) is not int for k in ('num_rows','num_cols'))
-                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6), (3, 8), (2, 7), (2, 6))):
+                or (data.get("num_rows"), data.get("num_cols")) not in ((3, 7), (1, 6), (3, 8), (2, 7), (2, 6), (2, 8))):
             return False
         bbox = prov[0].get("bbox") if isinstance(prov[0], dict) else None
         if (not isinstance(bbox, dict) or bbox.get("coord_origin") != "BOTTOMLEFT"
@@ -190,13 +190,15 @@ class DoclingDocumentParser:
         if any(not isinstance(c,dict) or not isinstance(c.get('text'),str) for c in cells):
             return False
         values = [c['text'].strip() for c in cells]
-        variant=(data['num_rows'],data['num_cols']) in ((3,8),(2,7),(2,6))
+        variant=(data['num_rows'],data['num_cols']) in ((3,8),(2,7),(2,6),(2,8))
+        split_number_stamp=((data['num_rows'],data['num_cols'])==(3,8)
+                            and '№ Лист' in values and 'док.' in values)
         page=prov[0].get('page_no')
         if variant and (type(page) is not int or page<1):
             return False
         if variant and (any(type(bbox.get(k)) not in (int,float) or not math.isfinite(bbox[k])
                             for k in ('l','t','r','b'))
-                        or not (40<=bbox['l']<=50 and 570<=bbox['r']<=585
+                        or not ((40<=bbox['l']<=50 or (split_number_stamp and 20<=bbox['l']<=25)) and 570<=bbox['r']<=585
                                 and 50<=bbox['t']<=70 and 10<=bbox['b']<=20)):
             return False
         required = {"Изм.", "Кол.уч", "Подп.", "Дата", "Лист"}
@@ -209,6 +211,8 @@ class DoclingDocumentParser:
             labels.update(('Кол.уч','Дата'))
         if variant and '№ док. Лист' in labels:
             labels.add('№ док.')
+        if split_number_stamp:
+            labels.add('№ док.')
         if variant:
             required=required|{'№ док.'}
         if not required.issubset(labels):
@@ -216,6 +220,8 @@ class DoclingDocumentParser:
         allowed = required | {"№ док.", "№ док. Лист", "Кол.уч Лист", "Лист №", "Пояснения"}
         if variant:
             allowed=allowed|{'Кол.уч Дата'}
+            if split_number_stamp:
+                allowed=allowed|{'№ Лист','док.'}
             code=r'[A-ZА-ЯЁ]{2,5}-[A-ZА-ЯЁ]{2,5}-\d{2}/\d{4}-\d+'
             if not any(re.fullmatch(code,v) or re.fullmatch(code+' '+str(page),v) for v in values):
                 return False
