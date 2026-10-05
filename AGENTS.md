@@ -114,3 +114,12 @@ Establish:
 6. Clear separation between runtime and engineering logic.
 
 Do not implement a large application before these boundaries are reviewable.
+
+
+## Living project map and handoff
+
+- Before continuing, read `ENGINEER_OS_PROJECT_MAP.md` in the repository root completely.
+- Verify actual local/remote branches, HEAD, source hashes and referenced run artifacts; the map is development context, not engineering evidence or acceptance.
+- After each substantive result, update the same map: date, verified scope/results, publication state, remaining blockers and one concrete next action. Never record planned work as completed.
+- Keep the repository map and the user's saved copy consistent, preserving the saved file's identity and version history.
+- See `docs/development/project-map-handoff.md` for retrieval and maintenance guidance.
