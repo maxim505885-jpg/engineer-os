@@ -64,6 +64,55 @@ def verify_vector_replacement(source,grid,target):
                 raise ValueError('native-empty source cell contains visible ink')
 
 
+def preserve_source_context(source, grid, target, source_sha256):
+    """Keep source pixels and outside words when neural bounds merge regions.
+
+    This alternative does not certify the neural table or whole-page coverage.
+    The physical grid is independently checked with its own exact boundaries.
+    """
+    import base64
+    import fitz
+    with fitz.open(source) as pdf:
+        page=pdf[grid['source_page']-1]
+        if page.rotation or page.cropbox.x0 or page.cropbox.y0:
+            raise ValueError('context capture requires unrotated, zero-offset source')
+        b=target['prov'][0]['bbox']
+        if any(type(b.get(k)) not in (int,float) or not math.isfinite(b[k]) or not 0<=b[k]<=limit
+               for k,limit in [('l',page.rect.width),('r',page.rect.width),('t',page.rect.height),('b',page.rect.height)]):
+            raise ValueError('target bbox outside original page')
+        if b.get('coord_origin')=='BOTTOMLEFT':
+            target_box=fitz.Rect(b['l'],page.rect.height-b['t'],b['r'],page.rect.height-b['b'])
+        elif b.get('coord_origin')=='TOPLEFT':target_box=fitz.Rect(b['l'],b['t'],b['r'],b['b'])
+        else:raise ValueError('invalid target coordinate origin')
+        box=fitz.Rect(grid['x_boundaries'][0],grid['y_boundaries'][0],grid['x_boundaries'][-1],grid['y_boundaries'][-1])
+        intersection=(box&target_box).get_area()
+        if target_box.is_empty or intersection<=0:
+            raise ValueError('target does not intersect source grid')
+        if max(intersection/box.get_area(),intersection/target_box.get_area())<.95:
+            raise ValueError('target and source grid lack substantial containment')
+        exact=dict(prov=[dict(page_no=grid['source_page'],bbox=dict(l=box.x0,t=box.y0,r=box.x1,b=box.y1,coord_origin='TOPLEFT'))])
+        verify_vector_replacement(source,grid,exact)
+        # Preserve the entire bounding union, including symbols, pictures and
+        # ink that the text layer cannot describe. Never call outside words blank.
+        union=box|target_box
+        words=page.get_text('words',sort=True)
+        outside=[w for w in words if (union&fitz.Rect(w[:4])).get_area()>0 and not box.contains(fitz.Rect(w[:4]))]
+        if union.get_area()*4>40000000:
+            raise ValueError('source context exceeds bounded render size')
+        pix=page.get_pixmap(matrix=fitz.Matrix(2,2),clip=union,alpha=False)
+        data=pix.tobytes('png')
+        return dict(block_id='source-context:'+grid['table_id'],kind='source_context',text=' '.join(w[4] for w in outside),
+                    source_sha256=source_sha256,table_id=grid['table_id'],original_target_sha256=table_digest(target),
+                    original_target_bbox=dict(b),source_grid_bbox=list(box),
+                    provenance=[dict(page_no=grid['source_page'],bbox=dict(left=union.x0,top=union.y0,right=union.x1,bottom=union.y1))],
+                    native_words=[dict(text=w[4],bbox=list(w[:4])) for w in outside],
+                    source_visual=dict(sha256=hashlib.sha256(data).hexdigest(),png_base64=base64.b64encode(data).decode('ascii'),
+                        mime_type='image/png',source_page=grid['source_page'],bbox=list(union),coordinate_origin='TOPLEFT',render_scale=2,
+                        rendered_pixel_origin=[pix.x,pix.y],width_px=pix.width,height_px=pix.height,annotations_rendered=True),
+                    source_capture_status='PASS',interpretation_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',
+                    complete_page=False,acceptance_granted=False)
+
+
 def recover_export(source, raw, manifest, *, project_id, document_id):
     manifest=manifest if isinstance(manifest,dict) else {}
     result=dict(parser='docling_source_grid_recovery',project_id=project_id,
@@ -87,6 +136,7 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
         tables=raw.get('tables') or []
         if not isinstance(tables,list):raise ValueError('invalid raw tables')
         mappings={}
+        contexts=[]
         for grid in checked['tables']:
             index=grid.get('docling_table_index')
             if type(index) is not int or not 0<=index<len(tables) or index in mappings:
@@ -99,6 +149,10 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
                 raise ValueError('target source page mismatch')
             data=target.get('data') or {}
             mode=grid.get('replacement_mode','MATCH_MODEL_GRID')
+            if mode=='SOURCE_VECTOR_CONTEXT':
+                contexts.append(preserve_source_context(source,grid,target,manifest['source_sha256']))
+                mappings[index]=grid['table_id']
+                continue
             if mode=='SOURCE_VECTOR_GRID':
                 verify_vector_replacement(source,grid,target)
                 mappings[index]=grid['table_id']
@@ -140,6 +194,9 @@ def recover_export(source, raw, manifest, *, project_id, document_id):
                     result['blocks'].append(block)
             except DocumentParseError as exc:
                 result['table_recovery']['unresolved_tables'].append(dict(table_index=index,reason=str(exc)))
+        result['blocks'].extend(contexts)
+        if contexts:
+            result['table_recovery']['preserved_context_indices']=[g['docling_table_index'] for g in checked['tables'] if g.get('replacement_mode')=='SOURCE_VECTOR_CONTEXT']
         if not tables or not result['blocks']:
             raise ValueError('no tables or extracted content for recovery')
         # Captions and body extraction outside these table regions are not
