@@ -1,0 +1,5 @@
+# Install into a separate optional venv, never the PDF runtime.
+# Browser Use version is pinned to the reviewed Git commit.
+browser-use @ git+https://github.com/browser-use/browser-use.git@7be96ed8bafa8dfe1eef228b59cf5c884b8b2431
+# Local symbolic checks; no OpenRouter scientific-schematics dependency.
+sympy==1.14.0
