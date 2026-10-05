@@ -239,3 +239,22 @@ python3 scripts/recheck_v4_exports.py /absolute/restored/source/v4-drive-source.
 Этот коммит содержит документацию. Проверенная PDF-реализация 6da5964 и локальный docs-коммит 4743ec4 в него не входят; прежний draft PR #35 не обновляется. Карта в ветке документации описывает состояние рабочей ветки PDF, а не наличие всех этих изменений в main. Слияние PR и развёртывание приложения не выполнены.
 
 Новый чат может читать карту непосредственно из указанной ветки GitHub. После слияния читать тот же путь в main. Сохранённый пользовательский файл имеет тот же ID; при сопровождении поддерживать обе копии согласованными, сверять фактические refs и не считать опубликованную карту подтверждением инженерного принятия.
+
+## 15. Выбранные upstream-репозитории добавлены локально — 05.10.2026
+
+По запросу «Все репозитории которые нам нужны добавляй» подготовлена отдельная ветка `feat/selected-integrations-20261005` от опубликованного PDF checkpoint `d20d8595094f452bd70d28c18f52cb7d0eede665`. Рабочая копия: `/workspace/scratch/499af82b6df5/engineer-os-integrations`. Коммиты: `23b9393` (исходники/адаптеры) и `cd5a0a1ac640be399a0d3566994a1e3f7157440c` (исправления локальных настроек). Эта ветка не включает неопубликованную PDF-реализацию 6da5964 и её docs-коммит 4743ec4.
+
+Фактически добавлено:
+- Шесть git submodules в `third_party/`: Browser Use, Agent Memory, Scientific Agent Skills, Diagram Design, Cybersecurity Skills, Awesome Harness Engineering. Их checkout HEAD сверены с шестью commits из обзора; `.gitmodules` и `integrations/upstreams.json` фиксируют URLs, commits, лицензии и выбранные пути. OpenViking остаётся отложенным.
+- `engineering/memory/agentmemory_http.py`: чтение real REST memories endpoint с project/q/latest/limit; чужие, устаревшие, повторные и malformed записи отвергаются. Контекст UNVERIFIED / NOT_EVIDENCE. Генерируемый upstream секрет читается только для loopback destination, явный env имеет приоритет.
+- `engineering/integrations/local_http.py`: HTTP только loopback, без proxy/redirects, ответ ограничен 1 MiB, timeout.
+- `engineering/integrations/browser_use_local.py`: явно включаемый Browser Use + Ollama; qwen3:8b использует текстовый режим, telemetry/cloud sync/авторасширения/CAPTCHA/downloads отключены; Ollama без env proxy/redirects; ограничение шагов и времени, очистка временных файлов. Domain policy upstream допускает www-вариант корневого домена и не является сетевой песочницей.
+- `scripts/integration_tools.py`: status, memory-recall, browser-run. `requirements-integrations.txt`: отдельное optional environment. `integrations/README.md`: Windows-подготовка и выборочное использование научных/диаграммных/защитных методик. Сторонние SKILL.md не импортированы в SkillLoader и не активируются автоматически.
+
+Проверки: baseline этой опубликованной основы — 194 Python tests; после изменения — **201 Python tests и 4 Node tests**, syntax/compileall/diff checks проходят; 6/6 source pins сверены. Транспорт проверен на локальном синтетическом HTTP-сервере, browser constructor/cleanup — на dependency doubles. Независимый review выполнен; настройки text-only модели, авторизации и local proxy исправлены после воспроизводимых failing tests. Это не live-проверка Browser Use, Ollama, iii/AgentMemory или Windows; эти проверки **NOT_RUN**. Качество русского memory retrieval и работы qwen3:8b в браузере не установлено.
+
+**Публикация кода заблокирована:** automatic approval review отклонил `git push origin feat/selected-integrations-20261005`, потому что общий запрос на добавление репозиториев не признан явным разрешением внешней публикации конкретного payload. Не повторять push и не публиковать тот же код другим способом без подтверждения пользователя. Подготовлен просматриваемый `ENGINEER_OS_selected_integrations.patch` (два коммита относительно d20d859). Ветка/PR интеграций на GitHub пока не подтверждены.
+
+Это изменение не исправляет PDF и не меняет подтверждённые 512 UNCERTAINTY / 22 BLOCK, document BLOCK, acceptance=false; нового полного PDF-прогона нет. Код PDF 6da5964 с 223 исторически подтверждёнными tests отличается от базы новой ветки; не смешивать эти числа с 201 tests этой поставки.
+
+Следующее действие для подключений — после отдельного разрешения отправить только ветку интеграций и открыть PR в `fix/pdf-completeness-audit`, затем выполнить Windows/local runtime smoke. Основной следующий инженерный шаг из раздела 11 остаётся исправлением детектора светлых линий.
