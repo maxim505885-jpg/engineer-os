@@ -12,6 +12,22 @@ MAX_BLOCKS=1000
 MAX_TOTAL_TEXT=2000000
 
 
+def parse_failure_message(error):
+    from engineering.document_intelligence.contracts import DocumentParseError
+    # Exact internal messages only: arbitrary parser exceptions may contain
+    # source text, paths or credentials and must never enter the journal.
+    table_errors={
+        'table cell is missing, merged or ambiguous',
+        'table grid has missing cells',
+        'table caption lacks verified table rows',
+        'table column header metadata is missing or ambiguous',
+        'table column headers are duplicated',
+    }
+    if isinstance(error,DocumentParseError) and str(error) in table_errors:
+        return 'TABLE_STRUCTURE_UNVERIFIED: структура таблицы неоднозначна; требуется сверка с исходной страницей.'
+    return 'PARSE_FAILED: извлечение страницы недоступно; проверьте parser/OCR/таблицы.'
+
+
 class ExtractionFailure(RuntimeError):
     """Only fixed, non-sensitive messages are raised by this module."""
 
@@ -94,9 +110,9 @@ def execute(store,job,stop_event,*,progress=None):
                 if not kept or clipped:
                     record['status']='BLOCK'
                     record['limitations']=['TEXT_LIMIT' if clipped else 'NO_NATIVE_TEXT' if backend=='native' else 'NO_CONTENT']
-            except Exception:
+            except Exception as exc:
                 record.update(execution='FAILED',status='BLOCK',blocks=[],stored_chars=0,
-                              limitations=['PARSE_FAILED: извлечение страницы недоступно; проверьте parser/OCR/таблицы.'])
+                              limitations=[parse_failure_message(exc)])
             verify_originals([file])
             store.save_extraction_page(job['id'],record);checkpoint()
         run['current_page']=None

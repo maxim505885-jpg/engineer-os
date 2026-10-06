@@ -33,11 +33,22 @@ def bounded_items(items, budget):
     return kept, False
 
 
-def source_context(store, job, files):
+def source_context(store, job, files, automatic_sources=None):
     budget = 12000
     sources = []
     truncated = False
+    automatic={s['file_id']:s for s in automatic_sources or []}
     for file in files:
+        if file['id'] in automatic:
+            from .coverage import automatic_summary
+            current=automatic[file['id']]
+            sources.append(dict(id=file['id'],name=file['name'],sha256=file['sha256'],
+                extraction_status='UNVERIFIED',text='',text_truncated=False,
+                extraction_note='Автоматическое извлечение: текст передаётся частями; полнота не проверена.',
+                scope='UNVERIFIED_SOURCE',extraction_coverage=automatic_summary(current),
+                context_text_chars=0,context_text_truncated=False))
+            truncated=truncated or bool(current['blocked_pages'] or current['failed_pages'])
+            continue
         text = file['text'][:min(4000, budget)]
         budget -= len(text)
         truncated = truncated or len(text) < len(file['text']) or bool(file['text_truncated']) or file['extraction_status'] == 'UNAVAILABLE' or incomplete(file['extraction_coverage'])
@@ -100,10 +111,10 @@ def parse_draft(task, raw, allowed_ids):
     return result, limits
 
 
-def execute(store, job, model, stop_event):
+def execute(store, job, model, stop_event, *, automatic_sources=None):
     prepared = prepare(store, job)
     files = [store.get_file(fid) for fid in job['file_ids']]
-    context, truncated = source_context(store, job, files)
+    context, truncated = source_context(store, job, files, automatic_sources)
     allowed_ids = {f['id'] for f in files} | {c['id'] for c in context['candidates']}
     core = EngineerCore()  # No acceptance gate for local draft analysis.
     state = core.plan(EngineerTask(job['id'], job['prompt'],

@@ -20,3 +20,10 @@ def summary(coverage):
 def incomplete(coverage):
     c=coverage or unknown_coverage()
     return c['status']=='UNKNOWN' or bool(c['stop_reasons'] or c['pages_without_text'])
+
+
+def automatic_summary(source):
+    return dict(scope='UNVERIFIED_EXTRACTION',status='RECORDED',
+                method=source['backend'].upper(),completeness='NOT_CHECKED',
+                pages_without_text=source['pages_without_text'],
+                **{key:source[key] for key in ('total_pages','processed_pages','blocked_pages','failed_pages','ocr')})

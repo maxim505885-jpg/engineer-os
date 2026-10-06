@@ -36,7 +36,7 @@ def prepare(store,job,stop):
     for file in pdfs:
         if stop.is_set():raise ExtractionFailure('Обработка документа остановлена; результаты сохранены.')
         child,created=store.automatic_extraction(job,file['id'],backend)
-        source=dict(file_id=file['id'],name=file['name'],extraction_job=child['id'],source_sha256=file['sha256'])
+        source=dict(file_id=file['id'],name=file['name'],extraction_job=child['id'],source_sha256=file['sha256'],backend=backend)
         report['sources'].append(source)
         def progress(run):
             source.update({k:run[k] for k in ('total_pages','processed_pages','blocked_pages','failed_pages','ocr')})
@@ -50,7 +50,7 @@ def prepare(store,job,stop):
         except Exception:
             if created:store.fail(child['id'],'Обработка PDF не выполнена; журнал сохранён.')
             raise
-        source['limitations']=[];source['unavailable_pages']=[]
+        source['limitations']=[];source['unavailable_pages']=[];source['pages_without_text']=[]
         run=result['extraction']
         for page in range(1,run['total_pages']+1):
             if page>run['processed_pages']:
@@ -58,6 +58,8 @@ def prepare(store,job,stop):
                 source['limitations'].append('UNPROCESSED_PAGES')
                 break
             record=store.extraction_page(job['session_id'],child['id'],page)
+            if backend=='native' and 'NO_NATIVE_TEXT' in record['limitations'] and len(source['pages_without_text'])<50:
+                source['pages_without_text'].append(page)
             if record['status']=='BLOCK':
                 for reason in record['limitations']:
                     if reason not in source['limitations']:source['limitations'].append(reason)

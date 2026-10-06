@@ -84,6 +84,49 @@ class AutomaticDocumentAnalysisTests(unittest.TestCase):
         self.assertEqual(job['result']['document_analysis']['stage'],'PARTIAL')
         self.assertEqual(calls,[])
 
+    def test_actual_ocr_context_does_not_claim_preview_ocr_was_not_run(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from engineering.document_intelligence.docling_adapter import DoclingDocumentParser
+        f=self.pdf([''])
+        class Converter:
+            def convert(inner,*args,**kwargs):
+                return SimpleNamespace(document=SimpleNamespace(export_to_dict=lambda:dict(
+                    texts=[dict(text='OCR candidate height 4m',prov=[dict(page_no=1)])])))
+        parser=DoclingDocumentParser(lambda:Converter())
+        self.store.enqueue(self.session,'Read',[f['id']]);model,calls=self.model()
+        with patch.dict('os.environ',{'ENGINEER_OS_DOCUMENT_INTELLIGENCE':'true','ENGINEER_OS_ATTACHMENT_PARSER':'docling'}),patch('engineering.local_app.extraction.docling_parser',return_value=parser):
+            Worker(self.store,model).run_once()
+        self.assertEqual(self.result()['state'],'SUCCEEDED')
+        self.assertNotIn('TEXT_PREVIEW_ONLY',str(calls))
+        self.assertNotIn('"ocr": "NOT_RUN"',str(calls))
+        self.assertIn('REQUESTED_NOT_VERIFIED',str(calls))
+        self.assertIn('OCR candidate height 4m',str(calls))
+        self.assertEqual(self.result()['result']['source_coverage'][0]['extraction_coverage']['method'],'DOCLING')
+        self.assertFalse(self.result()['result']['acceptance_granted'])
+
+    def test_core_ocr_prompts_and_saved_context_use_current_extraction(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from engineering.document_intelligence.docling_adapter import DoclingDocumentParser
+        f=self.pdf([''])
+        class Converter:
+            def convert(inner,*args,**kwargs):
+                return SimpleNamespace(document=SimpleNamespace(export_to_dict=lambda:dict(
+                    texts=[dict(text='OCR candidate height 4m',prov=[dict(page_no=1)])])))
+        parser=DoclingDocumentParser(lambda:Converter())
+        self.store.enqueue(self.session,'Review',[f['id']],mode='CORE_RUN',requested_checks=['report'])
+        model,calls=self.model(core=True)
+        with patch.dict('os.environ',{'ENGINEER_OS_DOCUMENT_INTELLIGENCE':'true','ENGINEER_OS_ATTACHMENT_PARSER':'docling'}),patch('engineering.local_app.extraction.docling_parser',return_value=parser):
+            Worker(self.store,model).run_once()
+        self.assertEqual(self.result()['state'],'SUCCEEDED');self.assertEqual(len(calls),2)
+        self.assertNotIn('TEXT_PREVIEW_ONLY',str(calls));self.assertNotIn('"ocr": "NOT_RUN"',str(calls))
+        context=self.result()['result']['core_run']['source_context']['sources'][0]
+        self.assertEqual(context['extraction_coverage']['method'],'DOCLING')
+        self.assertEqual(context['extraction_coverage']['ocr'],'REQUESTED_NOT_VERIFIED')
+        self.assertNotIn('preview',context['extraction_note'])
+        self.assertFalse(self.result()['result']['acceptance_granted'])
+
     def test_core_block_in_a_source_part_cannot_disappear_in_summary(self):
         f=self.pdf(['source '*500]*3)
         self.store.enqueue(self.session,'Review',[f['id']],mode='CORE_RUN',requested_checks=['report'])
