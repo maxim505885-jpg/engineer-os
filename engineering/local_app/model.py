@@ -77,3 +77,21 @@ class LocalModel:
             available=any(isinstance(x,dict) and x.get('id')==self.model for x in body.get('data',[]))
         except (OSError,ValueError,TypeError,AttributeError):available=False
         return dict(available=available,model=self.model,origin=self.origin,provider=self.provider,note='Model listed; inference not yet verified.' if available else 'Start the local model service and check the configured model.')
+
+    def checkpoint_identity(self):
+        if self.provider!='ollama':return None
+        from .analysis_identity import digest
+        headers={'Accept':'application/json'}
+        if self.key:headers['Authorization']='Bearer '+self.key
+        try:
+            with self.opener.open(Request(self.origin+'/api/tags',headers=headers),timeout=2) as response:
+                body=json.loads(BoundedResponse(response).read())
+            matches=[m for m in body.get('models',[]) if m.get('name')==self.model or m.get('model')==self.model]
+            if len(matches)!=1 or not isinstance(matches[0].get('digest'),str) or not matches[0]['digest']:return None
+            req=Request(self.origin+'/api/show',data=json.dumps(dict(model=self.model)).encode(),headers=dict(headers,**{'Content-Type':'application/json'}),method='POST')
+            with self.opener.open(req,timeout=2) as response:show=json.loads(BoundedResponse(response).read())
+            if not isinstance(show,dict) or 'parameters' not in show:return None
+            config={k:show.get(k) for k in ('parameters','template','system','model_info')}
+            return dict(provider=self.provider,origin=self.origin,model=self.model,model_digest=matches[0]['digest'],
+                        config_sha256=digest(config),thinking=self.thinking,temperature=0,timeout=180,response_chars=32000)
+        except (OSError,ValueError,TypeError,AttributeError):return None

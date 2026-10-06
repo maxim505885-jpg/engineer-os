@@ -5,8 +5,8 @@ const http=require('node:http');const {spawn}=require('node:child_process');cons
 async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(check())return;await new Promise(resolve=>setTimeout(resolve,40));}throw new Error('DOM condition timeout');}
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-dom-'));
- const requests=[],errors=[];let child,dom;
- const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);requests.push(payload);const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
+ const requests=[],errors=[];let child,dom,failAt;
+ const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify(req.url==='/api/tags'?{models:[{name:'qwen3:8b',digest:'sha256:'+'a'.repeat(64)}]}:{data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);if(req.url==='/api/show'){res.end(JSON.stringify({parameters:'num_ctx 8192',template:'stable'}));return;}requests.push(payload);if(requests.length===failAt){res.statusCode=503;res.end('{}');return;}const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
  try{
   await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,GOOGLE_DRIVE_CLIENT_ID:'',GOOGLE_DRIVE_CLIENT_SECRET:'',GOOGLE_DRIVE_REFRESH_TOKEN:'',ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
@@ -122,10 +122,29 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(JSON.stringify(requests.at(-1)).includes('height 4m'),'PDF is automatically supplied to analysis');
   assert.equal(requests.length,5,'One-page automatic document analysis needs one model request');
   doc.querySelector('.analysis-drafts').click();await until(()=>doc.querySelector('.analysis-receipt'));
+  const largePdf=require('node:child_process').execFileSync(process.env.PYTHON||'python3',['-c',"import fitz,sys; d=fitz.open();[d.new_page().insert_textbox((30,30,570,800),'RESUME_'+str(i)+' source '*500,fontsize=8) for i in range(4)];sys.stdout.buffer.write(d.tobytes())"]);
+  const largeFile=await (await fetch(origin+`/api/sessions/${id}/files?name=resume.pdf`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/octet-stream'},body:largePdf})).json();
+  const beforeResume=requests.length;failAt=beforeResume+2;
+  const resumeJob=await (await fetch(origin+`/api/sessions/${id}/jobs`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/json'},body:JSON.stringify({prompt:'Проверка продолжения',file_ids:[largeFile.id]})})).json();
+  await until(()=>doc.querySelector('.analysis-resume')&&!doc.querySelector('.analysis-resume').disabled);
+  const firstPayload=JSON.stringify(requests[beforeResume]);
+  dom.window.close();dom=await open();doc=dom.window.document;
+  await until(()=>doc.querySelectorAll('nav .session').length===2);
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.analysis-resume')&&!doc.querySelector('.analysis-resume').disabled);
+  doc.querySelector('.analysis-resume').click();
+  await until(()=>!doc.querySelector('.analysis-resume')&&!doc.querySelector('#send').disabled);
+  const resumed=await (await fetch(origin+`/api/sessions/${id}`,{headers:{'X-Engineer-Token':token}})).json();
+  const finished=resumed.jobs.find(j=>j.id===resumeJob.id);
+  assert.equal(finished.state,'SUCCEEDED');assert.ok(finished.result.document_analysis.calls_reused>0);
+  assert.equal(requests.filter(p=>JSON.stringify(p)===firstPayload).length,1,'Completed source part must not repeat');
+  assert.equal(resumed.messages.filter(m=>m.role==='user'&&m.content==='Проверка продолжения').length,1);
+  assert.ok(doc.querySelector('.automatic-analysis').textContent.includes('Повторно использовано'));
+  assert.equal(resumed.jobs.filter(j=>j.id===resumeJob.id).length,1);
   assert.ok(doc.querySelector('#drive-form'),'Drive import form missing');
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
-  assert.equal(doc.querySelectorAll('.file').length,2,'Unavailable Drive must not manufacture an imported file');
+  assert.equal(doc.querySelectorAll('.file').length,3,'Unavailable Drive must not manufacture an imported file');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}

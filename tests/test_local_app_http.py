@@ -23,9 +23,16 @@ class LocalHTTPTests(unittest.TestCase):
         class ModelHandler(BaseHTTPRequestHandler):
             def log_message(self,*args):pass
             def do_GET(self):
+                if self.path=='/api/tags':
+                    self.send_response(200);self.end_headers();self.wfile.write(json.dumps({'models':[{'name':'qwen3:8b','digest':getattr(owner,'model_digest','sha256:'+'a'*64)}]}).encode());return
                 self.send_response(200);self.end_headers();self.wfile.write(b'{"data":[{"id":"qwen3:8b"}]}')
             def do_POST(self):
-                owner.requests.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
+                payload=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                if self.path=='/api/show':
+                    self.send_response(200);self.end_headers();self.wfile.write(b'{"parameters":"num_ctx 8192\\nnum_predict 1024","template":"stable"}');return
+                owner.requests.append(payload)
+                if len(owner.requests)==getattr(owner,'fail_model_at',None):
+                    self.send_response(503);self.end_headers();return
                 content=getattr(owner,'core_reply','Нужна проверка источника')
                 self.send_response(200);self.end_headers();self.wfile.write(json.dumps({'choices':[{'message':{'content':content}}]},ensure_ascii=False).encode())
         self.fake=ThreadingHTTPServer(('127.0.0.1',0),ModelHandler)
@@ -52,6 +59,30 @@ class LocalHTTPTests(unittest.TestCase):
     def create(self):
         status,_,raw=self.request('POST','/api/sessions',{'title':'Объект'})
         self.assertEqual(status,201);return json.loads(raw)['id']
+
+    def test_analysis_resume_http_guards_and_actual_local_model_identity(self):
+        import fitz
+        from engineering.local_app.files import preserve_file
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        with fitz.open() as pdf:
+            for i in range(4):pdf.new_page().insert_textbox((30,30,570,800),'SOURCE_'+str(i)+' source '*500,fontsize=8)
+            file=preserve_file(self.store,session,'large.pdf',pdf.tobytes())
+        job=self.store.enqueue(session,'Read',[file['id']]);self.fail_model_at=2
+        Worker(self.store,self.model).run_once();route=f'/api/sessions/{session}/jobs/{job["id"]}/resume-analysis'
+        self.assertEqual(self.request('POST',route,{},token=False)[0],403)
+        other=self.create()
+        self.assertEqual(self.request('POST',f'/api/sessions/{other}/jobs/{job["id"]}/resume-analysis',{})[0],400)
+        self.model_digest='sha256:'+'b'*64
+        self.assertEqual(self.request('POST',route,{})[0],400)
+        self.model_digest='sha256:'+'a'*64
+        self.assertEqual(self.request('POST',route,{})[0],202)
+        self.assertEqual(self.request('POST',route,{})[0],400)
+        Worker(self.store,self.model).run_once()
+        snap=self.store.snapshot(session);self.assertEqual(snap['jobs'][0]['state'],'SUCCEEDED')
+        self.assertEqual(len(snap['messages']),2)
+        self.assertEqual(sum(p['messages']==self.requests[0]['messages'] for p in self.requests),1)
+        self.assertEqual(self.request('POST',route,{})[0],400)
 
     def test_real_upload_queue_model_and_history(self):
         from engineering.local_app.worker import Worker

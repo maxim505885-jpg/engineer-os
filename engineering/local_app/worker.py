@@ -23,12 +23,13 @@ class Worker:
             model=self.model;automatic=None
             if job['mode'] in {'CHAT','CORE_RUN'}:
                 from .automatic_analysis import prepare,DocumentModel
-                automatic=prepare(self.store,job,self.stop_event)
+                automatic=prepare(self.store,job,self.stop_event,model=self.model)
                 if automatic:model=DocumentModel(self.store,job,model,self.stop_event,automatic)
             if job['mode']=='CORE_RUN':
                 from .core_run import execute
                 result=execute(self.store,job,model,self.stop_event,automatic_sources=automatic['report']['sources'] if automatic else None)
                 if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; completed role drafts were preserved.')
+                elif automatic and not automatic['report']['all_batches_completed']:self.store.fail(job['id'],'Часть профильного анализа не выполнена; черновики сохранены. Продолжите анализ для повтора ошибок.')
                 else:self.store.finish(job['id'],result)
                 return True
             if job['mode']=='CORE_PLAN':

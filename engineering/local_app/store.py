@@ -34,6 +34,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_receipts(seq INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES jobs(id),record TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
@@ -166,7 +167,7 @@ class Store:
         except sqlite3.IntegrityError:raise ValueError('This conversation already has an active task') from None
         return self.job_dict(record)
 
-    def automatic_extraction(self,parent,file_id,backend):
+    def automatic_extraction(self,parent,file_id,backend,parser_identity=None):
         from .core_plan import verify_originals
         f=self.get_file(file_id);verify_originals([f])
         if f['session_id']!=parent['session_id'] or file_id not in parent['file_ids']:raise ValueError('Attachment isolation failure')
@@ -174,10 +175,17 @@ class Store:
             existing=db.execute("SELECT * FROM jobs WHERE session_id=? AND mode=? AND file_ids=? AND state='SUCCEEDED' ORDER BY created DESC LIMIT 20",(parent['session_id'],'EXTRACT_'+backend.upper(),json.dumps([file_id]))).fetchall()
             for row in existing:
                 job=self.job_dict(row);r=(job['result'] or {}).get('extraction',{})
-                if r.get('source_sha256')==f['sha256'] and r.get('cycle_complete') and not r.get('failed_pages') and not r.get('budget_exhausted'):return job,False
+                if r.get('source_sha256')==f['sha256'] and (parser_identity is None or r.get('parser_identity')==parser_identity) and r.get('cycle_complete') and not r.get('failed_pages') and not r.get('budget_exhausted'):return job,False
             db.execute('BEGIN IMMEDIATE')
             current=db.execute("SELECT id FROM jobs WHERE id=? AND state='RUNNING'",(parent['id'],)).fetchone()
             if current is None:raise ValueError('Parent task not running')
+            previous=db.execute('SELECT * FROM jobs WHERE parent_id=? AND file_ids=? ORDER BY created DESC LIMIT 1',(parent['id'],json.dumps([file_id]))).fetchone()
+            if previous:
+                child=self.job_dict(previous);r=(child['result'] or {}).get('extraction',{})
+                if r.get('budget_exhausted'):raise ValueError('Attachment extraction budget exhausted; resume cannot reset it')
+                if r.get('source_sha256')==f['sha256'] and r.get('parser_identity')==parser_identity and not r.get('budget_exhausted') and child['state'] in {'FAILED','SUCCEEDED'}:
+                    db.execute("UPDATE jobs SET state='ATTACHMENT',error=NULL,updated=? WHERE id=?",(time.time(),child['id']))
+                    return dict(child,state='ATTACHMENT'),True
             now=time.time();record=dict(id=str(uuid.uuid4()),session_id=parent['session_id'],prompt='Автоматическая обработка документа',file_ids=json.dumps([file_id]),state='ATTACHMENT',result=None,error=None,created=now,updated=now,mode='EXTRACT_'+backend.upper(),requested_checks='[]',parent_id=parent['id'])
             db.execute('INSERT INTO jobs(id,session_id,prompt,file_ids,state,result,error,created,updated,mode,requested_checks,parent_id) VALUES(:id,:session_id,:prompt,:file_ids,:state,:result,:error,:created,:updated,:mode,:requested_checks,:parent_id)',record)
         return self.job_dict(record),True
@@ -199,17 +207,22 @@ class Store:
             result['document_analysis']=report
             db.execute('UPDATE jobs SET result=?,updated=? WHERE id=?',(json.dumps(result,ensure_ascii=False),time.time(),job_id))
 
-    def save_analysis_receipt(self,job_id,record):
+    def save_analysis_receipt(self,job_id,record,*,update_seq=None):
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
             row=db.execute("SELECT result FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone()
             if row is None:raise ValueError('Task not running')
-            cur=db.execute('INSERT INTO analysis_receipts(job_id,record) VALUES(?,?)',(job_id,json.dumps(dict(record,acceptance_granted=False,scope='PRELIMINARY_ANALYSIS'),ensure_ascii=False)))
+            encoded=json.dumps(dict(record,acceptance_granted=False,scope='PRELIMINARY_ANALYSIS'),ensure_ascii=False)
+            if update_seq is None:
+                cur=db.execute('INSERT INTO analysis_receipts(job_id,record) VALUES(?,?)',(job_id,encoded));seq=cur.lastrowid
+            else:
+                if db.execute("UPDATE analysis_receipts SET record=? WHERE seq=? AND job_id=? AND json_extract(record,'$.status')='RUNNING'",(encoded,update_seq,job_id)).rowcount!=1:raise ValueError('Call checkpoint changed')
+                seq=update_seq
             if record.get('role')!='CHAT' and record.get('status')=='COMPLETED' and json.loads(record['text']).get('status')=='BLOCK':
                 result=json.loads(row['result'])
                 result['document_analysis']['roles'][record['role']]['block_seen']=True
                 db.execute('UPDATE jobs SET result=? WHERE id=?',(json.dumps(result,ensure_ascii=False),job_id))
-            return cur.lastrowid
+            return seq
 
     def analysis_receipts(self,session_id,job_id,*,offset=0,limit=50):
         identifier(session_id);identifier(job_id)
@@ -219,6 +232,34 @@ class Store:
             rows=db.execute('SELECT seq,record FROM analysis_receipts WHERE job_id=? ORDER BY seq LIMIT ? OFFSET ?',(job_id,limit,offset)).fetchall()
             total=db.execute('SELECT count(*) FROM analysis_receipts WHERE job_id=?',(job_id,)).fetchone()[0]
         return dict(records=[dict(json.loads(r['record']),receipt_id=r['seq']) for r in rows],total=total,has_more=offset+len(rows)<total)
+
+    def analysis_context(self,job_id,role,messages):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute("SELECT id FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone() is None:raise ValueError('Task not running')
+            row=db.execute('SELECT messages FROM analysis_contexts WHERE job_id=? AND role=?',(job_id,role)).fetchone()
+            if row:return json.loads(row['messages'])
+            db.execute('INSERT INTO analysis_contexts VALUES(?,?,?)',(job_id,role,json.dumps(messages,ensure_ascii=False)))
+        return messages
+
+    def resume_analysis(self,session_id,job_id,model):
+        identifier(session_id);identifier(job_id)
+        from .analysis_identity import identity
+        try:
+            with self.connection() as db:
+                db.execute('BEGIN IMMEDIATE')
+                row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=? AND parent_id IS NULL',(job_id,session_id)).fetchone()
+                if row is None:raise ValueError('Analysis not found in conversation')
+                job=self.job_dict(row);report=(job['result'] or {}).get('document_analysis',{})
+                if job['mode'] not in {'CHAT','CORE_RUN'} or job['state'] not in {'FAILED','SUCCEEDED'} or not report or report.get('all_batches_completed') or report.get('budget_exhausted') or not report.get('resume_supported'):
+                    raise ValueError('Analysis cannot be resumed; create a new task if inputs/settings changed')
+                _,fingerprint,supported=identity(self,job,model)
+                if not supported or fingerprint!=report.get('identity_sha256'):raise ValueError('Analysis identity changed; submit a new task')
+                report['resume_count']=report.get('resume_count',0)+1
+                job['result']['document_analysis']=report
+                db.execute("UPDATE jobs SET state='QUEUED',error=NULL,result=?,updated=? WHERE id=?",(json.dumps(job['result'],ensure_ascii=False),time.time(),job_id))
+                return dict(job,state='QUEUED',error=None)
+        except sqlite3.IntegrityError:raise ValueError('Conversation already has an active task') from None
 
     def enqueue_extraction(self,session_id,file_id,backend):
         if not isinstance(backend,str) or backend not in {'native','docling'}:raise ValueError('Unknown extraction backend')
@@ -240,6 +281,8 @@ class Store:
         from .core_plan import verify_originals
         f=self.get_file(job['file_ids'][0]);verify_originals([f])
         if f['sha256']!=run.get('source_sha256') or f['session_id']!=session_id:raise ValueError('Original identity changed')
+        from .analysis_identity import parser_identity
+        if run.get('parser_identity')!=parser_identity(run['backend']):raise ValueError('Parser identity changed; create a new extraction task')
         try:
             with self.connection() as db:
                 db.execute('BEGIN IMMEDIATE')

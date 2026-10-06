@@ -118,6 +118,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if len(parts)==6 and parts[5]=='resume' and post:
                         self.json_body()
                         return self.respond(202,store.resume_extraction(parts[2],parts[4]))
+                    if len(parts)==6 and parts[5]=='resume-analysis' and post:
+                        self.json_body()
+                        return self.respond(202,store.resume_analysis(parts[2],parts[4],model))
                     if len(parts)==6 and parts[5]=='pages' and not post:
                         query=parse_qs(path.query)
                         return self.respond(200,store.extraction_pages(parts[2],parts[4],offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0])))

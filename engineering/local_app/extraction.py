@@ -73,9 +73,13 @@ def execute(store,job,stop_event,*,progress=None):
     verify_originals([file])
     backend='docling' if job['mode']=='EXTRACT_DOCLING' else 'native'
     prior=(job['result'] or {}).get('extraction',{})
+    from .analysis_identity import parser_identity
+    config=parser_identity(backend)
+    if prior and (prior.get('source_sha256')!=file['sha256'] or prior.get('parser_identity')!=config):
+        raise ExtractionFailure('Идентичность parser/источника изменилась; создайте новое задание.')
     with fitz.open(file['path']) as pdf:
         if pdf.needs_pass or not 0<len(pdf)<=MAX_PAGES:raise ExtractionFailure('PDF защищён или превышает лимит 5000 страниц.')
-        run=dict(file_id=file['id'],name=file['name'],source_sha256=file['sha256'],backend=backend,
+        run=dict(file_id=file['id'],name=file['name'],source_sha256=file['sha256'],backend=backend,parser_identity=config,
                  total_pages=len(pdf),processed_pages=0,failed_pages=0,blocked_pages=0,
                  stored_chars=0,current_page=None,cycle_complete=False,budget_exhausted=False,
                  scope='UNVERIFIED_EXTRACTION',completeness='NOT_CHECKED',ocr=prior.get('ocr','NOT_RUN'),acceptance_granted=False)

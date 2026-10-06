@@ -133,6 +133,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
     def save_progress():
         run['status'] = core.final_status(state).value
         if any(r.status==AgentStatus.BLOCK for r in state.results):run['status']='BLOCK'
+        if any(r.get('block_seen') for r in getattr(model,'report',{}).get('roles',{}).values()):run['status']='BLOCK'
         lines = ['Предварительный профильный анализ ENGINEER CORE. Не является инженерным принятием.']
         for row in records:
             lines.append(row['label'] + ' · ' + row['execution'] + ' · ' + row['status'])
