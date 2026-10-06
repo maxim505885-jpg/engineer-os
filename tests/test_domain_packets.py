@@ -128,5 +128,51 @@ class DomainPacketTests(unittest.TestCase):
         with self.store.connection() as db:db.execute('UPDATE domain_packets SET record=? WHERE id=?',(json.dumps(event),event['id']))
         r=self.report()['packets'][0];self.assertIsNone(r['arithmetic']);self.assertIn('QUANTITY_BINDING_INVALID',r['reasons'])
 
+    def test_normative_authority_review_is_bound_but_not_acceptance(self):
+        p=self.packet()
+        p['authority_review']=dict(
+            document='TEST',edition='2026',clause='clause1',
+            authority='Controlled authority source',
+            source_ref='authority:test:2026:clause1',
+            applicability_basis='Scope was reviewed against the declared test case',
+            decision='VERIFIED')
+        self.save(p);r=self.report()['packets'][0]
+        self.assertEqual(r['authority_review']['status'],'READY_FOR_EXPERT_APPLICABILITY_REVIEW')
+        self.assertIn('AUTHORITY_RECEIPT_NOT_SELF_AUTHENTICATING',r['reasons'])
+        self.assertIn('NORMATIVE_APPLICABILITY_NOT_VERIFIED',r['reasons'])
+        self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
+
+    def test_normative_authority_identity_must_match_chain(self):
+        p=self.packet()
+        p['authority_review']=dict(
+            document='OTHER',edition='2026',clause='clause1',
+            authority='Controlled authority source',source_ref='authority:test',
+            applicability_basis='Controlled basis',decision='VERIFIED')
+        with self.assertRaises(ValueError):self.save(p)
+
+    def test_complete_calculation_semantic_review_advances_only_to_solver_verification(self):
+        from engineering.calculation.model_intake import CalculationArtifactRole
+        bindings=[dict(role=r.value,file_id=self.actual['id'],candidate_ids=[self.a['id']]) for r in CalculationArtifactRole]
+        semantic=[dict(role=r.value,statement='Controlled semantic statement',candidate_ids=[self.a['id']],
+                       decision='VERIFIED',basis='Controlled source review basis') for r in CalculationArtifactRole]
+        p=dict(kind='CALCULATION',bindings=bindings,semantic_reviews=semantic)
+        self.save(p);r=self.report()['packets'][0]
+        self.assertEqual(r['semantic_review']['status'],'READY_FOR_SOLVER_VERIFICATION')
+        self.assertIn('SOLVER_EXECUTION_NOT_PROVEN',r['reasons'])
+        self.assertIn('SOLVER_NOT_RUN',r['reasons'])
+        self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
+
+    def test_calculation_semantic_review_cannot_borrow_other_role_source(self):
+        from engineering.calculation.model_intake import CalculationArtifactRole
+        other=preserve_file(self.store,self.sid,'other.txt',b'Other source')
+        other_candidate=self.candidate(other,'Other source')
+        bindings=[
+            dict(role='MODEL',file_id=self.actual['id'],candidate_ids=[self.a['id']]),
+            dict(role='GEOMETRY',file_id=other['id'],candidate_ids=[other_candidate['id']])]
+        semantic=[dict(role='MODEL',statement='Model statement',candidate_ids=[other_candidate['id']],
+                       decision='VERIFIED',basis='Wrong source')]
+        with self.assertRaises(ValueError):
+            self.save(dict(kind='CALCULATION',bindings=bindings,semantic_reviews=semantic))
+
 
 if __name__=='__main__':unittest.main()
