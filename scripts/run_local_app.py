@@ -9,7 +9,7 @@ import webbrowser
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from engineering.local_app.lock import DataLock
-from engineering.local_app.model import LocalModel
+from engineering.local_app.model import LocalModel, thinking_setting
 from engineering.local_app.server import make_server
 from engineering.local_app.store import Store
 from engineering.local_app.worker import Worker
@@ -27,7 +27,8 @@ def main(argv=None):
     model_name=os.environ.get('ENGINEER_OS_LOCAL_MODEL','qwen3:8b')
     key=os.environ.get('ENGINEER_OS_LOCAL_MODEL_KEY','')
     try:
-        model=LocalModel(origin,model_name,key,provider=os.environ.get('ENGINEER_OS_LOCAL_PROVIDER','ollama'))
+        model=LocalModel(origin,model_name,key,provider=os.environ.get('ENGINEER_OS_LOCAL_PROVIDER','ollama'),
+                         thinking=thinking_setting(os.environ.get('ENGINEER_OS_LOCAL_THINK')))
         with DataLock(args.data_dir):
             store=Store(args.data_dir)
             server=make_server(store,model,port=args.port)

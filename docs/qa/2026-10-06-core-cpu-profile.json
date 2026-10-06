@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-06",
+  "scope": "BOUNDED_LIVE_CPU_PRELIMINARY_ANALYSIS",
+  "provider": "ollama",
+  "thinking": false,
+  "model": "engineer-qwen3-8b-q4km:stage2",
+  "weights_sha256": "d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785",
+  "config": {
+    "num_ctx": 8192,
+    "num_predict": 1024,
+    "num_thread": 4,
+    "temperature": 0,
+    "keep_alive": 0,
+    "timeout_seconds_per_call": 180
+  },
+  "core_run": {
+    "seconds": 220.19,
+    "calls_seconds": [
+      104.79,
+      115.36
+    ],
+    "source_sha256": "9e12c07bd1f9991d6a11eec5f098ef3e308e6150bdfddd72fb3be62eac14fa72",
+    "queue_state": "SUCCEEDED",
+    "status": "UNCERTAINTY",
+    "roles": [
+      {
+        "agent": "report-audit-agent",
+        "execution": "COMPLETED"
+      },
+      {
+        "agent": "final-audit-agent",
+        "execution": "COMPLETED"
+      }
+    ],
+    "acceptance_granted": false,
+    "final_audit": "NOT_RUN"
+  },
+  "verification": {
+    "python_tests": 339,
+    "node_tests": 4,
+    "compileall": "PASS",
+    "diff_check": "PASS",
+    "independent_review": "NO_ACTIONABLE_FINDINGS"
+  },
+  "limitations": [
+    "No paired OpenAI baseline rerun; speed causality not isolated",
+    "No new OCR run",
+    "Full V4 completeness remains unconfirmed",
+    "Windows NOT_RUN"
+  ],
+  "tables": [
+    {
+      "case": "v4-page-0015.pdf",
+      "seconds": 91.64,
+      "source_sha256": "3a3813a57b1953ed55b06666057efeb3a6a63a416bba5901a625a49e440a2600",
+      "queue_state": "SUCCEEDED",
+      "status": "UNCERTAINTY",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN",
+      "ocr": "NOT_RUN",
+      "original_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+      "original_page": 15,
+      "parser": "native",
+      "expected_values": [
+        "0,50 кПа",
+        "0,30 кПа",
+        "-30,0 °C",
+        "+40,0 °C",
+        "0,40 м"
+      ],
+      "all_expected_values_present": true
+    },
+    {
+      "case": "recorded-ocr-table-fixture.txt",
+      "seconds": 48.97,
+      "source_sha256": "a7b2ac2307575a53f9499521d56a1e9476254e8cbdfe59ac5f3ac65b9bf49cec",
+      "queue_state": "SUCCEEDED",
+      "status": "UNCERTAINTY",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN",
+      "ocr": "NOT_RUN",
+      "scope": "RECONSTRUCTED_PREVIOUS_OCR_TEXT_FIXTURE_NOT_LIVE_OCR",
+      "damaged_label": "ижете",
+      "ambiguity_explicit": true,
+      "floor_count_not_invented": true,
+      "explicit_prompt_do_not_guess": true
+    }
+  ]
+}

@@ -19,16 +19,44 @@ class BoundedResponse:
         return raw
 
 
+class OllamaResponse(BoundedResponse):
+    def read(self):
+        body=json.loads(super().read())
+        if (not isinstance(body,dict) or body.get('done') is not True
+                or body.get('done_reason')=='length'
+                or not isinstance(body.get('message'),dict)
+                or not isinstance(body['message'].get('content'),str)
+                or not body['message']['content'].strip()):
+            raise ModelGatewayError('Ollama returned an incomplete or invalid response')
+        return json.dumps({'choices':[{'message':{'content':body['message']['content']}}]}).encode()
+
+
+def thinking_setting(value):
+    if value in (None,'','default'):return None
+    if value=='false':return False
+    if value=='true':return True
+    raise ValueError('ENGINEER_OS_LOCAL_THINK must be default, false or true')
+
+
 class LocalModel:
-    def __init__(self,origin='http://127.0.0.1:11434',model='qwen3:8b',key='',*,provider='ollama'):
+    def __init__(self,origin='http://127.0.0.1:11434',model='qwen3:8b',key='',*,provider='ollama',thinking=None):
         try:self.origin=local_url(origin)
         except IntegrationError as exc:raise ValueError(str(exc)) from None
         if not isinstance(model,str) or not model.strip() or len(model)>200:raise ValueError('Invalid model')
         if provider not in {'ollama','openwebui'}:raise ValueError('Provider must be ollama or openwebui')
+        if thinking is not None and type(thinking) is not bool:raise ValueError('Thinking must be a boolean or None')
+        if thinking is not None and provider!='ollama':raise ValueError('Explicit thinking control requires the Ollama provider')
         self.provider=provider
+        self.thinking=thinking
         self.model=model;self.key=key;self.opener=build_opener(ProxyHandler({}),NoRedirect())
         def open_bounded(req,timeout):
             if self.provider=='openwebui':req=Request(self.origin+'/api/chat/completions',data=req.data,headers=dict(req.header_items()),method='POST')
+            if self.thinking is not None:
+                original=json.loads(req.data)
+                payload=dict(model=original['model'],messages=original['messages'],stream=False,
+                             think=self.thinking,options=dict(temperature=original['temperature']))
+                req=Request(self.origin+'/api/chat',data=json.dumps(payload,ensure_ascii=False).encode(),headers=dict(req.header_items()),method='POST')
+                return OllamaResponse(self.opener.open(req,timeout=timeout))
             return BoundedResponse(self.opener.open(req,timeout=timeout))
         self.gateway=OpenAICompatibleGateway(self.origin,api_key=key or None,opener=open_bounded)
 
