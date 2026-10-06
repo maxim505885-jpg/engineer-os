@@ -72,6 +72,32 @@ class LocalHTTPTests(unittest.TestCase):
         restarted=type(self.store)(Path(self.tmp.name))
         self.assertEqual(restarted.snapshot(session)['messages'][-1]['content'],'Нужна проверка источника')
 
+    def test_document_extraction_protected_routes_and_page_journal(self):
+        import fitz
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        with fitz.open() as pdf:
+            pdf.new_page().insert_text((30,40),'height 4m');data=pdf.tobytes()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=report.pdf',data,{'Content-Type':'application/octet-stream'})
+        file=json.loads(raw)
+        route=f'/api/sessions/{session}/extraction'
+        payload={'file_id':file['id'],'backend':'native'}
+        self.assertEqual(self.request('POST',route,payload,token=False)[0],403)
+        status,_,raw=self.request('POST',route,payload);self.assertEqual(status,202)
+        job=json.loads(raw);Worker(self.store,None).run_once()
+        route=f'/api/sessions/{session}/jobs/{job["id"]}'
+        self.assertEqual(self.request('GET',route+'/pages',token=False)[0],403)
+        status,_,raw=self.request('GET',route+'/pages');self.assertEqual(status,200)
+        self.assertEqual(json.loads(raw)['pages'][0]['page'],1)
+        status,_,raw=self.request('GET',route+'/pages/1');self.assertEqual(status,200)
+        self.assertIn('height 4m',json.loads(raw)['blocks'][0]['text'])
+        self.assertFalse(json.loads(raw)['acceptance_granted'])
+        self.assertEqual(self.request('GET',route+'/pages?limit=51')[0],400)
+        other=self.create();foreign=f'/api/sessions/{other}/jobs/{job["id"]}'
+        self.assertEqual(self.request('GET',foreign+'/pages')[0],400)
+        self.assertEqual(self.request('POST',foreign+'/resume',{})[0],400)
+        self.assertEqual(self.requests,[],'Extraction must not call the model')
+
     def test_core_preparation_through_http_queue_and_worker(self):
         from engineering.local_app.worker import Worker
         session=self.create()

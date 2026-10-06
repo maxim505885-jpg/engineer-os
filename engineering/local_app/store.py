@@ -33,6 +33,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
@@ -139,12 +140,16 @@ class Store:
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
-        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN'}:raise ValueError('Unknown task mode')
-        checks=requested_checks if requested_checks is not None else (['report','normative'] if mode!='CHAT' else [])
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING'}:raise ValueError('Unknown task mode')
+        checks=requested_checks if requested_checks is not None else (['report','normative'] if mode in {'CORE_PLAN','CORE_RUN'} else [])
         from engineering.core.engineer_core import CHECK_REGISTRY
         if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
-        if mode=='CHAT' and checks:raise ValueError('Engineering checks require a CORE mode')
-        if mode!='CHAT' and (not file_ids or not checks):raise ValueError('ТЗ, selected originals and checks required for CORE')
+        if mode not in {'CORE_PLAN','CORE_RUN'} and checks:raise ValueError('Engineering checks require a CORE mode')
+        if mode in {'CORE_PLAN','CORE_RUN'} and (not file_ids or not checks):raise ValueError('ТЗ, selected originals and checks required for CORE')
+        if mode.startswith('EXTRACT_'):
+            if len(file_ids)!=1:raise ValueError('Extraction requires one PDF')
+            original=self.get_file(file_ids[0])
+            if Path(original['name']).suffix.lower()!='.pdf':raise ValueError('Extraction requires a PDF original')
         for value in file_ids:identifier(value)
         now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now,mode=mode,requested_checks=json.dumps(checks))
         try:
@@ -158,6 +163,66 @@ class Store:
                 db.execute("UPDATE sessions SET title=? WHERE id=? AND title='Новый диалог'",(record['prompt'][:60],session_id))
         except sqlite3.IntegrityError:raise ValueError('This conversation already has an active task') from None
         return self.job_dict(record)
+
+    def enqueue_extraction(self,session_id,file_id,backend):
+        if not isinstance(backend,str) or backend not in {'native','docling'}:raise ValueError('Unknown extraction backend')
+        return self.enqueue(session_id,'Извлечение PDF · '+backend,[file_id],mode='EXTRACT_'+backend.upper())
+
+    def extraction_job(self,session_id,job_id):
+        identifier(session_id);identifier(job_id)
+        with self.connection() as db:r=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
+        if r is None or not r['mode'].startswith('EXTRACT_'):raise ValueError('Extraction task not found in conversation')
+        return self.job_dict(r)
+
+    def resume_extraction(self,session_id,job_id):
+        job=self.extraction_job(session_id,job_id)
+        run=(job['result'] or {}).get('extraction',{})
+        if job['state'] not in {'FAILED','SUCCEEDED'} or not run or run.get('budget_exhausted'):
+            raise ValueError('Task cannot be resumed')
+        if run.get('cycle_complete') and not run.get('failed_pages'):raise ValueError('Extraction cycle already complete')
+        from .core_plan import verify_originals
+        f=self.get_file(job['file_ids'][0]);verify_originals([f])
+        if f['sha256']!=run.get('source_sha256') or f['session_id']!=session_id:raise ValueError('Original identity changed')
+        try:
+            with self.connection() as db:
+                db.execute('BEGIN IMMEDIATE')
+                if db.execute("UPDATE jobs SET state='QUEUED',error=NULL,updated=? WHERE id=? AND state=?",(time.time(),job_id,job['state'])).rowcount!=1:raise ValueError('Task state changed')
+        except sqlite3.IntegrityError:raise ValueError('Conversation already has an active task') from None
+        return self.extraction_job(session_id,job_id)
+
+    def extraction_totals(self,job_id):
+        with self.connection() as db:
+            r=db.execute("SELECT count(*) processed_pages,coalesce(sum(json_extract(record,'$.stored_chars')),0) stored_chars,coalesce(sum(json_extract(record,'$.execution')='FAILED'),0) failed_pages,coalesce(sum(json_extract(record,'$.status')='BLOCK'),0) blocked_pages FROM extraction_pages WHERE job_id=?",(job_id,)).fetchone()
+        return dict(r)
+
+    def extraction_completed(self,job_id,page):
+        with self.connection() as db:r=db.execute("SELECT json_extract(record,'$.execution') execution FROM extraction_pages WHERE job_id=? AND page=?",(job_id,page)).fetchone()
+        return r is not None and r['execution']=='COMPLETED'
+
+    def save_extraction_page(self,job_id,record):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            r=db.execute('SELECT state FROM jobs WHERE id=?',(job_id,)).fetchone()
+            if r is None or r['state']!='RUNNING':raise ValueError('Task is not running')
+            db.execute('INSERT INTO extraction_pages VALUES(?,?,?) ON CONFLICT(job_id,page) DO UPDATE SET record=excluded.record',(job_id,record['page'],json.dumps(record,ensure_ascii=False)))
+
+    def extraction_pages(self,session_id,job_id,*,offset=0,limit=50):
+        self.extraction_job(session_id,job_id)
+        if type(offset) is not int or offset<0 or type(limit) is not int or not 1<=limit<=50:raise ValueError('Invalid journal window')
+        with self.connection() as db:
+            rows=db.execute('SELECT record FROM extraction_pages WHERE job_id=? ORDER BY page LIMIT ? OFFSET ?',(job_id,limit,offset)).fetchall()
+            total=db.execute('SELECT count(*) FROM extraction_pages WHERE job_id=?',(job_id,)).fetchone()[0]
+        pages=[]
+        for row in rows:
+            record=json.loads(row['record']);blocks=record.pop('blocks');record['blocks_count']=len(blocks);pages.append(record)
+        return dict(pages=pages,total=total,offset=offset,has_more=offset+len(pages)<total)
+
+    def extraction_page(self,session_id,job_id,page):
+        self.extraction_job(session_id,job_id)
+        if type(page) is not int or page<1:raise ValueError('Invalid page')
+        with self.connection() as db:r=db.execute('SELECT record FROM extraction_pages WHERE job_id=? AND page=?',(job_id,page)).fetchone()
+        if r is None:raise ValueError('Extraction page not found')
+        return json.loads(r['record'])
 
     def claim(self):
         with self.connection() as db:

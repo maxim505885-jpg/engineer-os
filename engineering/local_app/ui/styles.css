@@ -9,3 +9,5 @@
 #core-checks{margin:8px 0}#core-checks label{display:inline-flex;gap:6px;margin:8px 12px 8px 0}.role-result{border-top:1px solid var(--line,#ddd);padding-top:12px;margin-top:12px}.role-result blockquote{margin:8px 0;padding-left:12px;border-left:2px solid #a0a0a0}
 
 .drive-panel{margin:10px 0 18px}.drive-panel form{display:grid;gap:8px}.drive-panel input{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}.drive-panel small{font-size:12px}
+
+.extraction-text{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto}

@@ -90,6 +90,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
+                    if parts[3]=='extraction':
+                        body=self.json_body()
+                        return self.respond(202,store.enqueue_extraction(parts[2],body.get('file_id'),body.get('backend','native')))
                     if parts[3]=='drive-import':
                         body=self.json_body()
                         if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
@@ -108,6 +111,15 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
                         try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
                         finally:self.server.upload_slots.release()
+                if len(parts)>=6 and parts[:2]==['api','sessions'] and parts[3]=='jobs':
+                    if len(parts)==6 and parts[5]=='resume' and post:
+                        self.json_body()
+                        return self.respond(202,store.resume_extraction(parts[2],parts[4]))
+                    if len(parts)==6 and parts[5]=='pages' and not post:
+                        query=parse_qs(path.query)
+                        return self.respond(200,store.extraction_pages(parts[2],parts[4],offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0])))
+                    if len(parts)==7 and parts[5]=='pages' and not post:
+                        return self.respond(200,store.extraction_page(parts[2],parts[4],int(parts[6])))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='reviews' and post:
                     from .review import record_review
                     body=self.json_body()

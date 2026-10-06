@@ -78,3 +78,13 @@ Live Google OAuth/Drive NOT_RUN; интерактивное подключени
 Независимое ревью нашло CHAT prompt без фактического context_text_truncated и whitespace page count, оставшийся ненулевым после discard. Оба воспроизведены RED→GREEN. Повторное ревью: Critical/Important нет, 10 tests PASS; отдельные one-file/twenty-file CHAT repro остались в 16k.
 
 RECORDED — наблюдаемое покрытие preview, не подтверждение полноты. UNKNOWN для прежних файлов/ошибок; NOT_CHECKED/NOT_RUN/UNVERIFIED/acceptance=false сохраняются. PDF V4 не перепроверялся, старые неопубликованные PDF-правки не включены. Полный Docling/OCR, live Google/qwen3, real browser/CSP и Windows NOT_RUN; Windows последними.
+
+## Дополнение 06.10.2026 — фоновое постраничное извлечение PDF
+
+313 Python +4 Node PASS; оба actual HTTP/jsdom smoke, compileall/JS syntax/diff-check PASS. 11 extraction regressions и новый protected HTTP workflow. Первоначальные 8 extractor tests RED по отсутствию очереди; API RED404 и DOM RED missing action, после реализации GREEN. Real native 23-page PDF обработан за пределами preview20, page23 без текста BLOCK; исходные байты/hash не меняются, сохраняются journal/checkpoint/restart/resume.
+
+Проверены changed source до регистрации страницы, foreign job/file isolation, partial page/aggregate budget/resume protection, missing Docling explicit FAILED, existing adapter page_range с synthetic converter и source provenance. Converter reuse regression uncached RED2 loads→cached GREEN1. Независимое ревью выявило OCR history reset on resume: существующий adapter/synthetic failure воспроизвёл RED NOT_RUN, исправление сохраняет REQUESTED_NOT_VERIFIED до вызова и в durable page record; GREEN11 tests, весь набор313PASS. Других blocking findings reviewer не обнаружил.
+
+DOM запускает actual launcher/worker, native queue/journal/saved text; модельных запросов при извлечении нет (4 прежних chat/CORE calls). Другая Drive integration также PASS. Журнал хранит summaries отдельно от page blocks; JSON paths/exception secrets не публикуются.
+
+Docling/onnxruntime/OCR здесь отсутствуют, live Docling/OCR NOT_RUN; контракт synthetic не подтверждает распознавание, качество таблиц, offline weights или производительность. Новый результат не заменяет автоматически CORE preview. UNVERIFIED/NOT_EVIDENCE/NOT_CHECKED/acceptance=false/FINAL AUDIT NOT_RUN сохранены. PDF V4 не перепроверялся; Windows/live qwen3/Google OAuth/real browser NOT_RUN, Windows последними.
