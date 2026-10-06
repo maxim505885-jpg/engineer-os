@@ -212,3 +212,30 @@ def report(store,session_id):
 def acceptance_gate(store,session_id):
     r=report(store,session_id)
     return r.get("status")=="ACCEPTED" and r.get("acceptance_granted") is True and r.get("current_fresh") is True
+
+
+class LocalFinalAuditAcceptanceGate:
+    """ENGINEER CORE acceptance gate backed by the current local FINAL AUDIT.
+
+    The accepted audit must belong to the same CORE_RUN task_id; an ACCEPTED
+    audit from another case/session state cannot be replayed onto this state.
+    """
+    def __init__(self,store,session_id):
+        self.store=store;self.session_id=session_id
+
+    def __call__(self,state):
+        try:
+            current=report(self.store,self.session_id)
+            if current.get("status")!="ACCEPTED" or current.get("acceptance_granted") is not True or current.get("current_fresh") is not True:
+                return False
+            audits=current.get("audits") or []
+            audit=audits[-1] if audits else None
+            cases=real_case_report(self.store,self.session_id).get("cases") or []
+            case=next((x for x in cases if x.get("current")),None)
+            if not audit or not case or audit.get("case_id")!=case.get("id"):
+                return False
+            if case.get("identity",{}).get("core_job_id")!=state.task.task_id:
+                return False
+            return audit.get("effective_acceptance_granted") is True
+        except Exception:
+            return False
