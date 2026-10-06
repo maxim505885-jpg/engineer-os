@@ -62,13 +62,26 @@ function Ensure-Ollama{
  }else{Log "Model ready: $Model"}
 }
 
+function Find-OpenWebUI{
+ $ow=Get-Command open-webui -ErrorAction SilentlyContinue
+ if($ow){return $ow.Source}
+ $candidates=@(
+  (Join-Path $env:USERPROFILE '.local\bin\open-webui.exe'),
+  (Join-Path $env:APPDATA 'Python\Python313\Scripts\open-webui.exe'),
+  (Join-Path $env:APPDATA 'Python\Python312\Scripts\open-webui.exe'),
+  (Join-Path $env:APPDATA 'Python\Python311\Scripts\open-webui.exe')
+ )
+ foreach($p in $candidates){if(Test-Path $p){return $p}}
+ return $null
+}
+
 function Ensure-OpenWebUI{
  if($SkipOpenWebUI){Log 'Open WebUI skipped';return}
  if(Test-Http $OpenWebUIUrl 2){Log 'Open WebUI already running';return}
- $ow=Get-Command open-webui -ErrorAction SilentlyContinue
+ $ow=Find-OpenWebUI
  if($ow){
   Log 'Starting Open WebUI'
-  Start-Process -FilePath $ow.Source -ArgumentList @('serve') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'openwebui.out.log') -RedirectStandardError (Join-Path $LogDir 'openwebui.err.log')|Out-Null
+  Start-Process -FilePath $ow -ArgumentList @('serve') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'openwebui.out.log') -RedirectStandardError (Join-Path $LogDir 'openwebui.err.log')|Out-Null
   try{Wait-Http $OpenWebUIUrl 60 'Open WebUI'}catch{Log ('WARNING: '+$_.Exception.Message)}
   return
  }
@@ -82,6 +95,8 @@ function Ensure-OpenWebUI{
 
 function Ensure-EngineerOS{
  if(Test-EngineerOS){Log 'ENGINEER OS already running';return}
+ $listener=Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort 8765 -State Listen -ErrorAction SilentlyContinue
+ if($listener){throw 'Port 8765 is occupied by another application'}
  $env:ENGINEER_OS_LOCAL_PROVIDER='ollama'
  $env:ENGINEER_OS_LOCAL_MODEL_URL=$OllamaUrl
  $env:ENGINEER_OS_LOCAL_MODEL=$Model
