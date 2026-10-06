@@ -98,6 +98,28 @@ class LocalHTTPTests(unittest.TestCase):
         self.assertEqual(self.request('POST',foreign+'/resume',{})[0],400)
         self.assertEqual(self.requests,[],'Extraction must not call the model')
 
+    def test_automatic_pdf_analysis_and_protected_receipts(self):
+        import fitz
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        with fitz.open() as pdf:
+            for i in range(24):pdf.new_page().insert_text((30,40),f'PAGE_{i+1}')
+            data=pdf.tobytes()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=report.pdf',data,{'Content-Type':'application/octet-stream'})
+        file=json.loads(raw)
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Read','file_ids':[file['id']]})
+        self.assertEqual(status,202);job=json.loads(raw)
+        Worker(self.store,self.model).run_once()
+        route=f'/api/sessions/{session}/jobs/{job["id"]}/analysis'
+        self.assertEqual(self.request('GET',route,token=False)[0],403)
+        status,_,raw=self.request('GET',route);self.assertEqual(status,200)
+        self.assertGreater(json.loads(raw)['total'],0)
+        self.assertIn('PAGE_24',str(self.requests))
+        self.assertEqual(len(self.store.snapshot(session)['jobs']),1)
+        self.assertEqual(self.request('GET',route+'?limit=51')[0],400)
+        other=self.create()
+        self.assertEqual(self.request('GET',f'/api/sessions/{other}/jobs/{job["id"]}/analysis')[0],400)
+
     def test_core_preparation_through_http_queue_and_worker(self):
         from engineering.local_app.worker import Worker
         session=self.create()

@@ -113,19 +113,20 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('.core-run'));
   assert.ok(doc.querySelector('.core-run').textContent.includes('NOT_RUN'));
   const fullPdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
-  assert.ok(fullPdfCard.querySelector('.extract-native'),'Native full extraction action missing');
-  fullPdfCard.querySelector('.extract-native').click();
-  await until(()=>doc.querySelector('.extraction-run')&&!doc.querySelector('#send').disabled);
-  assert.ok(doc.querySelector('.extraction-run').textContent.includes('1/1'));
-  doc.querySelector('.extraction-journal').click();await until(()=>doc.querySelector('.extraction-page'));
-  doc.querySelector('.extraction-page').click();await until(()=>doc.querySelector('.extraction-text'));
-  assert.ok(doc.querySelector('.extraction-text').textContent.includes('height 4m'));
-  assert.equal(requests.length,4,'Document extraction must not call model');
+  assert.ok(fullPdfCard.querySelector('.advanced-document-actions'),'Manual extraction must be under advanced actions');
+  fullPdfCard.querySelector('input').click();
+  doc.querySelector('#task-mode').value='CHAT';doc.querySelector('#prompt').value='Проверь прикреплённый PDF';
+  doc.querySelector('#composer').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.automatic-analysis')&&!doc.querySelector('#send').disabled);
+  assert.ok(doc.querySelector('.automatic-analysis').textContent.includes('1/1'));
+  assert.ok(JSON.stringify(requests.at(-1)).includes('height 4m'),'PDF is automatically supplied to analysis');
+  assert.equal(requests.length,5,'One-page automatic document analysis needs one model request');
+  doc.querySelector('.analysis-drafts').click();await until(()=>doc.querySelector('.analysis-receipt'));
   assert.ok(doc.querySelector('#drive-form'),'Drive import form missing');
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
   assert.equal(doc.querySelectorAll('.file').length,2,'Unavailable Drive must not manufacture an imported file');
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','full-native-extraction','page-journal','saved-page-text'],requests:requests.length}));
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

@@ -1,0 +1,17 @@
+# Automatic attachment analysis
+
+The user attaches a PDF, selects it and sends CHAT or CORE_RUN. The worker processes its pages before calling the local model. Manual extraction stays under additional document actions. CORE_PLAN remains deterministic and does not call the model.
+
+The existing extraction engine writes page journals in SQLite through hidden ATTACHMENT child jobs. Completed same-source/backend journals may be reused after source hash verification. A child is not a separate conversation message and cannot be publicly resumed; resubmit the parent task after interruption. Model analysis has no automatic replay/resume. Existing page journals and completed drafts survive restart.
+
+Native text is the default; it does not read scans, diagrams or validate table structure. ENGINEER_OS_ATTACHMENT_PARSER=docling selects the optional existing adapter, requiring its dependencies, local artifacts and configuration. Missing setup fails explicitly, with no native fallback. Live Docling/OCR and model quality are NOT_RUN in this environment.
+
+All retained available page text enters bounded source batches, including pages after the preview's first 20. Limits: 6000 text characters and 20 references per batch, 2000000 source characters across selected PDFs. Existing extraction limits also apply. Missing, blocked, clipped or unprocessed content is disclosed. References retain original/file SHA through the extraction job, page-local start/end, batch start/end and exact segment SHA256. Joining pages adds newline separators. TXT/MD continue using existing bounded context; this automatic pipeline is PDF-specific.
+
+Every source batch is analyzed for CHAT or each planned CORE role. SQLite analysis_receipts stores each raw draft and failed call, separate from the compact final response. Protected GET /api/sessions/:sid/jobs/:jid/analysis returns at most 50 records with offset/limit and conversation ownership checks. The UI exposes results by part as inert text. Original hashes are checked before and after every model call. Each CORE response is validated through the existing draft contract; a BLOCK survives subsequent summary changes and model failures, while failed execution remains visible.
+
+Multiple drafts are summarized recursively in pairs. Each draft contributes at most 4000 characters to a summary input; original responses up to 20000 characters remain stored. Summary compression is disclosed; coverage of text batches does not prove semantic completeness. No solver, source verification, evidence promotion or engineering acceptance is introduced. acceptance=false and FINAL AUDIT NOT_RUN throughout.
+
+Progress distinguishes preparation, part analysis, summarization, completion and partial failure. Planned CORE roles start NOT_RUN, so finishing the first role cannot announce completion of the whole run. Failure/restart terminates active progress while preserving receipts and page journals. A saved BLOCK also survives shutdown. Reaching the extraction total-text budget fails before model analysis, avoiding an apparently complete answer from an unfinished extraction.
+
+Validation uses actual native PDFs, a synthetic model, actual loopback HTTP and jsdom. It covers page24, bounded multi-part calls and persistent receipts, source hash changes, mixed native/blank pages, blank/bad PDF failure, BLOCK retention after errors, access isolation and UI attach/send flow. Real-browser layout/CSP, Google OAuth, live OCR, live qwen3 and Windows remain unverified; Windows is last by user request.

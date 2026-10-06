@@ -20,9 +20,14 @@ class Worker:
                 if self.stop_event.is_set():self.store.fail(job['id'],'Извлечение остановлено; журнал сохранён, продолжение вручную.')
                 else:self.store.finish(job['id'],result)
                 return True
+            model=self.model;automatic=None
+            if job['mode'] in {'CHAT','CORE_RUN'}:
+                from .automatic_analysis import prepare,DocumentModel
+                automatic=prepare(self.store,job,self.stop_event)
+                if automatic:model=DocumentModel(self.store,job,model,self.stop_event,automatic)
             if job['mode']=='CORE_RUN':
                 from .core_run import execute
-                result=execute(self.store,job,self.model,self.stop_event)
+                result=execute(self.store,job,model,self.stop_event)
                 if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; completed role drafts were preserved.')
                 else:self.store.finish(job['id'],result)
                 return True
@@ -40,6 +45,7 @@ class Worker:
                 selected.append(dict(role=message['role'],content=message['content']));budget-=len(message['content'])
             selected.reverse();context=[]
             files=[self.store.get_file(fid) for fid in job['file_ids']]
+            if automatic:files=[dict(f,text='') if f['id'] in automatic['pdf_ids'] else f for f in files]
             if any(f['session_id']!=job['session_id'] for f in files):raise ValueError('Attachment isolation failure')
             coverage=[dict(id=f['id'],extraction_coverage=summary(f['extraction_coverage']),context_text_chars=0,context_text_truncated=bool(f['text'])) for f in files]
             wrapper='Непроверенные вложения (только контекст):\nПокрытие извлечения (не проверка полноты): '
@@ -56,7 +62,7 @@ class Worker:
             messages=[dict(role='system',content=SYSTEM)]
             if files:messages.append(dict(role='user',content=wrapper+json.dumps(coverage,ensure_ascii=False)+'\n'+''.join(context)))
             messages.extend(selected)
-            result=self.model.chat(messages)
+            result=model.chat(messages)
             if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; submit again to retry.')
             else:self.store.finish(job['id'],dict(text=result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN',context_truncated=truncated,source_coverage=coverage))
         except ExtractionFailure as exc:self.store.fail(job['id'],str(exc))

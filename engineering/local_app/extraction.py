@@ -50,7 +50,7 @@ def retain_blocks(blocks,page,budget):
     return retained,used,clipped
 
 
-def execute(store,job,stop_event):
+def execute(store,job,stop_event,*,progress=None):
     import fitz
     file=store.get_file(job['file_ids'][0])
     if file['session_id']!=job['session_id']:raise ValueError('Source isolation failure')
@@ -68,6 +68,7 @@ def execute(store,job,stop_event):
             run.update(store.extraction_totals(job['id']))
             result['text']=f"Извлечение {file['name']} · {backend}: обработано {run['processed_pages']}/{run['total_pages']} страниц; BLOCK {run['blocked_pages']}, ошибки {run['failed_pages']}. Полнота не проверена; FINAL AUDIT NOT_RUN."
             store.checkpoint(job['id'],result)
+            if progress:progress(run)
         checkpoint()
         parser=docling_parser() if backend=='docling' else None
         for page in range(1,len(pdf)+1):

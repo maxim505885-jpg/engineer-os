@@ -121,6 +121,7 @@ def execute(store, job, model, stop_event):
 
     def save_progress():
         run['status'] = core.final_status(state).value
+        if any(r.status==AgentStatus.BLOCK for r in state.results):run['status']='BLOCK'
         lines = ['Предварительный профильный анализ ENGINEER CORE. Не является инженерным принятием.']
         for row in records:
             lines.append(row['label'] + ' · ' + row['execution'] + ' · ' + row['status'])
@@ -158,8 +159,13 @@ def execute(store, job, model, stop_event):
             raw = model.chat(messages)
             parsed, limitations = parse_draft(task, raw, allowed_ids)
             execution = 'COMPLETED'
-        except Exception:
-            parsed = AgentResult(task.task_id, task.agent, AgentStatus.ERROR,
+        except Exception as exc:
+            saved_block=getattr(exc,'document_block_seen',False) or getattr(model,'report',{}).get('roles',{}).get(task.agent,{}).get('block_seen',False)
+            if hasattr(model,'report'):
+                model.report['roles'][task.agent]['status']='FAILED'
+                model.report.update(stage='PARTIAL',all_batches_completed=False)
+                store.analysis_progress(job['id'],model.report)
+            parsed = AgentResult(task.task_id, task.agent, AgentStatus.BLOCK if saved_block else AgentStatus.ERROR,
                                  message='Роль не выполнена: инструкция или модель недоступна либо ответ нарушает формат предварительного анализа.')
             limitations = ['Ошибка выполнения или формата; инженерная ошибка в объекте не доказана.']
             execution = 'FAILED'
@@ -167,6 +173,10 @@ def execute(store, job, model, stop_event):
         # completed draft. Preserve already recorded earlier roles on failure.
         verify_originals(files)
         if stop_event.is_set():
+            if getattr(model,'report',{}).get('roles',{}).get(task.agent,{}).get('block_seen'):
+                parsed=AgentResult(task.task_id,task.agent,AgentStatus.BLOCK,message='Сохранён BLOCK части документа; выполнение прервано.')
+                core.collect(state,[parsed])
+                row.update(status='BLOCK',summary=parsed.message)
             row['execution'] = 'INTERRUPTED'
             run['current_agent'] = None
             save_progress()
