@@ -199,6 +199,29 @@ class LocalHTTPTests(unittest.TestCase):
         other=self.create()
         self.assertEqual(self.request('POST',f'/api/sessions/{other}/real-case',{'job_id':job['id'],'expected_revision':0})[0],400)
 
+    def test_final_audit_http_route_is_private_immutable_and_fail_closed(self):
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=audit.txt',b'audit source',{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw)
+        self.core_reply=json.dumps(dict(status='UNCERTAINTY',summary='Controlled audit draft',observations=[],limitations=['Not accepted']))
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/jobs',
+            {'prompt':'Final audit case','file_ids':[f['id']],'mode':'CORE_RUN','requested_checks':['report']})
+        self.assertEqual(status,202);job=json.loads(raw);Worker(self.store,self.model).run_once()
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/real-case',
+            {'job_id':job['id'],'expected_revision':0,'manifest':{'TOR':[f['id']],'REPORT':[f['id']]}})
+        self.assertEqual(status,201);case=json.loads(raw)
+        route=f'/api/sessions/{session}/final-audit'
+        self.assertEqual(self.request('GET',route,token=False)[0],403)
+        status,_,raw=self.request('POST',route,{'case_id':case['id'],'expected_revision':0})
+        self.assertEqual(status,201);audit=json.loads(raw)
+        self.assertEqual(audit['decision'],'BLOCK');self.assertFalse(audit['acceptance_granted'])
+        self.assertEqual(audit['final_audit'],'COMPLETED');self.assertEqual(len(audit['audit_sha256']),64)
+        state=json.loads(self.request('GET',route)[2]);self.assertEqual(state['status'],'BLOCK');self.assertFalse(state['acceptance_granted'])
+        self.assertEqual(self.request('POST',route,{'case_id':case['id'],'expected_revision':0})[0],409)
+        other=self.create()
+        self.assertEqual(self.request('POST',f'/api/sessions/{other}/final-audit',{'case_id':case['id'],'expected_revision':0})[0],400)
+
     def test_profile_execution_uses_local_protocol_and_durable_results(self):
         from engineering.local_app.worker import Worker
         session=self.create()
