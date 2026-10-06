@@ -204,7 +204,7 @@ def report(store,session_id,*,selected_files=None):
             if p.get('authority_review'):
                 try:
                     authority_review=audit_normative_authority(NormativeAuthorityReview(**p['authority_review']))
-                    reasons.extend(authority_review['reasons'])
+                    if authority_review['status']=='BLOCK':reasons.extend(authority_review['reasons'])
                 except (ValueError,TypeError):
                     reasons.append('NORMATIVE_AUTHORITY_REVIEW_INVALID')
             else:
@@ -217,12 +217,16 @@ def report(store,session_id,*,selected_files=None):
                     if f['sha256']!=x['source_sha256'] or x['document']!=p['chain']['document'] or x['edition']!=p['chain']['edition']:
                         raise ValueError('normative source identity changed')
                     authority_source=audit_normative_source(NormativeSourceVerification(**x))
-                    reasons.extend(authority_source['reasons'])
+                    if authority_source['status']=='BLOCK':reasons.extend(authority_source['reasons'])
                 except (ValueError,TypeError,KeyError):
                     reasons.append('NORMATIVE_SOURCE_VERIFICATION_INVALID')
             else:
                 reasons.append('NORMATIVE_EDITION_NOT_VERIFIED')
-            reasons.extend(['NORMATIVE_APPLICABILITY_NOT_VERIFIED','INPUT_TRUTH_NOT_VERIFIED'])
+            if authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW' and authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW':
+                reasons.append('NORMATIVE_APPLICABILITY_NOT_ACCEPTED')
+            else:
+                reasons.append('NORMATIVE_APPLICABILITY_NOT_VERIFIED')
+            reasons.append('INPUT_TRUTH_NOT_VERIFIED')
         else:
             artifacts=[]
             for b in p['bindings']:
@@ -236,7 +240,7 @@ def report(store,session_id,*,selected_files=None):
                     semantic_review=audit_calculation_semantics(tuple(
                         CalculationSemanticReview(CalculationArtifactRole(x['role']),x['statement'],tuple(x['candidate_ids']),x['decision'],x['basis'])
                         for x in p['semantic_reviews']))
-                    reasons.extend(semantic_review['reasons'])
+                    if semantic_review['status']=='BLOCK':reasons.extend(semantic_review['reasons'])
                 except (ValueError,TypeError,KeyError):
                     reasons.append('CALCULATION_SEMANTIC_REVIEW_INVALID')
             else:
@@ -244,7 +248,7 @@ def report(store,session_id,*,selected_files=None):
             if p.get('exchange_manifest'):
                 try:
                     exchange_review=audit_exchange_manifest(parse_exchange_manifest(json.dumps(p['exchange_manifest'],ensure_ascii=False,separators=(',',':'))))
-                    reasons.extend(exchange_review['reasons'])
+                    if exchange_review['status']=='BLOCK':reasons.extend(exchange_review['reasons'])
                 except (ValueError,TypeError,KeyError):
                     reasons.append('CALCULATION_EXCHANGE_MANIFEST_INVALID')
             else:
@@ -252,7 +256,7 @@ def report(store,session_id,*,selected_files=None):
             if p.get('solver_receipt'):
                 try:
                     solver_review=audit_solver_receipt(SolverReceipt(**p['solver_receipt']))
-                    reasons.extend(solver_review['reasons'])
+                    if solver_review['status']=='BLOCK':reasons.extend(solver_review['reasons'])
                 except (ValueError,TypeError,KeyError):
                     reasons.append('SOLVER_RECEIPT_INVALID')
             else:
@@ -264,7 +268,7 @@ def report(store,session_id,*,selected_files=None):
             if p.get('execution_identity') and receipt is not None:
                 try:
                     execution_review=audit_execution_identity(SolverExecutionIdentity(**p['execution_identity']),receipt)
-                    reasons.extend(execution_review['reasons'])
+                    if execution_review['status']=='BLOCK':reasons.extend(execution_review['reasons'])
                 except (ValueError,TypeError,KeyError):reasons.append('SOLVER_EXECUTION_IDENTITY_INVALID')
             else:
                 reasons.append('SOLVER_EXECUTION_IDENTITY_MISSING')
@@ -272,7 +276,7 @@ def report(store,session_id,*,selected_files=None):
                 try:
                     x=p['result_verification']
                     result_review=audit_solver_results(SolverResultVerification(**dict(x,critical_findings=tuple(x['critical_findings']))),receipt)
-                    reasons.extend(result_review['reasons'])
+                    if result_review['status']=='BLOCK':reasons.extend(result_review['reasons'])
                 except (ValueError,TypeError,KeyError):reasons.append('SOLVER_RESULT_VERIFICATION_INVALID')
             else:
                 reasons.append('SOLVER_RESULT_VERIFICATION_MISSING')
@@ -281,13 +285,18 @@ def report(store,session_id,*,selected_files=None):
                     structure_review=audit_structure_correlation(tuple(
                         StructureCorrelationItem(x['role'],tuple(x['calculation_source_ids']),tuple(x['actual_source_ids']),x['statement'],x['basis'],x['decision'])
                         for x in p['structure_correlation']))
-                    reasons.extend(structure_review['reasons'])
+                    if structure_review['status']=='BLOCK':reasons.extend(structure_review['reasons'])
                 except (ValueError,TypeError,KeyError):reasons.append('ACTUAL_STRUCTURE_CORRELATION_INVALID')
             else:
                 reasons.append('ACTUAL_STRUCTURE_NOT_VERIFIED')
             if semantic_review is None or semantic_review['status']!='READY_FOR_SOLVER_VERIFICATION':
                 reasons.append('CALCULATION_SEMANTICS_NOT_VERIFIED')
-            reasons.append('SOLVER_NOT_RUN' if solver_review is None else 'SOLVER_EXECUTION_NOT_ACCEPTED')
+            if solver_review is None:
+                reasons.append('SOLVER_NOT_RUN')
+            elif result_review and result_review['status']=='READY_FOR_STRUCTURE_CORRELATION':
+                reasons.append('SOLVER_RESULTS_NOT_ENGINEERING_ACCEPTED')
+            else:
+                reasons.append('SOLVER_EXECUTION_NOT_ACCEPTED')
         if p.get('data_class_reviews'):
             try:
                 reviewed=[]
@@ -302,20 +311,19 @@ def report(store,session_id,*,selected_files=None):
             except (ValueError,TypeError,KeyError):reasons.append('DATA_CLASS_REVIEW_INVALID')
         else:
             reasons.append('DATA_CLASS_NOT_VERIFIED')
+        software_ready=bool(
+            data_class_review and data_class_review['status']=='READY_FOR_DOMAIN_REVIEW' and
+            ((p['kind']=='NORMATIVE' and authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW' and authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW')
+             or
+             (p['kind']=='CALCULATION' and intake and intake['status']=='READY_FOR_SEMANTIC_REVIEW' and semantic_review and semantic_review['status']=='READY_FOR_SOLVER_VERIFICATION' and exchange_review and exchange_review['status']=='READY_FOR_SEMANTIC_CROSSCHECK' and solver_review and solver_review['status']=='READY_FOR_RESULT_VERIFICATION' and execution_review and execution_review['status']=='READY_FOR_RESULT_INTEGRITY_REVIEW' and result_review and result_review['status']=='READY_FOR_STRUCTURE_CORRELATION' and structure_review and structure_review['status']=='READY_FOR_ENGINEERING_REVIEW')))
+        if software_ready:reasons.append('ENGINEERING_DECISION_NOT_RUN')
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
             reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,
             authority_review=authority_review,authority_source=authority_source,data_class_review=data_class_review,
             semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
             execution_review=execution_review,result_review=result_review,structure_review=structure_review,
-            point6_readiness=(
-                'READY_FOR_ENGINEERING_DECISION'
-                if (
-                    data_class_review and data_class_review['status']=='READY_FOR_DOMAIN_REVIEW' and
-                    ((p['kind']=='NORMATIVE' and authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW' and authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW')
-                     or
-                     (p['kind']=='CALCULATION' and intake and intake['status']=='READY_FOR_SEMANTIC_REVIEW' and semantic_review and semantic_review['status']=='READY_FOR_SOLVER_VERIFICATION' and exchange_review and exchange_review['status']=='READY_FOR_SEMANTIC_CROSSCHECK' and solver_review and solver_review['status']=='READY_FOR_RESULT_VERIFICATION' and execution_review and execution_review['status']=='READY_FOR_RESULT_INTEGRITY_REVIEW' and result_review and result_review['status']=='READY_FOR_STRUCTURE_CORRELATION' and structure_review and structure_review['status']=='READY_FOR_ENGINEERING_REVIEW'))
-                ) else 'BLOCKED_PREREQUISITES'),
+            point6_readiness='READY_FOR_ENGINEERING_DECISION' if software_ready else 'BLOCKED_PREREQUISITES',
             origin=event['origin'],acceptance_granted=False,engineering_verified=False))
     return dict(packets=rows,revision=state[-1]['revision'] if state else 0,status='BLOCK' if rows else 'NOT_PROVIDED',
                 scope='SOURCE_BOUND_DOMAIN_INPUTS',acceptance_granted=False,final_audit='NOT_RUN')
