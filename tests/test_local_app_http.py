@@ -166,6 +166,19 @@ class LocalHTTPTests(unittest.TestCase):
             self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':mode})[0],400)
         self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':'SHELL'})[0],400)
 
+    def test_domain_packet_http_isolation_and_revision_guard(self):
+        from engineering.local_app.files import preserve_file
+        from engineering.local_app.evidence import register
+        session=self.create();f=preserve_file(self.store,session,'units.txt',b'Units mm')
+        c=register(self.store,session,file_id=f['id'],quote='Units mm',statement='Unit declaration')
+        packet=dict(kind='CALCULATION',bindings=[dict(role='UNITS',file_id=f['id'],candidate_ids=[c['id']])])
+        route=f'/api/sessions/{session}/domain-packets';body=dict(packet=packet,expected_revision=0)
+        self.assertEqual(self.request('POST',route,body)[0],201)
+        self.assertEqual(self.request('POST',route,body)[0],409)
+        result=json.loads(self.request('GET',route)[2]);self.assertEqual(result['revision'],1)
+        self.assertIn('SOLVER_NOT_RUN',result['packets'][0]['reasons']);self.assertFalse(result['acceptance_granted'])
+        other=self.create();self.assertEqual(self.request('POST',f'/api/sessions/{other}/domain-packets',body)[0],400)
+
     def test_profile_execution_uses_local_protocol_and_durable_results(self):
         from engineering.local_app.worker import Worker
         session=self.create()

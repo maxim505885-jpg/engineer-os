@@ -38,6 +38,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
             CREATE TABLE IF NOT EXISTS requirement_sets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),record TEXT NOT NULL,created REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS domain_packets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));
             CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
@@ -128,6 +129,27 @@ class Store:
             sets=[json.loads(r['record']) for r in db.execute('SELECT record FROM requirement_sets WHERE session_id=? ORDER BY rowid',(session_id,))]
             events=[json.loads(r['record']) for r in db.execute('SELECT a.record FROM requirement_assessments a JOIN requirement_sets s ON s.id=a.set_id WHERE s.session_id=? ORDER BY a.rowid',(session_id,))]
         return dict(sets=sets,assessments=events)
+
+    def domain_packets_state(self,session_id):
+        self.requirements_state(session_id)
+        with self.connection() as db:
+            return [json.loads(r['record']) for r in db.execute('SELECT record FROM domain_packets WHERE session_id=? ORDER BY revision',(session_id,))]
+
+    def add_domain_packet(self,event,expected_revision):
+        from .analysis_identity import digest
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            count=db.execute('SELECT count(*) FROM domain_packets WHERE session_id=?',(event['session_id'],)).fetchone()[0]
+            if count!=expected_revision:raise ReviewConflict('Domain packet changed; reopen before saving')
+            if count>=100:raise ValueError('Domain packet history limit: 100 per conversation')
+            for source in event['sources']:
+                r=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(source['candidate_id'],event['session_id'])).fetchone()
+                review=db.execute('SELECT id,revision FROM source_reviews WHERE candidate_id=? ORDER BY revision DESC LIMIT 1',(source['candidate_id'],)).fetchone()
+                if not r or digest(json.loads(r['record']))!=source['candidate_sha256'] or (review['revision'] if review else 0)!=source['review_revision'] or (review['id'] if review else None)!=source['review_event_id']:
+                    raise ReviewConflict('Source review changed before packet save')
+            event=dict(event,revision=count+1)
+            db.execute('INSERT INTO domain_packets VALUES(?,?,?,?)',(event['id'],event['session_id'],event['revision'],json.dumps(event,ensure_ascii=False)))
+        return event
 
     def add_requirement_set(self,record):
         with self.connection() as db:

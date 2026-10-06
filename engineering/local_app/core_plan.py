@@ -33,7 +33,9 @@ def prepare(store,job):
     from .requirements import report
     requirements=report(store,job['session_id'],selected_files=job['file_ids']);plan['requirements_report']=requirements
     from .specialist_checks import report as specialist_report
-    checks=specialist_report(job);plan['specialist_checks']=checks
+    from .domain_packets import report as domain_report
+    domains=domain_report(store,job['session_id'],selected_files=job['file_ids'])
+    checks=specialist_report(job,domains);plan['specialist_checks']=checks
     if checks['status']=='BLOCK':plan['status']='BLOCK'
     text='План инженерной проверки подготовлен ENGINEER CORE. Проверки ещё не выполнены.\nТЗ: '+job['prompt']+'\n'+ '\n'.join('• '+p['label']+' — не выполнено' for p in plan['specialists'])+'\nИсходников: '+str(len(files))+'. Статус: '+plan['status']+'. Инженерное принятие отсутствует.'
-    return dict(text=text,core_plan=plan,requirements_report=requirements,specialist_checks=checks,context_truncated=plan['source_reviews']['truncated'] or any(f['text_truncated'] or f['extraction_status']=='UNAVAILABLE' or incomplete(f['extraction_coverage']) for f in files))
+    return dict(text=text,core_plan=plan,requirements_report=requirements,specialist_checks=checks,domain_packets=domains,context_truncated=plan['source_reviews']['truncated'] or any(f['text_truncated'] or f['extraction_status']=='UNAVAILABLE' or incomplete(f['extraction_coverage']) for f in files))

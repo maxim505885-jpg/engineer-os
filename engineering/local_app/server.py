@@ -92,6 +92,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
                     from .requirements import report
                     return self.respond(200,report(store,parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='domain-packets':
+                    from .domain_packets import save,report
+                    if not post:return self.respond(200,report(store,parts[2]))
+                    body=self.json_body()
+                    return self.respond(201,save(store,parts[2],packet=body.get('packet'),expected_revision=body.get('expected_revision')))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and parts[5]=='assessments' and post:
                     from .requirements import assess
                     body=self.json_body()

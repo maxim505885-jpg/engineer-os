@@ -1,0 +1,70 @@
+{
+  "scope": "REAL_DOCX_SOURCE_BINDING_ONLY",
+  "source_sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+  "source_bytes": 2754000,
+  "locator": {
+    "kind": "paragraph",
+    "part": "word/document.xml",
+    "paragraph": 25
+  },
+  "quote_sha256": "38f46963025794766eb687d8bc611c31b8e773344a0cc5592f20e20fa82365be",
+  "source_status": "SOURCE_REVIEWED",
+  "traceability": "SOURCE_LINKED",
+  "status": "BLOCK",
+  "missing_roles": [
+    "MODEL",
+    "GEOMETRY",
+    "MATERIALS_SECTIONS",
+    "LOADS_COMBINATIONS",
+    "SUPPORTS_RELEASES",
+    "SOLVER_LOG",
+    "RESULTS",
+    "ACTUAL_STRUCTURE_REFERENCE"
+  ],
+  "solver": "NOT_RUN",
+  "source_preserved": true,
+  "restart_preserved": true,
+  "controlled_model": true,
+  "model_calls": 45,
+  "seconds": 3.003,
+  "acceptance_granted": false,
+  "python_suite": {
+    "tests": 424,
+    "result": "PASS"
+  },
+  "node_dashboard_tests": 4,
+  "http_dom": {
+    "app": "PASS",
+    "drive": "PASS",
+    "controlled_model": true,
+    "live_oauth": false,
+    "visual_browser": false
+  },
+  "native_lir": [
+    {
+      "name": "048 секция 1_А2_011123.lir",
+      "bytes": 42047193,
+      "sha256": "a753162adf1f1b2de8ab92ab1355eac4d0c23e9241bf6e0e97f39d3ee6205ca9",
+      "first_zip_member_offset": 41855584,
+      "zip_members": 2,
+      "zip_expanded_bytes": 951888,
+      "semantics": "NOT_DECODED"
+    },
+    {
+      "name": "Секция 3 _S 011123.lir",
+      "bytes": 32397127,
+      "sha256": "fd300a06f23f455a00d120276c2daed3e6142de4abe9edb39d036c2a50f990ca",
+      "first_zip_member_offset": 32396665,
+      "zip_members": 1,
+      "zip_expanded_bytes": 4770,
+      "semantics": "NOT_DECODED"
+    }
+  ],
+  "stage6_complete": false,
+  "post_review_real_source_revalidation": true,
+  "review": {
+    "independent": true,
+    "important_fixed": 3,
+    "second_review": false
+  }
+}

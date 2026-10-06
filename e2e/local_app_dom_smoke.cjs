@@ -90,9 +90,48 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('.review-history'));
   assert.equal(dom.window.reviewInjected,undefined);
   assert.ok(doc.querySelector('.review-history').textContent.includes('Source checked'));
+  assert.ok(doc.querySelector('#calculation-packet-form'),'Calculation source roles form missing');
+  const initialDomainRevision=(await (await fetch(origin+`/api/sessions/${id}/domain-packets`,{headers:{'X-Engineer-Token':token}})).json()).revision;
+  const domainDraft=doc.querySelector('#normative-packet-form [name="document"]');domainDraft.value='Concurrent draft';domainDraft.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+  const unitRole=doc.querySelector('[data-domain-role="UNITS"]');
+  unitRole.value=doc.querySelector('.evidence-card').dataset.id||doc.querySelector('#evidence-file').value;
+  unitRole.value=[...unitRole.options].find(o=>o.value)?.value||'';
+  assert.ok(unitRole.value,'Confirmed source candidate must be selectable for a calculation role');
+  doc.querySelector('#calculation-packet-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.domain-packet-result'));
+  assert.ok(doc.querySelector('.domain-packet-result').textContent.includes('SOLVER_NOT_RUN'));
+  assert.ok(doc.querySelector('.domain-packet-result').textContent.includes('UNITS'));
+  async function reviewedDomainSource(name,text){
+    const headers={'X-Engineer-Token':token};
+    const f=await (await fetch(origin+`/api/sessions/${id}/files?name=${name}`,{method:'POST',headers:{...headers,'Content-Type':'application/octet-stream'},body:Buffer.from(text)})).json();
+    const c=await (await fetch(origin+`/api/sessions/${id}/evidence`,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({file_id:f.id,quote:text,statement:'Synthetic source for domain UI test'})})).json();
+    const response=await fetch(origin+`/api/sessions/${id}/evidence/${c.id}/reviews`,{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({expected_revision:0,decision:'SOURCE_CONFIRMED',note:'Synthetic fixture source checked',actor:'Test'})});
+    assert.equal(response.status,201);return c;
+  }
+  const normCandidate=await reviewedDomainSource('domain-norm.txt','TEST 2026 clause1 Limit 2.5 m');
+  const actualCandidate=await reviewedDomainSource('domain-actual.txt','Height 2500 mm');
+  await until(()=>[...doc.querySelector('[name="norm-source"]').options].some(o=>o.value===normCandidate.id));
+  const nf=doc.querySelector('#normative-packet-form');
+  const chain={document:'TEST',edition:'2026',scope:'Synthetic scope declaration',clause:'clause1',requirement:'Limit 2.5 m',actual_condition:'Height 2500 mm',comparison:'Compare synthetic quantities',conclusion:'Arithmetic matches, norm unverified'};
+  for(const [name,value] of Object.entries(chain))nf.querySelector(`[name="${name}"]`).value=value;
+  nf.querySelector('[name="norm-source"]').value=normCandidate.id;nf.querySelector('[name="actual-source"]').value=actualCandidate.id;
+  nf.querySelector('input[type="checkbox"]').click();
+  for(const [name,value] of Object.entries({'actual-value':'2500','actual-unit':'mm','actual-fragment':'2500 mm','limit-value':'2.5','limit-unit':'m','limit-fragment':'2.5 m'}))nf.querySelector(`[name="${name}"]`).value=value;
+  const domainWrites=[];const delegatedFetch=dom.window.fetch;
+  dom.window.fetch=(path,options)=>{if(String(path).endsWith('/domain-packets')&&options?.method==='POST')domainWrites.push(JSON.parse(options.body));return delegatedFetch(path,options);};
+  nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>domainWrites.length===1);
+  assert.equal(domainWrites[0].expected_revision,initialDomainRevision,'Saving calculation must retain normative draft revision');
+  await until(()=>!doc.querySelector('#error').hidden&&!doc.querySelector('#send').disabled);
+  nf.querySelector('.domain-use-current-revision').click();
+  nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>[...doc.querySelectorAll('.domain-packet-result')].some(c=>c.textContent.includes('Арифметика: 2.500 <= 2.5')));
+  assert.ok(doc.querySelector('.domain-panel').textContent.includes('NORMATIVE_APPLICABILITY_NOT_VERIFIED'));
+  nf.querySelector('[name="document"]').value='Unsaved domain from previous session';
   doc.querySelector('.review-button').click();doc.querySelector('#review-note').value='Unsaved review';
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#normative-packet-form [name="document"]').value,'','Domain drafts must not cross conversations');
   assert.equal(doc.querySelector('#review-panel').hidden,true);
   assert.equal(doc.querySelector('#review-note').value,'');
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
@@ -188,7 +227,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('#drive-form'),'Drive import form missing');
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
-  assert.equal(doc.querySelectorAll('.file').length,4,'Unavailable Drive must not manufacture an imported file');
+  assert.equal(doc.querySelectorAll('.file').length,6,'Unavailable Drive must not manufacture an imported file (including two domain fixtures)');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}

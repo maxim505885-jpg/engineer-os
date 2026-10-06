@@ -6,7 +6,7 @@ file names, a model response, or user-declared source confirmation.
 from engineering.calculation.model_intake import audit_calculation_model_intake
 
 
-def report(job):
+def report(job,domain_report=None):
     checks=[]
     if 'normative' in job['requested_checks']:
         checks.append(dict(agent='normative-agent',label='Нормативная проверка',status='BLOCK',
@@ -23,5 +23,12 @@ def report(job):
             reasons=['CALCULATION_ARTIFACT_ROLES_NOT_BOUND','CALCULATION_SEMANTICS_NOT_VERIFIED','SOLVER_NOT_RUN'],
             solver_execution='NOT_RUN',solver_access='NOT_CONFIGURED',
             note='Комплект с назначенными ролями, семантические проверки и протокол решателя в локальный маршрут ещё не подключены. Файл или ответ модели не подтверждает расчёт.'))
+    for check in checks:
+        kind='NORMATIVE' if check['agent']=='normative-agent' else 'CALCULATION'
+        packet=next((p for p in (domain_report or {}).get('packets',[]) if p['kind']==kind),None)
+        if packet:
+            check.update(packet_id=packet['id'],packet_revision=packet['revision'],traceability=packet['traceability'],
+                         reasons=packet['reasons'],arithmetic=packet['arithmetic'],scope='SOURCE_BOUND_INPUT_CHECK')
+            if packet['intake']:check.update(missing_roles=packet['intake']['missing_roles'],intake_status=packet['intake']['status'],note='Роли назначены пользователем. Семантика модели, соответствие реальной конструкции и выполнение решателя не подтверждены.')
     return dict(status='BLOCK' if checks else 'NOT_REQUESTED',checks=checks,
                 scope='DOMAIN_PREREQUISITES_ONLY',acceptance_granted=False,final_audit='NOT_RUN')

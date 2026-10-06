@@ -174,7 +174,10 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         prior, clipped = bounded_items(prior, 10000)
         prior_statuses = [dict(agent=r['agent'], status=r['status'], execution=r['execution']) for r in records[:index]]
         result['context_truncated'] = result['context_truncated'] or clipped
-        data = dict(tz=job['prompt'], task_id=job['id'], sources=context,
+        from .domain_packets import context as domain_context
+        domains=domain_context(result['domain_packets'])
+        result['context_truncated']=result['context_truncated'] or domains['context_truncated']
+        data = dict(tz=job['prompt'], task_id=job['id'], sources=context,domain_packets=domains,
                     specialist_checks=result['specialist_checks'],
                     source_context_truncated=truncated,
                     prior_statuses=prior_statuses, prior_results=prior, prior_results_truncated=clipped)
