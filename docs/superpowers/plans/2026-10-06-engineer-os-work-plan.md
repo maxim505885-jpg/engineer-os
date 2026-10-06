@@ -55,13 +55,13 @@
 Результат: известно, что прочитано/пропущено и какие утверждения модели совпали с источником. Завершение пункта2 не означает идеальныйOCR, полнотуV4 или инженерное принятие. Известные потери подписей и блокировкаграфики сохраняются доsource review/coverage/evidence в3/5/7; preferredRussianOCR не подтверждает bilingual switching; Windows9последней.
 Файлы: engineering/local_app/{extraction,automatic_analysis,coverage,worker,core_run}.py; docs/development/stage2-document-quality-2026-10-06.md; docs/qa/2026-10-06-stage2-quality.json. DraftPR54 наPR53.
 
-## 3. Довести обработку больших документов — НЕ СДЕЛАНО
+## 3. Довести обработку больших документов — ВЫПОЛНЕНО (RESUME/BUDGETS, НЕ ACCEPTED V4)
 
-- [ ] Сохранять идентичность задания, parser/model/config и обработанных частей для продолжения.
-- [ ] Добавить явное возобновление модели и повтор только неудачных частей с hash guards.
-- [ ] Проверить budgets, стоимость по времени и потерю деталей summary на эталонном наборе.
+- [x] Сохранять идентичность задания, parser/model/config и обработанных частей для продолжения.
+- [x] Добавить явное возобновление модели и повтор только неудачных частей с hash guards.
+- [x] Проверить budgets, стоимость по времени и потерю деталей summary на эталонном наборе.
 
-Результат: возобновление не дублирует готовые части и не скрывает пропуски.
+Результат: same-job resume, identity/response/source/config guards, failed/incomplete calls/pages повторяются, completed parts сохраняются. Изменившийся upstream CORE outcome инвалидирует зависимые drafts. 362Python/4Node/actualHTTP+DOMPASS; clipping/time/call budgets раскрыты. OpenWebUI/unknownidentity resume отключён, semantic completeness NOT_CHECKED. DraftPR55 наPR54; main/deployне менялись.
 Файлы: automatic_analysis.py, Store/Worker/API/UI, tests/test_automatic_document_analysis.py.
 
 ## 4. Подключить остальные форматы — НЕ СДЕЛАНО
@@ -175,3 +175,10 @@ CI PR53 push37484724688 и PR37484965521 SUCCESS, включая actual HTTP/DOM
 ✅2 — representative realOCR/modelqualityassessment;343Python/4NodePASS; actualscanCORE250,25с,UNCERTAINTY,acceptance=false. ❌FullV4ACCEPTED/идеальныйOCR/Windows — не выполнены и не заявляются. GitHub CI PR54 PASS: push37489666141 и PR37489670188, включая actual HTTP/DOM. Main/deploy не меняли. Картараздел33.
 
 Дальше:3 — Довести обработку больших документов. Parser/model/config/hash guards, restart/resume onlyfailed parts, budgets/summary loss на эталонном наборе.
+
+
+## Актуальный итог 06.10.2026: пункт3 завершён, PR55
+
+✅ Safe model/parser resume, durableRUNNING receipts, identity/response/session guards, cumulativebudgets, summarylossdisclosure и persistedBLOCK. 362Python/4Node/actualHTTP+DOMPASS. Одинreview, дваImportant исправленыRED→GREEN. GitHub CI PR55 PASS: push37497252188 и PR37497256126, включая actualHTTP/DOM; test-merge tree совпадает с опубликованным.. ❌FullV4ACCEPTED/semanticcompleteness/liveQwenresumerepeat/OpenWebUIresume/Windows не заявляются выполненными. Main/deployне менялись. Картараздел34.
+
+Дальше: пункт4 — Подключить остальные форматы: DOCXparagraphs/tablesrefs,XLSXaddresses/formulas/cache,DOCcontrolledconversion,общийupload/Drive/analysis.
