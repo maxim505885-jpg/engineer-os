@@ -44,12 +44,30 @@ def _selected_candidates(store,session_id,snapshot,file_ids):
     return rows
 
 
-def _source_stage(files,result):
+CASE_ROLES={'TOR','REPORT','CALCULATION_REPORT','MODEL','GEODESY','GRAPHICS','PHOTO','OTHER'}
+
+def _manifest(value,file_ids):
+    if value is None:return {}
+    if not isinstance(value,dict) or len(value)>len(CASE_ROLES):raise ValueError('Invalid case source manifest')
+    allowed=set(file_ids);out={}
+    for role,ids in value.items():
+        if role not in CASE_ROLES or not isinstance(ids,list) or not ids or len(ids)>20 or len(set(ids))!=len(ids):
+            raise ValueError('Invalid case source manifest role')
+        if any(not isinstance(x,str) or x not in allowed for x in ids):
+            raise ValueError('Case source manifest references a file outside CORE_RUN')
+        out[role]=list(ids)
+    return out
+
+def _source_stage(files,result,manifest):
     reasons=[]
     for f in files:
         path=Path(f['path'])
         if not path.is_file() or path.stat().st_size!=f['size']:
             reasons.append('SOURCE_IDENTITY_OR_LOCATION_CHANGED')
+    if not manifest:reasons.append('CASE_SOURCE_ROLES_NOT_DECLARED')
+    else:
+        if 'TOR' not in manifest:reasons.append('CASE_TOR_SOURCE_NOT_DECLARED')
+        if 'REPORT' not in manifest:reasons.append('CASE_REPORT_SOURCE_NOT_DECLARED')
     analysis=(result or {}).get('document_analysis')
     if analysis:
         if not analysis.get('all_batches_completed'):reasons.append('DOCUMENT_ANALYSIS_INCOMPLETE')
@@ -121,19 +139,20 @@ def _qc_stage(requirements,evidence,specialists,domains):
                 acceptance_granted=False,final_audit='NOT_RUN')
 
 
-def build(store,session_id,*,job_id,expected_revision):
+def build(store,session_id,*,job_id,expected_revision,manifest=None):
     snapshot=store.snapshot(session_id);job=_job(snapshot,job_id)
     if job.get('mode')!='CORE_RUN':raise ValueError('Stage 7 requires a CORE_RUN job')
     if not job.get('result'):raise ValueError('CORE_RUN has no saved result')
     files=[store.get_file(fid) for fid in job['file_ids']]
     if any(f['session_id']!=session_id for f in files):raise ValueError('Attachment isolation failure')
     verify_originals(files)
+    manifest=_manifest(manifest,job['file_ids'])
 
     requirements=requirements_report(store,session_id,selected_files=job['file_ids'])
     domains=domain_report(store,session_id,selected_files=job['file_ids'])
     candidates=_selected_candidates(store,session_id,snapshot,job['file_ids'])
 
-    source=_source_stage(files,job['result'])
+    source=_source_stage(files,job['result'],manifest)
     req_stage=_requirements_stage(requirements)
     evidence=_evidence_stage(candidates)
     specialists=_specialist_stage(job)
@@ -147,6 +166,7 @@ def build(store,session_id,*,job_id,expected_revision):
         prompt=job['prompt'],
         requested_checks=list(job['requested_checks']),
         originals=originals,
+        source_manifest=manifest,
         requirements_digest=_digest(requirements),
         evidence_digest=_digest(candidates),
         domain_digest=_digest(domains),
@@ -156,6 +176,7 @@ def build(store,session_id,*,job_id,expected_revision):
         id=str(uuid.uuid4()),session_id=session_id,job_id=job_id,created=time.time(),
         scope='REAL_ENGINEERING_CASE_SNAPSHOT',
         identity=identity,
+        source_manifest=manifest,
         stages=dict(source_identity=source,requirements=req_stage,evidence=evidence,
                     specialists=specialists,domain_prerequisites=domain,qc=qc),
         requirements=requirements,
