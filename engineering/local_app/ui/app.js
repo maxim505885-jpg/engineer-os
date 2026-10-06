@@ -134,18 +134,19 @@ const realCasePanel=node('details',undefined,'real-case-panel');realCasePanel.id
 realCasePanel.append(node('summary','Пункт 7 · полный реальный инженерный кейс'),node('p','Снимок объединяет ТЗ, оригиналы, evidence, предметные пакеты и результаты CORE_RUN. Он не выполняет FINAL AUDIT и не снимает BLOCK пункта 6.'));
 const realCaseForm=node('form');realCaseForm.id='real-case-form';
 const realCaseJob=node('select');realCaseJob.required=true;realCaseJob.setAttribute('aria-label','CORE_RUN для реального кейса');
+const realCaseManifest=node('textarea');realCaseManifest.maxLength=12000;realCaseManifest.setAttribute('aria-label','JSON ролей исходников реального кейса');realCaseManifest.placeholder='{"TOR":["file-id"],"REPORT":["file-id"],"MODEL":["file-id"]}';
 const realCaseButton=node('button','Зафиксировать снимок реального кейса');realCaseButton.type='submit';
-realCaseForm.append(realCaseJob,realCaseButton);
+realCaseForm.append(realCaseJob,realCaseManifest,realCaseButton);
 const realCaseStatus=node('p');const realCaseResults=node('div');
 realCasePanel.append(realCaseStatus,realCaseForm,realCaseResults);domainPanel.after(realCasePanel);
-realCaseForm.onsubmit=async event=>{event.preventDefault();if(!current||pending||!realCaseJob.value)return;const session=current;pending=true;realCaseButton.disabled=true;error(null);try{await api(`/api/sessions/${session}/real-case`,{method:'POST',body:{job_id:realCaseJob.value,expected_revision:realCaseRevision}});await refresh();}catch(e){error(e);}finally{pending=false;realCaseButton.disabled=false;controls();}};
+realCaseForm.onsubmit=async event=>{event.preventDefault();if(!current||pending||!realCaseJob.value)return;let manifest=null;if(realCaseManifest.value.trim()){try{manifest=JSON.parse(realCaseManifest.value);}catch(_){error('Manifest ролей исходников должен быть корректным JSON');return;}}const session=current;pending=true;realCaseButton.disabled=true;error(null);try{await api(`/api/sessions/${session}/real-case`,{method:'POST',body:{job_id:realCaseJob.value,expected_revision:realCaseRevision,manifest}});await refresh();}catch(e){error(e);}finally{pending=false;realCaseButton.disabled=false;controls();}};
 function renderRealCase(report,jobs){
  realCaseRevision=report.revision||0;
  const previous=realCaseJob.value;realCaseJob.replaceChildren();const blank=node('option','Выберите завершённый CORE_RUN');blank.value='';realCaseJob.append(blank);
  for(const j of jobs.filter(j=>j.mode==='CORE_RUN'&&j.result)){const o=node('option',(j.state==='SUCCEEDED'?'✓ ':'')+j.prompt.slice(0,90));o.value=j.id;realCaseJob.append(o);}if([...realCaseJob.options].some(o=>o.value===previous))realCaseJob.value=previous;
  realCaseStatus.textContent=report.cases?.length?`Версий: ${report.revision} · ${report.status} · текущий снимок ${report.current_fresh?'актуален':'устарел'} · FINAL AUDIT NOT_RUN`:'Реальный кейс ещё не зафиксирован.';
  realCaseResults.replaceChildren();
- for(const item of (report.cases||[]).slice(-5).reverse()){const card=node('article',undefined,'real-case-result');card.append(node('strong',`Кейс #${item.revision} · ${item.point7_readiness}`),node('p','SHA256: '+item.case_sha256),node('small',(item.current?'текущий':'исторический')+' · '+(item.fresh?'актуален':'не актуален')));
+ for(const item of (report.cases||[]).slice(-5).reverse()){const card=node('article',undefined,'real-case-result');card.append(node('strong',`Кейс #${item.revision} · ${item.point7_readiness}`),node('p','SHA256: '+item.case_sha256),node('p','Роли исходников: '+Object.keys(item.source_manifest||{}).join(', ')),node('small',(item.current?'текущий':'исторический')+' · '+(item.fresh?'актуален':'не актуален')));
   for(const [name,stage] of Object.entries(item.stages)){card.append(node('p',name+' · '+stage.status),node('small',(stage.reasons||[]).join(', ')));}
   if(item.stale_reasons?.length)card.append(node('small','Изменения после снимка: '+item.stale_reasons.join(', ')));
   card.append(node('small','acceptance=false · FINAL AUDIT NOT_RUN'));realCaseResults.append(card);}
