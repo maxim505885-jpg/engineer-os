@@ -978,3 +978,57 @@ Ruling: роль источника и нормативная цепочка aut
 ❌ Что остаётся для фактического завершения пункта 6 на реальном объекте: официальный нормативный исходник нужной редакции и реальная applicability verification; реальный documented LIRA/SCAD export/API snapshot пользовательской модели; подтверждённый executable/args конкретного solver; реальный solver run; реальные output/log; actual-structure source candidates и correlation; затем инженерное решение.
 
 Это теперь **external evidence/execution**, а не отсутствующие software gates. Пункт 6 не считается инженерно завершённым до такого реального прогона. После него — пункт 7 полный реальный инженерный кейс, пункт 8 FINAL AUDIT/acceptance, пункт 9 финальная Windows-проверка.
+
+
+## 44. Пункт 7 — полный реальный инженерный кейс — 07.10.2026
+
+Пользователь решил временно отложить фактическое инженерное завершение пункта 6 и перейти к пункту 7. Это допустимо только при сохранении fail-closed: зависимости пункта 6 остаются явными BLOCK и не подменяются synthetic/модельными результатами.
+
+Создана ветка `feat/real-engineering-case-stage7-20261007`, draft PR65 поверх `feat/point6-completion-gates-20261006`.
+
+### 7A — case-level orchestration
+
+✅ Добавлена append-only таблица `real_case_snapshots` в локальную SQLite.
+
+✅ Case snapshot привязан к конкретному `CORE_RUN` и фиксирует:
+- SHA256/size всех выбранных оригиналов;
+- source-role manifest: TOR, REPORT, CALCULATION_REPORT, MODEL, GEODESY, GRAPHICS, PHOTO, OTHER;
+- digest текущего ТЗ/requirements;
+- digest evidence/source reviews;
+- digest domain packets;
+- digest CORE result.
+
+✅ Стадии snapshot:
+- source_identity;
+- requirements;
+- evidence;
+- specialists;
+- domain_prerequisites;
+- qc.
+
+✅ Добавлен `point7_readiness` и fresh/stale revalidation. Изменение контролирующего ТЗ, evidence/review, domain packet, CORE result или набора/идентичности исходников делает текущий snapshot stale; исторические snapshots остаются неизменяемыми.
+
+✅ Добавлен защищённый API `GET/POST /api/sessions/{sid}/real-case` и UI для выбора завершённого CORE_RUN, задания manifest ролей и фиксации/просмотра snapshot.
+
+✅ Fail-closed сохраняется: `engineering_status=BLOCK`, `acceptance_granted=false`, `FINAL AUDIT NOT_RUN`. Отложенные пункты 6 отражаются deterministic BLOCK reasons.
+
+✅ Unit/HTTP regression suite на первом финальном проходе: 455 Python tests PASS, compile PASS. Первый DOM проход выявил race в тесте после сохранения snapshot; исправлено ожидание освобождения UI controls, финальный CI нового head выполняется.
+
+### 7B — реальный объект «БЦ, ул. Набережная, 28А»
+
+Реальный комплект найден в Drive/Library; повторная загрузка не требуется. Приватные Drive/Library IDs в публичный репозиторий не публикуются.
+
+Hash-bound inventory опубликован в `docs/development/stage7-naberezhnaya-case-inventory.md`:
+- V4 PDF — TOR + REPORT;
+- Расчет .docx/.doc — CALCULATION_REPORT;
+- Таблицы.xlsx — calculation data;
+- два .lir — MODEL;
+- геодезический PDF — GEODESY;
+- Графика 03.09.2026.pdf — GRAPHICS;
+- XLSX привязок к модулю грунт — model binding / OTHER.
+
+SHA256 обоих .lir совпали с ранее проверенными идентичностями. Все дополнительные реальные файлы получили собственные SHA256.
+
+❌ Реальный 7B snapshot ещё не считается инженерно завершённым: V4 completeness остаётся BLOCK, реальные normative/solver decisions пункта 6 отложены. Цель первого 7B прогона — доказать целостность end-to-end кейса и сохранение всех BLOCK, а не получить ACCEPTED.
+
+Следующая активная работа после зелёного PR65: сформировать первый фактический Stage 7B case snapshot на полном комплекте объекта и проверить его воспроизводимость/stale detection. Пункт 8 FINAL AUDIT не начинать до этого.
