@@ -8,11 +8,11 @@
 
 Мы продолжаем существующий ENGINEER OS пользователя Максима. Проект не начинать заново. Цель — бесплатное локальное инженерное приложение, а не только проверка одного PDF. Фундамент и адаптеры уже есть; первый локальный сценарий чат → файл → фоновая задача → ответ → история реализован и опубликован в PR38. Реальный запуск на Windows с qwen3 и принятый инженерный кейс пока не подтверждены.
 
-Активный результат — локальный кабинет с подготовкой и предварительным исполнением ролей ENGINEER CORE, реестром кандидатов, native координатами, просмотром страницы и журналом проверки источников и импортом оригиналов Drive и раскрытием покрытия извлечения и автоматическим анализом PDF (разделы 18–30); Document Intelligence продолжается отдельно: достоверное извлечение документов объекта «БЦ, ул. Набережная, 28А», прежде чем использовать их как доказательства. Последний полный повторный прогон: **534 страницы, 523 без ошибки нормализации, 11 BLOCK; полностью подтверждённых страниц 0, документ BLOCK, FINAL AUDIT NOT_RUN, acceptance=false**. 523 — UNCERTAINTY, а не ACCEPTED.
+Активный результат — локальный кабинет с подготовкой и предварительным исполнением ролей ENGINEER CORE, реестром кандидатов, native координатами, просмотром страницы и журналом проверки источников и импортом оригиналов Drive и раскрытием покрытия извлечения и автоматическим анализом PDF (разделы 18–31); Document Intelligence продолжается отдельно: достоверное извлечение документов объекта «БЦ, ул. Набережная, 28А», прежде чем использовать их как доказательства. Последний полный повторный прогон: **534 страницы, 523 без ошибки нормализации, 11 BLOCK; полностью подтверждённых страниц 0, документ BLOCK, FINAL AUDIT NOT_RUN, acceptance=false**. 523 — UNCERTAINTY, а не ACCEPTED.
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, раздел30 и docs/superpowers/plans/2026-10-06-engineer-os-work-plan.md. **Пункт1 выполнен как проверенный интеграционный кандидат PR51, CI success, без merge/deploy. Следующий — пункт2: Проверить настоящий анализ документов.** Active checkout engineer-os-local-app, ветка fix/local-release-readiness-20261006, local e6e1255, remote6de0af4, tree2116797f6c2debec1b47888b748d4ee0bd53fe9c. 329Python+4Node/HTTP-jsdom PASS из чистой venv. LiveOCR/model/Windows NOT_RUN; Windows пункт9, последняя. Каждый итог: ✅/❌ и номер/название следующего пункта.
+**Активный план:** девять пунктов, разделы30–31. Пункт1 — проверенный кандидат PR51 без merge. Пункт2 в работе: живые Qwen/OCR измерены, CORE и табличные таймауты остаются. **Начать с раздела31.** Active checkout engineer-os-local-app, branch fix/live-document-runtime-20261006; localffcdf40/remote901582d, tree2f526825c66fd955022f8af65a2ea90e8047179c, draftPR52. 332Python/4Node PASS. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -42,7 +42,7 @@ flowchart TD
 | Document Intelligence | `engineering/document_intelligence/`, `scripts/` | Docling, нормализация, provenance, source recovery и реестр; полнота документа не подтверждена |
 | Нормативная проверка | `engineering/normative/verification.py`, `skills/normative-check/` | Структура проверки реализована; проверенных актуальных редакций и полного агента ещё нет |
 | ЛИРА / SCAD | `engineering/calculation/model_intake.py`, `skills/calculation-review/` | Проверка комплекта и идентичности файлов; семантика моделей и solver-run не проверены |
-| Модели | `engineering/model_gateway/openai_compatible.py` | Локальный gateway связан с новым кабинетом; синтетический HTTP/DOM сценарий PASS, настоящий qwen3 NOT_RUN |
+| Модели | `engineering/model_gateway/openai_compatible.py` | Живая Qwen3-8B CPU: простые native/table/scan CHAT корректны; CORE роли и два табличных запроса достигли wait limit, принятых результатов нет — раздел31 |
 | Память | `engineering/memory/external_memory.py` | Граница доверия и snapshots; история диалогов/задач нового кабинета сохраняется в SQLite, подтверждённая инженерная память ещё не подключена |
 | Хранилище | `engineering/storage/` | Drive-адаптеры; OAuth пользовательского Windows требует отдельной проверки |
 | База и acceptance | `supabase/migrations/`, Supabase-адаптеры | Миграции и gates есть; наличие облачных функций не означает воспроизводимость backend из Git |
@@ -575,7 +575,7 @@ Expanded DOM запускает actual launcher/worker, native action/journal/sa
 Результат: одна воспроизводимая версия, известные зависимости и инструкция; test/CI подтверждены для точного дерева.
 Файлы: scripts/run_local_app.py, Start_ENGINEER_OS.cmd, requirements-pdf-review.txt, requirements-integrations.txt, .github/workflows/core-tests.yml, docs/development/local-app.md.
 
-## 2. Проверить настоящий анализ документов — НЕ СДЕЛАНО
+## 2. Проверить настоящий анализ документов — В РАБОТЕ: живые проверки выполнены, блокеры остаются
 
 - [ ] Проверить живую локальную модель и OCR на native PDF, скане, таблице и графическом листе.
 - [ ] Сопоставить исходник, извлечение и ответы; записать пропуски, время и память.
@@ -672,3 +672,20 @@ Expanded DOM запускает actual launcher/worker, native action/journal/sa
 Дальше: пункт2 — Проверить настоящий анализ документов. Подготовить отдельное локальное OCR/model окружение и representative набор; установка/качество ещё не проверены.
 
 Перед пунктом2 проверена доступность: docling/onnxruntime не установлены; команды Ollama нет, loopback11434 закрыт. Это состояние текущей среды, не компьютера пользователя. Windows не требуется для начала следующего этапа.
+
+## 31. Живой runtime, OCR и состояние ядра — актуальная точка продолжения
+
+
+## Выполнение пункта 2 — 06.10.2026, реальные Linux CPU/OCR проверки
+
+✅ [Draft PR52](https://github.com/maxim505885-jpg/engineer-os/pull/52) относительно PR50: privacy fix, Linux OCR snapshot и QA report. Local ffcdf40916e3fdaff4939b51010e7320cd8cb5cc; remote901582da1c9617a1a91063767ba324a1b6f5be14; одинаковое дерево2f526825c66fd955022f8af65a2ea90e8047179c. 7files/590add/4del. PR51 остаётся прежним интеграционным кандидатом, новый fix в него не включён; main/deployment не изменены.
+✅ Отдельная Python3.12.14 venv: Docling2.134.0, RapidOCR3.9.2, ORT1.30.0, torch2.14.1+cpu; 108packages pipcheck PASS. requirements-ocr-linux-cpu.lock — испытанный Linux snapshot, не Windows lock. Ollama0.35.1 CPU, Qwen3-8B-Q4_K_M official Qwen HF revision7c41481f57cb95916b40956ab2f0b139b296d974, SHA d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785. Alias engineer-qwen3-8b-q4km:stage2; registry qwen3:8b не установлен из-за сетевого ограничения. num_ctx8192/num_predict1024/threads4, /no_think в задаче.
+✅ 8 реальных OCR extraction jobs: 7 UNCERTAINTY и графический лист500 BLOCK/PARSE_FAILED, всего231.75s. Контрольные native/scan PDF и таблицы, V4p1 native/raster,p15,p500. Job SUCCEEDED не является успешным чтением каждой страницы. Контрольный scan потерял «Число»; scan table исказил «Этажи»→«ижете», числа4/2/0,50 сохранились. V4p15 пять климатических значений совпали с просмотренной таблицей; применимость СП не проверена. English language игнорируется RapidOCR — подтверждён только русский profile.
+✅ 6 реальных model jobs через LocalModel/Store/Worker: простой native CHAT132.18s, native-table CHAT119.82s и scan CHAT152.44s прочли контрольные значения правильно. CORE_RUN360.34s сохранил ERROR: две роли FAILED после model calls180.11/180.12s; FINAL AUDIT NOT_RUN, acceptance=false. Scan-table CHAT190.58s и V4p15 CHAT198.45s FAILED с model wait limit180s; ответы не получены. OOM/oom_kill0 при лимите8GiB, это измерение конкретной среды, не обещание работы на другом hardware.
+✅ Первый OCR запуск отклонён auto-review из-за Microsoft telemetry, payload не установлен. Незащищённый повтор не выполнялся. По официальной Privacy.md найден полный non-Windows opt-out ORT_DISABLE_TELEMETRY=1 ДО initialization; adapter задаёт его до imports, вызывает platform API и блокирует preloaded ORT без opt-out. Новый защищённый runtime import и OCR benchmark выполнены. strace/ptrace запрещён: полный сетевой аудит не выполнен, Windows startup event не подтверждён. Regression RED→GREEN, итог332Python/4Node/compileall/diff PASS; независимое read-only privacy review без actionable issues.
+❌ Пункт2 целиком не завершён: получить успешные CORE роли и ответы на две таблицы, проверить повреждённые OCR подписи и локализовать исключение графического листа. Весь534-page V4 не прогонялся: старые523UNCERTAINTY/11BLOCK и0подтверждённых страниц не заменяются этими derived-page испытаниями. Ни один новый результат не принят. Windows остаётся пунктом9.
+
+[Подробный QA report](https://github.com/maxim505885-jpg/engineer-os/blob/fix/live-document-runtime-20261006/docs/development/live-document-runtime-2026-10-06.md), [метаданные без полных исходных страниц/prompts](https://github.com/maxim505885-jpg/engineer-os/blob/fix/live-document-runtime-20261006/docs/qa/2026-10-06-live-document-runtime.json).
+Дальше: пункт2 — Проверить настоящий анализ документов: сначала проверить CPU-профиль/явный thinking control и успешный ограниченный CORE_RUN, затем табличные таймауты и PARSE_FAILED графического листа. reasoning_effort=none в Ollama — гипотеза для следующего bounded test, не испытанное исправление; не увеличивать timeout и не снимать BLOCK без проверки.
+
+✅ CI PR52 success: https://github.com/maxim505885-jpg/engineer-os/actions/runs/37473429471 (remote901582d, дерево2f526825c66fd955022f8af65a2ea90e8047179c). CI проверяет unit/DOM с synthetic transports, не подменяет вышеописанные live CPU/OCR результаты.
