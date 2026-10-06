@@ -83,7 +83,7 @@
 Результат: для каждого вывода видны основание и уровень проверки.
 Файлы: local_app/evidence.py, provenance.py, review.py; document_intelligence/evidence_bridge.py и evidence_validation.py; core adapters.
 
-## 6. Довести профильные проверки — В РАБОТЕ, ПОДЭТАП 6А ВЫПОЛНЕН
+## 6. Довести профильные проверки — В РАБОТЕ, ПОДЭТАПЫ 6А/6Б ВЫПОЛНЕНЫ
 
 - [ ] Нормы: подтверждать редакцию, применимость, пункт и сопоставление с фактом.
 - [ ] Расчёты: единицы, нагрузки, комбинации, опоры, материалы, результаты и solver logs.
@@ -212,3 +212,12 @@ GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actu
 Дальше: пункт6 — Довести профильные проверки.
 
 GitHub CI PR58 PASS: push37508689975 и PR37508694510, включая actual HTTP/DOM. Head f006d1efea7072eaa1ffc60a716edd4c49378869; test-merge 87ac8fdea85e6470328303e1e42ac82b8a8f767e, tree b80f78cfa8db9a00132444d8363f158bdc57521e совпадает с опубликованным и локальным.
+
+
+## Пункт6 — подэтап6Б, 06.10.2026
+
+✅ Неизменяемые source-bound normative/calculation packets, точная привязка numeric fields к цитатам/actual_condition/requirement, формы/API, per-form revision guard и CORE/QC/live+resume identities. DraftPR59 наPR58, remote19a31cfb7d1a032b1bf922cfa1b4c1245281c950/local16b28a4d729a393e58f5f1c8bdee6fb97732dc24/tree35b4579f5b77728b944cb21926088e7b313bd1f3. 424Python/4Node/actualHTTP+DOM PASS; один review/3Important fixed RED→GREEN. ActualDOCX paragraph25→UNITS SOURCE_LINKED/BLOCK/restart/originalpreserved; controlledmodel, не acceptedengineeringcase. Два actualLIR inspected metadataonly, binarypayload NOT_DECODED.
+❌ Четыре checkbox6 остаются пустыми: authority edition/applicability/clause, actual data semantics/class, calculation semantic route/solver ещё открыты. Все9 declaredroles не означают performedcalculation. Main/deployне менялись, FINAL AUDITNOT_RUN/acceptance=false; Windows9последней.
+Дальше: пункт6 — Довести профильные проверки: semantic calculation package и verifiednormativechain.
+
+**Проверка публикации 6Б:** GitHub CI push [37511687457](https://github.com/maxim505885-jpg/engineer-os/actions/runs/37511687457) и pull_request [37511692882](https://github.com/maxim505885-jpg/engineer-os/actions/runs/37511692882) — SUCCESS для HEAD `19a31cfb7d1a032b1bf922cfa1b4c1245281c950`. Тестовый merge `cbfdf85d3935480d9aaaac8d32a0973f4587b14a` имеет то же дерево `35b4579f5b77728b944cb21926088e7b313bd1f3`, что проверенная локальная версия. PR59 открыт как draft, не слит. Пункт 6 остаётся в работе.
