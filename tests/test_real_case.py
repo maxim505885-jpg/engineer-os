@@ -42,6 +42,16 @@ class RealCaseTests(unittest.TestCase):
         restarted=self.module().report(Store(self.store.root),self.sid)
         self.assertEqual(restarted['cases'][0]['case_sha256'],event['case_sha256'])
 
+    def test_source_role_manifest_is_validated_and_persisted(self):
+        job=self.core()
+        manifest={'TOR':[self.file['id']],'REPORT':[self.file['id']]}
+        event=self.module().build(self.store,self.sid,job_id=job['id'],expected_revision=0,manifest=manifest)
+        self.assertEqual(event['source_manifest'],manifest)
+        self.assertNotIn('CASE_SOURCE_ROLES_NOT_DECLARED',event['stages']['source_identity']['reasons'])
+        with self.assertRaises(ValueError):
+            self.module().build(self.store,self.sid,job_id=job['id'],expected_revision=1,
+                                manifest={'MODEL':['00000000-0000-0000-0000-000000000000']})
+
     def test_normative_case_discloses_deferred_point6_dependency(self):
         job=self.core(['normative'])
         event=self.module().build(self.store,self.sid,job_id=job['id'],expected_revision=0)
