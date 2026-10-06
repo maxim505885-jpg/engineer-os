@@ -104,6 +104,37 @@ class LocalHTTPTests(unittest.TestCase):
         self.assertIn('Review only the roof',str(self.requests[-1]))
         self.assertEqual(type(self.store)(Path(self.tmp.name)).snapshot(session)['jobs'][0]['result'],run)
 
+    def test_drive_import_is_private_and_retains_origin(self):
+        from tests.test_local_drive_import import Response,Token
+        from engineering.storage.google_drive import GoogleDriveClient
+        import hashlib
+        data=b'Imported original 4m';calls=[]
+        meta=dict(id='drive_original_123',name='drive-report.txt',mimeType='text/plain',size=str(len(data)),md5Checksum=hashlib.md5(data).hexdigest(),modifiedTime='2026-10-06T00:00:00Z',capabilities={'canDownload':True},trashed=False)
+        def opener(req,timeout):
+            calls.append(req.full_url)
+            return Response(data if 'alt=media' in req.full_url else json.dumps(meta).encode())
+        self.server.drive_client=GoogleDriveClient(Token(),opener)
+        self.assertEqual(self.request('GET','/api/drive/status',token=False)[0],403)
+        status=json.loads(self.request('GET','/api/drive/status')[2])
+        self.assertTrue(status['configured']);self.assertFalse(status['connection_verified'])
+        session=self.create();path=f'/api/sessions/{session}/drive-import';payload={'source':'drive_original_123'}
+        self.assertEqual(self.request('POST',path,payload,token=False)[0],403);self.assertEqual(calls,[])
+        code,_,raw=self.request('POST',path,payload);self.assertEqual(code,201);file=json.loads(raw)
+        self.assertEqual(self.request('GET','/api/files/'+file['id'])[2],data)
+        self.assertEqual(file['source_metadata']['provider'],'GOOGLE_DRIVE')
+        self.assertFalse(file['acceptance_granted']);self.assertNotIn('PRIVATE_TOKEN',raw.decode())
+        other=self.create()
+        self.assertEqual(json.loads(self.request('GET',f'/api/sessions/{other}')[2])['files'],[])
+        self.server.drive_client=None
+        self.assertEqual(self.request('POST',path,payload)[0],503)
+        self.assertEqual(len(json.loads(self.request('GET',f'/api/sessions/{session}')[2])['files']),1)
+
+    def test_drive_import_shares_upload_limit(self):
+        session=self.create()
+        self.server.upload_slots.acquire();self.server.upload_slots.acquire()
+        try:self.assertEqual(self.request('POST',f'/api/sessions/{session}/drive-import',{'source':'drive_original_123'})[0],429)
+        finally:self.server.upload_slots.release();self.server.upload_slots.release()
+
     def test_candidate_api_preserves_source_binding_and_rejects_forgery(self):
         session=self.create()
         _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.txt',b'height 4m',{'Content-Type':'application/octet-stream'})

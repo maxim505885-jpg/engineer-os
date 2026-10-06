@@ -104,6 +104,11 @@ class GoogleDriveClient:
         except (error.HTTPError, error.URLError, TimeoutError, json.JSONDecodeError) as exc:
             raise GoogleDriveError("Google Drive metadata request failed") from exc
         try:
+            capabilities = body.get("capabilities")
+            if (not isinstance(capabilities, dict)
+                    or type(capabilities.get("canDownload")) is not bool
+                    or type(body.get("trashed")) is not bool):
+                raise ValueError("Drive permission fields must be explicit booleans")
             size = int(body["size"]) if body.get("size") is not None else None
             return GoogleDriveFile(
                 file_id=body["id"],
@@ -114,8 +119,8 @@ class GoogleDriveClient:
                 modified_time=body.get("modifiedTime"),
                 parents=tuple(body.get("parents") or ()),
                 web_view_link=body.get("webViewLink"),
-                can_download=bool((body.get("capabilities") or {}).get("canDownload")),
-                trashed=bool(body.get("trashed")),
+                can_download=capabilities["canDownload"],
+                trashed=body["trashed"],
             )
         except (KeyError, TypeError, ValueError) as exc:
             raise GoogleDriveError("Google Drive returned invalid file metadata") from exc

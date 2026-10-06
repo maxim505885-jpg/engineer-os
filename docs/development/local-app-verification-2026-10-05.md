@@ -60,3 +60,13 @@ CORE_RUN связан с LocalModel/worker/SQLite/UI. Выбранные рол�
 DOM запускает настоящий launcher/worker и синтетический model protocol: 4 requests всего (1 чат +3 роли); проверяет выбор режима/ролей, инертную разметку, историю после reload. Это jsdom, не настоящий rendering/CSP. В draft results evidence_ids=[], PRELIMINARY_ANALYSIS, acceptance=false; формальный FINAL AUDIT NOT_RUN. SUCCEEDED относится к сохранению результата обработки и не скрывает core_run.status ERROR/BLOCK.
 
 Live Ollama/qwen3, Windows и принятый инженерный кейс NOT_RUN; Windows/live model последние по указанию пользователя. PDF V4 не менялся и не перепроверялся: прежний 523 UNCERTAINTY /11 BLOCK сохраняется.
+
+## Дополнение 06.10.2026 — локальный импорт Drive
+
+291 Python +4 Node PASS; compileall/JS syntax/git diff --check PASS. Actual HTTP route использует существующий GoogleDriveClient с синтетическим transport: token protection, session isolation, upload saturation, сохранение оригинала, MD5/recomputed SHA256/expected SHA256, source change, запрещённые форматы и отсутствие OAuth без фиктивного успеха. Импортёр имеет 9 тестов, HTTP добавлено 2. SQLite migration сохраняет старые файлы; происхождение восстанавливается после открытия базы.
+
+Независимое ревью нашло сохранение файла до успешного cleanup и coercion строковых прав через bool(). Обе проблемы воспроизведены RED→GREEN: регистрация перенесена после TemporaryDirectory cleanup, metadata требует явные boolean canDownload/trashed. Ошибки не раскрывают private exception/token.
+
+Два DOM smoke PASS: общий launcher/worker с 4 synthetic model requests и отдельный Drive submit с actual local HTTP/synthetic Google opener. Проверены configured-not-connected, selected original, provenance reload, отсутствие токена, смена диалога/очистка draft и failed checksum без ложного файла. Test transport существует только в тестах. jsdom не подтверждает rendering/CSP настоящего браузера.
+
+Live Google OAuth/Drive NOT_RUN; интерактивное подключение аккаунта не реализовано. Windows/live qwen3/real browser NOT_RUN, Windows последними. UNVERIFIED/NOT_EVIDENCE/acceptance=false, FINAL AUDIT NOT_RUN. PDF V4 не перепроверялся и старые неопубликованные PDF-изменения не включены.

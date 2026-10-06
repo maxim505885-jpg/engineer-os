@@ -10,6 +10,7 @@ from .files import preserve_file,MAX_FILE_BYTES
 from .store import ReviewConflict
 
 UI=Path(__file__).parent/'ui'
+_DRIVE_DEFAULT=object()
 CSP="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 
 
@@ -21,8 +22,10 @@ class LocalServer(ThreadingHTTPServer):
     daemon_threads=True
 
 
-def make_server(store,model,host='127.0.0.1',port=0):
+def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT):
     if host!='127.0.0.1':raise ValueError('Application must bind to 127.0.0.1 only')
+    from .drive_import import DriveImportError,configured_client,import_original
+    if drive_client is _DRIVE_DEFAULT:drive_client=configured_client()
     class Handler(BaseHTTPRequestHandler):
         def log_message(self,*args):pass
         def setup(self):
@@ -80,10 +83,18 @@ def make_server(store,model,host='127.0.0.1',port=0):
                             self.server.health_cache=model.health();self.server.health_at=time.monotonic()
                         health=self.server.health_cache
                     return self.respond(200,dict(model=health,engineering_status='UNCERTAINTY',acceptance_granted=False))
+                if route=='/api/drive/status' and not post:
+                    configured=self.server.drive_client is not None
+                    return self.respond(200,dict(configured=configured,connection_verified=False,note='Настройки Drive есть; доступ проверяется при импорте.' if configured else 'Drive не настроен на локальном сервере. Можно загрузить файл вручную.'))
                 if route=='/api/sessions':
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
+                    if parts[3]=='drive-import':
+                        body=self.json_body()
+                        if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
+                        try:return self.respond(201,import_original(store,parts[2],self.server.drive_client,body.get('source'),expected_sha256=body.get('expected_sha256')))
+                        finally:self.server.upload_slots.release()
                     if parts[3]=='evidence':
                         from .evidence import register
                         body=self.json_body()
@@ -116,11 +127,13 @@ def make_server(store,model,host='127.0.0.1',port=0):
                     return
                 raise RequestProblem(404,'Route not found')
             except RequestProblem as exc:self.respond(exc.status,dict(error=exc.message))
+            except DriveImportError as exc:self.respond(exc.status,dict(error=str(exc)))
             except ReviewConflict as exc:self.respond(409,dict(error=str(exc)))
             except ValueError as exc:self.respond(400,dict(error=str(exc)))
             except (BrokenPipeError,ConnectionResetError):pass
             except Exception:self.respond(500,dict(error='Local application error; original data retained'))
     server=LocalServer((host,port),Handler)
     server.token=secrets.token_urlsafe(32);server.origin=f'http://127.0.0.1:{server.server_port}'
+    server.drive_client=drive_client
     server.health_cache=None;server.health_at=float('-inf');server.health_lock=threading.Lock();server.upload_slots=threading.BoundedSemaphore(2);server.preview_slots=threading.BoundedSemaphore(2)
     return server

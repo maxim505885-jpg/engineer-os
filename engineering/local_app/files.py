@@ -35,7 +35,7 @@ def candidate_text(name,data):
         return '', 'UNAVAILABLE','Извлечение текста PDF недоступно. Оригинал сохранён; требуется отдельная проверка.',False
 
 
-def preserve_file(store,session_id,name,data):
+def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
     if Path(name).suffix.lower() not in {'.txt','.md','.pdf'}:raise ValueError('Supported originals: TXT, MD, PDF')
@@ -46,6 +46,7 @@ def preserve_file(store,session_id,name,data):
     text,status,note,truncated=candidate_text(name,data)
     path.write_bytes(data)
     record=dict(id=ident,session_id=session_id,name=name,path=str(path),sha256=hashlib.sha256(data).hexdigest(),size=len(data),text=text,extraction_status=status,extraction_note=note,text_truncated=int(truncated),created=time.time())
+    record['source_metadata']=source_metadata or {}
     try:return store.add_file(record)
     except Exception:
         path.unlink(missing_ok=True);raise

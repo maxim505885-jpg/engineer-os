@@ -38,6 +38,8 @@ class Store:
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
             if 'mode' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
             if 'requested_checks' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
+            file_columns={r['name'] for r in db.execute('PRAGMA table_info(files)')}
+            if 'source_metadata' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
 
     @contextmanager
     def connection(self):
@@ -76,6 +78,7 @@ class Store:
     @staticmethod
     def file_dict(row,private=False):
         r=dict(row);r['text_truncated']=bool(r['text_truncated']);r['acceptance_granted']=False
+        source=r.get('source_metadata','{}');r['source_metadata']=json.loads(source) if isinstance(source,str) else source
         if not private:
             r.pop('path');r.pop('text')
         return r
@@ -97,7 +100,8 @@ class Store:
             if db.execute('SELECT id FROM sessions WHERE id=?',(record['session_id'],)).fetchone() is None:raise ValueError('Conversation not found')
             if db.execute('SELECT count(*) FROM files WHERE session_id=?',(record['session_id'],)).fetchone()[0]>=200:
                 raise ValueError('Conversation attachment limit: 200 files; create another conversation')
-            db.execute('INSERT INTO files VALUES(:id,:session_id,:name,:path,:sha256,:size,:text,:extraction_status,:extraction_note,:text_truncated,:created)',record)
+            stored=dict(record,source_metadata=json.dumps(record.get('source_metadata',{}),ensure_ascii=False))
+            db.execute('INSERT INTO files(id,session_id,name,path,sha256,size,text,extraction_status,extraction_note,text_truncated,created,source_metadata) VALUES(:id,:session_id,:name,:path,:sha256,:size,:text,:extraction_status,:extraction_note,:text_truncated,:created,:source_metadata)',stored)
         return self.file_dict(record)
 
     def get_evidence(self,session_id,candidate_id):
