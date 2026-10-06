@@ -33,3 +33,11 @@
 Независимое ревью выявило ложное UNIQUE для abcABC/abc (один объединённый bbox case-insensitive поиска) и ababa/aba (перекрытие). Обе регрессии сначала FAIL; теперь учитываются перекрытия и требуется точное равенство native get_textbox найденной области и quote; оба случая AMBIGUOUS и source-binding BLOCK. Остальные Critical/Important не найдены.
 
 UNIQUE вызывает существующие DI evidence_candidates и validate_evidence_candidate на частичном native-quote документе; VALIDATED относится только к source binding. Полнота документа, смысл, классы данных и принятие остаются непроверенными; UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN. OCR и ручное подтверждение geometry не выполнены; Windows/live model/real browser по-прежнему NOT_RUN. PDF V4 не перепроверялся.
+
+## Дополнение 06.10.2026 — PNG страницы с подсветкой
+
+251 Python +4 Node PASS; expanded DOM smoke и compileall/JS syntax/diff PASS. Четыре начальных preview теста сначала FAIL; после реализации проверены исходные байты/SHA256, PNG bounds, red-pixel location для rotation90, чужой диалог/изменённый исходник, TXT/повреждённый PDF. Реальный HTTP проверяет token, image/png, nosniff/no-store, чужой session и 429 при занятых двух renderer slots. DOM отсутствующий viewer сначала FAIL, после реализации PNG fetch/data URL/source caption/смена диалога PASS. Это не визуальная проверка браузера.
+
+Независимое ревью нашло исчезновение рамки при offset CropBox + rotation90/180/270. Три subtests сначала FAIL; временно обнуляется rotation в копии PDF при рисовании unrotated geometry, затем восстанавливается перед get_pixmap. Pixel position/original-byte регрессия PASS во всех трёх ориентациях; полный набор PASS. Других Critical/Important нет. PDF parsing complexity не ограничена лимитом PNG, жесткий total deadline не заявляется.
+
+Просмотр не подтверждает содержание и не меняет UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN. Исходный V4 не перепроверялся; 11 BLOCK неизменны. Windows/live qwen3/real-browser layout по-прежнему NOT_RUN.

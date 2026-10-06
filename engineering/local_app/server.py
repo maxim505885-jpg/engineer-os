@@ -96,6 +96,11 @@ def make_server(store,model,host='127.0.0.1',port=0):
                         if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
                         try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
                         finally:self.server.upload_slots.release()
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
+                    from .preview import render_preview
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                    try:return self.respond(200,render_preview(store,parts[2],parts[4]),'image/png')
+                    finally:self.server.preview_slots.release()
                 if len(parts)==3 and parts[:2]==['api','files'] and not post:
                     f=store.get_file(parts[2]);file=Path(f['path'])
                     self.send_response(200);self.send_header('Content-Type','application/octet-stream');self.send_header('Content-Length',str(file.stat().st_size))
@@ -111,5 +116,5 @@ def make_server(store,model,host='127.0.0.1',port=0):
             except Exception:self.respond(500,dict(error='Local application error; original data retained'))
     server=LocalServer((host,port),Handler)
     server.token=secrets.token_urlsafe(32);server.origin=f'http://127.0.0.1:{server.server_port}'
-    server.health_cache=None;server.health_at=float('-inf');server.health_lock=threading.Lock();server.upload_slots=threading.BoundedSemaphore(2)
+    server.health_cache=None;server.health_at=float('-inf');server.health_lock=threading.Lock();server.upload_slots=threading.BoundedSemaphore(2);server.preview_slots=threading.BoundedSemaphore(2)
     return server

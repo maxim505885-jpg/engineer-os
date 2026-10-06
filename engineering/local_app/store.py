@@ -89,6 +89,12 @@ class Store:
             db.execute('INSERT INTO files VALUES(:id,:session_id,:name,:path,:sha256,:size,:text,:extraction_status,:extraction_note,:text_truncated,:created)',record)
         return self.file_dict(record)
 
+    def get_evidence(self,session_id,candidate_id):
+        identifier(session_id);identifier(candidate_id)
+        with self.connection() as db:r=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(candidate_id,session_id)).fetchone()
+        if r is None:raise ValueError('Source candidate not found in this conversation')
+        return json.loads(r['record'])
+
     def add_evidence(self,record):
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')

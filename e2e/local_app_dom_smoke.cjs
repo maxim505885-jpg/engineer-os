@@ -56,7 +56,24 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.equal(doc.querySelector('#evidence-quote').value,'','Draft source quote must not cross conversations');
   assert.equal(doc.querySelector('#evidence-statement').value,'');
   assert.equal(doc.querySelector('#evidence-page').value,'');
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation'],requests:requests.length}));
+  assert.ok(doc.querySelector('#source-viewer'),'Persistent source viewer must exist');
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.evidence-card'));
+  const pdf=require('node:child_process').execFileSync(process.env.PYTHON||'python3',['-c',"import fitz,sys; d=fitz.open();d.new_page().insert_text((40,40),'height 4m');sys.stdout.buffer.write(d.tobytes())"]);
+  const token=doc.querySelector('meta[name="app-token"]').content;
+  const sessions=await (await fetch(origin+'/api/sessions',{headers:{'X-Engineer-Token':token}})).json();
+  const id=sessions.find(s=>s.title==='Проверь высоту по ТЗ').id;
+  const file=await (await fetch(origin+`/api/sessions/${id}/files?name=preview.pdf`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/octet-stream'},body:pdf})).json();
+  await fetch(origin+`/api/sessions/${id}/evidence`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/json'},body:JSON.stringify({file_id:file.id,page:1,quote:'height 4m',statement:'Unverified preview'})});
+  await until(()=>doc.querySelector('.preview-button'));
+  doc.querySelector('.preview-button').click();
+  await until(()=>doc.querySelector('#source-image').src.startsWith('data:image/png'));
+  assert.ok(doc.querySelector('#source-caption').textContent.includes('preview.pdf'));
+  assert.ok(doc.querySelector('#source-caption').textContent.includes('не подтверждает'));
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
+  await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#source-viewer').hidden,true,'Preview must not cross conversations');
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

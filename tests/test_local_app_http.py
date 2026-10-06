@@ -94,6 +94,25 @@ class LocalHTTPTests(unittest.TestCase):
         self.assertEqual(self.request('POST',path,dict(payload,quote='height 99m'))[0],400)
         self.assertEqual(len(json.loads(self.request('GET',f'/api/sessions/{session}')[2])['evidence']),1)
 
+    def test_pdf_preview_endpoint_is_private_png_and_does_not_accept_record(self):
+        import fitz
+        from engineering.local_app.evidence import register
+        session=self.create()
+        with fitz.open() as pdf:
+            pdf.new_page().insert_text((40,40),'height 4m');data=pdf.tobytes()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.pdf',data,{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw);r=register(self.store,session,file_id=f['id'],page=1,quote='height 4m',statement='Unverified')
+        path=f"/api/sessions/{session}/evidence/{r['id']}/preview"
+        self.assertEqual(self.request('GET',path,token=False)[0],403)
+        status,h,png=self.request('GET',path)
+        self.assertEqual(status,200);self.assertEqual(h['Content-Type'],'image/png')
+        self.assertEqual(h['X-Content-Type-Options'],'nosniff');self.assertEqual(h['Cache-Control'],'no-store')
+        self.assertTrue(png.startswith(b'\x89PNG'));self.assertFalse(self.store.get_evidence(session,r['id'])['acceptance_granted'])
+        other=self.create();self.assertEqual(self.request('GET',path.replace(session,other))[0],400)
+        self.assertTrue(self.server.preview_slots.acquire(False));self.assertTrue(self.server.preview_slots.acquire(False))
+        try:self.assertEqual(self.request('GET',path)[0],429)
+        finally:self.server.preview_slots.release();self.server.preview_slots.release()
+
     def test_html_bootstrap_and_api_require_token(self):
         status,h,body=self.request('GET','/',token=False)
         self.assertEqual(status,200);self.assertIn(self.server.token.encode(),body)
