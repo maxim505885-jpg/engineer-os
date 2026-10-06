@@ -89,7 +89,17 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if route=='/api/sessions':
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
+                    from .requirements import report
+                    return self.respond(200,report(store,parts[2]))
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and parts[5]=='assessments' and post:
+                    from .requirements import assess
+                    body=self.json_body()
+                    return self.respond(201,assess(store,parts[2],set_id=body.get('set_id'),requirement_id=parts[4],expected_revision=body.get('expected_revision'),conclusion=body.get('conclusion'),evidence_ids=body.get('evidence_ids',[]),relation=body.get('relation')))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
+                    if parts[3]=='requirements':
+                        from .requirements import create_set
+                        return self.respond(201,create_set(store,parts[2],text=self.json_body().get('text')))
                     if parts[3]=='extraction':
                         body=self.json_body()
                         return self.respond(202,store.enqueue_extraction(parts[2],body.get('file_id'),body.get('backend','native')))
@@ -101,7 +111,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if parts[3]=='evidence':
                         from .evidence import register
                         body=self.json_body()
-                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U')))
+                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U'),source_job=body.get('source_job'),logical_unit=body.get('logical_unit')))
                     if parts[3]=='jobs':
                         body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[]),mode=body.get('mode','CHAT'),requested_checks=body.get('requested_checks')))
                     if parts[3]=='files':

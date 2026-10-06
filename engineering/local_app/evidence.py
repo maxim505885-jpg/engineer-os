@@ -6,7 +6,7 @@ import uuid
 from .provenance import locate,unavailable
 
 
-def register(store,session_id,*,file_id,quote,statement,page=None,data_class='U'):
+def register(store,session_id,*,file_id,quote,statement,page=None,data_class='U',source_job=None,logical_unit=None):
     for name,value,limit in [('quote',quote,4000),('statement',statement,4000)]:
         if not isinstance(value,str) or not value.strip() or len(value)>limit:raise ValueError(name+' must contain 1–4000 characters')
     if not isinstance(data_class,str) or data_class not in {'P','F','M','T','C','A','I','U'}:raise ValueError('Invalid data class')
@@ -14,7 +14,16 @@ def register(store,session_id,*,file_id,quote,statement,page=None,data_class='U'
     f=store.get_file(file_id)
     if f['session_id']!=session_id:raise ValueError('Original belongs to another conversation')
     if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc'}:
-        raise ValueError('Office: используйте привязку абзаца/таблицы/ячейки из журнала анализа; реестр этих привязок подключается отдельно.')
+        if page is not None:raise ValueError('Office does not have PDF evidence pages')
+        if source_job is None or logical_unit is None:raise ValueError('Office: укажите задание извлечения и логический элемент из журнала анализа.')
+        from .source_binding import office_location
+        binding=office_location(store,session_id,f,source_job,logical_unit,quote)
+        return store.add_evidence(dict(id=str(uuid.uuid4()),session_id=session_id,file_id=file_id,name=f['name'],source_sha256=f['sha256'],
+            page=None,quote=quote,statement=statement,data_class=data_class,data_class_verified=False,source_match='MATCH',
+            verification_note='Цитата совпала в логическом элементе. Полнота, тип данных и инженерный вывод не подтверждены.',
+            status='UNVERIFIED',acceptance_granted=False,final_audit='NOT_RUN',created=time.time(),source_binding=binding,
+            locator=binding['locator'],source_confirmable=binding['source_confirmable'],provenance=None,document_validation=None))
+    if source_job is not None or logical_unit is not None:raise ValueError('Logical Office location unavailable for this format')
     with Path(f['path']).open('rb') as stream:data=stream.read(100*1024*1024+1)
     if len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256']:raise ValueError('Original identity check failed')
     provenance,document_validation=unavailable()

@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "scope": "PROTOCOL_SOURCE_BINDING_QA_NOT_REAL_ENGINEERING_CASE",
+  "real_office_parser": true,
+  "real_doc_conversion": true,
+  "model_transport": "controlled in-process",
+  "real_model": false,
+  "tz_origin": "controlled test checklist, not actual object ТЗ",
+  "cases": [
+    {
+      "name": "Расчет  .docx",
+      "source_sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+      "source_bytes": 2754000,
+      "logical_unit": 1,
+      "locator": {
+        "kind": "paragraph",
+        "part": "word/document.xml",
+        "paragraph": 1
+      },
+      "quote_sha256": "a313e47e3f76f597c38828e8fbb243eac3c29b09250a9939dee45a398526cf6e",
+      "source_confirmed": true,
+      "traceability": "SOURCE_LINKED",
+      "status": "UNCERTAINTY",
+      "reasons": [
+        "ENGINEERING_VERIFICATION_REQUIRED",
+        "DATA_CLASS_NOT_VERIFIED"
+      ],
+      "restart_same_store": true,
+      "original_preserved": true,
+      "acceptance_granted": false,
+      "elapsed_seconds": 3.078
+    },
+    {
+      "name": "Таблицы.xlsx",
+      "source_sha256": "305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f",
+      "source_bytes": 10004,
+      "logical_unit": 1,
+      "locator": {
+        "kind": "cell",
+        "part": "xl/worksheets/sheet1.xml",
+        "sheet": "Лист1",
+        "cell": "A1"
+      },
+      "quote_sha256": "cc9fa02c9e5bb5426f20ea2c84d0f2ae9d8670648e5ac43d80c56786d27f9725",
+      "source_confirmed": true,
+      "traceability": "SOURCE_LINKED",
+      "status": "UNCERTAINTY",
+      "reasons": [
+        "ENGINEERING_VERIFICATION_REQUIRED",
+        "DATA_CLASS_NOT_VERIFIED"
+      ],
+      "restart_same_store": true,
+      "original_preserved": true,
+      "acceptance_granted": false,
+      "elapsed_seconds": 0.461
+    },
+    {
+      "name": "Расчет  .doc",
+      "source_sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+      "source_bytes": 3029504,
+      "logical_unit": 1,
+      "locator": {
+        "kind": "paragraph",
+        "part": "word/document.xml",
+        "paragraph": 1,
+        "scope": "DERIVED_DOCX_LOCATION",
+        "derived_sha256": "b4a70990b1e65b626e5201d59bf4038ca88fa3aa6121d3df1902967b28eee554"
+      },
+      "quote_sha256": "a313e47e3f76f597c38828e8fbb243eac3c29b09250a9939dee45a398526cf6e",
+      "source_confirmed": false,
+      "traceability": "NOT_ESTABLISHED",
+      "status": "BLOCK",
+      "reasons": [
+        "SOURCE_NOT_CONFIRMED",
+        "SOURCE_LOCATION_UNVERIFIED"
+      ],
+      "restart_same_store": true,
+      "original_preserved": true,
+      "acceptance_granted": false,
+      "elapsed_seconds": 4.039
+    }
+  ],
+  "repeat_after_final_fixes": true
+}

@@ -14,6 +14,8 @@ def record_review(store,session_id,candidate_id,*,expected_revision,decision,not
     with Path(f['path']).open('rb') as stream:data=stream.read(100*1024*1024+1)
     if f['session_id']!=session_id or len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256'] or f['sha256']!=r['source_sha256']:raise ValueError('Original identity check failed')
     if decision=='SOURCE_CONFIRMED':
+        from .source_binding import validate_candidate
+        validate_candidate(store,session_id,r)
         if r['source_match']!='MATCH':raise ValueError('Unchecked quote cannot be confirmed as a source match')
         if Path(f['name']).suffix.lower()=='.pdf' and (r.get('provenance') or {}).get('status')!='UNIQUE':raise ValueError('PDF region must be unambiguous for source confirmation')
     event=dict(id=str(uuid.uuid4()),candidate_id=candidate_id,session_id=session_id,decision=decision,note=note.strip(),actor=actor.strip(),actor_verified=False,source_sha256=r['source_sha256'],scope='SOURCE_REVIEW_ONLY',acceptance_granted=False,created=time.time())

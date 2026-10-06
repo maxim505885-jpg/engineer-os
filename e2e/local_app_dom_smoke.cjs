@@ -6,7 +6,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-dom-'));
  const requests=[],errors=[];let child,dom,failAt;
- const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify(req.url==='/api/tags'?{models:[{name:'qwen3:8b',digest:'sha256:'+'a'.repeat(64)}]}:{data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);if(req.url==='/api/show'){res.end(JSON.stringify({parameters:'num_ctx 8192',template:'stable'}));return;}requests.push(payload);if(requests.length===failAt){res.statusCode=503;res.end('{}');return;}const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
+ const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify(req.url==='/api/tags'?{models:[{name:'qwen3:8b',digest:'sha256:'+'a'.repeat(64)}]}:{data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);if(req.url==='/api/show'){res.end(JSON.stringify({parameters:'num_ctx 8192',template:'stable'}));return;}requests.push(payload);if(requests.length===failAt){res.statusCode=503;res.end('{}');return;}const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[{text:"Пример непроверенного наблюдения",source_ids:[]}],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
  try{
   await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,GOOGLE_DRIVE_CLIENT_ID:'',GOOGLE_DRIVE_CLIENT_SECRET:'',GOOGLE_DRIVE_REFRESH_TOKEN:'',ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
@@ -107,6 +107,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.core-run').textContent.includes('UNCERTAINTY'));
   assert.ok(doc.querySelector('.core-run').textContent.includes('Черновик'));
   assert.equal(dom.window.coreInjected,undefined);
+  assert.ok(doc.querySelector('.finding-gate')?.textContent.includes('NO_CANDIDATE_REFERENCE'),'Unlinked findings must show their deterministic source BLOCK');
   dom.window.close();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
@@ -150,6 +151,37 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(!officeCard.textContent.includes('4/4 страниц'),'Cell counts must not be called physical pages');
   officeCard.querySelector('.analysis-drafts').click();await until(()=>officeCard.querySelector('.analysis-receipt')||[...doc.querySelectorAll('.analysis-receipt')].some(c=>c.textContent.includes('Нагрузки!C1')));
   assert.ok([...doc.querySelectorAll('.analysis-receipt')].some(c=>c.textContent.includes('Нагрузки!C1')),'Sheet/cell locator must be visible');
+  assert.ok(doc.querySelector('#tz-form'),'ТЗ checklist form must be available');
+  doc.querySelector('#tz-text').value='Проверить снеговую нагрузку\nПроверить опоры';
+  doc.querySelector('#tz-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+  await until(()=>doc.querySelectorAll('.requirement-card').length===2&&!doc.querySelector('#tz-save').disabled);
+  const officeReceipt=[...doc.querySelectorAll('.analysis-receipt')].find(c=>c.textContent.includes('Нагрузки!C1'));
+  officeReceipt.querySelector('.candidate-from-source').click();
+  await until(()=>doc.querySelector('#evidence-quote').value.includes('Снег'));
+  doc.querySelector('#evidence-statement').value='Снег по таблице';doc.querySelector('#evidence-class').value='P';
+  doc.querySelector('#evidence-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+  await until(()=>[...doc.querySelectorAll('.evidence-card')].some(c=>c.textContent.includes('Снег по таблице'))&&!doc.querySelector('#evidence-save').disabled);
+  let officeCandidate=[...doc.querySelectorAll('.evidence-card')].find(c=>c.textContent.includes('Снег по таблице'));
+  assert.ok(officeCandidate.textContent.includes('Нагрузки!A1'));
+  officeCandidate.querySelector('.review-button').click();doc.querySelector('#review-decision').value='SOURCE_CONFIRMED';doc.querySelector('#review-note').value='Адрес и значение сверены';
+  doc.querySelector('#review-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+  await until(()=>[...doc.querySelectorAll('.evidence-card')].some(c=>c.textContent.includes('Снег по таблице')&&c.querySelector('.review-history'))&&doc.querySelector('#review-panel').hidden);
+  let req=doc.querySelector('.requirement-card');req.querySelector('.requirement-conclusion').value='Снег указан в ячейке';
+  req.querySelector('.requirement-relation').value='SUPPORTS';
+  [...req.querySelectorAll('input[type=checkbox]')].find(c=>c.parentElement.textContent.includes('Снег по таблице')).checked=true;
+  req.querySelector('form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
+  await until(()=>doc.querySelector('.requirement-card').textContent.includes('SOURCE_LINKED'));
+  assert.ok(doc.querySelector('.requirement-card').textContent.includes('UNCERTAINTY'),'Source match must not become engineering PASS');
+  dom.window.close();dom=await open();doc=dom.window.document;
+  await until(()=>doc.querySelectorAll('nav .session').length===2);
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.requirement-card')?.textContent.includes('SOURCE_LINKED'));
+  const editing=doc.querySelector('.requirement-conclusion');editing.value='Черновик до проверки';editing.dispatchEvent(new dom.window.Event('input',{bubbles:true}));editing.focus();editing.setSelectionRange(2,5);
+  const history=doc.querySelector('.requirement-card details');history.open=true;
+  await new Promise(resolve=>setTimeout(resolve,2000));
+  assert.ok(doc.activeElement.classList.contains('requirement-conclusion'),'Polling must preserve focused assessment control');
+  assert.equal(doc.activeElement.selectionStart,2);assert.equal(doc.activeElement.selectionEnd,5);assert.equal(doc.activeElement.value,'Черновик до проверки');
+  assert.equal(doc.querySelector('.requirement-card details').open,true,'Polling must preserve expanded assessment history');
   assert.ok(doc.querySelector('#drive-form'),'Drive import form missing');
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');

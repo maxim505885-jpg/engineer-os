@@ -60,6 +60,8 @@ def source_context(store, job, files, automatic_sources=None):
                             context_text_chars=len(text),context_text_truncated=len(text)<len(file['text'])))
     selected = set(job['file_ids'])
     candidates = [dict(id=r['id'], file_id=r['file_id'], page=r['page'],
+                       locator=r.get('locator'),data_class=r['data_class'],data_class_verified=False,
+                       source_limitations=(r.get('source_binding') or {}).get('limitations',[]),
                        quote=r['quote'][:500], statement=r['statement'][:500],
                        review_decision=r['latest_review']['decision'] if r['latest_review'] else 'NOT_REVIEWED',
                        review_event_id=r['latest_review']['id'] if r['latest_review'] else None,
@@ -68,7 +70,9 @@ def source_context(store, job, files, automatic_sources=None):
                   for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in selected]
     truncated = truncated or any(c['quote_truncated'] or c['statement_truncated'] for c in candidates)
     candidates, clipped = bounded_items(candidates, 6000)
-    return dict(sources=sources, candidates=candidates), truncated or clipped
+    from .requirements import context
+    requirements=context(store,job['session_id'],job['file_ids'])
+    return dict(sources=sources, candidates=candidates,requirements=requirements), truncated or clipped or requirements['context_truncated']
 
 
 def unique_object(pairs):
@@ -112,6 +116,11 @@ def parse_draft(task, raw, allowed_ids):
 
 
 def execute(store, job, model, stop_event, *, automatic_sources=None):
+    from .analysis_identity import context_identity
+    from .requirements import finding_gates
+    stamp=context_identity(store,job)
+    def guard_context():
+        if context_identity(store,job)!=stamp:raise ValueError('Requirements or source reviews changed during analysis')
     prepared = prepare(store, job)
     files = [store.get_file(fid) for fid in job['file_ids']]
     context, truncated = source_context(store, job, files, automatic_sources)
@@ -169,6 +178,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
             messages = [dict(role='system', content='Назначенная роль: ' + task.agent + '\n' + skills.load(task.skill) + '\nГраницы локального режима:\n' + SYSTEM),
                         dict(role='user', content='UNTRUSTED TASK DATA:\n' + json.dumps(data, ensure_ascii=False))]
             raw = model.chat(messages)
+            guard_context()
             parsed, limitations = parse_draft(task, raw, allowed_ids)
             execution = 'COMPLETED'
         except Exception as exc:
@@ -184,6 +194,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         # Results computed from a changed original must not be retained as a
         # completed draft. Preserve already recorded earlier roles on failure.
         verify_originals(files)
+        guard_context()
         if stop_event.is_set():
             if getattr(model,'report',{}).get('roles',{}).get(task.agent,{}).get('block_seen'):
                 parsed=AgentResult(task.task_id,task.agent,AgentStatus.BLOCK,message='Сохранён BLOCK части документа; выполнение прервано.')
@@ -195,7 +206,8 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
             break
         core.collect(state, [parsed])
         row.update(execution=execution, status=parsed.status.value, summary=parsed.message,
-                   findings=list(parsed.findings), limitations=limitations)
+                   findings=list(parsed.findings), limitations=limitations,
+                   finding_gates=finding_gates(store,job['session_id'],list(parsed.findings),job['file_ids']))
         run['current_agent'] = None
         save_progress()
     run['analysis_complete'] = len(state.results) == len(state.planned)

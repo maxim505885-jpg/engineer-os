@@ -48,7 +48,7 @@ def parser_identity(backend):
 
 
 def identity(store,job,model):
-    from . import automatic_analysis,core_run,worker,model as model_module,core_plan,coverage
+    from . import automatic_analysis,core_run,worker,model as model_module,core_plan,coverage,requirements,source_binding
     from engineering.model_gateway import openai_compatible
     files=[store.get_file(fid) for fid in job['file_ids']]
     from .core_plan import verify_originals
@@ -57,7 +57,7 @@ def identity(store,job,model):
     backend=os.environ.get('ENGINEER_OS_ATTACHMENT_PARSER','native')
     if backend not in {'native','docling'}:raise ValueError('Unknown parser')
     selected=model.checkpoint_identity() if hasattr(model,'checkpoint_identity') else None
-    implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible)}
+    implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible,requirements,source_binding)}
     implementation['identity']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     if job['mode']=='CORE_RUN':
         from engineering.core.skill_loader import SkillLoader
@@ -66,8 +66,16 @@ def identity(store,job,model):
         implementation['skills']=[digest(loader.load(CHECK_REGISTRY[c][1])) for c in dict.fromkeys(job['requested_checks']+['final_audit'])]
     value=dict(schema=1,task_id=job['id'],session_id=job['session_id'],mode=job['mode'],prompt=job['prompt'],checks=job['requested_checks'],
                sources=[dict(id=f['id'],sha256=f['sha256'],name=f['name']) for f in files],parser=parser_identity(backend),model=selected,
-               evidence_sha256=digest([r for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in job['file_ids']]),
+               evidence_sha256=context_identity(store,job)['evidence_sha256'],
+               requirements_sha256=digest(store.requirements_state(job['session_id'])),
                parsers={f['id']:parser_identity(Path(f['name']).suffix.lower()[1:]) for f in files if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc'}},
                implementation=implementation,budgets=dict(part_chars=automatic_analysis.PART_CHARS,source_chars=automatic_analysis.MAX_SOURCE_CHARS,
                max_calls=automatic_analysis.MAX_MODEL_CALLS,max_seconds=automatic_analysis.MAX_MODEL_SECONDS,summary_chars=automatic_analysis.SUMMARY_CHARS))
     return value,digest(value),selected is not None
+
+
+def context_identity(store,job):
+    state=store.requirements_state(job['session_id']);current=state['sets'][-1]['id'] if state['sets'] else None
+    linked={s['candidate_id'] for e in state['assessments'] if e['set_id']==current for s in e['sources']}
+    return dict(requirements_sha256=digest(state),
+        evidence_sha256=digest([r for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in job['file_ids'] or r['id'] in linked]))

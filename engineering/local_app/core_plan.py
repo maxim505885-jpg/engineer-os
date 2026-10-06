@@ -31,4 +31,6 @@ def prepare(store,job):
     candidates=[r for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in job['file_ids']]
     plan['source_reviews']=dict(scope='SOURCE_REVIEW_ONLY',candidates_total=len(candidates),truncated=len(candidates)>100,candidates=[dict(candidate_id=r['id'],source_sha256=r['source_sha256'],review_revision=r['review_revision'],decision=r['latest_review']['decision'] if r['latest_review'] else 'NOT_REVIEWED',review_event_id=r['latest_review']['id'] if r['latest_review'] else None,acceptance_granted=False) for r in candidates[:100]])
     text='План инженерной проверки подготовлен ENGINEER CORE. Проверки ещё не выполнены.\nТЗ: '+job['prompt']+'\n'+ '\n'.join('• '+p['label']+' — не выполнено' for p in plan['specialists'])+'\nИсходников: '+str(len(files))+'. Статус: UNCERTAINTY. Инженерное принятие отсутствует.'
-    return dict(text=text,core_plan=plan,context_truncated=plan['source_reviews']['truncated'] or any(f['text_truncated'] or f['extraction_status']=='UNAVAILABLE' or incomplete(f['extraction_coverage']) for f in files))
+    from .requirements import report
+    requirements=report(store,job['session_id'],selected_files=job['file_ids']);plan['requirements_report']=requirements
+    return dict(text=text,core_plan=plan,requirements_report=requirements,context_truncated=plan['source_reviews']['truncated'] or any(f['text_truncated'] or f['extraction_status']=='UNAVAILABLE' or incomplete(f['extraction_coverage']) for f in files))

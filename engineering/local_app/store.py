@@ -37,6 +37,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
+            CREATE TABLE IF NOT EXISTS requirement_sets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),record TEXT NOT NULL,created REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
@@ -118,6 +120,38 @@ class Store:
         with self.connection() as db:r=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(candidate_id,session_id)).fetchone()
         if r is None:raise ValueError('Source candidate not found in this conversation')
         return json.loads(r['record'])
+
+    def requirements_state(self,session_id):
+        identifier(session_id)
+        with self.connection() as db:
+            if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
+            sets=[json.loads(r['record']) for r in db.execute('SELECT record FROM requirement_sets WHERE session_id=? ORDER BY rowid',(session_id,))]
+            events=[json.loads(r['record']) for r in db.execute('SELECT a.record FROM requirement_assessments a JOIN requirement_sets s ON s.id=a.set_id WHERE s.session_id=? ORDER BY a.rowid',(session_id,))]
+        return dict(sets=sets,assessments=events)
+
+    def add_requirement_set(self,record):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('SELECT count(*) FROM requirement_sets WHERE session_id=?',(record['session_id'],)).fetchone()[0]>=20:raise ValueError('Requirement set limit: 20 per conversation')
+            db.execute('INSERT INTO requirement_sets VALUES(?,?,?,?)',(record['id'],record['session_id'],json.dumps(record,ensure_ascii=False),record['created']))
+        return record
+
+    def add_requirement_assessment(self,session_id,event,expected_revision):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            latest=db.execute('SELECT id,record FROM requirement_sets WHERE session_id=? ORDER BY rowid DESC LIMIT 1',(session_id,)).fetchone()
+            if latest is None or latest['id']!=event['set_id'] or event['requirement_id'] not in {r['id'] for r in json.loads(latest['record'])['requirements']}:raise ValueError('Current requirement not found')
+            count=db.execute('SELECT count(*) FROM requirement_assessments WHERE set_id=? AND requirement_id=?',(event['set_id'],event['requirement_id'])).fetchone()[0]
+            if count!=expected_revision:raise ReviewConflict('Requirement assessment changed; reopen before saving')
+            total=db.execute('SELECT count(*) FROM requirement_assessments a JOIN requirement_sets s ON s.id=a.set_id WHERE s.session_id=?',(session_id,)).fetchone()[0]
+            if count>=50 or total>=1000:raise ValueError('Requirement assessment history limit')
+            for source in event['sources']:
+                candidate=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(source['candidate_id'],session_id)).fetchone()
+                revision=db.execute('SELECT count(*) FROM source_reviews WHERE candidate_id=?',(source['candidate_id'],)).fetchone()[0]
+                if candidate is None or revision!=source['review_revision']:raise ReviewConflict('Source review changed; reopen before saving')
+            event=dict(event,revision=count+1)
+            db.execute('INSERT INTO requirement_assessments VALUES(?,?,?,?,?)',(event['id'],event['set_id'],event['requirement_id'],event['revision'],json.dumps(event,ensure_ascii=False)))
+        return event
 
     def append_review(self,event,expected_revision):
         with self.connection() as db:

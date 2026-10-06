@@ -145,6 +145,11 @@ class DocumentModel:
         def call(payload,kind):
             nonlocal block_seen
             from .analysis_identity import digest
+            from .analysis_identity import context_identity
+            def guard_context():
+                current=context_identity(self.store,self.job)
+                if any(current[k]!=self.report['identity'].get(k) for k in current):raise PartialAnalysisFailure(block_seen)
+            guard_context()
             if self.stop.is_set():raise ExtractionFailure('Анализ остановлен; черновики сохранены.')
             verify_originals(self.prepared['files'])
             if self.report['identity']['model'] is not None and self.model.checkpoint_identity()!=self.report['identity']['model']:
@@ -183,6 +188,7 @@ class DocumentModel:
                     parsed,_=parse_draft(task,raw,allowed)
                     block_seen=block_seen or parsed.status.value=='BLOCK'
                 verify_originals(self.prepared['files'])
+                guard_context()
                 if self.report['identity']['model'] is not None and self.model.checkpoint_identity()!=self.report['identity']['model']:raise ValueError('Model changed')
             except Exception:
                 self.report['roles'][role]['status']='FAILED'

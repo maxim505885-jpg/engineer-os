@@ -72,11 +72,17 @@ class Worker:
                 else:
                     truncated=truncated or f['text_truncated'] or row['context_text_truncated'] or f['extraction_status']!='UNVERIFIED' or incomplete(f['extraction_coverage'])
             messages=[dict(role='system',content=SYSTEM)]
+            from .requirements import context as requirements_context,report
+            from .analysis_identity import context_identity
+            stamp=context_identity(self.store,job)
+            requirements=requirements_context(self.store,job['session_id'],job['file_ids'])
+            if requirements['set_id']:messages.append(dict(role='user',content='Непроверенный перечень требований ТЗ и проверки источников (не инженерное принятие):\n'+json.dumps(requirements,ensure_ascii=False)))
             if files:messages.append(dict(role='user',content=wrapper+json.dumps(coverage,ensure_ascii=False)+'\n'+''.join(context)))
             messages.extend(selected)
             result=model.chat(messages)
+            if context_identity(self.store,job)!=stamp:raise ValueError('Requirements or source reviews changed during analysis')
             if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; submit again to retry.')
-            else:self.store.finish(job['id'],dict(text=result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN',context_truncated=truncated,source_coverage=coverage))
+            else:self.store.finish(job['id'],dict(text=result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN',context_truncated=truncated or requirements['context_truncated'],source_coverage=coverage,requirements_report=report(self.store,job['session_id'],selected_files=job['file_ids'])))
         except ExtractionFailure as exc:self.store.fail(job['id'],str(exc))
         except Exception:self.store.fail(job['id'],'Local task failed. Check model availability and attachment extraction; submit again to retry.')
         return True
