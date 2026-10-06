@@ -23,7 +23,19 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   dom.window.close();dom=await open();win=dom.window;doc=win.document;await until(()=>doc.querySelector('.message.assistant'));assert.equal(doc.querySelectorAll('.file').length,1);
   doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.message').length===0);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();await until(()=>doc.querySelector('.message.assistant'));
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch'],requests:requests.length}));
+  assert.ok(doc.querySelector('#task-mode'),'Explicit engineering preparation mode must be available');
+  doc.querySelector('#task-mode').value='CORE_PLAN';doc.querySelector('.file input').click();
+  doc.querySelector('#prompt').value='ТЗ: проверить отчёт и нормы';
+  doc.querySelector('#composer').dispatchEvent(new win.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.core-plan')&&!doc.querySelector('#send').disabled);
+  assert.equal(requests.length,1,'CORE preparation must not call model');
+  assert.ok(doc.querySelector('.core-plan').textContent.includes('FINAL AUDIT'));
+  assert.ok(doc.querySelector('.core-plan').textContent.includes('ТЗ.md'));
+  dom.window.close();dom=await open();doc=dom.window.document;
+  await until(()=>doc.querySelectorAll('nav .session').length===2);
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.core-plan'));
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

@@ -84,7 +84,7 @@ def make_server(store,model,host='127.0.0.1',port=0):
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
                     if parts[3]=='jobs':
-                        body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[])))
+                        body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[]),mode=body.get('mode','CHAT'),requested_checks=body.get('requested_checks')))
                     if parts[3]=='files':
                         names=parse_qs(path.query).get('name',[])
                         if len(names)!=1:raise RequestProblem(400,'Filename required')

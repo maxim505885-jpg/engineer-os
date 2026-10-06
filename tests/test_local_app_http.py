@@ -69,6 +69,20 @@ class LocalHTTPTests(unittest.TestCase):
         restarted=type(self.store)(Path(self.tmp.name))
         self.assertEqual(restarted.snapshot(session)['messages'][-1]['content'],'Нужна проверка источника')
 
+    def test_core_preparation_through_http_queue_and_worker(self):
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        status,_,body=self.request('POST',f'/api/sessions/{session}/files?name=r.txt',b'123',{'Content-Type':'application/octet-stream'})
+        f=json.loads(body);self.assertEqual(status,201)
+        status,_,_=self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'ТЗ: проверка отчёта','file_ids':[f['id']],'mode':'CORE_PLAN'})
+        self.assertEqual(status,202);Worker(self.store,self.model).run_once()
+        j=json.loads(self.request('GET',f'/api/sessions/{session}')[2])['jobs'][0]
+        self.assertEqual(j['state'],'SUCCEEDED');self.assertEqual(j['result']['core_plan']['status'],'UNCERTAINTY')
+        self.assertEqual(self.requests,[])
+        for mode in ([],{},None,3):
+            self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':mode})[0],400)
+        self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':'SHELL'})[0],400)
+
     def test_html_bootstrap_and_api_require_token(self):
         status,h,body=self.request('GET','/',token=False)
         self.assertEqual(status,200);self.assertIn(self.server.token.encode(),body)

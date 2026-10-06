@@ -11,6 +11,12 @@ class Worker:
         job=self.store.claim()
         if job is None:return False
         try:
+            if job['mode']=='CORE_PLAN':
+                from .core_plan import prepare
+                result=prepare(self.store,job)
+                if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; submit again to retry.')
+                else:self.store.finish(job['id'],result)
+                return True
             snap=self.store.snapshot(job['session_id']);history=snap['messages'];selected=[];budget=24000
             truncated=snap['history_windowed'] or len(history)>20
             for message in reversed(history[-20:]):

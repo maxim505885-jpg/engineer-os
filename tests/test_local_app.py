@@ -124,6 +124,46 @@ class LocalAppTests(unittest.TestCase):
         self.assertFalse(r['acceptance_granted'])
         self.assertEqual(r['final_audit'],'NOT_RUN')
 
+    def core_job(self,prompt,files,**kwargs):
+        try:return self.store.enqueue(self.session,prompt,files,mode='CORE_PLAN',**kwargs)
+        except TypeError:self.fail('Explicit CORE_PLAN queue mode missing')
+
+    def test_core_plan_runs_without_model_and_survives_restart(self):
+        f=self.files.preserve_file(self.store,self.session,'report.md',b'UNVERIFIED source')
+        job=self.core_job('Проверить отчёт по ТЗ',[f['id']])
+        class NoModel:
+            def chat(inner,messages):raise AssertionError('Core plan must not call a model')
+        self.worker.Worker(self.store,NoModel()).run_once()
+        snap=self.store_module.Store(self.store.root).snapshot(self.session)
+        j=snap['jobs'][0];self.assertEqual(j['state'],'SUCCEEDED')
+        plan=j['result']['core_plan']
+        self.assertEqual([p['agent'] for p in plan['specialists']],['report-audit-agent','normative-agent','final-audit-agent'])
+        self.assertEqual(plan['materials'][0]['id'],f['id'])
+        self.assertEqual(plan['materials'][0]['sha256'],f['sha256'])
+        self.assertEqual(plan['evidence_ids'],[])
+        self.assertFalse(plan['acceptance_granted'])
+        self.assertEqual(plan['final_audit'],'NOT_RUN')
+        self.assertEqual(plan['status'],'UNCERTAINTY')
+        self.assertEqual(plan['task_id'],job['id'])
+
+    def test_core_plan_requires_explicit_selected_sources_and_valid_checks(self):
+        with self.assertRaises(ValueError):self.core_job('ТЗ',[])
+        f=self.files.preserve_file(self.store,self.session,'r.txt',b'123')
+        with self.assertRaises(ValueError):self.core_job('ТЗ',[f['id']],requested_checks=['execute_shell'])
+        self.assertEqual(self.store.snapshot(self.session)['jobs'],[])
+        self.assertEqual(self.store.snapshot(self.session)['messages'],[])
+
+    def test_existing_history_migrates_without_losing_pending_chat(self):
+        job=self.store.enqueue(self.session,'Normal chat',[])
+        with self.store.connection() as db:
+            cols={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
+            self.assertIn('mode',cols,'Durable queue mode migration missing')
+            db.execute('ALTER TABLE jobs DROP COLUMN mode')
+            db.execute('ALTER TABLE jobs DROP COLUMN requested_checks')
+        restarted=self.store_module.Store(self.store.root)
+        j=restarted.claim();self.assertEqual(j['id'],job['id']);self.assertEqual(j['mode'],'CHAT')
+        self.assertEqual(j['requested_checks'],[])
+
     def test_worker_failure_does_not_create_assistant_reply(self):
         self.store.enqueue(self.session,'Question',[])
         class Broken:

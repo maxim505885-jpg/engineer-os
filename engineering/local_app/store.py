@@ -28,6 +28,9 @@ class Store:
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
+            columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
+            if 'mode' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
+            if 'requested_checks' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
 
     @contextmanager
     def connection(self):
@@ -66,7 +69,7 @@ class Store:
 
     @staticmethod
     def job_dict(row):
-        r=dict(row);r['file_ids']=json.loads(r['file_ids']);r['result']=json.loads(r['result']) if r['result'] else None
+        r=dict(row);r['file_ids']=json.loads(r['file_ids']);r['result']=json.loads(r['result']) if r['result'] else None;r['requested_checks']=json.loads(r['requested_checks'])
         return r
 
     def get_file(self,file_id):
@@ -84,19 +87,25 @@ class Store:
             db.execute('INSERT INTO files VALUES(:id,:session_id,:name,:path,:sha256,:size,:text,:extraction_status,:extraction_note,:text_truncated,:created)',record)
         return self.file_dict(record)
 
-    def enqueue(self,session_id,prompt,file_ids):
+    def enqueue(self,session_id,prompt,file_ids,*,mode='CHAT',requested_checks=None):
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN'}:raise ValueError('Unknown task mode')
+        checks=requested_checks if requested_checks is not None else (['report','normative'] if mode=='CORE_PLAN' else [])
+        from engineering.core.engineer_core import CHECK_REGISTRY
+        if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
+        if mode=='CHAT' and checks:raise ValueError('Engineering checks require CORE_PLAN')
+        if mode=='CORE_PLAN' and (not file_ids or not checks):raise ValueError('ТЗ, selected originals and checks required for CORE_PLAN')
         for value in file_ids:identifier(value)
-        now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now)
+        now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now,mode=mode,requested_checks=json.dumps(checks))
         try:
             with self.connection() as db:
                 db.execute('BEGIN IMMEDIATE')
                 if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
                 for fid in file_ids:
                     if db.execute('SELECT id FROM files WHERE id=? AND session_id=?',(fid,session_id)).fetchone() is None:raise ValueError('Attachment belongs to another conversation or does not exist')
-                db.execute('INSERT INTO jobs VALUES(:id,:session_id,:prompt,:file_ids,:state,:result,:error,:created,:updated)',record)
+                db.execute('INSERT INTO jobs(id,session_id,prompt,file_ids,state,result,error,created,updated,mode,requested_checks) VALUES(:id,:session_id,:prompt,:file_ids,:state,:result,:error,:created,:updated,:mode,:requested_checks)',record)
                 db.execute('INSERT INTO messages(session_id,role,content,created) VALUES(?,?,?,?)',(session_id,'user',record['prompt'],now))
                 db.execute("UPDATE sessions SET title=? WHERE id=? AND title='Новый диалог'",(record['prompt'][:60],session_id))
         except sqlite3.IntegrityError:raise ValueError('This conversation already has an active task') from None
