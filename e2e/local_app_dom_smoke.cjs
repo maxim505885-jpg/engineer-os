@@ -157,6 +157,13 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.core-run'));
   assert.ok(doc.querySelector('.core-run').textContent.includes('NOT_RUN'));
+  assert.ok(doc.querySelector('#real-case-panel'),'Stage-7 real case panel missing');
+  await until(()=>[...doc.querySelector('#real-case-form select').options].some(o=>o.value));
+  const caseSelect=doc.querySelector('#real-case-form select');caseSelect.value=[...caseSelect.options].find(o=>o.value).value;
+  doc.querySelector('#real-case-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.real-case-result'));
+  assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
+  assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
   const fullPdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
   assert.ok(fullPdfCard.querySelector('.advanced-document-actions'),'Manual extraction must be under advanced actions');
   fullPdfCard.querySelector('input').click();
