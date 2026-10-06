@@ -193,7 +193,9 @@ def report(store,session_id,*,selected_files=None):
                     reasons.append('SOLVER_RECEIPT_INVALID')
             else:
                 reasons.append('SOLVER_RECEIPT_MISSING')
-            reasons.extend(['CALCULATION_SEMANTICS_NOT_VERIFIED','SOLVER_NOT_RUN','ACTUAL_STRUCTURE_NOT_VERIFIED'])
+            reasons.append('CALCULATION_SEMANTICS_NOT_VERIFIED')
+            reasons.append('SOLVER_NOT_RUN' if solver_review is None else 'SOLVER_EXECUTION_NOT_ACCEPTED')
+            reasons.append('ACTUAL_STRUCTURE_NOT_VERIFIED')
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
             reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,authority_review=authority_review,semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
