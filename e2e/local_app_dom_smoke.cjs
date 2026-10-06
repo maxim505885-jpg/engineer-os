@@ -167,7 +167,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
   const fullPdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
   assert.ok(fullPdfCard.querySelector('.advanced-document-actions'),'Manual extraction must be under advanced actions');
-  const fullPdfCheck=fullPdfCard.querySelector('input');if(!fullPdfCheck.checked)fullPdfCheck.click();
+  const fullPdfCheck=fullPdfCard.querySelector('input');for(const check of doc.querySelectorAll('.file input:checked'))if(check!==fullPdfCheck)check.click();if(!fullPdfCheck.checked)fullPdfCheck.click();
   doc.querySelector('#task-mode').value='CHAT';doc.querySelector('#prompt').value='Проверь прикреплённый PDF';
   doc.querySelector('#composer').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>doc.querySelector('.automatic-analysis')&&!doc.querySelector('#send').disabled);
