@@ -166,3 +166,5 @@
 Явный `ENGINEER_OS_LOCAL_THINK=false` через native Ollama; timeout180с и acceptance gates сохранены. Production CORE220,19с, роли104,79/115,36с; таблица V4 native91,64с; damaged label text fixture48,97с. Нельзя объявлять OCR исправленным: текущие проверки без Docling, парный OpenAI baseline не повторён. 339Python/4Node/compileall/diff PASS. Draft PR53 на PR52; remote1fe8ce0/tree da3e402a, locald788cbd. Main/deploy не меняли.
 
 Дальше: пункт2 — Проверить настоящий анализ документов: graphical PARSE_FAILED page500, защищённый OCR repeat сканированной таблицы и сверка подписей/пропусков. Пункт2 открыт; Windows — пункт9, последняя. Карта, раздел32.
+
+CI PR53 push37484724688 и PR37484965521 SUCCESS, включая actual HTTP/DOM. Graphical page500 прежний raw checkpoint имеет59texts/1table/2pictures; сравнить старое/новое окружение, не снимать текущий BLOCK по старому результату.
