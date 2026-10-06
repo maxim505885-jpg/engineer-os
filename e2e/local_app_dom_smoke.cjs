@@ -91,6 +91,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.equal(dom.window.reviewInjected,undefined);
   assert.ok(doc.querySelector('.review-history').textContent.includes('Source checked'));
   assert.ok(doc.querySelector('#calculation-packet-form'),'Calculation source roles form missing');
+  assert.ok(doc.querySelector('#advanced-domain-packet-form'),'Advanced point-6 packet import form missing');
   const initialDomainRevision=(await (await fetch(origin+`/api/sessions/${id}/domain-packets`,{headers:{'X-Engineer-Token':token}})).json()).revision;
   const domainDraft=doc.querySelector('#normative-packet-form [name="document"]');domainDraft.value='Concurrent draft';domainDraft.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
   const unitRole=doc.querySelector('[data-domain-role="UNITS"]');
@@ -101,6 +102,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('.domain-packet-result'));
   assert.ok(doc.querySelector('.domain-packet-result').textContent.includes('SOLVER_NOT_RUN'));
   assert.ok(doc.querySelector('.domain-packet-result').textContent.includes('UNITS'));
+  assert.ok(doc.querySelector('.domain-packet-result').textContent.includes('Пункт 6: BLOCKED_PREREQUISITES'));
   async function reviewedDomainSource(name,text){
     const headers={'X-Engineer-Token':token};
     const f=await (await fetch(origin+`/api/sessions/${id}/files?name=${name}`,{method:'POST',headers:{...headers,'Content-Type':'application/octet-stream'},body:Buffer.from(text)})).json();
