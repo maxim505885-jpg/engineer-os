@@ -119,25 +119,47 @@ def evaluate_offline_stage7(case):
     if case.get("source_identity_status")!="PASS":reasons.append("SOURCE_IDENTITY_NOT_PASS")
     if case.get("missing_roles"):reasons.append("REQUIRED_SOURCE_ROLES_MISSING")
     if not case.get("workflow_complete"):reasons.append("STAGE7_WORKFLOW_NOT_COMPLETE")
+    if case.get("tz_traceability_status")!="PASS":reasons.append("TZ_TRACEABILITY_NOT_RECORDED")
+    if case.get("evidence_review_status")!="PASS":reasons.append("EVIDENCE_REVIEW_NOT_RECORDED")
+    if case.get("specialist_coverage_status")!="PASS":reasons.append("SPECIALIST_COVERAGE_NOT_RECORDED")
+    if case.get("domain_prerequisites_status")!="PASS":reasons.append("DOMAIN_PREREQUISITES_NOT_RECORDED")
+    if case.get("case_qc_status")!="PASS":reasons.append("CASE_QC_NOT_RECORDED")
     if case.get("engineering_status")!="READY_FOR_FINAL_AUDIT":
         reasons.append("CASE_ENGINEERING_STATUS_NOT_READY")
     reasons=list(dict.fromkeys(reasons))
+
+    def dimension(name,status_key,extra=()):
+        local=[x for x in extra if x in reasons]
+        if case.get(status_key)!="PASS":
+            code={
+                "tz_traceability_status":"TZ_TRACEABILITY_NOT_RECORDED",
+                "evidence_review_status":"EVIDENCE_REVIEW_NOT_RECORDED",
+                "specialist_coverage_status":"SPECIALIST_COVERAGE_NOT_RECORDED",
+                "domain_prerequisites_status":"DOMAIN_PREREQUISITES_NOT_RECORDED",
+                "case_qc_status":"CASE_QC_NOT_RECORDED",
+            }[status_key]
+            if code not in local:local.append(code)
+        return dict(dimension=name,status="BLOCK" if local else "PASS",reasons=local)
+
+    checks=[
+        dict(dimension="CASE_FRESHNESS",status="PASS",reasons=[]),
+        dict(dimension="SOURCE_IDENTITY",status="PASS" if case.get("source_identity_status")=="PASS" else "BLOCK",
+             reasons=[] if case.get("source_identity_status")=="PASS" else ["SOURCE_IDENTITY_NOT_PASS"]),
+        dimension("TZ_TRACEABILITY","tz_traceability_status",("V4_DOCUMENT_COMPLETENESS_BLOCK",)),
+        dimension("EVIDENCE_REVIEW","evidence_review_status"),
+        dimension("SPECIALIST_COVERAGE","specialist_coverage_status",("POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING")),
+        dimension("DOMAIN_PREREQUISITES","domain_prerequisites_status",("ACTUAL_STRUCTURE_CORRELATION_PENDING",)),
+        dimension("CASE_QC","case_qc_status"),
+    ]
+    basis_blockers=list(reasons)
+    checks.append(dict(dimension="ACCEPTANCE_BASIS",status="BLOCK" if basis_blockers else "PASS",reasons=basis_blockers))
     deterministic=dict(
         schema="ENGINEER_OS_FINAL_AUDIT_V1",
         source_schema=case.get("schema"),
         case_id=case.get("case_id"),
         case_sha256=case.get("case_sha256"),
         checked_dimensions=list(CHECKED_DIMENSIONS),
-        checks=[
-            dict(dimension="CASE_FRESHNESS",status="PASS",reasons=[]),
-            dict(dimension="SOURCE_IDENTITY",status="PASS" if case.get("source_identity_status")=="PASS" else "BLOCK",reasons=[] if case.get("source_identity_status")=="PASS" else ["SOURCE_IDENTITY_NOT_PASS"]),
-            dict(dimension="TZ_TRACEABILITY",status="BLOCK" if "V4_DOCUMENT_COMPLETENESS_BLOCK" in reasons else "PASS",reasons=["V4_DOCUMENT_COMPLETENESS_BLOCK"] if "V4_DOCUMENT_COMPLETENESS_BLOCK" in reasons else []),
-            dict(dimension="EVIDENCE_REVIEW",status="PASS",reasons=[]),
-            dict(dimension="SPECIALIST_COVERAGE",status="BLOCK" if any(x in reasons for x in ("POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING")) else "PASS",reasons=[x for x in reasons if x in ("POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING")]),
-            dict(dimension="DOMAIN_PREREQUISITES",status="BLOCK" if "ACTUAL_STRUCTURE_CORRELATION_PENDING" in reasons else "PASS",reasons=["ACTUAL_STRUCTURE_CORRELATION_PENDING"] if "ACTUAL_STRUCTURE_CORRELATION_PENDING" in reasons else []),
-            dict(dimension="CASE_QC",status="BLOCK" if reasons else "PASS",reasons=reasons),
-            dict(dimension="ACCEPTANCE_BASIS",status="BLOCK" if reasons else "PASS",reasons=reasons),
-        ],
+        checks=checks,
         blocker_codes=reasons,
         decision="BLOCK" if reasons else "ACCEPTED",
         acceptance_granted=not reasons,
