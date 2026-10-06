@@ -900,3 +900,20 @@ Ruling: роль источника и нормативная цепочка aut
 ❌ PR60 пока draft; GitHub CI browser run нужно считать подтверждённым только после SUCCESS конкретного run. Windows остаётся пунктом 9 и этим Linux Chromium smoke не закрывается.
 
 **Активный инженерный следующий шаг остаётся прежним:** пункт 6 — семантический расчётный комплект и подтверждённая нормативная цепочка. UI/QA поток ведётся параллельно и не повышает acceptance.
+
+
+## 40. Пункт 6 — подэтап 6В: semantic review + normative authority — 06.10.2026
+
+✅ Создан отдельный кандидат поверх 6Б: ветка `feat/domain-semantics-stage6c-20261006`, draft PR61.
+
+✅ Добавлен fail-closed нормативный authority/applicability contract: document/edition/clause/authority/source_ref/applicability_basis/decision. Даже VERIFIED не даёт acceptance; максимум `READY_FOR_EXPERT_APPLICABILITY_REVIEW`, потому что receipt не самоподтверждающийся.
+
+✅ Добавлен semantic review расчётного комплекта по всем 9 ролям. Источник semantic review обязан принадлежать той же binding-role. Полный VERIFIED набор даёт только `READY_FOR_SOLVER_VERIFICATION`; solver execution и actual-structure correlation остаются открыты.
+
+✅ Domain packets обратно совместимы: старые 6Б-пакеты продолжают работать без новых полей; новые authority/semantic поля перепроверяются на fresh report. Общий статус остаётся BLOCK, acceptance=false, FINAL AUDIT NOT_RUN.
+
+✅ Добавлены regression tests: mismatch нормативной identity; authority receipt не снимает applicability BLOCK; все9 semantic roles не снимают solver BLOCK; cross-role source borrowing отклоняется.
+
+❌ Пункт6 всё ещё не завершён. Не выполнены: внешний/независимый authority verification конкретной нормы, native LIR/SCAD semantic decoder, solver execution receipt, проверка results/logs и сопоставление с фактической конструкцией.
+
+Следующий подэтап пункта6: воспроизводимый solver/input route и реальный parser семантики экспортируемого расчётного комплекта. Windows остаётся пунктом9.
