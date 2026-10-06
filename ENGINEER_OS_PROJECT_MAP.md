@@ -1083,3 +1083,62 @@ SHA256 обоих .lir совпали с ранее проверенными и�
 **План:** пункт 7 ✅. Пункт 8 FINAL AUDIT можно проектировать/проверять дальше,
 но положительный FINAL AUDIT/ACCEPTED невозможен, пока реальные BLOCK пункта 6
 не будут закрыты.
+
+
+## 46. Пункт 8 — FINAL AUDIT / acceptance — ЗАКРЫТ ТЕХНИЧЕСКИ — 07.10.2026
+
+Создана ветка `feat/final-audit-stage8-20261007`, draft PR66 поверх завершённого Stage 7.
+
+✅ Реализована append-only история `final_audits` в локальной SQLite.
+
+✅ FINAL AUDIT привязан к точному текущему Stage-7 case ID/SHA/revision и проверяет восемь обязательных измерений:
+CASE_FRESHNESS, SOURCE_IDENTITY, TZ_TRACEABILITY, EVIDENCE_REVIEW,
+SPECIALIST_COVERAGE, DOMAIN_PREREQUISITES, CASE_QC, ACCEPTANCE_BASIS.
+
+✅ Решение вычисляется детерминированно: только `ACCEPTED` или `BLOCK`. Ручного override ACCEPTED нет.
+
+✅ Acceptance certificate создаётся только для свежего чистого ACCEPTED audit.
+
+✅ Изменение Stage-7 case после аудита делает старый audit stale; его effective decision становится BLOCK и acceptance=false.
+
+✅ Stage-7 clean case теперь может получить `READY_FOR_FINAL_AUDIT`, но это не ACCEPTED.
+
+✅ Добавлен `LocalFinalAuditAcceptanceGate`, который принимает только свежий текущий ACCEPTED audit, принадлежащий тому же `CORE_RUN task_id`. Audit другого кейса/задачи не может быть переиспользован.
+
+✅ Существующий production `SupabaseAcceptanceGate` не удалён. Local FINAL AUDIT — отдельный auditable gate; production может дополнительно требовать Supabase.
+
+✅ Добавлен защищённый API `GET/POST /api/sessions/{sid}/final-audit` и UI пункта 8.
+
+✅ Добавлены unit/HTTP/DOM/offline regression tests. Финальный PR run 37538061240 на head
+`ea8f8cb03fccd8f612a242e6ce5e9d944a7ea52a` — SUCCESS:
+468 Python tests PASS, compile PASS, actual HTTP/DOM PASS.
+
+✅ Реальный FINAL AUDIT выполнен над сохранённым Stage-7 snapshot объекта «БЦ, ул. Набережная, 28А».
+
+Фактический результат:
+- `final_audit=COMPLETED`;
+- `decision=BLOCK`;
+- `acceptance_granted=false`;
+- `engineering_verified=false`;
+- audit SHA256:
+  `46d1454834921437a1d1e27a427bebecfcc68106c40d823a6845c8e80c7bf6e4`.
+
+Сохранён QA snapshot:
+`docs/qa/2026-10-07-stage8-naberezhnaya-final-audit.json`.
+
+FINAL AUDIT сохранил upstream BLOCK и дополнительно не выдумал отсутствующие audit dimensions:
+- ACTUAL_STRUCTURE_CORRELATION_PENDING;
+- POINT6_NORMATIVE_DECISION_PENDING;
+- POINT6_SOLVER_DECISION_PENDING;
+- V4_DOCUMENT_COMPLETENESS_BLOCK;
+- TZ_TRACEABILITY_NOT_RECORDED;
+- EVIDENCE_REVIEW_NOT_RECORDED;
+- SPECIALIST_COVERAGE_NOT_RECORDED;
+- DOMAIN_PREREQUISITES_NOT_RECORDED;
+- CASE_QC_NOT_RECORDED;
+- CASE_ENGINEERING_STATUS_NOT_READY.
+
+**Итог:** пункт 8 как механизм FINAL AUDIT/acceptance технически завершён ✅.
+Реальный объект не ACCEPTED — это корректный результат аудита, а не незавершённость Stage 8.
+
+Следующий плановый пункт: 9 — финальная Windows-проверка/запуск. Положительный ACCEPTED реального объекта возможен только после возврата и фактического закрытия BLOCK пункта 6/V4.
