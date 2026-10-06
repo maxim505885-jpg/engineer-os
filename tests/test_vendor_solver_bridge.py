@@ -92,6 +92,19 @@ class SolverBridgeTests(unittest.TestCase):
                     solver_name='TEST',solver_version='1',timeout_seconds=1,
                 ))
 
+    def test_zero_exit_without_expected_output_fails_closed(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td).resolve()
+            inp=root/'input';log=root/'solver.log';script=root/'solver.py';out=root/'missing.out'
+            inp.write_bytes(b'x')
+            script.write_text("print('no output produced')\n",encoding='utf-8')
+            with self.assertRaises(RuntimeError):
+                execute_solver(SolverCommand(
+                    executable=str(Path(sys.executable).resolve()),args=(str(script),),cwd=str(root),
+                    input_path=str(inp),output_path=str(out),log_path=str(log),
+                    solver_name='CONTROLLED_TEST_SOLVER',solver_version='1',timeout_seconds=30,
+                ))
+
 
 if __name__=='__main__':
     unittest.main()
