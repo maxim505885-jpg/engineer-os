@@ -1142,3 +1142,337 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 Реальный объект не ACCEPTED — это корректный результат аудита, а не незавершённость Stage 8.
 
 Следующий плановый пункт: 9 — финальная Windows-проверка/запуск. Положительный ACCEPTED реального объекта возможен только после возврата и фактического закрытия BLOCK пункта 6/V4.
+
+
+## 47. MASTER PLAN ДО 100% — актуальный план завершения ENGINEER OS — 07.10.2026
+
+**Этот раздел является текущим главным планом проекта и имеет приоритет над более ранними промежуточными статусами в этой карте.**
+Старые разделы сохраняются как история разработки. Новый чат обязан начинать работу с разделов 47–48 и не возвращать проект к старому состоянию.
+
+### Правило работы по плану
+
+После каждого рабочего прохода обязательно писать и фиксировать в этой карте:
+
+- ✅ что полностью выполнено и фактически проверено;
+- 🟡 что реализовано программно, но требует реального запуска/внешнего подтверждения;
+- ❌ что ещё не выполнено;
+- **Следующий активный пункт: №N — название**;
+- branch / PR / head SHA / CI run, если изменялся код;
+- реальные BLOCK/UNCERTAINTY нельзя снимать ради продвижения плана.
+
+**100% проекта означает не количество написанного кода, а выполнение всех критериев MASTER PLAN и финальный воспроизводимый релиз.**
+
+### Текущее состояние
+
+| № | Этап | Статус | Критерий завершения |
+|---|---|---|---|
+| 1 | Единый integration candidate | ✅ | локальный инженерный контур собран |
+| 2 | Реальная проверка OCR/model quality | ✅ | качество измерено fail-closed на реальных примерах |
+| 3 | Large-document resume/recovery | ✅ | checkpoints/identity/retry/budgets работают |
+| 4 | DOCX/XLSX/DOC | ✅ | форматы подключены с provenance |
+| 5 | ТЗ → evidence → assessments | ✅ | versioned requirements и source-bound review работают |
+| 6 | Реальная нормативная + расчётная верификация | 🟡 | software gates готовы; реальные norm/LIRA/SCAD decisions ещё не закрыты |
+| 7 | Полный реальный инженерный case workflow | ✅ | Stage-7 real case выполнен воспроизводимо |
+| 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
+| 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
+| 10 | Release consolidation / единый source of truth | ❌ | stacked PR собраны в один release-candidate и затем проверенный main |
+| 11 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
+| 12 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
+| 13 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/12 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
+| 14 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
+| 15 | Report Generator | ❌ | evidence-bound DOCX/PDF выпуск с таблицами/рисунками/выводами и FINAL AUDIT |
+| 16 | CAD/DWG Agent | ❌ | безопасный DWG/DXF workflow: import/read/review/edit/export/verification |
+| 17 | Multi-AI connector | ❌ | одинаковые инженерные gates для локального и optional external providers; платные провайдеры не обязательны |
+| 18 | v1.0 FINAL RELEASE AUDIT | ❌ | clean install/release candidate/backup/restore/Windows/real accepted case/docs/version tag полностью воспроизводимы |
+
+---
+
+### №9 — Windows one-click runtime — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+
+**Почему сейчас:** код уже подготовлен и это самый дешёвый способ обнаружить реальные Windows/runtime проблемы до дальнейшего расширения системы.
+
+Текущий кандидат:
+- branch: `feat/windows-one-click-stage9-20261007`;
+- PR67;
+- head: `510d3b785ec44999b0d8793b655be6f2f3cc000c`;
+- PR mergeable;
+- push run 37540039590 SUCCESS;
+- PR run 37540067054 SUCCESS;
+- 473 Python tests PASS;
+- PowerShell syntax PASS;
+- compile PASS;
+- actual HTTP/DOM PASS.
+
+Уже автоматизировано:
+- `.venv` create/reuse;
+- dependency fingerprint;
+- Ollama start/reuse;
+- qwen3:8b presence/pull;
+- Open WebUI detection/reuse/start when available;
+- Drive/local env load without printing secrets;
+- ENGINEER OS + built-in worker background start;
+- readiness;
+- browser auto-open;
+- duplicate-process protection;
+- logs/startup-state;
+- safe stop helper.
+
+Чтобы поставить №9 ✅, выполнить на реальном Windows:
+1. cold start двойным кликом `Start_ENGINEER_OS.cmd`;
+2. browser opens automatically;
+3. Ollama/model ready;
+4. Open WebUI reused/started if installed;
+5. ENGINEER OS + worker ready;
+6. повторный двойной клик не создаёт дубли;
+7. закрыть/запустить приложение повторно;
+8. reboot Windows → one-click start;
+9. история/SQLite/files/reviews/case/audit сохранены;
+10. реальные PDF/DOC/DOCX/XLSX/LIR принимаются;
+11. Drive import проверен при наличии OAuth;
+12. CORE_RUN → Stage7 → FINAL AUDIT проходит с ожидаемым fail-closed результатом;
+13. кириллица/пробелы/длинные пути проверены;
+14. логи не содержат secrets;
+15. stale lock/process отсутствует после restart.
+
+---
+
+### №10 — Release consolidation / единый source of truth
+
+**Проблема:** рабочая версия сейчас живёт в stacked PR, а `main` значительно старее. Текущий Stage-9 head примерно на 308 commits впереди main и затрагивает около 280 файлов.
+
+Сделать:
+1. создать `integration/release-candidate-v1` от полного проверенного Stage-9 tree;
+2. проверить ancestry/trees всех нужных PR #38–#67;
+3. убедиться, что боковые полезные изменения не потеряны;
+4. вернуть настоящий Playwright/Chromium gate из UI/QA stream;
+5. удалить только реально obsolete/dead compatibility paths после проверки;
+6. полный CI на release candidate;
+7. clean checkout smoke;
+8. после №6/№12 и release criteria — merge в `main`;
+9. закрыть/архивировать старые stacked draft PR с документированным superseded-by.
+
+Критерий ✅: один официальный reproducible branch/main содержит весь актуальный продукт.
+
+---
+
+### №11 — Reliability / Backup / Restore / Browser Gate
+
+Сделать:
+- `Backup_ENGINEER_OS.cmd`;
+- `Restore_ENGINEER_OS.cmd`;
+- backup SQLite + originals + evidence + reviews + requirements + domain packets + Stage7 + FINAL AUDIT + non-secret config;
+- manifest SHA256 и проверка backup integrity;
+- restore только после validation;
+- real Chromium/Playwright CI gate;
+- crash/restart test;
+- stale lock recovery;
+- disk-full/partial-write handling для критичных записей;
+- backup before schema migration;
+- restore test на отдельном data-dir.
+
+Критерий ✅: потеря процесса/обновление/backup+restore не теряют проект и не создают ложный ACCEPTED.
+
+---
+
+### №12 — Document Intelligence production completeness
+
+Не ставить целью «сделать любой OCR PASS». Цель — универсальный воспроизводимый workflow.
+
+Сделать:
+- Windows-compatible OCR environment/service;
+- on-demand запуск OCR, а не постоянное потребление RAM;
+- one-click supervisor умеет обнаружить OCR capability;
+- сложные raster/mixed tables;
+- graphics/legends;
+- coverage/completeness report;
+- visual review queue;
+- source coordinates/provenance;
+- large-document resume;
+- представительские real-document fixtures;
+- V4 11 BLOCK разобрать как реальный regression corpus;
+- проверить, можно ли снять BLOCK доказательствами; если нельзя — BLOCK остаётся.
+
+Критерий ✅: пользователь загружает документ один раз, система сама выбирает native/OCR/review route и честно выдаёт доказуемую completeness state.
+
+---
+
+### №6 — Возврат и фактическое закрытие инженерных specialist gates
+
+После Windows/release foundations вернуться к пункту6.
+
+Нормативная часть:
+- authoritative source нужной редакции;
+- source SHA;
+- authority verification;
+- scope/applicability;
+- exact clause/requirement;
+- evidence-bound actual condition;
+- expert engineering decision.
+
+LIRA/SCAD:
+- конкретная установленная версия пользователя;
+- документированный export/API snapshot;
+- geometry;
+- materials/sections;
+- loads/combinations;
+- supports/releases;
+- units;
+- solver executable/version/command identity;
+- реальный solver run;
+- output/log receipt;
+- result semantic verification;
+- actual-structure correlation.
+
+Критерий ✅: реальный normative + calculation packet получает `READY_FOR_ENGINEERING_DECISION` на фактических проверенных данных, а инженерное решение закрывает prerequisites без synthetic substitutions.
+
+---
+
+### №13 — Повтор реального кейса после закрытия BLOCK
+
+После №6 и №12:
+1. повторить Stage7 на «Набережная 28А» либо на другом полностью подтверждаемом объекте;
+2. все source identities/reviews fresh;
+3. requirements/evidence/domain/specialists/QC complete;
+4. Stage8 FINAL AUDIT повторить;
+5. acceptance только если действительно нет BLOCK/ERROR/недопустимой UNCERTAINTY.
+
+Критерий ✅: существует минимум один **реальный** ACCEPTED engineering case с полной audit trail. Если реальный объект объективно не может быть ACCEPTED из-за недостатка исходных данных, использовать отдельный реальный полностью подтверждаемый case; нельзя искусственно снимать BLOCK.
+
+---
+
+### №14 — Confirmed engineering memory
+
+Текущая memory boundary безопасна, но read-only/contextual.
+
+Сделать:
+- запись только из ACCEPTED audit/certificate;
+- project/object scoping;
+- source refs + case/audit SHA;
+- immutable versions;
+- recall;
+- remembered fact всегда NOT_EVIDENCE в новой задаче до повторной source verification;
+- delete/export/backup;
+- защита от cross-project leakage;
+- тест, что BLOCK/UNCERTAINTY никогда не обучают confirmed memory.
+
+Критерий ✅: система действительно накапливает подтверждённый инженерный опыт, не превращая память в доказательство.
+
+---
+
+### №15 — Report Generator
+
+Сделать production workflow:
+`accepted evidence + calculations + normative decisions → structured report → DOCX/PDF → review → FINAL AUDIT`.
+
+Обязательно:
+- traceable sections;
+- source/evidence IDs;
+- таблицы;
+- изображения;
+- conclusions;
+- normative references;
+- templates;
+- no invented measurements/defects;
+- revision history;
+- compare generated report against ТЗ;
+- export DOCX/PDF.
+
+Критерий ✅: готовый технический документ воспроизводимо формируется из подтверждённых данных и не превышает evidence.
+
+---
+
+### №16 — CAD/DWG Agent
+
+Текущий CAD/DWG функционал практически не реализован, хотя он входит в исходную концепцию.
+
+Сделать отдельным fail-closed контуром:
+- DWG/DXF intake и identity;
+- безопасный конвертер/reader;
+- layers/blocks/text/dimensions/entities inventory;
+- связь графики с объектом/evidence;
+- controlled edits;
+- before/after diff;
+- export;
+- human review;
+- никаких изменений оригинала без отдельной derived copy.
+
+Критерий ✅: один реальный CAD case проходит read → review → controlled edit → export → verification.
+
+---
+
+### №17 — Multi-AI connector
+
+Не делать обязательной зависимостью v1 local mode.
+
+Сделать:
+- единый provider contract;
+- Ollama остаётся default/free;
+- Open WebUI optional;
+- external providers only when user configures them;
+- одинаковые source/evidence/acceptance gates независимо от модели;
+- provider identity/version in receipts;
+- no provider may bypass FINAL AUDIT.
+
+Критерий ✅: переключение провайдера меняет только inference runtime, но не инженерную доказательность.
+
+---
+
+### №18 — v1.0 FINAL RELEASE AUDIT
+
+Финальная проверка 100%:
+- clean checkout;
+- one-click Windows install/start;
+- offline/local mode;
+- dependency locks;
+- real Chromium gate;
+- backup/restore;
+- migration/upgrade;
+- representative PDF/DOC/DOCX/XLSX/LIR;
+- Drive;
+- accepted engineering case;
+- confirmed memory;
+- report generation;
+- CAD case;
+- optional multi-AI;
+- security/secrets review;
+- docs;
+- release notes;
+- version/tag;
+- main matches release tree;
+- no open critical/high defects;
+- FINAL RELEASE AUDIT record.
+
+**Только после выполнения №18 проект считать 100% завершённым по полной исходной концепции.**
+
+---
+
+## 48. Инструкция новому чату — как продолжать без потери контекста
+
+Новый чат должен:
+
+1. Прочитать `ENGINEER_OS_PROJECT_MAP.md`, особенно разделы **47–48**.
+2. Не начинать ENGINEER OS заново и не предлагать новую архитектуру без необходимости.
+3. Считать Stage-9 head/последующий release-candidate рабочим источником, а не старый `main`, пока карта явно не зафиксирует merge.
+4. Всегда проверять фактический GitHub head/PR/CI перед утверждением статуса.
+5. Сохранять fail-closed: BLOCK/UNCERTAINTY не снимать ради прогресса.
+6. После каждого прохода обновлять **этот же файл** и писать:
+   - ✅ выполнено;
+   - 🟡 требуется внешняя/Windows/инженерная проверка;
+   - ❌ осталось;
+   - **Следующий активный пункт: №N — название**.
+7. Не переходить к следующему пункту, если текущий имеет незакрытые software-defects, кроме явно зафиксированной зависимости/отложенного внешнего подтверждения.
+8. Не считать CI synthetic tests доказательством инженерной правильности реального объекта.
+9. Не считать наличие LIR/PDF/DOCX доказательством семантики или completeness.
+10. Не выдавать ACCEPTED без свежего FINAL AUDIT и всех upstream gates.
+11. Не возвращать обязательные платные API в local-first путь.
+12. Не держать тяжёлые OCR/solver процессы постоянно в RAM — запускать по требованию.
+13. При конфликте между ранним разделом карты и разделом47/48 использовать **47/48 как актуальную истину**, затем проверить GitHub.
+14. После значимого изменения обязательно записать branch/PR/head/CI и обновить master status table.
+
+### Текущий следующий активный пункт
+
+**№9 — фактическая Windows one-click verification на компьютере пользователя.**
+
+После №9:
+**№10 — release consolidation**, затем **№11 reliability**, **№12 Document Intelligence completeness**, затем возврат к **№6 real engineering verification**, после чего №13–18.
+
