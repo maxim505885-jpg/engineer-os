@@ -5,3 +5,5 @@
 #source-viewer{padding:10px;border:1px solid #d9e2d5;margin:12px 0;border-radius:8px;font-size:11px;overflow-wrap:anywhere}#source-image{width:100%;height:auto;background:white}#source-viewer[hidden]{display:none}
 
 #review-panel{padding:12px;border:1px solid #d9e2d5;border-radius:8px;margin:12px 0;background:white;overflow-wrap:anywhere}#review-panel form{display:grid;gap:8px}#review-panel textarea,#review-panel input,#review-panel select{border:1px solid #d9e2d5;width:100%;padding:6px;font:inherit}#review-panel[hidden]{display:none}.review-history{margin-top:10px;font-size:11px;overflow-wrap:anywhere}
+
+#core-checks{margin:8px 0}#core-checks label{display:inline-flex;gap:6px;margin:8px 12px 8px 0}.role-result{border-top:1px solid var(--line,#ddd);padding-top:12px;margin-top:12px}.role-result blockquote{margin:8px 0;padding-left:12px;border-left:2px solid #a0a0a0}

@@ -7,14 +7,18 @@ from engineering.core.engineer_core import EngineerCore
 LABELS={'report-audit-agent':'Проверка отчёта','normative-agent':'Нормативная проверка','inspection-agent':'Обследование','calculation-agent':'Проверка расчёта','final-audit-agent':'FINAL AUDIT'}
 
 
-def prepare(store,job):
-    files=[store.get_file(fid) for fid in job['file_ids']]
-    if any(f['session_id']!=job['session_id'] for f in files):raise ValueError('Attachment isolation failure')
+def verify_originals(files):
     for f in files:
         path=Path(f['path'])
         if path.stat().st_size!=f['size']:raise ValueError('Original identity check failed')
         with path.open('rb') as stream:
             if hashlib.file_digest(stream,'sha256').hexdigest()!=f['sha256']:raise ValueError('Original identity check failed')
+
+
+def prepare(store,job):
+    files=[store.get_file(fid) for fid in job['file_ids']]
+    if any(f['session_id']!=job['session_id'] for f in files):raise ValueError('Attachment isolation failure')
+    verify_originals(files)
     materials=tuple(MaterialRef(f['id'],'UNVERIFIED_SOURCE',f['name']) for f in files)
     task=EngineerTask(job['id'],job['prompt'],materials,tuple(job['requested_checks']))
     core=EngineerCore();state=core.plan(task)

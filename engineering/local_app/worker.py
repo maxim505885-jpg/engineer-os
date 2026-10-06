@@ -11,6 +11,12 @@ class Worker:
         job=self.store.claim()
         if job is None:return False
         try:
+            if job['mode']=='CORE_RUN':
+                from .core_run import execute
+                result=execute(self.store,job,self.model,self.stop_event)
+                if self.stop_event.is_set():self.store.fail(job['id'],'Execution interrupted; completed role drafts were preserved.')
+                else:self.store.finish(job['id'],result)
+                return True
             if job['mode']=='CORE_PLAN':
                 from .core_plan import prepare
                 result=prepare(self.store,job)

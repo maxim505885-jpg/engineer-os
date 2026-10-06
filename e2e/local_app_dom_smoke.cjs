@@ -6,7 +6,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-dom-'));
  const requests=[],errors=[];let child,dom;
- const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{requests.push(JSON.parse(raw));res.end(JSON.stringify({choices:[{message:{content:'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>'}}]}));});});
+ const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);requests.push(payload);const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
  try{
   await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
@@ -91,7 +91,24 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
   assert.equal(doc.querySelector('#review-panel').hidden,true);
   assert.equal(doc.querySelector('#review-note').value,'');
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation'],requests:requests.length}));
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.file input'));
+  assert.ok(doc.querySelector('#task-mode option[value="CORE_RUN"]'),'Profile execution mode missing');
+  doc.querySelector('#task-mode').value='CORE_RUN';doc.querySelector('#task-mode').dispatchEvent(new dom.window.Event('change'));
+  assert.ok(doc.querySelector('#core-checks'),'Selectable specialist checks missing');
+  doc.querySelector('.file input').click();doc.querySelector('#prompt').value='Предварительно проверить отчёт и нормы';
+  doc.querySelector('#composer').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.core-run')&&!doc.querySelector('#send').disabled);
+  assert.equal(requests.length,4,'Three specialist calls should follow one chat call');
+  assert.ok(doc.querySelector('.core-run').textContent.includes('UNCERTAINTY'));
+  assert.ok(doc.querySelector('.core-run').textContent.includes('Черновик'));
+  assert.equal(dom.window.coreInjected,undefined);
+  dom.window.close();dom=await open();doc=dom.window.document;
+  await until(()=>doc.querySelectorAll('nav .session').length===2);
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.core-run'));
+  assert.ok(doc.querySelector('.core-run').textContent.includes('NOT_RUN'));
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

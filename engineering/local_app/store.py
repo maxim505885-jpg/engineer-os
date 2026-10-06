@@ -130,12 +130,12 @@ class Store:
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
-        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN'}:raise ValueError('Unknown task mode')
-        checks=requested_checks if requested_checks is not None else (['report','normative'] if mode=='CORE_PLAN' else [])
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN'}:raise ValueError('Unknown task mode')
+        checks=requested_checks if requested_checks is not None else (['report','normative'] if mode!='CHAT' else [])
         from engineering.core.engineer_core import CHECK_REGISTRY
         if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
-        if mode=='CHAT' and checks:raise ValueError('Engineering checks require CORE_PLAN')
-        if mode=='CORE_PLAN' and (not file_ids or not checks):raise ValueError('ТЗ, selected originals and checks required for CORE_PLAN')
+        if mode=='CHAT' and checks:raise ValueError('Engineering checks require a CORE mode')
+        if mode!='CHAT' and (not file_ids or not checks):raise ValueError('ТЗ, selected originals and checks required for CORE')
         for value in file_ids:identifier(value)
         now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now,mode=mode,requested_checks=json.dumps(checks))
         try:
@@ -157,6 +157,13 @@ class Store:
             if r is None:return None
             db.execute("UPDATE jobs SET state='RUNNING',updated=? WHERE id=?",(time.time(),r['id']))
             return self.job_dict(dict(r,state='RUNNING'))
+
+    def checkpoint(self,job_id,result):
+        identifier(job_id)
+        if not isinstance(result,dict) or not isinstance(result.get('text'),str):raise ValueError('Invalid progress result')
+        result=dict(result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
+        with self.connection() as db:
+            if db.execute("UPDATE jobs SET result=?,updated=? WHERE id=? AND state='RUNNING'",(json.dumps(result,ensure_ascii=False),time.time(),job_id)).rowcount!=1:raise ValueError('Task is not running')
 
     def finish(self,job_id,result):
         identifier(job_id)

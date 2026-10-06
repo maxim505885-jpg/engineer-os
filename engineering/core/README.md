@@ -36,7 +36,10 @@ data. Prior results include failed specialists and malformed-output failures,
 so FINAL AUDIT cannot silently lose the latest runtime error.
 
 Current local app mode CORE_PLAN only prepares and persists the plan. It does
-not execute specialists or grant engineering acceptance. Live model execution,
+not execute specialists or grant engineering acceptance. CORE_RUN executes
+preliminary drafts via the local model and persists per-role errors/results,
+without accepted evidence or formal FINAL AUDIT. See
+[local execution contract](../../docs/development/local-core-run.md). Live model execution,
 Windows transport and a complete accepted engineering case remain unverified.
 
 See [core audit](../../docs/development/engineer-core-audit-2026-10-06.md) for

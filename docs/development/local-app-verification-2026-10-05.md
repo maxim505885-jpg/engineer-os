@@ -49,3 +49,14 @@ UNIQUE вызывает существующие DI evidence_candidates и valid
 Проверяются неизменяемая история/повторное открытие, revision conflict, invalid/empty fields, чужой session/изменённый original, запрет подтверждения unchecked PDF, source-only CORE context. HTTP проверяет token, 409 при stale revision, игнорирование acceptance/actor_verified из body. Независимое ревью: 18 review/HTTP тестов PASS; 8 одновременных revision0 запросов сохранили ровно1 event, остальные7 ReviewConflict. Critical/Important не найдено.
 
 Это SOURCE_REVIEW_ONLY с подписью, указанной пользователем. Инженерное содержание, классы данных, полнота, нормы и расчёты не приняты; UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN сохраняются. CORE делает versioned snapshot решения по выбранным файлам, до100 кандидатов с explicit truncation; специалистов не исполняет. Windows/live qwen3/realbrowser остаются NOT_RUN, PDF V4 не перепроверялся.
+
+
+## 06.10.2026 — предварительное исполнение профильных ролей CORE
+
+CORE_RUN связан с LocalModel/worker/SQLite/UI. Выбранные роли выполняются последовательно, затем preliminary audit. Размер/SHA выбранных оригиналов проверяются до и после каждого вызова; изменения фатальны. Per-role checkpoints сохраняют результаты при сбое/прерывании. Strict JSON разрешает только UNCERTAINTY/BLOCK, известные source IDs и ограниченные поля; принимающие статусы и proof grants не допускаются. source context/review events и усечение записываются; ошибки инструкции/модели/формата видны последующим ролям.
+
+**280 Python PASS, 4 Node PASS, expanded HTTP/DOM PASS**, compileall/JS syntax/diff-check PASS. Добавлены 9 CORE_RUN регрессий и actual loopback HTTP тест. До реализации CORE_RUN все 8 первоначальных регрессий отклонялись отсутствующим режимом; DOM показал missing mode. После реализации последовательность/ТЗ/история, ошибочное acceptance, чужие ссылки, сбои, изменение оригинала до/во время вызова, прерывание и бюджет контекста PASS. Независимое ревью выявило необработанное отсутствие skill; новый тест сначала FAIL (1 вместо 2 model calls), после исправления role ERROR сохранён и audit продолжился. Повторное ревью: оставшихся actionable findings нет, все 9 целевых тестов PASS.
+
+DOM запускает настоящий launcher/worker и синтетический model protocol: 4 requests всего (1 чат +3 роли); проверяет выбор режима/ролей, инертную разметку, историю после reload. Это jsdom, не настоящий rendering/CSP. В draft results evidence_ids=[], PRELIMINARY_ANALYSIS, acceptance=false; формальный FINAL AUDIT NOT_RUN. SUCCEEDED относится к сохранению результата обработки и не скрывает core_run.status ERROR/BLOCK.
+
+Live Ollama/qwen3, Windows и принятый инженерный кейс NOT_RUN; Windows/live model последние по указанию пользователя. PDF V4 не менялся и не перепроверялся: прежний 523 UNCERTAINTY /11 BLOCK сохраняется.

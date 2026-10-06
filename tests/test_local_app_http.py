@@ -26,7 +26,8 @@ class LocalHTTPTests(unittest.TestCase):
                 self.send_response(200);self.end_headers();self.wfile.write(b'{"data":[{"id":"qwen3:8b"}]}')
             def do_POST(self):
                 owner.requests.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
-                self.send_response(200);self.end_headers();self.wfile.write(json.dumps({'choices':[{'message':{'content':'Нужна проверка источника'}}]},ensure_ascii=False).encode())
+                content=getattr(owner,'core_reply','Нужна проверка источника')
+                self.send_response(200);self.end_headers();self.wfile.write(json.dumps({'choices':[{'message':{'content':content}}]},ensure_ascii=False).encode())
         self.fake=ThreadingHTTPServer(('127.0.0.1',0),ModelHandler)
         self.fake_thread=threading.Thread(target=self.fake.serve_forever,daemon=True);self.fake_thread.start()
         self.model=LocalModel(f'http://127.0.0.1:{self.fake.server_port}','qwen3:8b')
@@ -82,6 +83,26 @@ class LocalHTTPTests(unittest.TestCase):
         for mode in ([],{},None,3):
             self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':mode})[0],400)
         self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':'SHELL'})[0],400)
+
+    def test_profile_execution_uses_local_protocol_and_durable_results(self):
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.txt',b'height 4m',{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw)
+        self.core_reply=json.dumps(dict(status='UNCERTAINTY',summary='Unverified specialist draft',observations=[],limitations=['Measurements not checked']))
+        payload=dict(prompt='Review only the roof',file_ids=[f['id']],mode='CORE_RUN',requested_checks=['report','normative'])
+        path=f'/api/sessions/{session}/jobs'
+        self.assertEqual(self.request('POST',path,payload,token=False)[0],403)
+        self.assertEqual(self.request('POST',path,payload)[0],202)
+        Worker(self.store,self.model).run_once()
+        run=json.loads(self.request('GET',f'/api/sessions/{session}')[2])['jobs'][0]['result']
+        self.assertEqual(len(self.requests),3)
+        self.assertTrue(run['core_run']['analysis_complete'])
+        self.assertEqual(run['core_run']['results'][-1]['agent'],'final-audit-agent')
+        self.assertTrue(all(r['execution']=='COMPLETED' for r in run['core_run']['results']))
+        self.assertFalse(run['acceptance_granted']);self.assertEqual(run['final_audit'],'NOT_RUN')
+        self.assertIn('Review only the roof',str(self.requests[-1]))
+        self.assertEqual(type(self.store)(Path(self.tmp.name)).snapshot(session)['jobs'][0]['result'],run)
 
     def test_candidate_api_preserves_source_binding_and_rejects_forgery(self):
         session=self.create()
