@@ -98,3 +98,17 @@ CORE_PLAN повторно проверяет исходные байты и в�
 Основной путь — выбрать прикреплённый PDF и отправить задачу. В карточке задачи видны прогресс автоматической обработки и «Результаты по частям». Отдельные действия native без OCR и Docling находятся в «Дополнительные действия с документом». Они запускают extraction без модели; журнал показывает сохранённый текст страницы. После прерывания отдельной extraction-задачи можно явно продолжить её. Автоматический анализ модели пока не возобновляется: повторная отправка может использовать завершённый extraction journal, но модельные части выполняются заново. Ошибки и BLOCK видимы; завершённый цикл не означает принятый документ.
 
 [Контракт, лимиты, зависимости и проверки extraction](local-document-extraction.md), [автоматический анализ](automatic-document-analysis.md). Docling здесь пока проверен только через synthetic converter; live OCR/runtime не установлен. Page journals и модельные черновики сохраняются отдельно. Windows последними.
+
+
+## Stage 8 FINAL AUDIT
+
+The local cabinet now has a separate deterministic FINAL AUDIT route over the
+current Stage-7 real-case snapshot. It is append-only, case-identity-bound and
+fails closed if the audited case becomes stale. The preliminary model
+`final-audit-agent` inside CORE_RUN is not this formal audit.
+
+Endpoint: `GET/POST /api/sessions/{sid}/final-audit`.
+
+A clean audit can create an acceptance certificate; any unresolved upstream
+BLOCK keeps acceptance=false. The real Naberezhnaya 28A audit currently
+completes with BLOCK, not ACCEPTED.
