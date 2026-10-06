@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Следующее конкретное действие:** подключить выбранные страницы из нового extraction journal к CHAT/CORE_RUN как непроверенный контекст с job/page/source SHA, явным бюджетом и раскрытием пропущенного содержания. Фоновое постраничное извлечение и explicit resume реализованы PR48: native проверен на настоящем 23-page PDF; Docling подключён через существующий adapter, **live Docling/OCR NOT_RUN — зависимости в этом окружении отсутствуют**. Новый extraction пока не заменяет автоматически preview/CORE context. Активная ветка `feat/local-document-extraction-20261006`, checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`. **313 Python +4 Node и два actual HTTP/jsdom сценария PASS**. Windows/живая qwen3 — последними; live Google OAuth/real-browser layout/CSP NOT_RUN. PDF V4 не перепроверялся и остаётся 523 UNCERTAINTY/11 BLOCK.
+**Текущий результат:** прикрепить PDF → отправить задачу → автоматическая постраничная обработка и предварительный анализ CHAT/CORE_RUN, без отдельного ручного извлечения. Большие документы идут по частям; черновики сохраняются отдельно (раздел 29). [Draft PR49](https://github.com/maxim505885-jpg/engineer-os/pull/49), ветка `feat/automatic-document-analysis-20261006`, checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`. **329 Python +4 Node и два actual HTTP/jsdom сценария PASS**. Native text проверен; live Docling/OCR и qwen3 NOT_RUN. Следующий этап: живой локальный OCR/модель на представительном документе, затем привязка предметных данных к источникам и gates. Windows — последними. PDF V4 остаётся 523 UNCERTAINTY/11 BLOCK, acceptance=false.
 
 ## 2. Зачем создаём систему
 
@@ -503,3 +503,28 @@ Expanded DOM запускает actual launcher/worker, native action/journal/sa
 Документы: `docs/development/local-document-extraction.md`, local-app.md/verification journal, design/plan 2026-10-06-local-document-extraction. Код extraction.py и Store/Worker/API/UI; тест `tests/test_local_document_extraction.py`, HTTP/DOM дополнены.
 
 Следующий этап — явный выбор journal pages для непроверенного контекста CHAT/CORE с traceability/budgets, затем source-binding/gates предметных данных. Реальный Docling runtime потребует установленного optional набора и весов; не выдавать synthetic contract за OCR. Продолжать с PR48 и этой же карты, Windows последними.
+
+
+## 29. Автоматический анализ прикреплённых PDF — 06.10.2026
+
+Пользователь подтвердил единый сценарий: прикрепить документ и отправить задачу; извлечение является внутренней стадией. Предыдущий следующий шаг с ручным выбором journal pages заменён этим требованием.
+
+**Опубликован [draft PR49](https://github.com/maxim505885-jpg/engineer-os/pull/49)** относительно PR48. Ветка `feat/automatic-document-analysis-20261006`; локальный HEAD `478dfe56e27276917f8ed6d305eb178ba8dc40b3`, remote HEAD `22641c3d3dead8f6619fbda2bff2f758705e46bd`. Дерево обоих **`92b593a6c9245725fba621e33431551e46be9c94` совпадает**. 11 файлов, 507 additions/23 deletions. Draft/open/unmerged, main/deployment/Windows не обновлены.
+
+Реализовано:
+
+- CHAT и CORE_RUN автоматически запускают существующий extraction engine для выбранных PDF; CORE_PLAN остаётся без модели. Hidden child jobs не появляются отдельными пользовательскими задачами. Совпадающий завершённый журнал можно использовать повторно после проверки SHA.
+- Все доступные сохранённые страницы, включая страницы после preview20, передаются модели по частям: 6000 text chars, до20 refs, общий лимит2000000 chars. Прежние extraction limits остаются. Достижение общего extraction budget прекращает анализ до модели. Пропуски/пустые/усечённые страницы раскрываются; это не доказанная смысловая полнота.
+- Каждая часть содержит file/source job/page, page-local start/end, batch start/end и segment SHA. Между страницами есть разделители. SHA оригиналов проверяется перед/после каждого вызова модели.
+- SQLite analysis_receipts сохраняет исходные ответы и ошибки отдельно от финальной сводки. Protected GET analysis с offset/limit<=50; чужая сессия/token отклоняются. UI показывает прогресс и «Результаты по частям» инертным текстом. Ручные действия extraction спрятаны в «Дополнительные действия с документом».
+- Для больших документов сводки объединяются парами рекурсивно. До4000 chars каждого черновика входит в summary; полный raw до20000 chars остаётся сохранён. Summary compression раскрывается, окончательная сводка может терять детали.
+- Каждый CORE ответ проверяется прежним JSON contract. BLOCK части сохраняется при последующих ошибках, summary, остановке и checkpoint failure. Receipt и durable BLOCK marker пишутся атомарно. FAILED/INTERRUPTED execution не скрывается. Planned roles начинаются NOT_RUN; первая завершённая роль не объявляет готовность всего анализа.
+- Failure/restart переводит progress в PARTIAL; journals/receipts остаются. Автоматического возобновления модели нет; повторная отправка задачи может повторно использовать завершённое извлечение. Hidden child нельзя public resume.
+
+Ограничения: автоматический полный путь пока **PDF-only**. TXT/MD используют прежний bounded context. Native default читает текст, не сканы/рисунки и не подтверждает структуру таблиц. `ENGINEER_OS_ATTACHMENT_PARSER=docling` выбирает existing optional adapter при установленных dependencies/local artifacts/config; отсутствие setup — FAILED без fallback. **Live Docling/OCR, qwen3, Google OAuth, real-browser layout/CSP и Windows NOT_RUN**. Windows последними.
+
+**329 Python +4 Node PASS**, compileall/JS syntax/diff-check PASS. Actual loopback HTTP/jsdom app и Drive scenarios PASS. 15 новых automatic regressions +HTTP API: page24, multi-batch/receipts/restart, lateCOREpages, bad/blankPDF, mixed native/blank, source mutation, segment mapping, foreign receipt, budget refusal, BLOCK after summary/error/other-role/shutdown/checkpoint failure. Модель synthetic; реальные native PDF. Независимое ревью выявило потерю BLOCK и зависающий active progress; исправлено, финальное ревью без blockers.
+
+Код: `engineering/local_app/automatic_analysis.py`, Store/Worker/core_run/extraction/server/UI; контракт `docs/development/automatic-document-analysis.md`, тесты automatic_document_analysis/local_app_http и DOM. Статус PRELIMINARY_ANALYSIS / NOT_EVIDENCE, FINAL AUDIT NOT_RUN, acceptance=false. V4 не перепроверялся.
+
+Продолжать с PR49. Следующая практическая проверка — representative native/scanned/table PDF на живом локальном OCR и модели, затем предметные source-binding/gates; финальная Windows проверка позже. Не считать завершение очереди инженерным принятием.
