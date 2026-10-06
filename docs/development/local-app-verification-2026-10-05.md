@@ -25,3 +25,11 @@
 238 Python +4 Node PASS; compileall/JS syntax/diff PASS. Новые проверки: сохранение/повторное открытие, ложная цитата, чужой источник, изменение оригинала, точная PDF-страница 21 вне ограниченного preview, недоступный parser, защищённый token API и игнорирование присланного acceptance=true. DOM smoke дополнен созданием кандидата, инертным markup, reload и изоляцией черновика. Все новые функции сначала воспроизведены FAIL.
 
 Независимое ревью воспроизвело сохранение черновика при смене диалога; очищаются quote/statement/page, регрессия FAIL→PASS. Остальных Critical/Important нет; reviewer отдельно проверил 15 evidence/API тестов и DOM. MATCH не утверждает правдивость факта, UNVERIFIED/NOT_CHECKED не поступают в принятую evidence базу. PDF полнота и прежние 11 BLOCK не перепроверялись; Windows/live inference/visual browser остаются NOT_RUN.
+
+## Дополнение 06.10.2026 — происхождение и координаты native PDF цитаты
+
+245 Python +4 Node PASS; DOM smoke и compileall/JS syntax/diff PASS. Проверены одиночная цитата, повторы, многострочный фрагмент, TXT без PDF-координат, page_rotation=90 и восстановление геометрии. Четыре начальные geometry теста сначала FAIL, затем реализация.
+
+Независимое ревью выявило ложное UNIQUE для abcABC/abc (один объединённый bbox case-insensitive поиска) и ababa/aba (перекрытие). Обе регрессии сначала FAIL; теперь учитываются перекрытия и требуется точное равенство native get_textbox найденной области и quote; оба случая AMBIGUOUS и source-binding BLOCK. Остальные Critical/Important не найдены.
+
+UNIQUE вызывает существующие DI evidence_candidates и validate_evidence_candidate на частичном native-quote документе; VALIDATED относится только к source binding. Полнота документа, смысл, классы данных и принятие остаются непроверенными; UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN. OCR и ручное подтверждение geometry не выполнены; Windows/live model/real browser по-прежнему NOT_RUN. PDF V4 не перепроверялся.

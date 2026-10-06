@@ -42,6 +42,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('#evidence-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>doc.querySelector('.evidence-card'));
   assert.ok(doc.querySelector('.evidence-card').textContent.includes('UNVERIFIED'));
+  assert.ok(doc.querySelector('.provenance-status').textContent.includes('неприменимы'),'TXT must not invent PDF geometry');
   assert.equal(dom.window.forged,undefined);
   dom.window.close();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
