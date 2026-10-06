@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–31. Пункт1 — проверенный кандидат PR51 без merge. Пункт2 в работе: живые Qwen/OCR измерены, CORE и табличные таймауты остаются. **Начать с раздела31.** Active checkout engineer-os-local-app, branch fix/live-document-runtime-20261006; localffcdf40/remote901582d, tree2f526825c66fd955022f8af65a2ea90e8047179c, draftPR52. 332Python/4Node PASS. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** девять пунктов, разделы30–32. Пункт1 — проверенный кандидат PR51 без merge. **Пункт2 в работе: успешный живой CORE_RUN и две табличные проверки выполнены; качество OCR и PARSE_FAILED графического листа остаются. Начать с раздела32.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `fix/core-cpu-profile-20261006`; local `d788cbdda3b0645a89cc42d9477e4ac18b35bca5`, remote `1fe8ce024021e784519b7599a196fe77f1edcf70`, одинаковое tree `da3e402a11f4a35821bd8eb81a76e6730d9b7116`, draft PR53 на PR52. 339Python/4Node PASS; CI новой ветки ещё проверить. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -42,7 +42,7 @@ flowchart TD
 | Document Intelligence | `engineering/document_intelligence/`, `scripts/` | Docling, нормализация, provenance, source recovery и реестр; полнота документа не подтверждена |
 | Нормативная проверка | `engineering/normative/verification.py`, `skills/normative-check/` | Структура проверки реализована; проверенных актуальных редакций и полного агента ещё нет |
 | ЛИРА / SCAD | `engineering/calculation/model_intake.py`, `skills/calculation-review/` | Проверка комплекта и идентичности файлов; семантика моделей и solver-run не проверены |
-| Модели | `engineering/model_gateway/openai_compatible.py` | Живая Qwen3-8B CPU: простые native/table/scan CHAT корректны; CORE роли и два табличных запроса достигли wait limit, принятых результатов нет — раздел31 |
+| Модели | `engineering/model_gateway/openai_compatible.py` | Живая Qwen3-8B CPU: CORE_RUN обе роли COMPLETED за220с, реальная native таблица91,64с, damaged-label fixture48,97с; UNCERTAINTY, acceptance=false — раздел32; OCR/графика остаются |
 | Память | `engineering/memory/external_memory.py` | Граница доверия и snapshots; история диалогов/задач нового кабинета сохраняется в SQLite, подтверждённая инженерная память ещё не подключена |
 | Хранилище | `engineering/storage/` | Drive-адаптеры; OAuth пользовательского Windows требует отдельной проверки |
 | База и acceptance | `supabase/migrations/`, Supabase-адаптеры | Миграции и gates есть; наличие облачных функций не означает воспроизводимость backend из Git |
@@ -689,3 +689,25 @@ Expanded DOM запускает actual launcher/worker, native action/journal/sa
 Дальше: пункт2 — Проверить настоящий анализ документов: сначала проверить CPU-профиль/явный thinking control и успешный ограниченный CORE_RUN, затем табличные таймауты и PARSE_FAILED графического листа. reasoning_effort=none в Ollama — гипотеза для следующего bounded test, не испытанное исправление; не увеличивать timeout и не снимать BLOCK без проверки.
 
 ✅ CI PR52 success: https://github.com/maxim505885-jpg/engineer-os/actions/runs/37473429471 (remote901582d, дерево2f526825c66fd955022f8af65a2ea90e8047179c). CI проверяет unit/DOM с synthetic transports, не подменяет вышеописанные live CPU/OCR результаты.
+
+
+
+## 32. Пункт2: успешный реальный CORE_RUN и CPU-профиль — 06.10.2026
+
+**Что изменилось:** добавлен явный `ENGINEER_OS_LOCAL_THINK=false/true` для Ollama native `/api/chat`. Пустое/default/не задано сохраняет прежний маршрут. Open WebUI с явной настройкой и ошибочные значения останавливают запуск. Незавершённый/обрезанный native ответ отвергается; thinking не попадает в ответ. Loopback, запрет redirect/proxy, auth, timeout180с, cap2MiB/32000символов и acceptance gates сохранены.
+
+В начале этого продолжения scratch вернулся к прежнему checkpoint: восстановлены17 файлов точного tree PR52, Ollama и те же официальные Qwen3-8B Q4_K_M веса с проверкой SHA. Это не замена модели меньшей. Linux Python3.12.14/PyMuPDF1.26.6/Pillow12.3.0/Ollama0.35.1 CPU. Alias `engineer-qwen3-8b-q4km:stage2`; num_ctx8192, num_predict1024, num_thread4, temperature0, keep_alive0, одна параллельная задача. Веса: Qwen/Qwen3-8B-GGUF revision `7c41481f57cb95916b40956ab2f0b139b296d974`, SHA256 `d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785`. Docling/ORT заново не запускали.
+
+| Контроль | Факт | Ограничение |
+|---|---|---|
+| Прямой native diagnostic CORE |210,19с; роли104,58/105,57с; thinking_chars0; SUCCEEDED| Проверка протокола, затем выполнен production repeat |
+| Production LocalModel + Store + Worker CORE_RUN |220,19с; report104,79с/final115,36с; обе COMPLETED; UNCERTAINTY, acceptance=false, FINAL AUDIT NOT_RUN| Контрольный PDF:4м/2этажа/кирпич; неизвестный диаметр; предварительное исполнение, не принятый кейс |
+| Реальная таблица V4 оригинал page15 |91,64с;5 ожидаемых значений с единицами; автоматическая batch COMPLETED; UNCERTAINTY| Native текстовый слой, OCR NOT_RUN; снег0,50кПа/ветер0,30кПа/min−30°C/max+40°C/промерзание0,40м; редакции норм не проверены |
+| Повреждённое название «ижете» |48,97с; модель явно отметила неопределённость, не выдумала этажность| Восстановленный текст прежнего OCR, не новый OCR; prompt явно запрещает угадывать |
+| Код |339Python/4Node PASS; compileall/diff PASS; независимый review без actionable findings| Живой прогон отдельно от synthetic HTTP/unit checks; Windows NOT_RUN |
+
+Исходный V4 SHA `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`; derived page15 SHA `3a3813a57b1953ed55b06666057efeb3a6a63a416bba5901a625a49e440a2600`; в одностраничном файле original15 становится derived1. Native и reconstructed-text маршруты отличаются от прошлого Docling прогона: **это не доказательство починки OCR и не сравнение скорости при равных условиях**. Парный OpenAI baseline в этой среде не повторяли, поэтому весь выигрыш времени не приписывать только think=false.
+
+Опубликовано: draft https://github.com/maxim505885-jpg/engineer-os/pull/53, base `fix/live-document-runtime-20261006` / PR52. Remote commit `1fe8ce024021e784519b7599a196fe77f1edcf70`, local `d788cbdda3b0645a89cc42d9477e4ac18b35bca5`, tree идентичен `da3e402a11f4a35821bd8eb81a76e6730d9b7116`. Restore-коммит только локальный; публикация основана на PR52. Main и deploy не изменены. Отчёты: `docs/development/core-cpu-profile-2026-10-06.md`, `docs/qa/2026-10-06-core-cpu-profile.json`; полный реальный исходник/страницы/prompts/веса не опубликованы.
+
+**Дальше — пункт2 «Проверить настоящий анализ документов»:** локализовать PARSE_FAILED графического листа500 и проверить пропуски/подписи OCR в защищённом окружении с отключённой телеметрией; повторить настоящий scanned-table маршрут, сравнить изображение→OCR→ответ. Полное534-страничное покрытие и инженерное принятие не выполнены; stage2 не закрывать. Пункт3 «Довести обработку больших документов» после контроля качества. Windows только пункт9.

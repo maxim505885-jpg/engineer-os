@@ -41,11 +41,16 @@
 Результат: одна воспроизводимая версия, известные зависимости и инструкция; test/CI подтверждены для точного дерева.
 Файлы: scripts/run_local_app.py, Start_ENGINEER_OS.cmd, requirements-pdf-review.txt, requirements-integrations.txt, .github/workflows/core-tests.yml, docs/development/local-app.md.
 
-## 2. Проверить настоящий анализ документов — В РАБОТЕ: живые проверки выполнены, блокеры остаются
+## 2. Проверить настоящий анализ документов — В РАБОТЕ: CORE_RUN и native таблица прошли, OCR/графика остаются
 
 - [ ] Проверить живую локальную модель и OCR на native PDF, скане, таблице и графическом листе.
 - [ ] Сопоставить исходник, извлечение и ответы; записать пропуски, время и память.
 - [ ] Зафиксировать качество на небольшом эталонном наборе, затем проверить реальные документы.
+
+- [x] Завершить bounded живой CORE_RUN через production LocalModel/Worker: обе роли COMPLETED,220,19с, UNCERTAINTY, acceptance=false.
+- [x] Проверить native таблицу настоящего V4 page15: пять значений с единицами,91,64с.
+- [x] Проверить реакцию на повреждённое имя в recorded OCR text fixture: явная неопределённость,48,97с; не новый OCR.
+- [ ] Локализовать graphical PARSE_FAILED и повторить настоящий scanned-table OCR маршрут.
 
 Результат: известно, что прочитано/пропущено и какие утверждения модели подтверждаются источником.
 Файлы: engineering/local_app/model.py, extraction.py, automatic_analysis.py; engineering/document_intelligence/docling_adapter.py; actual-runtime verification report.
@@ -153,3 +158,11 @@
 Дальше: пункт2 — Проверить настоящий анализ документов: сначала проверить CPU-профиль/явный thinking control и успешный ограниченный CORE_RUN, затем табличные таймауты и PARSE_FAILED графического листа. reasoning_effort=none в Ollama — гипотеза для следующего bounded test, не испытанное исправление; не увеличивать timeout и не снимать BLOCK без проверки.
 
 ✅ CI PR52 success: https://github.com/maxim505885-jpg/engineer-os/actions/runs/37473429471 (remote901582d, дерево2f526825c66fd955022f8af65a2ea90e8047179c). CI проверяет unit/DOM с synthetic transports, не подменяет вышеописанные live CPU/OCR результаты.
+
+
+
+## Продолжение 06.10.2026: PR53 / успешный CORE_RUN
+
+Явный `ENGINEER_OS_LOCAL_THINK=false` через native Ollama; timeout180с и acceptance gates сохранены. Production CORE220,19с, роли104,79/115,36с; таблица V4 native91,64с; damaged label text fixture48,97с. Нельзя объявлять OCR исправленным: текущие проверки без Docling, парный OpenAI baseline не повторён. 339Python/4Node/compileall/diff PASS. Draft PR53 на PR52; remote1fe8ce0/tree da3e402a, locald788cbd. Main/deploy не меняли.
+
+Дальше: пункт2 — Проверить настоящий анализ документов: graphical PARSE_FAILED page500, защищённый OCR repeat сканированной таблицы и сверка подписей/пропусков. Пункт2 открыт; Windows — пункт9, последняя. Карта, раздел32.
