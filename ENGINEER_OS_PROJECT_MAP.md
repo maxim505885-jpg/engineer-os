@@ -1032,3 +1032,54 @@ SHA256 обоих .lir совпали с ранее проверенными и�
 ❌ Реальный 7B snapshot ещё не считается инженерно завершённым: V4 completeness остаётся BLOCK, реальные normative/solver decisions пункта 6 отложены. Цель первого 7B прогона — доказать целостность end-to-end кейса и сохранение всех BLOCK, а не получить ACCEPTED.
 
 ✅ 7A считается технически завершённым на head `fdebaf082ae81e44190c061843a4bb4cc42977f4`; draft PR65 открыт и mergeable. Следующая активная работа: сформировать первый фактический Stage 7B case snapshot на полном комплекте объекта и проверить его воспроизводимость/stale detection. Пункт 8 FINAL AUDIT не начинать до этого.
+
+
+## 45. Пункт 7 — ЗАКРЫТ ТЕХНИЧЕСКИ — 07.10.2026
+
+✅ Stage 7A case-level orchestration реализован и ранее прошёл полный CI:
+455 Python tests PASS, compile PASS, actual HTTP/DOM PASS на head
+`fdebaf082ae81e44190c061843a4bb4cc42977f4`.
+
+✅ Stage 7B выполнен на полном реальном комплекте объекта
+«БЦ, ул. Набережная, 28А».
+
+Фактический real-case run:
+- 10/10 source entries identity/format PASS;
+- обязательные роли TOR / REPORT / CALCULATION_REPORT / MODEL / GEODESY /
+  GRAPHICS присутствуют;
+- V4 PDF, DOC/DOCX, XLSX, оба LIR, геодезия и графика проверены по
+  size + SHA256 + базовой структуре формата;
+- два последовательных запуска дали одинаковый case SHA256:
+  `eb6f21893534b84ed2c5088347c530e3289b07b34c8ba0460d222d9b87e37060`;
+- stale-test с намеренно неверным ожидаемым SHA одного LIR дал
+  `BLOCKED_BY_SOURCE_INTEGRITY`, source identity BLOCK и новый case SHA;
+- реальный snapshot сохранён:
+  `docs/qa/2026-10-07-stage7-naberezhnaya-real-case.json`;
+- воспроизводимый offline runner сохранён:
+  `scripts/stage7_real_case_offline.py`;
+- regression tests runner сохранены:
+  `tests/test_stage7_real_case_offline.py`.
+
+Итог Stage 7:
+`stage7_completion=COMPLETE_WITH_OPEN_ENGINEERING_BLOCKS`.
+
+Это означает, что **сам пункт 7 как проверка полного реального end-to-end кейса
+завершён**. Он не означает инженерное принятие объекта.
+
+Сохранены fail-closed статусы:
+- `engineering_status=BLOCK`;
+- `acceptance_granted=false`;
+- `FINAL AUDIT NOT_RUN`.
+
+Открытые инженерные причины:
+- `V4_DOCUMENT_COMPLETENESS_BLOCK`;
+- `POINT6_NORMATIVE_DECISION_PENDING`;
+- `POINT6_SOLVER_DECISION_PENDING`;
+- `ACTUAL_STRUCTURE_CORRELATION_PENDING`.
+
+Эти причины относятся к отложенному пункту 6/V4 и не являются незавершённой
+архитектурой пункта 7.
+
+**План:** пункт 7 ✅. Пункт 8 FINAL AUDIT можно проектировать/проверять дальше,
+но положительный FINAL AUDIT/ACCEPTED невозможен, пока реальные BLOCK пункта 6
+не будут закрыты.
