@@ -1,0 +1,363 @@
+{
+  "date": "2026-10-06",
+  "scope": "STAGE2_REPRESENTATIVE_QUALITY_VERIFICATION_NOT_ENGINEERING_ACCEPTANCE",
+  "completion": "STAGE2_QUALITY_ASSESSMENT_COMPLETE_WITH_KNOWN_LIMITATIONS",
+  "runtime": {
+    "python": "3.12.14",
+    "docling": "2.134.0",
+    "rapidocr": "3.9.2",
+    "onnxruntime": "1.30.0",
+    "torch": "2.14.1+cpu",
+    "pymupdf": "1.26.6",
+    "ollama": "0.35.1",
+    "dependency_snapshot": "requirements-ocr-linux-cpu.lock",
+    "dependency_check": "PASS"
+  },
+  "original_v4_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "model": {
+    "alias": "engineer-qwen3-8b-q4km:stage2",
+    "sha256": "d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785",
+    "thinking": false,
+    "num_ctx": 8192,
+    "num_predict": 1024,
+    "num_thread": 4,
+    "temperature": 0,
+    "keep_alive": 0,
+    "timeout_seconds": 180
+  },
+  "network": {
+    "ORT_DISABLE_TELEMETRY": "1_BEFORE_IMPORT",
+    "HF_HUB_OFFLINE": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1",
+    "linux_seccomp_denied_syscalls": [
+      "socket",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "deny_probe": "PERMISSION_ERROR_BEFORE_OCR_IMPORT",
+    "all_six_cases_completed_under_guard": true,
+    "python_socket_connects": 0,
+    "external_attempts_blocked": 0
+  },
+  "extraction": [
+    {
+      "case": "controlled-native.pdf",
+      "source_sha256": "170f6522f7c3cf054620e4df098d24dc177e2502a9567e4b8edc6ed9ec249e02",
+      "seconds": 8.28,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "COMPLETED",
+      "page_status": "UNCERTAINTY",
+      "limitations": [],
+      "blocks": 3,
+      "chars": 106,
+      "rss_high_water_mib": 1149.7,
+      "raw_counts": {
+        "texts": 3,
+        "tables": 0,
+        "pictures": 0
+      },
+      "acceptance_granted": false,
+      "controlled_text": "Проверочный документ. Высота здания 4 м.\nЧисло этажей: 2. Материал: кирпич.\nДата обследования: 03.09.2026."
+    },
+    {
+      "case": "controlled-scan.pdf",
+      "source_sha256": "d67f8e71dd898fef3d5f70ddfaf113828b624a20969490eab814bc7862edaa72",
+      "seconds": 2.42,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "COMPLETED",
+      "page_status": "UNCERTAINTY",
+      "limitations": [],
+      "blocks": 4,
+      "chars": 100,
+      "rss_high_water_mib": 1864.5,
+      "raw_counts": {
+        "texts": 4,
+        "tables": 0,
+        "pictures": 0
+      },
+      "acceptance_granted": false,
+      "controlled_text": "Проверочный документ. Высота здания 4 м.\nэтажей: 2. Материал:\nкирпич.\nДата обследования: 03.09.2026."
+    },
+    {
+      "case": "controlled-table-native.pdf",
+      "source_sha256": "66ad5ef72c6bfc51a2d6075a9a108964945b835d79ac4dd89928fc64ca776b90",
+      "seconds": 2.94,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "COMPLETED",
+      "page_status": "UNCERTAINTY",
+      "limitations": [],
+      "blocks": 4,
+      "chars": 147,
+      "rss_high_water_mib": 1930.4,
+      "raw_counts": {
+        "texts": 1,
+        "tables": 1,
+        "pictures": 0
+      },
+      "acceptance_granted": false,
+      "controlled_text": "Контрольная таблица. Не инженерный объект.\nПараметр: Высота, м | Значение: 4\nПараметр: Этажи | Значение: 2\nПараметр: Нагрузка, кПа | Значение: 0,50"
+    },
+    {
+      "case": "controlled-table-scan.pdf",
+      "source_sha256": "fd4d5d4614acd4939c57d80e2301dd4f3c6d75915b93a1609dd8146881336eed",
+      "seconds": 3.79,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "COMPLETED",
+      "page_status": "UNCERTAINTY",
+      "limitations": [],
+      "blocks": 4,
+      "chars": 146,
+      "rss_high_water_mib": 2011.0,
+      "raw_counts": {
+        "texts": 1,
+        "tables": 1,
+        "pictures": 0
+      },
+      "acceptance_granted": false,
+      "controlled_text": "Контрольная таблица. Не инженерный объект.\nПараметр: Высота, м | Значение: 4\nПараметр: ижее | Значение: 2\nПараметр: Нагрузка, кПа | Значение: 0,50"
+    },
+    {
+      "case": "v4-page-0015.pdf",
+      "source_sha256": "0603f961ee227bf199e3fc39cd02dd14cfdddd8ed053c17e951a0c6b489ef17b",
+      "seconds": 7.33,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "COMPLETED",
+      "page_status": "UNCERTAINTY",
+      "limitations": [],
+      "blocks": 25,
+      "chars": 1512,
+      "rss_high_water_mib": 2338.8,
+      "raw_counts": {
+        "texts": 18,
+        "tables": 1,
+        "pictures": 0
+      },
+      "acceptance_granted": false,
+      "original_page": 15
+    },
+    {
+      "case": "v4-page-0500.pdf",
+      "source_sha256": "81ddf57403ea04646a134d9078c03f66f87da32c4bde2134f0e3a184ca5c3ffd",
+      "seconds": 83.0,
+      "queue_state": "SUCCEEDED",
+      "page_execution": "FAILED",
+      "page_status": "BLOCK",
+      "limitations": [
+        "TABLE_STRUCTURE_UNVERIFIED: структура таблицы неоднозначна; требуется сверка с исходной страницей."
+      ],
+      "blocks": 0,
+      "chars": 0,
+      "rss_high_water_mib": 3108.7,
+      "raw_counts": {
+        "texts": 59,
+        "tables": 1,
+        "pictures": 2
+      },
+      "acceptance_granted": false,
+      "original_page": 500
+    }
+  ],
+  "model_checks": [
+    {
+      "case": "controlled-scan.pdf",
+      "seconds": 57.52,
+      "queue_state": "SUCCEEDED",
+      "analysis_stage": "COMPLETED",
+      "all_batches_completed": true,
+      "source_method": "DOCLING",
+      "ocr": "REQUESTED_NOT_VERIFIED",
+      "engineering_status": "UNCERTAINTY",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN",
+      "expected_facts_found": true,
+      "false_no_ocr_claim": false
+    },
+    {
+      "case": "controlled-table-scan.pdf",
+      "seconds": 105.86,
+      "queue_state": "SUCCEEDED",
+      "analysis_stage": "COMPLETED",
+      "all_batches_completed": true,
+      "source_method": "DOCLING",
+      "ocr": "REQUESTED_NOT_VERIFIED",
+      "engineering_status": "UNCERTAINTY",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN",
+      "damaged_label": "ижее",
+      "ambiguity_explicit": true,
+      "floor_count_not_invented": true,
+      "expected_values_found": true
+    },
+    {
+      "case": "v4-page-0015.pdf",
+      "seconds": 79.12,
+      "queue_state": "SUCCEEDED",
+      "analysis_stage": "COMPLETED",
+      "all_batches_completed": true,
+      "source_method": "DOCLING",
+      "ocr": "REQUESTED_NOT_VERIFIED",
+      "engineering_status": "UNCERTAINTY",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN",
+      "expected_values": [
+        "0,50 кПа",
+        "0,30 кПа",
+        "-30,0 °C",
+        "+40,0 °C",
+        "0,40 м"
+      ],
+      "all_expected_values_found": true
+    }
+  ],
+  "graphic_comparison": {
+    "expected_legend_codes": [
+      "П1",
+      "П2",
+      "П3",
+      "П4",
+      "П5",
+      "П6",
+      "П7",
+      "П8",
+      "П9",
+      "П10",
+      "П11",
+      "К1",
+      "К2",
+      "К3",
+      "К4",
+      "С1",
+      "С2",
+      "С3",
+      "С4",
+      "Л1",
+      "Л2",
+      "Г1",
+      "Г2",
+      "Г3"
+    ],
+    "exact_codes_found": [
+      "П5",
+      "П6",
+      "К2",
+      "К4",
+      "С2",
+      "С4",
+      "Л2",
+      "Г1",
+      "Г2"
+    ],
+    "exact_codes_missing": [
+      "П1",
+      "П2",
+      "П3",
+      "П4",
+      "П7",
+      "П8",
+      "П9",
+      "П10",
+      "П11",
+      "К1",
+      "К3",
+      "С1",
+      "С3",
+      "Л1",
+      "Г3"
+    ],
+    "scope": "VISUAL_BENCHMARK_LABELS_NOT_ACCEPTED_FACTS",
+    "table_rows": 14,
+    "table_cols": 3,
+    "table_cells": 22,
+    "merged_cells": 1,
+    "note": "Raw OCR is lossy; source legend is not a verified rectangular engineering data table."
+  },
+  "verification": {
+    "python_tests": 343,
+    "python_status": "PASS",
+    "node_tests": 4,
+    "node_status": "PASS",
+    "compileall": "PASS",
+    "diff_check": "PASS",
+    "review": "P2_CORE_METADATA_FIXED_RED_GREEN"
+  },
+  "limitations": [
+    "Full534-pageV4 acceptance remains unconfirmed",
+    "Graphic legend OCR is lossy and table normalization remains BLOCK",
+    "Scanned table label misread; manual verification required",
+    "Only preferred Russian OCR backend tested, not bilingual switching",
+    "One Linux CPU profile; Windows stage9",
+    "No norm edition or calculation validation performed",
+    "Current Ollama process-tree RSS sample was implausibly small; no reliable model RSS peak established in this repeat. OCR process RSS and cgroup OOM counters are valid observations."
+  ],
+  "artifacts": [
+    {
+      "path": "RapidOcr/ch_PP-OCRv5_det_mobile.onnx",
+      "bytes": 4819576,
+      "sha256": "4d97c44a20d30a81aad087d6a396b08f786c4635742afc391f6621f5c6ae78ae"
+    },
+    {
+      "path": "RapidOcr/eslav_PP-OCRv5_rec_mobile.onnx",
+      "bytes": 7911802,
+      "sha256": "08705d6721849b1347d26187f15a5e362c431963a2a62bfff4feac578c489aab"
+    },
+    {
+      "path": "RapidOcr/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+      "bytes": 585532,
+      "sha256": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c"
+    },
+    {
+      "path": "docling-project--docling-layout-heron/model.safetensors",
+      "bytes": 171658996,
+      "sha256": "00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c"
+    },
+    {
+      "path": "docling-project--docling-layout-heron-onnx/model.onnx",
+      "bytes": 171220471,
+      "sha256": "59c81a3a2923042d85034ffc487f8f47e4854117e879aef89b2b9f728fb4922a"
+    },
+    {
+      "path": "docling-project--docling-models/model_artifacts/tableformer/fast/tableformer_fast.safetensors",
+      "bytes": 145453276,
+      "sha256": "3119563aab5a7c96fda4d621119b63fd8806272b86c30936d15507616422f718"
+    },
+    {
+      "path": "docling-project--docling-models/model_artifacts/tableformer/accurate/tableformer_accurate.safetensors",
+      "bytes": 212758388,
+      "sha256": "2a7d6c924b3cd12fb99a09280ca9c33a89c5d60b93253617d2e088c1a40374d9"
+    }
+  ],
+  "scan_core": {
+    "seconds": 250.25,
+    "call_seconds": [
+      119.36,
+      130.84
+    ],
+    "queue_state": "SUCCEEDED",
+    "status": "UNCERTAINTY",
+    "roles": [
+      {
+        "agent": "report-audit-agent",
+        "execution": "COMPLETED"
+      },
+      {
+        "agent": "final-audit-agent",
+        "execution": "COMPLETED"
+      }
+    ],
+    "current_ocr_metadata": true,
+    "source_sha256": "d67f8e71dd898fef3d5f70ddfaf113828b624a20969490eab814bc7862edaa72",
+    "acceptance_granted": false,
+    "final_audit": "NOT_RUN",
+    "memory": {
+      "peak_sampled_tree_rss_mib": 0.4,
+      "samples": 499,
+      "measurement_status": "UNRELIABLE_PROCESS_TREE_SAMPLE_RUNNER_VISIBILITY_NOT_ESTABLISHED"
+    }
+  },
+  "cgroup_oom_snapshot": {
+    "oom": 0,
+    "oom_kill": 0
+  }
+}
