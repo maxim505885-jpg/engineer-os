@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–32. Пункт1 — проверенный кандидат PR51 без merge. **Пункт2 в работе: успешный живой CORE_RUN и две табличные проверки выполнены; качество OCR и PARSE_FAILED графического листа остаются. Начать с раздела32.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `fix/core-cpu-profile-20261006`; local `d788cbdda3b0645a89cc42d9477e4ac18b35bca5`, remote `1fe8ce024021e784519b7599a196fe77f1edcf70`, одинаковое tree `da3e402a11f4a35821bd8eb81a76e6730d9b7116`, draft PR53 на PR52. 339Python/4Node PASS; GitHub push и PR CI PASS, включая actual HTTP/DOM. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** девять пунктов, разделы30–33. Пункты1–2 выполнены как проверенный кандидат и оценка качества; main не обновлён, инженерное принятие не выдано. **Следующий — пункт3 «Довести обработку больших документов». Начать с раздела33.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `fix/document-quality-stage2-20261006`; local `7780ff9c88ce4b75620045b341d929dddccfc648`, remote `d49430f5ae82195911bb61746456ae283fabc2e1`, одинаковое tree `5d7db7be9b879b35a1327701c26e6cd2d62eb0d7`, draftPR54 на PR53. 343Python/4Node PASS; GitHub CI PR54 PASS: push37489666141 и PR37489670188, включая actual HTTP/DOM. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -715,3 +715,42 @@ Expanded DOM запускает actual launcher/worker, native action/journal/sa
 CI PR53: push run37484724688 и pull_request run37484965521 SUCCESS; actual HTTP/DOM включены. Test-merge commit10abc5ae0488e5e6a07e6497bcc39d8f9b53e279 проверяет PR53 на PR52.
 
 Зацепка для PARSE_FAILED: прежний восстановленный `full-current/v4-full-check/raw/page-0500.json` содержит59texts/1table/2pictures; это исторический checkpoint другого окружения, а не успешный текущий OCR. Сравнить версии parser/config/resources и сохранить безопасную диагностику текущей ошибки; причины пока не установлены.
+
+
+## 33. Пункт2 завершён: реальное качество OCR/модели установлено — 06.10.2026
+
+**Смысл завершения:** выполнены три исходных требования пункта2: живые модель/OCR на native PDF/скане/таблице/графическом листе; сопоставление источник→извлечение→ответ с пропусками, временем и памятью; эталонный набор и реальные страницы V4. Это завершение проверки качества, **не починка всех ошибок OCR и не ACCEPTED полного V4**. Ограничения ниже остаются обязательными до source review/доказательств/принятого кейса в пунктах3/5/7. Windows только9.
+
+| Случай | Защищённый OCR/извлечение, с | Фактическое качество |
+|---|---:|---|
+| controlled native text |8,28|3блока, три исходных строки сохранены; UNCERTAINTY |
+| controlled raster text |2,42|4блока; пропало «Число»;4м/2этажа/кирпич/дата сохранились |
+| native table |2,94|4блока;3имени/3значения сохранены |
+| raster table |3,79|«Этажи»→«ижее»; числа сохранились, имя не подтверждено |
+| real V4 page15 / Docling |7,33|25блоков;5климатических значений с единицами совпали |
+| real V4 page500 |83,00|raw59texts/1table/2pictures; нормализация FAILED/BLOCK,0 retained blocks |
+
+Queue SUCCEEDED всех6 extraction jobs не означает валидную страницу500. OCR process high-water RSS3108,7MiB. Новый optional LinuxCPU environment соответствует `requirements-ocr-linux-cpu.lock`, uv pip check PASS. Оба прогона6случаев завершены, второй — с системным Linux seccomp запретом socket/connect/sendto/sendmsg/sendmmsg до импортов: socket probe PermissionError;0Python socket-connect attempts. ORT_DISABLE_TELEMETRY=1 и HF opt-out доimports, HF offline, веса локальные. Это защита конкретного QA-процесса, не внедрённый Windows firewall.
+
+**Причина страницы500 установлена:** Docling представил легенду чертежа как14×3 с22ячейками и объединением; validator raises `table cell is missing, merged or ambiguous`. Исторический raw и новый raw дают тот же тип проблемы. Точный label benchmark:9из24ожидаемых кодов легенды встречаются в rawOCR. Это не точность всей страницы и не проверка геометрии/размеров. Страница остаётся BLOCK; не принимать фактические дефекты здания по испорченным надписям.
+
+**Два исправления кода:**
+- Safe allowlist таблиц выдаёт `TABLE_STRUCTURE_UNVERIFIED` вместо общегоPARSE_FAILED; произвольные exception messages/секреты/пути не раскрываются. BLOCK/FAILED/emptyblocks/acceptance=false сохранены.
+- Живой Qwen обнаружил конфликт: свежий Docling-text и устаревший upload preview OCR_NOT_RUN. CHAT и CORE_RUN теперь передают текущую extraction coverage/backend/OCR и note, CORE сохраняет те же метаданные. Оба regressionRED→GREEN; native blank pages берутся из current journal. Независимый reviewer обнаружил оставшийся CORE-путь, исправлен отдельным RED→GREEN; после исправления full343PythonPASS,4NodePASS,compileall/diffPASS.
+
+| Живая модель после исправления | Секунды | Результат |
+|---|---:|---|
+| Real scanned text / CHAT |57,52|4контрольных факта; нет ложного «OCRне выполнен» |
+| Real scanned table / CHAT |105,86|«ижее» явно неопределённо;2не выдумано как этажность |
+| Real V4 table / Docling CHAT |79,12|5значений с единицами; нормы/расчёты не подтверждены |
+| Real scanned text / CORE_RUN |250,25|роли119,36/130,84с; обеCOMPLETED,UNCERTAINTY;actualOCRmetadata сохранены |
+
+Все эти preliminary model tasks queueSUCCEEDED; acceptance=false, FINAL AUDITNOT_RUN. Production LocalModel/Store/Worker, та же Qwen3-8B Q4_K_M и think=false, num_ctx8192/num_predict1024/num_thread4/temp0/keep_alive0, timeout180с/вызов. OCR и модель запускались последовательно; используется штатное повторное использование сохранённого successful extraction, а не гарантия одновременной памятиOCR+Qwen. Coreprocess-treeRSS sampler дал неправдоподобно малые0,4MiB и помечен UNRELIABLE: новый modelRSSpeak не установлен. OCRRSS измерен; cgroupoom/oom_kill0. Не выдавать прежние6,1GiB за peak этого повтора.
+
+Первый model attempt прервался из-за полного scratch: временные копии весов занимали место. Удалены только собственные временные download/sync files, проверенные веса/источники сохранены; SQLite integrityok. Опубликованные времена — clean repeat. Не увеличивалиtimeout и не снималиgates.
+
+Публикация: draft https://github.com/maxim505885-jpg/engineer-os/pull/54 наPR53; remote `d49430f5ae82195911bb61746456ae283fabc2e1`, local `7780ff9c88ce4b75620045b341d929dddccfc648`, tree `5d7db7be9b879b35a1327701c26e6cd2d62eb0d7`. Дваreviewable commits: accurateOCRmetadata/safediagnostics и qualityreport. GitHub CI PR54 PASS: push37489666141 и PR37489670188, включая actual HTTP/DOM. Main/deploy не менялись. Отчёт `docs/development/stage2-document-quality-2026-10-06.md`; bounded matrix+SHA `docs/qa/2026-10-06-stage2-quality.json`; полные реальные страницы/raw/prompts/веса не опубликованы. OriginalV4 hash прежнийb5d95b66...; originalpage15/500 соответствуютderivedpage1, hashes записанывматрице.
+
+**Ограничения:** повреждённая подпись таблицы и графическая легенда требуют source review до доказательств; полнота534страниц не подтверждена (прежние523UNCERTAINTY/11BLOCK/0ACCEPTED не заменены этим набором); preferredRussianOCR проверен, bilingual switching/другое оборудование не испытаны; нормативная достоверность/расчёты не проверены.
+
+**Дальше — пункт3 «Довести обработку больших документов»:** сохранить parser/model/config и hash-identity продолжения, повторять только неудачные части, проверить budgets и потери при summary. Пункт5 связывает source review с доказательствами/ТЗ; пункт7 — реальный инженерный accepted case; Windows9последней. Не начинать новый полный534-pageOCR прогон до устранения воспроизводимых coverage/resume ограничений.

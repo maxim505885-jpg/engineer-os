@@ -41,19 +41,19 @@
 Результат: одна воспроизводимая версия, известные зависимости и инструкция; test/CI подтверждены для точного дерева.
 Файлы: scripts/run_local_app.py, Start_ENGINEER_OS.cmd, requirements-pdf-review.txt, requirements-integrations.txt, .github/workflows/core-tests.yml, docs/development/local-app.md.
 
-## 2. Проверить настоящий анализ документов — В РАБОТЕ: CORE_RUN и native таблица прошли, OCR/графика остаются
+## 2. Проверить настоящий анализ документов — ВЫПОЛНЕНО (ОЦЕНКА КАЧЕСТВА, НЕ ACCEPTED V4)
 
-- [ ] Проверить живую локальную модель и OCR на native PDF, скане, таблице и графическом листе.
-- [ ] Сопоставить исходник, извлечение и ответы; записать пропуски, время и память.
-- [ ] Зафиксировать качество на небольшом эталонном наборе, затем проверить реальные документы.
+- [x] Проверить живую локальную модель и OCR на native PDF, скане, таблице и графическом листе:6реальныхслучаев, включая V4pages15/500.
+- [x] Сопоставить исходник, извлечение и ответы; записать пропуски, время и память: label «Этажи»→«ижее», wordloss «Число»,9/24codes графическойлегенды, OCRRSS3108,7MiB, cgroupOOM0; modelRSSsampler признанненадёжным.
+- [x] Зафиксировать качество на небольшом эталонном наборе, затем проверить реальные документы: boundedQA matrix и source/model artifactSHA.
+- [x] Проверить успешный actualscan CORE_RUN:250,25с,119,36/130,84с, обеCOMPLETED,UNCERTAINTY,acceptance=false.
+- [x] Получить ответы на actualscan table105,86с и V4 Docling table79,12с; неопределённое имя не выдумано как этажность.
+- [x] Локализовать graphicalPARSE_FAILED:14×3legend/22cells/merged; sanitizedTABLE_STRUCTURE_UNVERIFIED, BLOCKсохранён.
+- [x] Исправить конфликтpreview/currentOCRmetadata вCHAT/CORE_RUN;343Python/4Node/compileall/diffPASS.
+- [x] Повторить6OCRcases подLinuxseccompnetworkdeny сtelemetryoptoutдоimports.
 
-- [x] Завершить bounded живой CORE_RUN через production LocalModel/Worker: обе роли COMPLETED,220,19с, UNCERTAINTY, acceptance=false.
-- [x] Проверить native таблицу настоящего V4 page15: пять значений с единицами,91,64с.
-- [x] Проверить реакцию на повреждённое имя в recorded OCR text fixture: явная неопределённость,48,97с; не новый OCR.
-- [ ] Локализовать graphical PARSE_FAILED и повторить настоящий scanned-table OCR маршрут.
-
-Результат: известно, что прочитано/пропущено и какие утверждения модели подтверждаются источником.
-Файлы: engineering/local_app/model.py, extraction.py, automatic_analysis.py; engineering/document_intelligence/docling_adapter.py; actual-runtime verification report.
+Результат: известно, что прочитано/пропущено и какие утверждения модели совпали с источником. Завершение пункта2 не означает идеальныйOCR, полнотуV4 или инженерное принятие. Известные потери подписей и блокировкаграфики сохраняются доsource review/coverage/evidence в3/5/7; preferredRussianOCR не подтверждает bilingual switching; Windows9последней.
+Файлы: engineering/local_app/{extraction,automatic_analysis,coverage,worker,core_run}.py; docs/development/stage2-document-quality-2026-10-06.md; docs/qa/2026-10-06-stage2-quality.json. DraftPR54 наPR53.
 
 ## 3. Довести обработку больших документов — НЕ СДЕЛАНО
 
@@ -168,3 +168,10 @@
 Дальше: пункт2 — Проверить настоящий анализ документов: graphical PARSE_FAILED page500, защищённый OCR repeat сканированной таблицы и сверка подписей/пропусков. Пункт2 открыт; Windows — пункт9, последняя. Карта, раздел32.
 
 CI PR53 push37484724688 и PR37484965521 SUCCESS, включая actual HTTP/DOM. Graphical page500 прежний raw checkpoint имеет59texts/1table/2pictures; сравнить старое/новое окружение, не снимать текущий BLOCK по старому результату.
+
+
+## Актуальный итог 06.10.2026: пункт2 завершён, PR54
+
+✅2 — representative realOCR/modelqualityassessment;343Python/4NodePASS; actualscanCORE250,25с,UNCERTAINTY,acceptance=false. ❌FullV4ACCEPTED/идеальныйOCR/Windows — не выполнены и не заявляются. GitHub CI PR54 PASS: push37489666141 и PR37489670188, включая actual HTTP/DOM. Main/deploy не меняли. Картараздел33.
+
+Дальше:3 — Довести обработку больших документов. Parser/model/config/hash guards, restart/resume onlyfailed parts, budgets/summary loss на эталонном наборе.
