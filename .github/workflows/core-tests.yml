@@ -40,6 +40,10 @@ jobs:
           python -m pip check
       - name: Install locked development-only DOM dependencies
         run: npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
+      - name: Install pinned Playwright for real Chromium smoke
+        run: |
+          npm install --prefix e2e --no-save --no-package-lock playwright@1.55.0
+          npx --prefix e2e playwright install --with-deps chromium
       - name: Run full Python regression suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Compile runtime
@@ -49,3 +53,8 @@ jobs:
           PYTHON: python
           ENGINEER_OS_ATTACHMENT_PARSER: native
         run: npm test --prefix e2e
+      - name: Check real Chromium local UI workflow
+        env:
+          PYTHON: python
+          ENGINEER_OS_ATTACHMENT_PARSER: native
+        run: npm run test:browser --prefix e2e
