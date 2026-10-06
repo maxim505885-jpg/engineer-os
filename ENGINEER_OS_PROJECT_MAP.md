@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–35. Пункты1–4 выполнены как проверенные кандидаты: окружение, оценка OCR/модели, безопасное продолжение и Office-форматы. Main не обновлён, инженерное принятие не выдано. **Следующий — пункт5 «Связать анализ с доказательствами и ТЗ». Начать с раздела35.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/office-documents-stage4-20261006`; local `cc6c05412a6d7ce786c918c928f14fc8bc230f64`, remote `ec52dd3f553a1f6e7c31d340eb80469ec27bf0b7`, одинаковое tree `4c6e8f96e0e4d694773a6283506ae64e46506991`, draftPR56 на PR55. 376Python/4Node/actualHTTP+DOM PASS. GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** девять пунктов, разделы30–36. Пункты1–5 выполнены как проверенные кандидаты: окружение, качество OCR/модели, безопасное продолжение, Office-форматы и связь выводов с источниками/ТЗ. Main не обновлён, инженерное принятие не выдано. **Следующий — пункт6 «Довести профильные проверки». Начать с раздела36.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/evidence-tz-stage5-20261006`; local `40e4c606cd184caa2c0b6ef3ed2b217a2d9273f6`, remote `386cde2e49a8104e2bd3d96a204e680e2a8649c5`, одинаковое tree `70b36f9f977736a7fd5e0811478519ba43b5016b`, draftPR57 на PR56. 400Python/4Node/actualHTTP+DOM PASS. GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -806,3 +806,35 @@ Queue SUCCEEDED всех6 extraction jobs не означает валидную
 **Дальше — пункт5 «Связать анализ с доказательствами и ТЗ»:** построить проверяемый перечень требований ТЗ, существенные выводы связать с цитатой/местом/типом данных и source review, включить evidence gates и видимые непроверенные требования/противоречия. Начать с currentPR56tree; сохранять Office locators и оригинальные/производные границы. Не выдавать COMPLETED/SUCCEEDED за инженерное принятие.
 
 GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. 
+
+
+## 36. 06.10.2026 — пункт5 завершён: source traceability и требования ТЗ, PR57
+
+**Сделано:** Office source candidates с extraction child/logical unit/server locator; fresh parser/прочитанные байты SHA + checkpointtext + точная цитата. DOCX paragraphs/table cells, XLSX sheet!cell; повторяющиеся цитаты/заблокированные/усечённые элементы не source-confirmable. PDF native quote/provenance/preview path сохранён. DOC derivative SHA/location отдельно, даже MATCH в производном DOCX не подтверждает оригинальный DOC.
+
+**ТЗ:** immutable user-authored checklist (1–50 requirements,≤2000chars;20версий/диалог), append-only assessments (≤2000chars,≤20candidates,50revisions/requirement,1000events/диалог), optimistic revision guards. Сохраняются conclusion/relation/evidence snapshot; новая версия не переносит статусы. Gate показывает quote/location/source SHA/declared P/F/M/T/C/A/I/U/latest source review; changed/rejected/unchecked/unselected source — BLOCK. SUPPORTS/CONTRADICTS/UNKNOWN пользовательские декларации, не semantic truth detector. SOURCE_LINKED остаётся UNCERTAINTY/ENGINEERING_VERIFICATION_REQUIRED/DATA_CLASS_NOT_VERIFIED, acceptance=false.
+
+**Общий сценарий:** results by part→source location→candidate form→source review→TZ assessment; server ref ссылается на extraction original, не modeltext. CHAT/CORE получают bounded14k TZ context с disclosure полногоtotal/усечения; полный report сохраняется отдельно. CORE findings имеют deterministic source gates, видимые в UI; голый fileID не evidence. Требования и все их evidence/review dependencies, включая unselected file, входят в live/resume identity; изменение во время вызова модели отклоняет результат. Poll сохраняетdraft/focus/caret/selection/openhistory. Старый jobreport явно snapshot, текущий перечень — актуальная проверка.
+
+| Проверка | Факт | Граница |
+|---|---|---|
+| Реальный «Расчет  .docx» |paragraph1 quoteSHA/sourceSHA подтверждены, SOURCE_LINKED/UNCERTAINTY, Store restart/original bytes unchanged |Проверка привязки, не истинности/реальногоТЗ |
+| Реальный «Таблицы.xlsx» |Лист1!A1/source quote/hash, SOURCE_LINKED/UNCERTAINTY, restart/unchanged original |Raw cell/formula limitations; data_class U notverified |
+| Реальный «Расчет  .doc» |actual LibreOffice→derived paragraph1, NOT_ESTABLISHED/BLOCK; original preserved |SOURCE_NOT_CONFIRMED/SOURCE_LOCATION_UNVERIFIED; derived quote не original confirmation |
+| Actual HTTP/DOM |Office source candidate→review→requirement gate→reload; pollingfocus/caret/history; CORE per-finding BLOCK visible;12modelrequests; app+Drive PASS |Controlled model/Drive, jsdom; не screenshot/liveOAuth/Windows |
+| Финальные checks |400Python (24stage5),4Node/compileall/JS/diff PASS |FINAL AUDIT NOT_RUN, engineering acceptance=false |
+
+**Review:** один независимый whole-branch read-only reviewer; два Important reproduced RED→GREEN: unselected requirement source review пропускался identity, polling терялfocus/caret/history. Исправлены за один finalfixpass; full400suitePASS. Minor о hidden finding_gates переоценён Important, поскольку пользователь должен видеть основание BLOCK; actualHTTP/DOM RED→GREEN, детали теперь доступны. Дополнительная точность: SOURCE_LOCATION_UNVERIFIED отличена от hash/locationchanged; actualsourceQA повторена послеfinalfix. Новых deferred minors нет.
+
+**Rulings:** перечень и смысловые отношения authored by user; цена ошибки — неполный перечень/неверная декларация возможны, поэтому origin/disclosure и engineering gate открыты. Отображение per-finding source reasons повышено дообязательного; цена — дополнительные UI details без повышения инженерного статуса. Наследованный stage4 converter launcher-only fingerprint открыт; не обновлять runtime внутриunfinishedanalysis.
+
+**Публикация:** draft https://github.com/maxim505885-jpg/engineer-os/pull/57, basePR56/feat/office-documents-stage4-20261006; remote `386cde2e49a8104e2bd3d96a204e680e2a8649c5`, local `40e4c606cd184caa2c0b6ef3ed2b217a2d9273f6`, identicaltree `70b36f9f977736a7fd5e0811478519ba43b5016b`,20files/687add/23del;2remotecommits. Main/deployне меняли. Отчёты `docs/development/evidence-tz-2026-10-06.md`,`docs/development/stage5-evidence-tz-plan.md`,`docs/qa/2026-10-06-stage5-evidence-tz.json`. QA onlymetadata/quoteSHA, rawsources/prompts/quotes не опубликованы; controlled model и test checklist, не actualengineeringcase.
+
+**Открыто:** семантическая полнотаТЗ, data_class verification, meaning/application of quote, normative/calculation checks и true FINAL AUDIT не выполнены. FullV4/11BLOCK/0ACCEPTED прежние; Windows9 последняя.
+
+**Дальше — пункт6 «Довести профильные проверки»:** нормы — подтверждённые edition/scope/clause/requirement/actual comparison; расчёты — units/loads/combinations/supports/materials/results/solverlogs; ЛИРА/SCAD semantic route поверх existing intake, с честной границей доступа solver; role checks и возврат ошибок QC. Начать с currentPR57tree и source gates. Не принимать расчёт по существованию файла, не выдумывать редакции/пункты норм. Real engineering case — пункт7.
+
+Initial CI PR37504947830 PASS, push37504942036 FAIL из-за ZIPfixture timestamps в inheritedtest; controlledclock RED→GREEN, preservation expected сравнивается с originaluploadbytes. Local400suite повторён послеfix; productionlogic не менялась.
+
+GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором.
+Дальше: пункт6 — Довести профильные проверки.

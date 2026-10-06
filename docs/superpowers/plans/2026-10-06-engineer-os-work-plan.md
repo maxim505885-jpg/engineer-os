@@ -74,11 +74,11 @@
 Результат: поддержанные форматы анализируются с проверяемой привязкой и явными ограничениями.
 Файлы: local_app/files.py, drive_import.py, automatic_analysis.py, UI; новые format adapters/tests.
 
-## 5. Связать анализ с доказательствами и ТЗ — НЕ СДЕЛАНО
+## 5. Связать анализ с доказательствами и ТЗ — ВЫПОЛНЕНО (SOURCE TRACEABILITY, НЕ ENGINEERING ACCEPTANCE)
 
-- [ ] Построить проверяемый перечень требований ТЗ.
-- [ ] Привязать существенные выводы к цитате/месту/типу данных и source review.
-- [ ] Подключить предметные evidence gates; раскрывать непроверенные требования и противоречия.
+- [x] Построить проверяемый перечень требований ТЗ.
+- [x] Привязать существенные выводы к цитате/месту/типу данных и source review.
+- [x] Подключить предметные evidence gates; раскрывать непроверенные требования и противоречия.
 
 Результат: для каждого вывода видны основание и уровень проверки.
 Файлы: local_app/evidence.py, provenance.py, review.py; document_intelligence/evidence_bridge.py и evidence_validation.py; core adapters.
@@ -191,3 +191,15 @@ CI PR53 push37484724688 и PR37484965521 SUCCESS, включая actual HTTP/DOM
 Дальше: пункт5 — Связать анализ с доказательствами и ТЗ.
 
 GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. 
+
+
+## Актуальный итог 06.10.2026: пункт5 завершён, PR57
+
+✅ Версионированный user-authored перечень требований, append-only выводы/relations/candidates/review snapshots. Office sourcebinding revalidated; DOC derivedunverified не originalconfirmation. CHAT/CORE context/identity/resume guards; source gates каждого требования и наблюдения; UI source→candidate→review→assessment/reload; pollingfocus/selection/history сохранены. 400Python/4Node/оба actualHTTP+DOMPASS. Actual DOCX/XLSX SOURCE_LINKED/UNCERTAINTY; DOC BLOCK; protocolQA с controlledmodel/testТЗ, не engineeringcase. Одинreview и одинImportantfixpass; hiddenfindinggates regradedImportant и исправлены RED→GREEN. DraftPR57наPR56; дерево70b36f9f977736a7fd5e0811478519ba43b5016b, картараздел36.
+❌ Полнота/семантикаТЗ, типданных, нормативная/расчётная проверка и инженерное принятие не подтверждены. SUPPORTS/CONTRADICTS декларациипользователя; DOCoriginalconfirmation/Windows не выполнены. Наследованный converterruntimefingerprintlauncher-only открыт. Main/deployне менялись.
+Дальше: пункт6 — Довести профильные проверки.
+
+Initial CI PR37504947830 PASS, push37504942036 FAIL из-за ZIPfixture timestamps в inheritedtest; controlledclock RED→GREEN, preservation expected сравнивается с originaluploadbytes. Local400suite повторён послеfix; productionlogic не менялась.
+
+GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором.
+Дальше: пункт6 — Довести профильные проверки.
