@@ -35,14 +35,21 @@ FINAL AUDIT выполнен над сохранённым Stage-7 snapshot «Н
 - `decision=BLOCK`;
 - `acceptance_granted=false`;
 - audit SHA256:
-  `4e032ee1ca9716fc4511e5dedb1efa3f9ec18c8b6493d8a02bf8fae94aabc298`.
+  `46d1454834921437a1d1e27a427bebecfcc68106c40d823a6845c8e80c7bf6e4`.
 
 Сохранённые blocker codes:
 - ACTUAL_STRUCTURE_CORRELATION_PENDING;
 - POINT6_NORMATIVE_DECISION_PENDING;
 - POINT6_SOLVER_DECISION_PENDING;
 - V4_DOCUMENT_COMPLETENESS_BLOCK;
-- CASE_ENGINEERING_STATUS_NOT_READY.
+- CASE_ENGINEERING_STATUS_NOT_READY;
+- TZ_TRACEABILITY_NOT_RECORDED;
+- EVIDENCE_REVIEW_NOT_RECORDED;
+- SPECIALIST_COVERAGE_NOT_RECORDED;
+- DOMAIN_PREREQUISITES_NOT_RECORDED;
+- CASE_QC_NOT_RECORDED.
+
+Последние пять причин важны: Stage-7 offline inventory подтверждал реальные файлы и их identity, но сам JSON snapshot не содержал достаточного структурированного доказательства этих audit dimensions. FINAL AUDIT намеренно не повышает их до PASS по косвенным данным.
 
 Это корректный FINAL AUDIT: он выполнен до конца, но не скрывает незакрытые
 инженерные prerequisites.
