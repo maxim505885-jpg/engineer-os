@@ -238,6 +238,13 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>!doc.querySelector('#send').disabled);
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
+  assert.ok(doc.querySelector('#final-audit-panel'),'Stage-8 FINAL AUDIT panel missing');
+  doc.querySelector('#final-audit-run').click();
+  await until(()=>doc.querySelector('.final-audit-result'));
+  await until(()=>!doc.querySelector('#send').disabled);
+  assert.ok(doc.querySelector('.final-audit-result').textContent.includes('FINAL AUDIT COMPLETED'));
+  assert.ok(doc.querySelector('.final-audit-result').textContent.includes('NOT ACCEPTED'));
+  assert.ok(doc.querySelector('.final-audit-result').textContent.includes('BLOCK'));
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
