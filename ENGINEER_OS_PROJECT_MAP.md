@@ -885,3 +885,18 @@ Ruling: роль источника и нормативная цепочка aut
 Дальше: пункт6 — Довести профильные проверки: семантический расчётный комплект и подтверждённая нормативная цепочка. Windows9 последней.
 
 **Проверка публикации 6Б:** GitHub CI push [37511687457](https://github.com/maxim505885-jpg/engineer-os/actions/runs/37511687457) и pull_request [37511692882](https://github.com/maxim505885-jpg/engineer-os/actions/runs/37511692882) — SUCCESS для HEAD `19a31cfb7d1a032b1bf922cfa1b4c1245281c950`. Тестовый merge `cbfdf85d3935480d9aaaac8d32a0973f4587b14a` имеет то же дерево `35b4579f5b77728b944cb21926088e7b313bd1f3`, что проверенная локальная версия. PR59 открыт как draft, не слит. Пункт 6 остаётся в работе.
+
+
+## 39. UI/QA side stream: Playwright + design skills — 06.10.2026
+
+Отдельный development-only поток создан поверх подэтапа 6Б и **не заменяет пункт 6**. Ветка `chore/ui-qa-playwright-20261006`, draft PR60 на `feat/domain-packets-stage6b-20261006`.
+
+✅ Playwright: существующий `e2e/local_app_ui_smoke.cjs` оформлен как явный browser smoke (`npm run test:browser`). CI закрепляет Playwright 1.55.0, ставит Chromium во временном runner и запускает реальный локальный launcher/worker/upload/chat/reload/session-switch/mobile viewport сценарий. Это browser/UI gate, не инженерный acceptance.
+
+✅ Impeccable и Emil Kowalski Skills: зафиксированы в `docs/development/ui-qa-design-tooling.md` как developer guidance для типографики/отступов/иерархии/accessibility и motion/interaction. Они **не являются runtime-зависимостями**, не импортируются в ENGINEER CORE и не могут менять evidence status, BLOCK/UNCERTAINTY, FINAL AUDIT или ACCEPTED.
+
+✅ Граница доверия: ENGINEER CORE/evidence gates → functional/API tests → Playwright browser behavior → внешние design/motion рекомендации. При конфликте управляет fail-closed инженерная логика.
+
+❌ PR60 пока draft; GitHub CI browser run нужно считать подтверждённым только после SUCCESS конкретного run. Windows остаётся пунктом 9 и этим Linux Chromium smoke не закрывается.
+
+**Активный инженерный следующий шаг остаётся прежним:** пункт 6 — семантический расчётный комплект и подтверждённая нормативная цепочка. UI/QA поток ведётся параллельно и не повышает acceptance.
