@@ -40,6 +40,20 @@ jobs:
           python -m pip check
       - name: Install locked development-only DOM dependencies
         run: npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
+      - name: Check Windows launcher PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($path in @("scripts/windows_supervisor.ps1","scripts/windows_stop.ps1")) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $path),[ref]$tokens,[ref]$errors) | Out-Null
+            if ($errors.Count) {
+              $errors | ForEach-Object { Write-Error $_ }
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
       - name: Run full Python regression suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Compile runtime
