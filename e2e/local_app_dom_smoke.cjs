@@ -141,10 +141,19 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.equal(resumed.messages.filter(m=>m.role==='user'&&m.content==='Проверка продолжения').length,1);
   assert.ok(doc.querySelector('.automatic-analysis').textContent.includes('Повторно использовано'));
   assert.equal(resumed.jobs.filter(j=>j.id===resumeJob.id).length,1);
+  assert.ok(doc.querySelector('#upload').accept.includes('.docx'),'Office formats must be selectable');
+  const officePdf=require('node:child_process').execFileSync(process.env.PYTHON||'python3',['-c',"import sys;sys.path.insert(0,'tests');from test_office_documents import xlsx;sys.stdout.buffer.write(xlsx())"],{cwd:root});
+  const officeFile=await (await fetch(origin+`/api/sessions/${id}/files?name=loads.xlsx`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/octet-stream'},body:officePdf})).json();
+  const officeJob=await (await fetch(origin+`/api/sessions/${id}/jobs`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/json'},body:JSON.stringify({prompt:'Проверить таблицу Office',file_ids:[officeFile.id]})})).json();
+  await until(()=>[...doc.querySelectorAll('.automatic-analysis')].some(c=>c.textContent.includes('loads.xlsx')&&c.textContent.includes('логических элементов'))&&!doc.querySelector('#send').disabled);
+  const officeCard=[...doc.querySelectorAll('.job')].find(c=>c.textContent.includes('Проверить таблицу Office'));
+  assert.ok(!officeCard.textContent.includes('4/4 страниц'),'Cell counts must not be called physical pages');
+  officeCard.querySelector('.analysis-drafts').click();await until(()=>officeCard.querySelector('.analysis-receipt')||[...doc.querySelectorAll('.analysis-receipt')].some(c=>c.textContent.includes('Нагрузки!C1')));
+  assert.ok([...doc.querySelectorAll('.analysis-receipt')].some(c=>c.textContent.includes('Нагрузки!C1')),'Sheet/cell locator must be visible');
   assert.ok(doc.querySelector('#drive-form'),'Drive import form missing');
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
-  assert.equal(doc.querySelectorAll('.file').length,3,'Unavailable Drive must not manufacture an imported file');
+  assert.equal(doc.querySelectorAll('.file').length,4,'Unavailable Drive must not manufacture an imported file');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}

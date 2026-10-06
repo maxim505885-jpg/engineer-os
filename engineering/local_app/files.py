@@ -8,11 +8,15 @@ from .coverage import unknown_coverage
 
 MAX_FILE_BYTES=100*1024*1024
 MAX_TEXT=100000
+SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc'}
 
 
 def extract_preview(name,data):
     suffix=Path(name).suffix.lower()
     c=unknown_coverage('EXTRACTION_UNAVAILABLE')
+    if suffix in {'.docx','.xlsx','.doc'}:
+        c.update(method=suffix[1:].upper(),stop_reasons=['BACKGROUND_EXTRACTION_REQUIRED'])
+        return '', 'UNAVAILABLE','Оригинал Office сохранён. Текст и таблицы будут обработаны при отправке задания; полнота не проверена.',False,c
     if suffix in {'.txt','.md'}:
         try:text=data.decode('utf-8-sig')
         except UnicodeDecodeError:return '', 'UNAVAILABLE','Текст не в UTF-8; оригинал сохранён.',False,c
@@ -65,7 +69,7 @@ def candidate_text(name,data):
 def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
-    if Path(name).suffix.lower() not in {'.txt','.md','.pdf'}:raise ValueError('Supported originals: TXT, MD, PDF')
+    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC')
     if not isinstance(data,bytes) or not data or len(data)>MAX_FILE_BYTES:raise ValueError('Original must contain 1 byte–100 MiB')
     store.snapshot(session_id)
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)

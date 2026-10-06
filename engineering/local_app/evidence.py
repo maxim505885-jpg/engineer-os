@@ -13,6 +13,8 @@ def register(store,session_id,*,file_id,quote,statement,page=None,data_class='U'
     if page is not None and (type(page) is not int or not 1<=page<=100000):raise ValueError('Page must be a positive integer')
     f=store.get_file(file_id)
     if f['session_id']!=session_id:raise ValueError('Original belongs to another conversation')
+    if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc'}:
+        raise ValueError('Office: используйте привязку абзаца/таблицы/ячейки из журнала анализа; реестр этих привязок подключается отдельно.')
     with Path(f['path']).open('rb') as stream:data=stream.read(100*1024*1024+1)
     if len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256']:raise ValueError('Original identity check failed')
     provenance,document_validation=unavailable()

@@ -62,6 +62,16 @@ class LocalDriveImportTests(unittest.TestCase):
         self.assertNotIn('PRIVATE_TOKEN',json.dumps(restored))
         self.assertFalse(list(self.store.root.glob('drive-import-*')))
 
+    def test_office_import_runs_through_same_background_analysis(self):
+        from test_office_documents import docx,xlsx,Model
+        from engineering.local_app.worker import Worker
+        for suffix,data in [('docx',docx()),('xlsx',xlsx())]:
+            self.data=data;self.meta.update(name='drive.'+suffix,mimeType='application/octet-stream',size=str(len(data)),md5Checksum=hashlib.md5(data).hexdigest())
+            file=self.run_import();self.store.enqueue(self.session,'Read',[file['id']]);model=Model();Worker(self.store,model).run_once()
+            job=self.store.snapshot(self.session)['jobs'][0];self.assertEqual(job['state'],'SUCCEEDED')
+            self.assertEqual(job['result']['document_analysis']['sources'][0]['backend'],suffix)
+            self.assertEqual(self.store.get_file(file['id'])['source_metadata']['provider'],'GOOGLE_DRIVE')
+
     def test_checksum_mismatch_and_source_change_leave_no_file(self):
         for mode in ('corrupt','change','expected-sha'):
             self.corrupt=mode=='corrupt';self.change=mode=='change';self.metadata_count=0

@@ -12,6 +12,15 @@ def digest(value):
 
 def parser_identity(backend):
     from . import extraction
+    if backend in {'docx','xlsx','doc'}:
+        import sys
+        from . import office
+        value=dict(schema=1,backend=backend,python=sys.version.split()[0],implementation=hashlib.sha256(Path(office.__file__).read_bytes()).hexdigest(),
+                    limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT])
+        if backend=='doc':
+            from .doc_conversion import converter_identity
+            value['converter']=converter_identity()
+        return value
     packages=['PyMuPDF']+(['docling','docling-core','rapidocr','onnxruntime','torch'] if backend=='docling' else [])
     versions={}
     for name in packages:
@@ -58,6 +67,7 @@ def identity(store,job,model):
     value=dict(schema=1,task_id=job['id'],session_id=job['session_id'],mode=job['mode'],prompt=job['prompt'],checks=job['requested_checks'],
                sources=[dict(id=f['id'],sha256=f['sha256'],name=f['name']) for f in files],parser=parser_identity(backend),model=selected,
                evidence_sha256=digest([r for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in job['file_ids']]),
+               parsers={f['id']:parser_identity(Path(f['name']).suffix.lower()[1:]) for f in files if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc'}},
                implementation=implementation,budgets=dict(part_chars=automatic_analysis.PART_CHARS,source_chars=automatic_analysis.MAX_SOURCE_CHARS,
                max_calls=automatic_analysis.MAX_MODEL_CALLS,max_seconds=automatic_analysis.MAX_MODEL_SECONDS,summary_chars=automatic_analysis.SUMMARY_CHARS))
     return value,digest(value),selected is not None

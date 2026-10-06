@@ -67,6 +67,9 @@ def retain_blocks(blocks,page,budget):
 
 
 def execute(store,job,stop_event,*,progress=None):
+    if Path(store.get_file(job['file_ids'][0])['name']).suffix.lower() in {'.docx','.xlsx','.doc'}:
+        from .office import execute as office_execute
+        return office_execute(store,job,stop_event,progress=progress)
     import fitz
     file=store.get_file(job['file_ids'][0])
     if file['session_id']!=job['session_id']:raise ValueError('Source isolation failure')

@@ -23,7 +23,11 @@ def incomplete(coverage):
 
 
 def automatic_summary(source):
-    return dict(scope='UNVERIFIED_EXTRACTION',status='RECORDED',
+    result=dict(scope='UNVERIFIED_EXTRACTION',status='RECORDED',
                 method=source['backend'].upper(),completeness='NOT_CHECKED',
                 pages_without_text=source['pages_without_text'],
                 **{key:source[key] for key in ('total_pages','processed_pages','blocked_pages','failed_pages','ocr')})
+    if 'total_units' in source:
+        result.update(total_pages=None,processed_pages=None,total_units=source['total_units'],processed_units=source['processed_units'],
+                      unit_label=source['unit_label'],limitations=source.get('limitations',[]),physical_pages=None)
+    return result
