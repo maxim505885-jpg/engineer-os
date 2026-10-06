@@ -174,5 +174,30 @@ class DomainPacketTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.save(dict(kind='CALCULATION',bindings=bindings,semantic_reviews=semantic))
 
+    def test_calculation_exchange_and_solver_receipt_still_do_not_accept(self):
+        from engineering.calculation.model_intake import CalculationArtifactRole
+        bindings=[dict(role=r.value,file_id=self.actual['id'],candidate_ids=[self.a['id']]) for r in CalculationArtifactRole]
+        semantic=[dict(role=r.value,statement='Controlled semantic statement',candidate_ids=[self.a['id']],
+                       decision='VERIFIED',basis='Controlled source review basis') for r in CalculationArtifactRole]
+        sha='a'*64
+        exchange=dict(format='ENGINEER_OS_CALC_EXCHANGE',version=1,source_sha256=sha,sections=[
+            dict(name='GEOMETRY',source_sha256=sha,records=[{'node':1}]),
+            dict(name='MATERIALS_SECTIONS',source_sha256=sha,records=[{'material':'test'}]),
+            dict(name='LOADS_COMBINATIONS',source_sha256=sha,records=[{'case':'LC1'}]),
+            dict(name='SUPPORTS_RELEASES',source_sha256=sha,records=[{'node':1}]),
+            dict(name='UNITS',source_sha256=sha,records=[{'length':'m'}]),
+        ])
+        receipt=dict(solver_name='TEST_SOLVER',solver_version='1.0',input_sha256='a'*64,
+                     output_sha256='b'*64,log_sha256='c'*64,exit_code=0,
+                     started_at='2026-10-06T20:00:00Z',finished_at='2026-10-06T20:01:00Z')
+        self.save(dict(kind='CALCULATION',bindings=bindings,semantic_reviews=semantic,
+                       exchange_manifest=exchange,solver_receipt=receipt))
+        r=self.report()['packets'][0]
+        self.assertEqual(r['exchange_review']['status'],'READY_FOR_SEMANTIC_CROSSCHECK')
+        self.assertEqual(r['solver_review']['status'],'READY_FOR_RESULT_VERIFICATION')
+        self.assertIn('SOLVER_EXECUTION_NOT_ACCEPTED',r['reasons'])
+        self.assertNotIn('SOLVER_NOT_RUN',r['reasons'])
+        self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
+
 
 if __name__=='__main__':unittest.main()
