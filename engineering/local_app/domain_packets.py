@@ -14,6 +14,8 @@ from engineering.normative.numeric_comparison import compare_quantity
 from engineering.calculation.model_intake import CalculationArtifact,CalculationArtifactRole,audit_calculation_model_intake
 from engineering.normative.authority import NormativeAuthorityReview,audit_normative_authority
 from engineering.calculation.semantic_review import CalculationSemanticReview,audit_calculation_semantics
+from engineering.calculation.exchange_manifest import parse_exchange_manifest,audit_exchange_manifest
+from engineering.calculation.solver_receipt import SolverReceipt,audit_solver_receipt
 
 CHAIN=('document','edition','scope','clause','requirement','actual_condition','comparison','conclusion')
 ALIASES={'м':'m','мм':'mm','см':'cm','Н':'N','кН':'kN','Па':'Pa','кПа':'kPa','МПа':'MPa','м2':'m2','мм2':'mm2'}
@@ -73,7 +75,7 @@ def save(store,session_id,*,packet,expected_revision):
                 raise ValueError('Authority review must match normative chain identity')
             audit_normative_authority(NormativeAuthorityReview(**a))
     elif kind=='CALCULATION':
-        if set(packet) not in ({'kind','bindings'},{'kind','bindings','semantic_reviews'}) or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
+        if not isinstance(packet,dict) or packet.get('kind')!='CALCULATION' or not set(packet)<= {'kind','bindings','semantic_reviews','exchange_manifest','solver_receipt'} or not {'kind','bindings'}<=set(packet) or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
         roles=[]
         for binding in packet['bindings']:
             if not isinstance(binding,dict) or set(binding)!={'role','file_id','candidate_ids'}:raise ValueError('Invalid calculation binding')
@@ -99,6 +101,14 @@ def save(store,session_id,*,packet,expected_revision):
                     raise ValueError('Semantic review sources must belong to the same calculation role')
                 reviews.append(CalculationSemanticReview(role,item['statement'],tuple(source_ids),item['decision'],item['basis']))
             audit_calculation_semantics(tuple(reviews))
+        if 'exchange_manifest' in packet:
+            raw=json.dumps(packet['exchange_manifest'],ensure_ascii=False,separators=(',',':'))
+            parse_exchange_manifest(raw)
+        if 'solver_receipt' in packet:
+            sr=packet['solver_receipt']
+            if not isinstance(sr,dict) or set(sr)!={'solver_name','solver_version','input_sha256','output_sha256','log_sha256','exit_code','started_at','finished_at'}:
+                raise ValueError('Invalid solver receipt')
+            audit_solver_receipt(SolverReceipt(**sr))
     else:raise ValueError('Unknown domain packet kind')
     snapshots=[]
     for eid in dict.fromkeys(refs):
@@ -121,7 +131,7 @@ def report(store,session_id,*,selected_files=None):
     state=store.domain_packets_state(session_id)
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']};rows=[]
     for event in latest(state):
-        p=event['packet'];sources=[];reasons=[];authority_review=None;semantic_review=None
+        p=event['packet'];sources=[];reasons=[];authority_review=None;semantic_review=None;exchange_review=None;solver_review=None
         for expected in event['sources']:
             r=candidates.get(expected['candidate_id'])
             if not r:reasons.append('CANDIDATE_MISSING');continue
@@ -167,10 +177,26 @@ def report(store,session_id,*,selected_files=None):
                     reasons.append('CALCULATION_SEMANTIC_REVIEW_INVALID')
             else:
                 reasons.append('CALCULATION_SEMANTIC_REVIEW_MISSING')
+            if p.get('exchange_manifest'):
+                try:
+                    exchange_review=audit_exchange_manifest(parse_exchange_manifest(json.dumps(p['exchange_manifest'],ensure_ascii=False,separators=(',',':'))))
+                    reasons.extend(exchange_review['reasons'])
+                except (ValueError,TypeError,KeyError):
+                    reasons.append('CALCULATION_EXCHANGE_MANIFEST_INVALID')
+            else:
+                reasons.append('CALCULATION_EXCHANGE_MANIFEST_MISSING')
+            if p.get('solver_receipt'):
+                try:
+                    solver_review=audit_solver_receipt(SolverReceipt(**p['solver_receipt']))
+                    reasons.extend(solver_review['reasons'])
+                except (ValueError,TypeError,KeyError):
+                    reasons.append('SOLVER_RECEIPT_INVALID')
+            else:
+                reasons.append('SOLVER_RECEIPT_MISSING')
             reasons.extend(['CALCULATION_SEMANTICS_NOT_VERIFIED','SOLVER_NOT_RUN','ACTUAL_STRUCTURE_NOT_VERIFIED'])
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
-            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,authority_review=authority_review,semantic_review=semantic_review,
+            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,authority_review=authority_review,semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
             origin=event['origin'],acceptance_granted=False,engineering_verified=False))
     return dict(packets=rows,revision=state[-1]['revision'] if state else 0,status='BLOCK' if rows else 'NOT_PROVIDED',
                 scope='SOURCE_BOUND_DOMAIN_INPUTS',acceptance_granted=False,final_audit='NOT_RUN')
