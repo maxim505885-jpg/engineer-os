@@ -157,14 +157,6 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.core-run'));
   assert.ok(doc.querySelector('.core-run').textContent.includes('NOT_RUN'));
-  assert.ok(doc.querySelector('#real-case-panel'),'Stage-7 real case panel missing');
-  await until(()=>[...doc.querySelector('#real-case-form select').options].some(o=>o.value));
-  const caseSelect=doc.querySelector('#real-case-form select');caseSelect.value=[...caseSelect.options].find(o=>o.value).value;
-  doc.querySelector('#real-case-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
-  await until(()=>doc.querySelector('.real-case-result'));
-  await until(()=>!doc.querySelector('#send').disabled);
-  assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
-  assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
   const fullPdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
   assert.ok(fullPdfCard.querySelector('.advanced-document-actions'),'Manual extraction must be under advanced actions');
   const fullPdfCheck=fullPdfCard.querySelector('input');for(const check of doc.querySelectorAll('.file input:checked'))if(check!==fullPdfCheck)check.click();if(!fullPdfCheck.checked)fullPdfCheck.click();
@@ -238,6 +230,14 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
   assert.equal(doc.querySelectorAll('.file').length,6,'Unavailable Drive must not manufacture an imported file (including two domain fixtures)');
+  assert.ok(doc.querySelector('#real-case-panel'),'Stage-7 real case panel missing');
+  await until(()=>[...doc.querySelector('#real-case-form select').options].some(o=>o.value));
+  const caseSelect=doc.querySelector('#real-case-form select');caseSelect.value=[...caseSelect.options].find(o=>o.value).value;
+  doc.querySelector('#real-case-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.real-case-result'));
+  await until(()=>!doc.querySelector('#send').disabled);
+  assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
+  assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
