@@ -1,0 +1,37 @@
+{
+  "acceptance_granted": false,
+  "block_reasons": [
+    "ACTUAL_STRUCTURE_CORRELATION_PENDING",
+    "POINT6_NORMATIVE_DECISION_PENDING",
+    "POINT6_SOLVER_DECISION_PENDING",
+    "V4_DOCUMENT_COMPLETENESS_BLOCK"
+  ],
+  "case_name": "БЦ ул. Набережная 28А — Stage 7B real case",
+  "case_sha256": "eb6f21893534b84ed2c5088347c530e3289b07b34c8ba0460d222d9b87e37060",
+  "engineering_status": "BLOCK",
+  "external_gates": {
+    "actual_structure_correlation": "DEFERRED",
+    "point6_normative_decision": "DEFERRED",
+    "point6_solver_decision": "DEFERRED",
+    "v4_document_completeness": "BLOCK"
+  },
+  "files": [
+    {"role":"TOR","name":"15.09.2026 ТЗК БЦ ул. Набережная 28А V4 сшито с графикой.pdf","size":74522583,"sha256":"b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["PDF_MAGIC_OK"],"status":"PASS","reasons":[]},
+    {"role":"REPORT","name":"15.09.2026 ТЗК БЦ ул. Набережная 28А V4 сшито с графикой.pdf","size":74522583,"sha256":"b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["PDF_MAGIC_OK"],"status":"PASS","reasons":[]},
+    {"role":"CALCULATION_REPORT","name":"Расчет  .docx","size":2754000,"sha256":"7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["OFFICE_STRUCTURE_OK"],"status":"PASS","reasons":[]},
+    {"role":"CALCULATION_REPORT","name":"Расчет  .doc","size":3029504,"sha256":"ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["OLE_MAGIC_OK"],"status":"PASS","reasons":[]},
+    {"role":"MODEL","name":"048 секция 1_А2_011123.lir","size":42047193,"sha256":"a753162adf1f1b2de8ab92ab1355eac4d0c23e9241bf6e0e97f39d3ee6205ca9","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["LIR_CONTAINER_READABLE","LIR_MEMBERS=2"],"status":"PASS","reasons":[]},
+    {"role":"MODEL","name":"Секция 3 _S 011123.lir","size":32397127,"sha256":"fd300a06f23f455a00d120276c2daed3e6142de4abe9edb39d036c2a50f990ca","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["LIR_CONTAINER_READABLE","LIR_MEMBERS=1"],"status":"PASS","reasons":[]},
+    {"role":"GEODESY","name":"Геодезические измерения 03.09 пакетная печать(1).pdf","size":7563047,"sha256":"6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["PDF_MAGIC_OK"],"status":"PASS","reasons":[]},
+    {"role":"GRAPHICS","name":"Графика 03.09.2026.pdf","size":10793106,"sha256":"fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["PDF_MAGIC_OK"],"status":"PASS","reasons":[]},
+    {"role":"OTHER","name":"Таблицы.xlsx","size":10004,"sha256":"305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["OFFICE_STRUCTURE_OK"],"status":"PASS","reasons":[]},
+    {"role":"OTHER","name":"привязки секций к модулю грунт.xlsx","size":665732,"sha256":"d04e2fc60d7110d3b1a13095c1e50c67c2bdd24fd7d4eac60cc2e1145510139e","size_match":true,"sha256_match":true,"format_status":"PASS","format_details":["OFFICE_STRUCTURE_OK"],"status":"PASS","reasons":[]}
+  ],
+  "final_audit": "NOT_RUN",
+  "missing_roles": [],
+  "required_roles": ["CALCULATION_REPORT","GEODESY","GRAPHICS","MODEL","REPORT","TOR"],
+  "schema": "ENGINEER_OS_STAGE7_REAL_CASE_V1",
+  "source_identity_status": "PASS",
+  "stage7_completion": "COMPLETE_WITH_OPEN_ENGINEERING_BLOCKS",
+  "workflow_complete": true
+}
