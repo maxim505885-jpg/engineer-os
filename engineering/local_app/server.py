@@ -83,6 +83,10 @@ def make_server(store,model,host='127.0.0.1',port=0):
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
+                    if parts[3]=='evidence':
+                        from .evidence import register
+                        body=self.json_body()
+                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U')))
                     if parts[3]=='jobs':
                         body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[]),mode=body.get('mode','CHAT'),requested_checks=body.get('requested_checks')))
                     if parts[3]=='files':

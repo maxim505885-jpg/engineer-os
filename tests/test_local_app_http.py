@@ -83,6 +83,17 @@ class LocalHTTPTests(unittest.TestCase):
             self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':mode})[0],400)
         self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':'SHELL'})[0],400)
 
+    def test_candidate_api_preserves_source_binding_and_rejects_forgery(self):
+        session=self.create()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.txt',b'height 4m',{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw);payload=dict(file_id=f['id'],quote='height 4m',statement='According to original',status='ACCEPTED',acceptance_granted=True)
+        path=f'/api/sessions/{session}/evidence'
+        self.assertEqual(self.request('POST',path,payload,token=False)[0],403)
+        status,_,raw=self.request('POST',path,payload);r=json.loads(raw)
+        self.assertEqual(status,201);self.assertEqual(r['status'],'UNVERIFIED');self.assertFalse(r['acceptance_granted'])
+        self.assertEqual(self.request('POST',path,dict(payload,quote='height 99m'))[0],400)
+        self.assertEqual(len(json.loads(self.request('GET',f'/api/sessions/{session}')[2])['evidence']),1)
+
     def test_html_bootstrap_and_api_require_token(self):
         status,h,body=self.request('GET','/',token=False)
         self.assertEqual(status,200);self.assertIn(self.server.token.encode(),body)

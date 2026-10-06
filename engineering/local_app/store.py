@@ -26,6 +26,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS messages(seq INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL REFERENCES sessions(id),role TEXT NOT NULL,content TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
@@ -57,8 +58,9 @@ class Store:
             messages=[dict(r) for r in db.execute('SELECT * FROM (SELECT * FROM messages WHERE session_id=? ORDER BY seq DESC LIMIT 200) ORDER BY seq',(session_id,))]
             jobs=[self.job_dict(r) for r in db.execute('SELECT * FROM jobs WHERE session_id=? ORDER BY created DESC LIMIT 200',(session_id,))]
             files=[self.file_dict(r) for r in db.execute('SELECT * FROM files WHERE session_id=? ORDER BY created LIMIT 200',(session_id,))]
+            evidence=[json.loads(r['record']) for r in db.execute('SELECT record FROM local_evidence WHERE session_id=? ORDER BY created LIMIT 500',(session_id,))]
             count=db.execute('SELECT count(*) FROM messages WHERE session_id=?',(session_id,)).fetchone()[0]
-        return dict(session=dict(session),messages=messages,jobs=jobs,files=files,history_windowed=count>len(messages),message_count=count)
+        return dict(session=dict(session),messages=messages,jobs=jobs,files=files,evidence=evidence,history_windowed=count>len(messages),message_count=count)
 
     @staticmethod
     def file_dict(row,private=False):
@@ -86,6 +88,14 @@ class Store:
                 raise ValueError('Conversation attachment limit: 200 files; create another conversation')
             db.execute('INSERT INTO files VALUES(:id,:session_id,:name,:path,:sha256,:size,:text,:extraction_status,:extraction_note,:text_truncated,:created)',record)
         return self.file_dict(record)
+
+    def add_evidence(self,record):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('SELECT id FROM files WHERE id=? AND session_id=?',(record['file_id'],record['session_id'])).fetchone() is None:raise ValueError('Original isolation failure')
+            if db.execute('SELECT count(*) FROM local_evidence WHERE session_id=?',(record['session_id'],)).fetchone()[0]>=500:raise ValueError('Candidate limit: 500 per conversation')
+            db.execute('INSERT INTO local_evidence VALUES(?,?,?,?,?)',(record['id'],record['session_id'],record['file_id'],json.dumps(record,ensure_ascii=False),record['created']))
+        return record
 
     def enqueue(self,session_id,prompt,file_ids,*,mode='CHAT',requested_checks=None):
         identifier(session_id)

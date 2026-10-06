@@ -19,3 +19,9 @@
 232 Python + 4 Node PASS; DOM smoke дополнительно проверяет explicit CORE_PLAN, отсутствие model request, показ плана и восстановление после повторного открытия диалога. Тест миграции старой SQLite-базы сохраняет незавершённый CHAT. API проверен настоящим loopback HTTP. Независимое ревью: некорректный mode []/{} давал 500, воспроизведён FAIL и исправлен на 400; повторный полный набор PASS.
 
 Работает EngineerCore.plan, не исполнение специалистов. Источники UNVERIFIED_SOURCE, evidence_ids=[], FINAL AUDIT NOT_RUN, acceptance=false. План доступен без модели. Настоящий браузер снова вернул ERR_BLOCKED_BY_CLIENT для 127.0.0.1:8765; layout/CSP NOT_RUN. Windows и настоящая qwen3 по указанию пользователя проверяются последними.
+
+## Дополнение 06.10.2026 — локальные кандидаты доказательств
+
+238 Python +4 Node PASS; compileall/JS syntax/diff PASS. Новые проверки: сохранение/повторное открытие, ложная цитата, чужой источник, изменение оригинала, точная PDF-страница 21 вне ограниченного preview, недоступный parser, защищённый token API и игнорирование присланного acceptance=true. DOM smoke дополнен созданием кандидата, инертным markup, reload и изоляцией черновика. Все новые функции сначала воспроизведены FAIL.
+
+Независимое ревью воспроизвело сохранение черновика при смене диалога; очищаются quote/statement/page, регрессия FAIL→PASS. Остальных Critical/Important нет; reviewer отдельно проверил 15 evidence/API тестов и DOM. MATCH не утверждает правдивость факта, UNVERIFIED/NOT_CHECKED не поступают в принятую evidence базу. PDF полнота и прежние 11 BLOCK не перепроверялись; Windows/live inference/visual browser остаются NOT_RUN.

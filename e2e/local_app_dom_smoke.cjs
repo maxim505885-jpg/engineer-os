@@ -35,7 +35,27 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.core-plan'));
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload'],requests:requests.length}));
+  assert.ok(doc.querySelector('#evidence-form'),'Source candidate form must exist');
+  doc.querySelector('#evidence-file').value=doc.querySelector('#evidence-file option').value;
+  doc.querySelector('#evidence-quote').value='ТЗ: высота 4 м';
+  doc.querySelector('#evidence-statement').value='<script>window.forged=true</script>';
+  doc.querySelector('#evidence-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.evidence-card'));
+  assert.ok(doc.querySelector('.evidence-card').textContent.includes('UNVERIFIED'));
+  assert.equal(dom.window.forged,undefined);
+  dom.window.close();dom=await open();doc=dom.window.document;
+  await until(()=>doc.querySelectorAll('nav .session').length===2);
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.evidence-card'));
+  doc.querySelector('#evidence-quote').value='Unsaved previous source';
+  doc.querySelector('#evidence-statement').value='Unsaved previous assertion';
+  doc.querySelector('#evidence-page').value='12';
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
+  await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#evidence-quote').value,'','Draft source quote must not cross conversations');
+  assert.equal(doc.querySelector('#evidence-statement').value,'');
+  assert.equal(doc.querySelector('#evidence-page').value,'');
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
