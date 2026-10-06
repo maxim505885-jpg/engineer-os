@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -48,6 +49,7 @@ def main(argv=None) -> int:
     try:
         data_dir.mkdir(parents=True,exist_ok=True)
         fd,name=tempfile.mkstemp(prefix="stage9-write-",suffix=".tmp",dir=data_dir)
+        os.close(fd)
         Path(name).write_text("ENGINEER OS stage9 write probe",encoding="utf-8")
         Path(name).unlink(missing_ok=True)
         checks.append(dict(name="data_dir_write",status="PASS",path=str(data_dir)))
