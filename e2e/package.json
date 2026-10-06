@@ -3,9 +3,14 @@
   "private": true,
   "version": "1.0.0",
   "description": "Development-only DOM test dependencies; not needed to run the Python cabinet",
-  "engines": {"node": ">=20"},
-  "scripts": {
-    "test": "node local_app_dom_smoke.cjs && node local_drive_dom_smoke.cjs"
+  "engines": {
+    "node": ">=20"
   },
-  "dependencies": {"jsdom": "26.1.0"}
+  "scripts": {
+    "test": "node local_app_dom_smoke.cjs && node local_drive_dom_smoke.cjs",
+    "test:browser": "node local_app_ui_smoke.cjs"
+  },
+  "dependencies": {
+    "jsdom": "26.1.0"
+  }
 }
