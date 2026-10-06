@@ -17,7 +17,9 @@ $SupervisorLog=Join-Path $LogDir 'windows-supervisor.log'
 
 function Log([string]$m){$line=('{0} {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'),$m);Write-Host $line;Add-Content -Encoding UTF8 -Path $SupervisorLog -Value $line}
 function Test-Http([string]$u,[int]$t=2){try{$r=Invoke-WebRequest -UseBasicParsing -Uri $u -TimeoutSec $t -MaximumRedirection 0;return $r.StatusCode -ge 200 -and $r.StatusCode -lt 500}catch{return $false}}
+function Test-EngineerOS{try{$r=Invoke-WebRequest -UseBasicParsing -Uri $AppUrl -TimeoutSec 2 -MaximumRedirection 0;return $r.StatusCode -eq 200 -and $r.Content -match 'ENGINEER OS'}catch{return $false}}
 function Wait-Http([string]$u,[int]$t,[string]$n){$d=(Get-Date).AddSeconds($t);do{if(Test-Http $u 2){Log "$n ready";return};Start-Sleep -Milliseconds 500}while((Get-Date)-lt$d);throw "$n did not become ready: $u"}
+function Wait-EngineerOS([int]$t){$d=(Get-Date).AddSeconds($t);do{if(Test-EngineerOS){Log 'ENGINEER OS ready';return};Start-Sleep -Milliseconds 500}while((Get-Date)-lt$d);throw "ENGINEER OS did not become ready: $AppUrl"}
 function Import-EnvFile([string]$p){if(!(Test-Path $p)){return};foreach($line in Get-Content -LiteralPath $p -Encoding UTF8){$x=$line.Trim();if(!$x -or $x.StartsWith('#') -or !$x.Contains('=')){continue};$a=$x.Split('=',2);$n=$a[0].Trim();$v=$a[1].Trim();if($n -match '^[A-Za-z_][A-Za-z0-9_]*$'){[Environment]::SetEnvironmentVariable($n,$v,'Process')}};Log ('Loaded '+(Split-Path -Leaf $p))}
 
 function Ensure-Venv{
@@ -79,13 +81,13 @@ function Ensure-OpenWebUI{
 }
 
 function Ensure-EngineerOS{
- if(Test-Http "$AppUrl/api/status" 2){Log 'ENGINEER OS already running';return}
+ if(Test-EngineerOS){Log 'ENGINEER OS already running';return}
  $env:ENGINEER_OS_LOCAL_PROVIDER='ollama'
  $env:ENGINEER_OS_LOCAL_MODEL_URL=$OllamaUrl
  $env:ENGINEER_OS_LOCAL_MODEL=$Model
  Log 'Starting ENGINEER OS server + built-in worker'
  Start-Process -FilePath $VenvPython -ArgumentList @('scripts\run_local_app.py','--port','8765','--no-browser') -WorkingDirectory $RepoRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'engineer-os.out.log') -RedirectStandardError (Join-Path $LogDir 'engineer-os.err.log')|Out-Null
- Wait-Http "$AppUrl/api/status" 60 'ENGINEER OS'
+ Wait-EngineerOS 60
 }
 
 try{
