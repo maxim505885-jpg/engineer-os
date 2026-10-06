@@ -1012,7 +1012,7 @@ Ruling: роль источника и нормативная цепочка aut
 
 ✅ Fail-closed сохраняется: `engineering_status=BLOCK`, `acceptance_granted=false`, `FINAL AUDIT NOT_RUN`. Отложенные пункты 6 отражаются deterministic BLOCK reasons.
 
-✅ Unit/HTTP regression suite на первом финальном проходе: 455 Python tests PASS, compile PASS. Первый DOM проход выявил race в тесте после сохранения snapshot; исправлено ожидание освобождения UI controls, финальный CI нового head выполняется.
+✅ Unit/HTTP regression suite: 455 Python tests PASS, compile PASS. После двух исправлений E2E-состояния Stage 7 DOM-проверка перенесена в конец legacy workflow; финальный push run 37534881202 на head `fdebaf082ae81e44190c061843a4bb4cc42977f4` полностью SUCCESS, включая actual HTTP/DOM.
 
 ### 7B — реальный объект «БЦ, ул. Набережная, 28А»
 
@@ -1031,4 +1031,4 @@ SHA256 обоих .lir совпали с ранее проверенными и�
 
 ❌ Реальный 7B snapshot ещё не считается инженерно завершённым: V4 completeness остаётся BLOCK, реальные normative/solver decisions пункта 6 отложены. Цель первого 7B прогона — доказать целостность end-to-end кейса и сохранение всех BLOCK, а не получить ACCEPTED.
 
-Следующая активная работа после зелёного PR65: сформировать первый фактический Stage 7B case snapshot на полном комплекте объекта и проверить его воспроизводимость/stale detection. Пункт 8 FINAL AUDIT не начинать до этого.
+✅ 7A считается технически завершённым на head `fdebaf082ae81e44190c061843a4bb4cc42977f4`; draft PR65 открыт и mergeable. Следующая активная работа: сформировать первый фактический Stage 7B case snapshot на полном комплекте объекта и проверить его воспроизводимость/stale detection. Пункт 8 FINAL AUDIT не начинать до этого.
