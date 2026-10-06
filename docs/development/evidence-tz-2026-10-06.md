@@ -16,4 +16,6 @@ CHAT/CORE получают bounded перечень с раскрытием ус
 
 Один независимый review; два Important reproduced RED→GREEN. Замечание о скрытых finding gates переоценено как Important и исправлено через HTTP/DOM RED→GREEN: иначе пользователь не видел бы существенные причины BLOCK. Новых deferred minors нет. Наследованное ограничение LibreOffice fingerprint=launcher остаётся, runtime нельзя обновлять во время незавершённого анализа.
 
+CI initial PR37504947830 PASS, push37504942036 FAIL: inherited test_docx_order_tables_and_exact_locators сравнивал сохранённый оригинал с новым ZIP fixture, чей timestamp мог отличаться. Reproduced RED контролируемыми двумя timestamps, исправлен expected=исходные upload bytes; GREEN с тем же clock probe. Производственный код не менялся; финальный400suite повторён. Последний CI и точные commit/tree записаны в живой карте.
+
 Пункт5 выполнен как source traceability candidate, без engineering PASS/ACCEPTED. Непроверенный тип данных, полнота перечня, смысловое соответствие вывода цитате, реальные нормативные/расчётные проверки и FINAL AUDIT остаются открыты. Main/deployment не изменены; Windows последней. Дальше: пункт6 — Довести профильные проверки.

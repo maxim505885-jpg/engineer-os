@@ -53,14 +53,15 @@ class OfficeTests(unittest.TestCase):
         return f,job,model,result
 
     def test_docx_order_tables_and_exact_locators(self):
-        f,job,model,result=self.run_doc('report.docx',docx())
+        original=docx()
+        f,job,model,result=self.run_doc('report.docx',original)
         self.assertEqual(result['state'],'SUCCEEDED');self.assertIn('ПОСЛЕДНИЙ_АБЗАЦ',str(model.calls))
         records=self.store.analysis_receipts(self.session,job['id'])['records']
         refs=records[0]['refs'];self.assertTrue(all(r['page'] is None for r in refs))
         self.assertTrue(any(r['locator'].get('kind')=='table_cell' and r['locator']['column']==2 for r in refs))
         self.assertTrue(all(r['locator']['part']=='word/document.xml' for r in refs))
         self.assertIn('200 мм',str(model.calls));self.assertFalse(result['result']['acceptance_granted'])
-        self.assertEqual(Path(self.store.get_file(f['id'])['path']).read_bytes(),docx())
+        self.assertEqual(Path(self.store.get_file(f['id'])['path']).read_bytes(),original)
 
     def test_xlsx_formulas_cached_values_and_missing_cache_are_separate(self):
         _,job,model,result=self.run_doc('table.xlsx',xlsx())
