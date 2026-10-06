@@ -19,6 +19,7 @@
 - append-only `real_case_snapshots` в локальной SQLite;
 - снимок привязан к конкретному `CORE_RUN`;
 - фиксируются SHA256/size всех оригиналов;
+- фиксируется явный manifest ролей исходников: TOR, REPORT, CALCULATION_REPORT, MODEL, GEODESY, GRAPHICS, PHOTO, OTHER;
 - фиксируются digest текущего ТЗ, evidence/review, domain packets и CORE result;
 - стадии:
   - source_identity;
