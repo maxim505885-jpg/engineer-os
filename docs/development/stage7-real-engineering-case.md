@@ -62,3 +62,38 @@
 4. изменение любого ключевого входа делает snapshot stale;
 5. QC не теряет BLOCK профильных ролей;
 6. нет FINAL AUDIT/ACCEPTED до пункта 8.
+
+
+## 7C — фактическое закрытие Stage 7
+
+07.10.2026 выполнен offline real-case run на полном фактическом комплекте объекта.
+
+Результат:
+- required source roles: все присутствуют;
+- 10/10 source entries: identity/format PASS;
+- два независимых запуска дали один и тот же case SHA256:
+  `eb6f21893534b84ed2c5088347c530e3289b07b34c8ba0460d222d9b87e37060`;
+- stale test: намеренная подмена ожидаемого SHA256 одного LIR перевела
+  source identity в BLOCK, изменила case SHA и дала
+  `BLOCKED_BY_SOURCE_INTEGRITY`;
+- сохранён реальный QA snapshot:
+  `docs/qa/2026-10-07-stage7-naberezhnaya-real-case.json`;
+- воспроизводимый runner:
+  `scripts/stage7_real_case_offline.py`.
+
+Stage 7 считается **технически завершённым**:
+`stage7_completion=COMPLETE_WITH_OPEN_ENGINEERING_BLOCKS`.
+
+Это не означает инженерное ACCEPTED. Реальный кейс остаётся:
+- `engineering_status=BLOCK`;
+- `acceptance_granted=false`;
+- `FINAL AUDIT NOT_RUN`.
+
+Открытые причины относятся к отложенному пункту 6 и V4 completeness:
+- V4_DOCUMENT_COMPLETENESS_BLOCK;
+- POINT6_NORMATIVE_DECISION_PENDING;
+- POINT6_SOLVER_DECISION_PENDING;
+- ACTUAL_STRUCTURE_CORRELATION_PENDING.
+
+Следующий этап по карте — пункт 8 FINAL AUDIT, но его нельзя считать
+успешным до возврата и фактического закрытия указанных инженерных BLOCK.
