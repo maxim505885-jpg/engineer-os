@@ -14,6 +14,7 @@ import subprocess
 import time
 
 from .solver_receipt import SolverReceipt
+from .execution_identity import SolverExecutionIdentity,command_fingerprint
 
 @dataclass(frozen=True)
 class SolverCommand:
@@ -98,3 +99,25 @@ def execute_solver(command:SolverCommand)->SolverReceipt:
         started_at=started,
         finished_at=finished,
     )
+
+
+def execute_solver_with_identity(command:SolverCommand):
+    """Execute once and return receipt plus immutable executable/command identity."""
+    receipt=execute_solver(command)
+    executable_sha=_sha(Path(command.executable))
+    identity=SolverExecutionIdentity(
+        solver_name=command.solver_name,
+        solver_version=command.solver_version,
+        executable_sha256=executable_sha,
+        command_sha256=command_fingerprint(
+            solver_name=command.solver_name,
+            solver_version=command.solver_version,
+            executable_sha256=executable_sha,
+            args=command.args,
+            timeout_seconds=command.timeout_seconds,
+        ),
+        input_sha256=receipt.input_sha256,
+        output_sha256=receipt.output_sha256,
+        log_sha256=receipt.log_sha256,
+    )
+    return receipt,identity
