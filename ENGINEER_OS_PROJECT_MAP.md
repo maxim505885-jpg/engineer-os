@@ -951,3 +951,30 @@ Ruling: роль источника и нормативная цепочка aut
 ❌ Это ещё не реальный запуск пользовательской ЛИРА/SCAD. Нет подтверждённых аргументов запуска конкретной установленной версии, реального vendor export fixture, result adapter и actual-structure correlation.
 
 Следующий подэтап пункта6: result-verification layer — типизированные solver outputs/log findings, привязка output hash к input receipt, проверка completeness/result consistency и actual-structure correlation contract. Финальная Windows-проверка остаётся пунктом9.
+
+
+## 43. Пункт 6 — программные completion gates — 06.10.2026
+
+Создана ветка `feat/point6-completion-gates-20261006` поверх stage6E. Цель этого прохода — проверить весь оставшийся пункт 6 и закрыть все software-gaps, которые можно закрыть без реальной установленной ЛИРА/SCAD и без объявления инженерного ACCEPTED.
+
+✅ Добавлен immutable solver execution identity: SHA256 executable, fingerprint команды/config, solver name/version и привязка к input/output/log receipt.
+
+✅ Добавлен result-verification gate: input/output/log SHA должны совпасть с receipt; отдельно проверяются completeness, consistency, solver log и critical findings. Успех даёт только `READY_FOR_STRUCTURE_CORRELATION`.
+
+✅ Добавлен actual-structure correlation gate для GEOMETRY, MATERIALS_SECTIONS, LOADS_COMBINATIONS, SUPPORTS_RELEASES. Расчётные source IDs и фактические source IDs разделены и проверяются по ролям. Успех даёт только `READY_FOR_ENGINEERING_REVIEW`.
+
+✅ Добавлен identity-bound normative source verification: нормативный candidate, document/edition/authority/source_ref и SHA256 исходного файла. Это подтверждает только identity/source route и не заменяет applicability review.
+
+✅ Добавлен engineering data-class review для P/F/M/T/C/A/I/U. Все source candidates пакета должны иметь отдельную VERIFIED-классификацию; declaration кандидата сама по себе недостаточна.
+
+✅ Все новые гейты подключены в NORMATIVE/CALCULATION domain packets и fresh report. Добавлен единый `point6_readiness`: полный набор software prerequisites → `READY_FOR_ENGINEERING_DECISION`; иначе `BLOCKED_PREREQUISITES`.
+
+✅ Даже `READY_FOR_ENGINEERING_DECISION` намеренно сохраняет `status=BLOCK`, `acceptance_granted=false`, `engineering_verified=false`, `FINAL AUDIT NOT_RUN`. Это readiness для реального инженерного решения, а не само решение.
+
+✅ Local UI получил расширенный JSON packet route для receipts/gates через тот же строгий server validation и отображение статусов каждого слоя. Базовые формы 6Б остаются совместимыми.
+
+✅ Добавлены unit/integration/DOM regression tests. В ходе первого прогона обнаружена одна syntax regression в domain_packets; корень найден по GitHub Actions logs и исправлен. Исправленный Python regression suite уже PASS; финальный HTTP/DOM run должен подтверждаться отдельным SUCCESS run перед объявлением CI PASS.
+
+❌ Что остаётся для фактического завершения пункта 6 на реальном объекте: официальный нормативный исходник нужной редакции и реальная applicability verification; реальный documented LIRA/SCAD export/API snapshot пользовательской модели; подтверждённый executable/args конкретного solver; реальный solver run; реальные output/log; actual-structure source candidates и correlation; затем инженерное решение.
+
+Это теперь **external evidence/execution**, а не отсутствующие software gates. Пункт 6 не считается инженерно завершённым до такого реального прогона. После него — пункт 7 полный реальный инженерный кейс, пункт 8 FINAL AUDIT/acceptance, пункт 9 финальная Windows-проверка.
