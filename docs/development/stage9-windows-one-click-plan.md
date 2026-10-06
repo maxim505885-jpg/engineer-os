@@ -11,7 +11,7 @@ Goal: one double-click on `Start_ENGINEER_OS.cmd` replaces the manual PowerShell
 6. Reuse or start Open WebUI when installed. Open WebUI is optional because the app can talk directly to Ollama.
 7. Load Google Drive OAuth env if `.env.google-drive` exists. Drive is not a background process.
 8. Start ENGINEER OS on 127.0.0.1:8765. Its durable worker starts inside the same process.
-9. Wait for `/api/status`; open the browser only after readiness.
+9. Wait for the local ENGINEER OS HTML page and separately verify Ollama readiness; open the browser only after readiness.
 10. Write logs and startup state under `.engineer-os`.
 11. A second launch reuses healthy services and avoids duplicate app instances.
 
