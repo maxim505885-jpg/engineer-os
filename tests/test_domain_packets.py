@@ -199,5 +199,67 @@ class DomainPacketTests(unittest.TestCase):
         self.assertNotIn('SOLVER_NOT_RUN',r['reasons'])
         self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
 
+    def test_complete_normative_software_gates_are_ready_but_still_blocked(self):
+        p=self.packet()
+        p['authority_review']=dict(
+            document='TEST',edition='2026',clause='clause1',authority='Controlled authority',
+            source_ref='authority:test',applicability_basis='Controlled applicability review',decision='VERIFIED')
+        p['authority_source']=dict(
+            candidate_id=self.n['id'],document='TEST',edition='2026',authority='Controlled authority',
+            source_ref='authority:test',source_sha256=self.norm['sha256'],
+            verification_method='Controlled source identity review',decision='VERIFIED')
+        p['data_class_reviews']=[
+            dict(candidate_id=self.n['id'],data_class='U',decision='VERIFIED',basis='Controlled classification'),
+            dict(candidate_id=self.a['id'],data_class='U',decision='VERIFIED',basis='Controlled classification')]
+        self.save(p);r=self.report()['packets'][0]
+        self.assertEqual(r['authority_source']['status'],'READY_FOR_APPLICABILITY_REVIEW')
+        self.assertEqual(r['data_class_review']['status'],'READY_FOR_DOMAIN_REVIEW')
+        self.assertEqual(r['point6_readiness'],'READY_FOR_ENGINEERING_DECISION')
+        self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
+
+    def test_complete_calculation_software_gates_are_ready_but_still_blocked(self):
+        from engineering.calculation.model_intake import CalculationArtifactRole
+        roles=list(CalculationArtifactRole)
+        bindings=[dict(role=x.value,file_id=self.actual['id'],candidate_ids=[self.a['id']]) for x in roles]
+        semantic=[dict(role=x.value,statement='Controlled semantic statement',candidate_ids=[self.a['id']],
+                       decision='VERIFIED',basis='Controlled semantic basis') for x in roles]
+        sha='a'*64
+        exchange=dict(format='ENGINEER_OS_CALC_EXCHANGE',version=1,source_sha256=sha,sections=[
+            dict(name='GEOMETRY',source_sha256=sha,records=[{'node':1}]),
+            dict(name='MATERIALS_SECTIONS',source_sha256=sha,records=[{'section':'S1'}]),
+            dict(name='LOADS_COMBINATIONS',source_sha256=sha,records=[{'case':'LC1'}]),
+            dict(name='SUPPORTS_RELEASES',source_sha256=sha,records=[{'node':1}]),
+            dict(name='UNITS',source_sha256=sha,records=[{'length':'m'}])])
+        receipt=dict(solver_name='TEST',solver_version='1',input_sha256='a'*64,
+                     output_sha256='b'*64,log_sha256='c'*64,exit_code=0,
+                     started_at='2026-10-06T20:00:00Z',finished_at='2026-10-06T20:01:00Z')
+        execution=dict(solver_name='TEST',solver_version='1',executable_sha256='d'*64,
+                       command_sha256='e'*64,input_sha256='a'*64,output_sha256='b'*64,log_sha256='c'*64)
+        result=dict(input_sha256='a'*64,output_sha256='b'*64,log_sha256='c'*64,
+                    output_source_ref='file:result',log_source_ref='file:log',
+                    completeness='VERIFIED',consistency='VERIFIED',log_review='VERIFIED',critical_findings=[])
+        correlation=[dict(role=role,calculation_source_ids=[self.a['id']],actual_source_ids=[self.a['id']],
+                          statement='Controlled correlation',basis='Controlled basis',decision='VERIFIED')
+                     for role in ('GEOMETRY','MATERIALS_SECTIONS','LOADS_COMBINATIONS','SUPPORTS_RELEASES')]
+        p=dict(kind='CALCULATION',bindings=bindings,semantic_reviews=semantic,exchange_manifest=exchange,
+               solver_receipt=receipt,execution_identity=execution,result_verification=result,
+               structure_correlation=correlation,
+               data_class_reviews=[dict(candidate_id=self.a['id'],data_class='U',decision='VERIFIED',basis='Controlled classification')])
+        self.save(p);r=self.report()['packets'][0]
+        self.assertEqual(r['execution_review']['status'],'READY_FOR_RESULT_INTEGRITY_REVIEW')
+        self.assertEqual(r['result_review']['status'],'READY_FOR_STRUCTURE_CORRELATION')
+        self.assertEqual(r['structure_review']['status'],'READY_FOR_ENGINEERING_REVIEW')
+        self.assertEqual(r['data_class_review']['status'],'READY_FOR_DOMAIN_REVIEW')
+        self.assertEqual(r['point6_readiness'],'READY_FOR_ENGINEERING_DECISION')
+        self.assertEqual(r['status'],'BLOCK');self.assertFalse(r['acceptance_granted'])
+
+    def test_normative_authority_source_hash_mismatch_is_rejected(self):
+        p=self.packet()
+        p['authority_source']=dict(
+            candidate_id=self.n['id'],document='TEST',edition='2026',authority='Controlled authority',
+            source_ref='authority:test',source_sha256='f'*64,
+            verification_method='Controlled source identity review',decision='VERIFIED')
+        with self.assertRaises(ValueError):self.save(p)
+
 
 if __name__=='__main__':unittest.main()
