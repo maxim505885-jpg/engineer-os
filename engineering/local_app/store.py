@@ -369,7 +369,10 @@ class Store:
     def checkpoint(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str):raise ValueError('Invalid progress result')
-        result=dict(result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
+        status='UNCERTAINTY'
+        if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
+            status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
+        result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
         with self.connection() as db:
             previous=db.execute('SELECT result FROM jobs WHERE id=?',(job_id,)).fetchone()
             prior=json.loads(previous['result']) if previous and previous['result'] else {}
@@ -379,7 +382,10 @@ class Store:
     def finish(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str) or not result['text'].strip():raise ValueError('Nonempty model response required')
-        result=dict(result,engineering_status='UNCERTAINTY',evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
+        status='UNCERTAINTY'
+        if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
+            status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
+        result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
             r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone()

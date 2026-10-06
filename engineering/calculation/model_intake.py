@@ -34,9 +34,11 @@ class CalculationArtifact:
     source_ref: str
 
     def __post_init__(self) -> None:
-        if not self.artifact_id.strip() or not self.source_ref.strip():
+        if any(not isinstance(v,str) or not v.strip() or len(v)>2000 for v in (self.artifact_id,self.source_ref)):
             raise ValueError("calculation artifact identity and source_ref are required")
-        if not _SHA256.fullmatch(self.source_sha256):
+        if not isinstance(self.role,CalculationArtifactRole):
+            raise ValueError('a typed calculation artifact role is required')
+        if not isinstance(self.source_sha256,str) or not _SHA256.fullmatch(self.source_sha256):
             raise ValueError("calculation artifact SHA-256 must be 64 lowercase hex characters")
 
 
@@ -53,6 +55,10 @@ _REQUIRED = tuple(CalculationArtifactRole)
 def audit_calculation_model_intake(
     artifacts: tuple[CalculationArtifact, ...],
 ) -> CalculationIntakeResult:
+    if not isinstance(artifacts,(tuple,list)) or len(artifacts)>1000 or any(not isinstance(a,CalculationArtifact) for a in artifacts):
+        raise ValueError('bounded typed calculation artifacts are required')
+    for artifact in artifacts:
+        artifact.__post_init__()
     if not artifacts:
         return CalculationIntakeResult("BLOCK", _REQUIRED, ())
 

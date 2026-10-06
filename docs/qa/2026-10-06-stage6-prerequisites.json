@@ -1,0 +1,13 @@
+{
+  "scope": "STAGE6A_PARTIAL_PREREQUISITES_AND_ARITHMETIC",
+  "stage6_complete": false,
+  "python_suite": {"tests": 410, "result": "PASS"},
+  "new_focused_tests": 10,
+  "node_dashboard_tests": {"tests": 4, "result": "PASS"},
+  "http_dom": {"app": "PASS", "drive": "PASS", "synthetic_model": true, "live_ollama": false, "live_oauth": false, "visual_browser": false, "model_requests": 12},
+  "red_green": ["calculation_role_type", "normative_evidence_array", "invalid_normative_scalar", "numeric_comparison", "core_prerequisites_report", "persisted_engineering_block", "visible_domain_block"],
+  "arithmetic_only": {"inputs_verified": false, "normative_applicability_verified": false, "ui_api_connected": false},
+  "solver": {"execution": "NOT_RUN", "local_app_access": "NOT_CONFIGURED", "lira_scad_commands_in_path": false, "windows_checked": false},
+  "acceptance_granted": false,
+  "final_audit": "NOT_RUN"
+}

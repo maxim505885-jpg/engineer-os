@@ -32,10 +32,11 @@ class NormativeVerificationRecord:
             "comparison": self.comparison,
             "conclusion": self.conclusion,
         }
-        missing = [name for name, value in values.items() if not value.strip()]
-        if not self.evidence_ids or any(not item.strip() for item in self.evidence_ids):
+        missing = [name for name, value in values.items() if not isinstance(value,str) or not value.strip() or len(value)>10000]
+        valid_ids=isinstance(self.evidence_ids,(tuple,list)) and 0<len(self.evidence_ids)<=100 and all(isinstance(item,str) and item.strip() and len(item)<=200 for item in self.evidence_ids)
+        if not valid_ids:
             missing.append("evidence_ids")
-        if len(set(self.evidence_ids)) != len(self.evidence_ids):
+        if valid_ids and len(set(self.evidence_ids)) != len(self.evidence_ids):
             missing.append("evidence_ids_unique")
         return tuple(missing)
 
@@ -48,9 +49,11 @@ class NormativeGateResult:
 
 
 def gate_normative_verification(record: NormativeVerificationRecord) -> NormativeGateResult:
+    if not isinstance(record,NormativeVerificationRecord):
+        raise ValueError('typed normative record required')
     missing = record.missing_fields()
     return NormativeGateResult(
         status="BLOCK" if missing else "READY_FOR_EXPERT_VERIFICATION",
         missing_fields=missing,
-        evidence_ids=record.evidence_ids,
+        evidence_ids=tuple(record.evidence_ids) if 'evidence_ids' not in missing else (),
     )

@@ -141,6 +141,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
 
     def save_progress():
         run['status'] = core.final_status(state).value
+        if result['specialist_checks']['status']=='BLOCK' and run['status']!='ERROR':run['status']='BLOCK'
         if any(r.status==AgentStatus.BLOCK for r in state.results):run['status']='BLOCK'
         if any(r.get('block_seen') for r in getattr(model,'report',{}).get('roles',{}).values()):run['status']='BLOCK'
         lines = ['Предварительный профильный анализ ENGINEER CORE. Не является инженерным принятием.']
@@ -151,6 +152,8 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
             lines.extend('Наблюдение (не проверено): ' + f['text'] for f in row['findings'])
             lines.extend('Ограничение: ' + limit for limit in row['limitations'])
         lines.append('Исходники непроверены. FINAL AUDIT NOT_RUN; acceptance=false.')
+        for check in result['specialist_checks']['checks']:
+            lines.append(check['label']+' · предметная проверка BLOCK: '+check['note'])
         result['text'] = '\n'.join(lines)
         store.checkpoint(job['id'], result)
 
@@ -172,6 +175,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         prior_statuses = [dict(agent=r['agent'], status=r['status'], execution=r['execution']) for r in records[:index]]
         result['context_truncated'] = result['context_truncated'] or clipped
         data = dict(tz=job['prompt'], task_id=job['id'], sources=context,
+                    specialist_checks=result['specialist_checks'],
                     source_context_truncated=truncated,
                     prior_statuses=prior_statuses, prior_results=prior, prior_results_truncated=clipped)
         try:
@@ -208,6 +212,7 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         row.update(execution=execution, status=parsed.status.value, summary=parsed.message,
                    findings=list(parsed.findings), limitations=limitations,
                    finding_gates=finding_gates(store,job['session_id'],list(parsed.findings),job['file_ids']))
+        row['domain_gate']=next((check for check in result['specialist_checks']['checks'] if check['agent']==task.agent),None)
         run['current_agent'] = None
         save_progress()
     run['analysis_complete'] = len(state.results) == len(state.planned)

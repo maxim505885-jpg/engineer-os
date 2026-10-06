@@ -159,7 +159,8 @@ class LocalHTTPTests(unittest.TestCase):
         status,_,_=self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'ТЗ: проверка отчёта','file_ids':[f['id']],'mode':'CORE_PLAN'})
         self.assertEqual(status,202);Worker(self.store,self.model).run_once()
         j=json.loads(self.request('GET',f'/api/sessions/{session}')[2])['jobs'][0]
-        self.assertEqual(j['state'],'SUCCEEDED');self.assertEqual(j['result']['core_plan']['status'],'UNCERTAINTY')
+        self.assertEqual(j['state'],'SUCCEEDED');self.assertEqual(j['result']['core_plan']['status'],'BLOCK')
+        self.assertIn('NORMATIVE_EDITION_NOT_VERIFIED',str(j['result']['specialist_checks']))
         self.assertEqual(self.requests,[])
         for mode in ([],{},None,3):
             self.assertEqual(self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Invalid','file_ids':[f['id']],'mode':mode})[0],400)

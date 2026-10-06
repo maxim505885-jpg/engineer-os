@@ -143,7 +143,8 @@ class LocalAppTests(unittest.TestCase):
         self.assertEqual(plan['evidence_ids'],[])
         self.assertFalse(plan['acceptance_granted'])
         self.assertEqual(plan['final_audit'],'NOT_RUN')
-        self.assertEqual(plan['status'],'UNCERTAINTY')
+        self.assertEqual(plan['status'],'BLOCK')
+        self.assertIn('NORMATIVE_EDITION_NOT_VERIFIED',str(j['result']['specialist_checks']))
         self.assertEqual(plan['task_id'],job['id'])
 
     def test_core_plan_requires_explicit_selected_sources_and_valid_checks(self):
