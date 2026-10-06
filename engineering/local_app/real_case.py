@@ -183,8 +183,8 @@ def build(store,session_id,*,job_id,expected_revision,manifest=None):
         evidence=candidates,
         domain_packets=domains,
         point7_readiness=qc['status'],
-        engineering_status='BLOCK',
-        evidentiary_status='CASE_SNAPSHOT_NOT_ACCEPTANCE',
+        engineering_status='READY_FOR_FINAL_AUDIT' if qc['status']=='READY_FOR_REAL_CASE_REVIEW' else 'BLOCK',
+        evidentiary_status='CASE_READY_FOR_FINAL_AUDIT' if qc['status']=='READY_FOR_REAL_CASE_REVIEW' else 'CASE_SNAPSHOT_NOT_ACCEPTANCE',
         acceptance_granted=False,
         final_audit='NOT_RUN',
     )
