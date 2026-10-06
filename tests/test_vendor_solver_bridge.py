@@ -9,7 +9,7 @@ from engineering.calculation.vendor_adapters import (
     SolverSourceSnapshot,audit_documented_source,to_exchange_manifest,
 )
 from engineering.calculation.exchange_manifest import parse_exchange_manifest,audit_exchange_manifest
-from engineering.calculation.solver_bridge import SolverCommand,execute_solver
+from engineering.calculation.solver_bridge import SolverCommand,execute_solver,execute_solver_with_identity
 from engineering.calculation.solver_receipt import audit_solver_receipt
 
 
@@ -104,6 +104,25 @@ class SolverBridgeTests(unittest.TestCase):
                     input_path=str(inp),output_path=str(out),log_path=str(log),
                     solver_name='CONTROLLED_TEST_SOLVER',solver_version='1',timeout_seconds=30,
                 ))
+
+    def test_external_runner_emits_executable_and_command_identity(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td).resolve()
+            inp=root/'input.json';out=root/'output.json';log=root/'solver.log';script=root/'solver.py'
+            inp.write_text('{"case":"identity"}',encoding='utf-8')
+            script.write_text(
+                "from pathlib import Path\n"
+                "Path('output.json').write_text('RESULT IDENTITY',encoding='utf-8')\n"
+                "print('identity log')\n",encoding='utf-8')
+            command=SolverCommand(
+                executable=str(Path(sys.executable).resolve()),args=(str(script),),cwd=str(root),
+                input_path=str(inp),output_path=str(out),log_path=str(log),
+                solver_name='CONTROLLED_TEST_SOLVER',solver_version='1',timeout_seconds=30)
+            receipt,identity=execute_solver_with_identity(command)
+            self.assertEqual(identity.executable_sha256,hashlib.sha256(Path(sys.executable).resolve().read_bytes()).hexdigest())
+            self.assertEqual(identity.input_sha256,receipt.input_sha256)
+            self.assertEqual(identity.output_sha256,receipt.output_sha256)
+            self.assertEqual(len(identity.command_sha256),64)
 
 
 if __name__=='__main__':
