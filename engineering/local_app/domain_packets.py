@@ -310,7 +310,7 @@ def report(store,session_id,*,selected_files=None):
                     reviewed.append(DataClassReview(**x))
                 data_class_review=audit_data_classes(tuple(reviewed),tuple(dict.fromkeys(
                     list(p.get('norm_ids',[]))+list(p.get('actual_ids',[]))+
-                    [eid for b in p.get('bindings',[]) for eid in b['candidate_ids']]))))
+                    [eid for b in p.get('bindings',[]) for eid in b['candidate_ids']])))
                 reasons.extend(data_class_review['reasons'])
             except (ValueError,TypeError,KeyError):reasons.append('DATA_CLASS_REVIEW_INVALID')
         else:
