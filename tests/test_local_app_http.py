@@ -179,6 +179,26 @@ class LocalHTTPTests(unittest.TestCase):
         self.assertIn('SOLVER_NOT_RUN',result['packets'][0]['reasons']);self.assertFalse(result['acceptance_granted'])
         other=self.create();self.assertEqual(self.request('POST',f'/api/sessions/{other}/domain-packets',body)[0],400)
 
+    def test_real_case_snapshot_http_route_is_private_and_fail_closed(self):
+        from engineering.local_app.worker import Worker
+        session=self.create()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=case.txt',b'case source',{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw)
+        self.core_reply=json.dumps(dict(status='UNCERTAINTY',summary='Controlled case draft',observations=[],limitations=['Not accepted']))
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/jobs',
+            {'prompt':'Full real case','file_ids':[f['id']],'mode':'CORE_RUN','requested_checks':['report']})
+        self.assertEqual(status,202);job=json.loads(raw);Worker(self.store,self.model).run_once()
+        route=f'/api/sessions/{session}/real-case'
+        self.assertEqual(self.request('GET',route,token=False)[0],403)
+        status,_,raw=self.request('POST',route,{'job_id':job['id'],'expected_revision':0})
+        self.assertEqual(status,201);case=json.loads(raw)
+        self.assertEqual(case['engineering_status'],'BLOCK');self.assertFalse(case['acceptance_granted'])
+        status,_,raw=self.request('GET',route);self.assertEqual(status,200)
+        report=json.loads(raw);self.assertEqual(report['revision'],1);self.assertTrue(report['current_fresh'])
+        self.assertEqual(self.request('POST',route,{'job_id':job['id'],'expected_revision':0})[0],409)
+        other=self.create()
+        self.assertEqual(self.request('POST',f'/api/sessions/{other}/real-case',{'job_id':job['id'],'expected_revision':0})[0],400)
+
     def test_profile_execution_uses_local_protocol_and_durable_results(self):
         from engineering.local_app.worker import Worker
         session=self.create()
