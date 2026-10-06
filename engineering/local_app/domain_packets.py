@@ -12,6 +12,8 @@ from .requirements import source_check
 from engineering.normative.verification import NormativeVerificationRecord,gate_normative_verification
 from engineering.normative.numeric_comparison import compare_quantity
 from engineering.calculation.model_intake import CalculationArtifact,CalculationArtifactRole,audit_calculation_model_intake
+from engineering.normative.authority import NormativeAuthorityReview,audit_normative_authority
+from engineering.calculation.semantic_review import CalculationSemanticReview,audit_calculation_semantics
 
 CHAIN=('document','edition','scope','clause','requirement','actual_condition','comparison','conclusion')
 ALIASES={'м':'m','мм':'mm','см':'cm','Н':'N','кН':'kN','Па':'Pa','кПа':'kPa','МПа':'MPa','м2':'m2','мм2':'mm2'}
@@ -50,7 +52,7 @@ def save(store,session_id,*,packet,expected_revision):
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']}
     kind=packet.get('kind');refs=[];files=[]
     if kind=='NORMATIVE':
-        if set(packet)!={'kind','chain','norm_ids','actual_ids','quantities'}:raise ValueError('Invalid normative packet fields')
+        if set(packet) not in ({'kind','chain','norm_ids','actual_ids','quantities'},{'kind','chain','norm_ids','actual_ids','quantities','authority_review'}):raise ValueError('Invalid normative packet fields')
         chain=packet['chain']
         if not isinstance(chain,dict) or set(chain)!=set(CHAIN) or any(not isinstance(v,str) or not v.strip() or len(v)>1000 for v in chain.values()):raise ValueError('Complete bounded normative chain required')
         norm=ids(packet['norm_ids']);actual=ids(packet['actual_ids']);refs=norm+actual
@@ -63,8 +65,15 @@ def save(store,session_id,*,packet,expected_revision):
             numeric=compare_quantity(actual=q['actual']['value'].replace(',','.'),actual_unit=ALIASES.get(q['actual']['unit'],q['actual']['unit']),limit=q['limit']['value'].replace(',','.'),limit_unit=ALIASES.get(q['limit']['unit'],q['limit']['unit']),operator=q['operator'])
             if numeric['status']=='BLOCK':raise ValueError('Invalid numeric comparison: '+','.join(numeric['reasons']))
         gate_normative_verification(NormativeVerificationRecord(**chain,evidence_ids=tuple(dict.fromkeys(refs))))
+        if 'authority_review' in packet:
+            a=packet['authority_review']
+            if not isinstance(a,dict) or set(a)!={'document','edition','clause','authority','source_ref','applicability_basis','decision'}:
+                raise ValueError('Invalid normative authority review')
+            if any(a[k]!=chain[k] for k in ('document','edition','clause')):
+                raise ValueError('Authority review must match normative chain identity')
+            audit_normative_authority(NormativeAuthorityReview(**a))
     elif kind=='CALCULATION':
-        if set(packet)!={'kind','bindings'} or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
+        if set(packet) not in ({'kind','bindings'},{'kind','bindings','semantic_reviews'}) or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
         roles=[]
         for binding in packet['bindings']:
             if not isinstance(binding,dict) or set(binding)!={'role','file_id','candidate_ids'}:raise ValueError('Invalid calculation binding')
@@ -76,6 +85,20 @@ def save(store,session_id,*,packet,expected_revision):
                 if eid not in candidates or candidates[eid]['file_id']!=f['id']:raise ValueError('Calculation candidate/file mismatch')
                 refs.append(eid)
         if len(set(roles))!=len(roles):raise ValueError('Calculation roles must be distinct')
+        if 'semantic_reviews' in packet:
+            semantic=packet['semantic_reviews']
+            if not isinstance(semantic,list) or len(semantic)>9:raise ValueError('Invalid calculation semantic reviews')
+            allowed_by_role={b['role']:set(b['candidate_ids']) for b in packet['bindings']}
+            reviews=[]
+            for item in semantic:
+                if not isinstance(item,dict) or set(item)!={'role','statement','candidate_ids','decision','basis'}:
+                    raise ValueError('Invalid calculation semantic review')
+                role=CalculationArtifactRole(item['role'])
+                source_ids=ids(item['candidate_ids'])
+                if role.value not in allowed_by_role or not set(source_ids)<=allowed_by_role[role.value]:
+                    raise ValueError('Semantic review sources must belong to the same calculation role')
+                reviews.append(CalculationSemanticReview(role,item['statement'],tuple(source_ids),item['decision'],item['basis']))
+            audit_calculation_semantics(tuple(reviews))
     else:raise ValueError('Unknown domain packet kind')
     snapshots=[]
     for eid in dict.fromkeys(refs):
@@ -98,7 +121,7 @@ def report(store,session_id,*,selected_files=None):
     state=store.domain_packets_state(session_id)
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']};rows=[]
     for event in latest(state):
-        p=event['packet'];sources=[];reasons=[]
+        p=event['packet'];sources=[];reasons=[];authority_review=None;semantic_review=None
         for expected in event['sources']:
             r=candidates.get(expected['candidate_id'])
             if not r:reasons.append('CANDIDATE_MISSING');continue
@@ -117,6 +140,14 @@ def report(store,session_id,*,selected_files=None):
                     numeric=compare_quantity(actual=q['actual']['value'].replace(',','.'),actual_unit=ALIASES.get(q['actual']['unit'],q['actual']['unit']),limit=q['limit']['value'].replace(',','.'),limit_unit=ALIASES.get(q['limit']['unit'],q['limit']['unit']),operator=q['operator'])
                 except (ValueError,KeyError):
                     reasons.append('QUANTITY_BINDING_INVALID');linked=False
+            if p.get('authority_review'):
+                try:
+                    authority_review=audit_normative_authority(NormativeAuthorityReview(**p['authority_review']))
+                    reasons.extend(authority_review['reasons'])
+                except (ValueError,TypeError):
+                    reasons.append('NORMATIVE_AUTHORITY_REVIEW_INVALID')
+            else:
+                reasons.append('NORMATIVE_AUTHORITY_REVIEW_MISSING')
             reasons.extend(['NORMATIVE_APPLICABILITY_NOT_VERIFIED','NORMATIVE_EDITION_NOT_VERIFIED','DATA_CLASS_NOT_VERIFIED','INPUT_TRUTH_NOT_VERIFIED'])
         else:
             artifacts=[]
@@ -126,10 +157,20 @@ def report(store,session_id,*,selected_files=None):
             checked=audit_calculation_model_intake(tuple(artifacts))
             intake=dict(status=checked.status,missing_roles=[r.value for r in checked.missing_roles])
             if checked.missing_roles:reasons.append('CALCULATION_ARTIFACT_ROLES_MISSING')
+            if p.get('semantic_reviews'):
+                try:
+                    semantic_review=audit_calculation_semantics(tuple(
+                        CalculationSemanticReview(CalculationArtifactRole(x['role']),x['statement'],tuple(x['candidate_ids']),x['decision'],x['basis'])
+                        for x in p['semantic_reviews']))
+                    reasons.extend(semantic_review['reasons'])
+                except (ValueError,TypeError,KeyError):
+                    reasons.append('CALCULATION_SEMANTIC_REVIEW_INVALID')
+            else:
+                reasons.append('CALCULATION_SEMANTIC_REVIEW_MISSING')
             reasons.extend(['CALCULATION_SEMANTICS_NOT_VERIFIED','SOLVER_NOT_RUN','ACTUAL_STRUCTURE_NOT_VERIFIED'])
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
-            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,
+            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,authority_review=authority_review,semantic_review=semantic_review,
             origin=event['origin'],acceptance_granted=False,engineering_verified=False))
     return dict(packets=rows,revision=state[-1]['revision'] if state else 0,status='BLOCK' if rows else 'NOT_PROVIDED',
                 scope='SOURCE_BOUND_DOMAIN_INPUTS',acceptance_granted=False,final_audit='NOT_RUN')
