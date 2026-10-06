@@ -222,6 +222,8 @@ def report(store,session_id,*,selected_files=None):
                     reasons.append('NORMATIVE_SOURCE_VERIFICATION_INVALID')
             else:
                 reasons.append('NORMATIVE_EDITION_NOT_VERIFIED')
+                if authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW':
+                    reasons.append('AUTHORITY_RECEIPT_NOT_SELF_AUTHENTICATING')
             if authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW' and authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW':
                 reasons.append('NORMATIVE_APPLICABILITY_NOT_ACCEPTED')
             else:
@@ -292,6 +294,8 @@ def report(store,session_id,*,selected_files=None):
             if semantic_review is None or semantic_review['status']!='READY_FOR_SOLVER_VERIFICATION':
                 reasons.append('CALCULATION_SEMANTICS_NOT_VERIFIED')
             if solver_review is None:
+                if semantic_review and semantic_review['status']=='READY_FOR_SOLVER_VERIFICATION':
+                    reasons.append('SOLVER_EXECUTION_NOT_PROVEN')
                 reasons.append('SOLVER_NOT_RUN')
             elif result_review and result_review['status']=='READY_FOR_STRUCTURE_CORRELATION':
                 reasons.append('SOLVER_RESULTS_NOT_ENGINEERING_ACCEPTED')
