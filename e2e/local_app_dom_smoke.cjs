@@ -16,6 +16,8 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   dom=await open();let win=dom.window,doc=win.document;await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);
   const source=Buffer.from('ТЗ: высота 4 м');const upload=doc.querySelector('#upload');Object.defineProperty(upload,'files',{value:[{name:'ТЗ.md',size:source.length,arrayBuffer:async()=>new win.Uint8Array(source).buffer}]});
   upload.dispatchEvent(new win.Event('change'));try{await until(()=>doc.querySelector('.file')&&!doc.querySelector('#send').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
+  assert.ok(doc.querySelector('.file .coverage'),'File extraction coverage must be visible');
+  assert.ok(doc.querySelector('.file .coverage').textContent.includes('Полнота документа не проверена'));
   doc.querySelector('#prompt').value='Проверь высоту по ТЗ';doc.querySelector('#composer').dispatchEvent(new win.Event('submit',{cancelable:true}));
   await until(()=>doc.querySelector('.message.assistant')&&!doc.querySelector('#send').disabled);
   assert.equal(requests.length,1);assert.ok(JSON.stringify(requests[0]).includes('высота 4 м'));assert.equal(win.injected,undefined);
@@ -69,6 +71,8 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('.preview-button').click();
   await until(()=>doc.querySelector('#source-image').src.startsWith('data:image/png'));
   assert.ok(doc.querySelector('#source-caption').textContent.includes('preview.pdf'));
+  const pdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
+  assert.ok(pdfCard.querySelector('.coverage').textContent.includes('1/1'),'Actual PDF coverage must be visible');
   assert.ok(doc.querySelector('#source-caption').textContent.includes('не подтверждает'));
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
@@ -112,7 +116,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('#drive-status').textContent.includes('не настроен'));
   assert.equal(doc.querySelector('#drive-import').disabled,true,'Missing OAuth must not be shown as connected');
   assert.equal(doc.querySelectorAll('.file').length,2,'Unavailable Drive must not manufacture an imported file');
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import'],requests:requests.length}));
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

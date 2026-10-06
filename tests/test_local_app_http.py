@@ -58,6 +58,8 @@ class LocalHTTPTests(unittest.TestCase):
         session=self.create();source='ТЗ: высота 4 м'.encode()
         status,_,body=self.request('POST',f'/api/sessions/{session}/files?name='+quote('ТЗ.md'),source,{'Content-Type':'application/octet-stream'})
         self.assertEqual(status,201);f=json.loads(body)
+        self.assertEqual(f['extraction_coverage']['method'],'UTF8')
+        self.assertEqual(f['extraction_coverage']['completeness'],'NOT_CHECKED')
         self.assertEqual(self.request('GET','/api/files/'+f['id'])[2],source)
         status,_,body=self.request('POST',f'/api/sessions/{session}/jobs',{'prompt':'Проверь','file_ids':[f['id']]})
         self.assertEqual(status,202)

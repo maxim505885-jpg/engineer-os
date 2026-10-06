@@ -1,0 +1,22 @@
+"""Observed preview coverage, never a document completeness certificate."""
+
+
+def unknown_coverage(reason='LEGACY_UNKNOWN'):
+    return dict(scope='TEXT_PREVIEW_ONLY',status='UNKNOWN',method='UNKNOWN',
+                total_pages=None,attempted_pages=None,pages_with_text=None,
+                pages_without_text=[],unattempted_pages=None,page_records=[],
+                source_chars=None,stored_chars=None,stop_reasons=[reason],
+                completeness='NOT_CHECKED',ocr='NOT_RUN')
+
+
+def summary(coverage):
+    c=coverage or unknown_coverage()
+    keys=('scope','status','method','total_pages','attempted_pages','pages_with_text',
+          'pages_without_text','unattempted_pages','source_chars','stored_chars',
+          'stop_reasons','completeness','ocr')
+    return {key:c.get(key) for key in keys}
+
+
+def incomplete(coverage):
+    c=coverage or unknown_coverage()
+    return c['status']=='UNKNOWN' or bool(c['stop_reasons'] or c['pages_without_text'])

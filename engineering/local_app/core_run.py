@@ -1,6 +1,7 @@
 """Local specialist drafts. Model output never creates accepted evidence."""
 import json
 from pathlib import Path
+from .coverage import summary, incomplete
 
 from engineering.core.contracts import AgentResult, AgentStatus, EngineerTask, MaterialRef
 from engineering.core.engineer_core import EngineerCore
@@ -39,12 +40,13 @@ def source_context(store, job, files):
     for file in files:
         text = file['text'][:min(4000, budget)]
         budget -= len(text)
-        truncated = truncated or len(text) < len(file['text']) or bool(file['text_truncated']) or file['extraction_status'] == 'UNAVAILABLE'
+        truncated = truncated or len(text) < len(file['text']) or bool(file['text_truncated']) or file['extraction_status'] == 'UNAVAILABLE' or incomplete(file['extraction_coverage'])
         sources.append(dict(id=file['id'], name=file['name'], sha256=file['sha256'],
                             extraction_status=file['extraction_status'], text=text,
                             extraction_note=file['extraction_note'],
                             text_truncated=len(text) < len(file['text']) or bool(file['text_truncated']),
-                            scope='UNVERIFIED_SOURCE'))
+                            scope='UNVERIFIED_SOURCE',extraction_coverage=summary(file['extraction_coverage']),
+                            context_text_chars=len(text),context_text_truncated=len(text)<len(file['text'])))
     selected = set(job['file_ids'])
     candidates = [dict(id=r['id'], file_id=r['file_id'], page=r['page'],
                        quote=r['quote'][:500], statement=r['statement'][:500],

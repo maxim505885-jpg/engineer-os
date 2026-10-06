@@ -70,3 +70,11 @@ Live Ollama/qwen3, Windows и принятый инженерный кейс NOT
 Два DOM smoke PASS: общий launcher/worker с 4 synthetic model requests и отдельный Drive submit с actual local HTTP/synthetic Google opener. Проверены configured-not-connected, selected original, provenance reload, отсутствие токена, смена диалога/очистка draft и failed checksum без ложного файла. Test transport существует только в тестах. jsdom не подтверждает rendering/CSP настоящего браузера.
 
 Live Google OAuth/Drive NOT_RUN; интерактивное подключение аккаунта не реализовано. Windows/live qwen3/real browser NOT_RUN, Windows последними. UNVERIFIED/NOT_EVIDENCE/acceptance=false, FINAL AUDIT NOT_RUN. PDF V4 не перепроверялся и старые неопубликованные PDF-изменения не включены.
+
+## Дополнение 06.10.2026 — покрытие извлечения
+
+301 Python +4 Node PASS; два actual HTTP/jsdom сценария, compileall/JS syntax/diff-check PASS. Добавлены 10 coverage tests: mixed 23-page PDF с 20 попытками/пропущенным native-текстом, char limit на первой странице, readable/empty/whitespace PDF, повреждённый PDF/UTF8, legacy SQLite migration и restart, CORE_PLAN/CORE_RUN metadata и CHAT actual context cut. Первоначальные 9 тестов RED по отсутствующему покрытию, затем GREEN. HTTP upload assertions проверяют JSON coverage, DOM впервые RED по отсутствующей карточке, после UI GREEN.
+
+Независимое ревью нашло CHAT prompt без фактического context_text_truncated и whitespace page count, оставшийся ненулевым после discard. Оба воспроизведены RED→GREEN. Повторное ревью: Critical/Important нет, 10 tests PASS; отдельные one-file/twenty-file CHAT repro остались в 16k.
+
+RECORDED — наблюдаемое покрытие preview, не подтверждение полноты. UNKNOWN для прежних файлов/ошибок; NOT_CHECKED/NOT_RUN/UNVERIFIED/acceptance=false сохраняются. PDF V4 не перепроверялся, старые неопубликованные PDF-правки не включены. Полный Docling/OCR, live Google/qwen3, real browser/CSP и Windows NOT_RUN; Windows последними.
