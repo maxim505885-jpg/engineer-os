@@ -934,3 +934,20 @@ Ruling: роль источника и нормативная цепочка aut
 ❌ Пункт6 ещё открыт. Нет адаптера конкретного экспортного формата ЛИРА/SCAD, реального solver runner, проверки result semantics/logs и actual-structure correlation.
 
 Следующий подэтап пункта6: adapter конкретного текстового/обменного экспорта ЛИРА/SCAD + real solver execution bridge с immutable identity, затем result verification. Windows остаётся пунктом9.
+
+
+## 42. Пункт 6 — подэтап 6Д: documented LIRA/SCAD adapters + controlled solver bridge — 06.10.2026
+
+✅ Создан кандидат поверх 6Г: ветка `feat/lira-scad-bridge-stage6e-20261006`, draft PR63.
+
+✅ Подтверждены документированные vendor boundaries без догадок о binary: LIRA-FEM text/processsor export и COM/ActiveX API; SCAD text archive/export. ENGINEER OS не зашивает неподтверждённые vendor CLI switches.
+
+✅ Добавлен `vendor_adapters.py`: source kinds LIRA_FEM_API / LIRA_PROCESSOR_TEXT / SCAD_TEXT_ARCHIVE, source version + SHA256 + явные semantic sections. Неполный/пустой/неизвестный source -> BLOCK; полный -> только READY_FOR_EXCHANGE_NORMALIZATION.
+
+✅ Добавлен `solver_bridge.py`: реальный external subprocess boundary с absolute executable, shell=false, bounded args/timeout, confinement input/output/log внутри cwd, минимальным environment и SHA256 input/output/log. Zero exit без ожидаемого output fail-closed: receipt не создаётся.
+
+✅ Добавлены regression tests: normalization, missing/unknown sections, controlled real subprocess, hash receipts, path confinement, zero-exit/no-output fail-closed. Receipt остаётся ниже acceptance.
+
+❌ Это ещё не реальный запуск пользовательской ЛИРА/SCAD. Нет подтверждённых аргументов запуска конкретной установленной версии, реального vendor export fixture, result adapter и actual-structure correlation.
+
+Следующий подэтап пункта6: result-verification layer — типизированные solver outputs/log findings, привязка output hash к input receipt, проверка completeness/result consistency и actual-structure correlation contract. Финальная Windows-проверка остаётся пунктом9.
