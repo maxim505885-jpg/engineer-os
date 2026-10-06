@@ -41,6 +41,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS domain_packets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));
             CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE TABLE IF NOT EXISTS real_case_snapshots(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),job_id TEXT NOT NULL REFERENCES jobs(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
+            CREATE TABLE IF NOT EXISTS final_audits(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),case_id TEXT NOT NULL REFERENCES real_case_snapshots(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
@@ -172,6 +173,28 @@ class Store:
             record=dict(event,revision=count+1)
             db.execute('INSERT INTO real_case_snapshots VALUES(?,?,?,?,?,?)',
                 (record['id'],record['session_id'],record['job_id'],record['revision'],json.dumps(record,ensure_ascii=False),record['created']))
+        return record
+
+
+    def final_audit_state(self,session_id):
+        identifier(session_id)
+        with self.connection() as db:
+            if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
+            return [json.loads(r['record']) for r in db.execute('SELECT record FROM final_audits WHERE session_id=? ORDER BY revision',(session_id,))]
+
+    def add_final_audit(self,event,expected_revision):
+        identifier(event['session_id']);identifier(event['case_id'])
+        if type(expected_revision) is not int or expected_revision<0:raise ValueError('Final audit revision required')
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('SELECT id FROM real_case_snapshots WHERE id=? AND session_id=?',(event['case_id'],event['session_id'])).fetchone() is None:
+                raise ValueError('Final audit case not found in this conversation')
+            count=db.execute('SELECT count(*) FROM final_audits WHERE session_id=?',(event['session_id'],)).fetchone()[0]
+            if count!=expected_revision:raise ReviewConflict('FINAL AUDIT changed; reopen before saving')
+            if count>=100:raise ValueError('FINAL AUDIT history limit: 100 per conversation')
+            record=dict(event,revision=count+1)
+            db.execute('INSERT INTO final_audits VALUES(?,?,?,?,?,?)',
+                (record['id'],record['session_id'],record['case_id'],record['revision'],json.dumps(record,ensure_ascii=False),record['created']))
         return record
 
     def add_requirement_set(self,record):
