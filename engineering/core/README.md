@@ -35,12 +35,20 @@ The Codex adapter includes the controlling ТЗ and materials as untrusted task
 data. Prior results include failed specialists and malformed-output failures,
 so FINAL AUDIT cannot silently lose the latest runtime error.
 
-Current local app mode CORE_PLAN only prepares and persists the plan. It does
-not execute specialists or grant engineering acceptance. CORE_RUN executes
-preliminary drafts via the local model and persists per-role errors/results,
-without accepted evidence or formal FINAL AUDIT. See
-[local execution contract](../../docs/development/local-core-run.md). Live model execution,
-Windows transport and a complete accepted engineering case remain unverified.
+CORE_PLAN only prepares and persists the plan. CORE_RUN executes preliminary
+specialist drafts via the local model and persists per-role errors/results; its
+model "final-audit-agent" remains preliminary and cannot grant acceptance.
+
+Stage 8 adds a separate deterministic local FINAL AUDIT over the current
+immutable Stage-7 case snapshot. That audit may feed ENGINEER CORE through
+LocalFinalAuditAcceptanceGate only when it is fresh, ACCEPTED, and bound to the
+same CORE_RUN task_id. Production may additionally require the existing
+SupabaseAcceptanceGate. See [local execution contract](../../docs/development/local-core-run.md)
+and [Stage-8 FINAL AUDIT](../../docs/development/stage8-final-audit.md).
+
+The current real Naberezhnaya case remains BLOCK because upstream point-6/V4
+prerequisites are open; no real-object ACCEPTED is claimed. Windows transport
+remains the final plan item.
 
 See [core audit](../../docs/development/engineer-core-audit-2026-10-06.md) for
 the current implementation findings and verification limits.
