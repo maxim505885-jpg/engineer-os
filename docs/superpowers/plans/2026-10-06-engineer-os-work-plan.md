@@ -83,7 +83,7 @@
 Результат: для каждого вывода видны основание и уровень проверки.
 Файлы: local_app/evidence.py, provenance.py, review.py; document_intelligence/evidence_bridge.py и evidence_validation.py; core adapters.
 
-## 6. Довести профильные проверки — НЕ СДЕЛАНО
+## 6. Довести профильные проверки — В РАБОТЕ, ПОДЭТАП 6А ВЫПОЛНЕН
 
 - [ ] Нормы: подтверждать редакцию, применимость, пункт и сопоставление с фактом.
 - [ ] Расчёты: единицы, нагрузки, комбинации, опоры, материалы, результаты и solver logs.
@@ -203,3 +203,12 @@ Initial CI PR37504947830 PASS, push37504942036 FAIL из-за ZIPfixture timesta
 
 GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором.
 Дальше: пункт6 — Довести профильные проверки.
+
+
+## Продолжение пункта6 — подэтап6А, 06.10.2026
+
+✅ Строгие normative/calculation contracts, bounded Decimal/SI arithmetic primitive и deterministic domain prerequisite BLOCK в CORE_PLAN/CORE_RUN/QC/UI/Store. DraftPR58 наPR57, remote f006d1efea7072eaa1ffc60a716edd4c49378869/local e1475715c7fb7066a2a3ddaec715b946c03a96ef, tree b80f78cfa8db9a00132444d8363f158bdc57521e. 410Python/4Node/actualHTTP+DOM PASS; one review, copied-plan status fixed RED→GREEN.
+❌ Пункт6 полностью не выполнен: real norm verification, source-bound quantities/domain packet, calculation semantic route и solver execution остаются открыты; арифметика пока standalone, не UI/API/source facts. acceptance=false, FINAL AUDITNOT_RUN, main/deployне менялись. Windows9последней. Четыре верхнихcheckbox6 остаются пустыми.
+Дальше: пункт6 — Довести профильные проверки.
+
+GitHub CI PR58 PASS: push37508689975 и PR37508694510, включая actual HTTP/DOM. Head f006d1efea7072eaa1ffc60a716edd4c49378869; test-merge 87ac8fdea85e6470328303e1e42ac82b8a8f767e, tree b80f78cfa8db9a00132444d8363f158bdc57521e совпадает с опубликованным и локальным.

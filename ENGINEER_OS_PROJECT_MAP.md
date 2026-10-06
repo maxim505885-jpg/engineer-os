@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–36. Пункты1–5 выполнены как проверенные кандидаты: окружение, качество OCR/модели, безопасное продолжение, Office-форматы и связь выводов с источниками/ТЗ. Main не обновлён, инженерное принятие не выдано. **Следующий — пункт6 «Довести профильные проверки». Начать с раздела36.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/evidence-tz-stage5-20261006`; local `40e4c606cd184caa2c0b6ef3ed2b217a2d9273f6`, remote `386cde2e49a8104e2bd3d96a204e680e2a8649c5`, одинаковое tree `70b36f9f977736a7fd5e0811478519ba43b5016b`, draftPR57 на PR56. 400Python/4Node/actualHTTP+DOM PASS. GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** девять пунктов, разделы30–37. Пункты1–5 выполнены как проверенные кандидаты. Пункт6 «Довести профильные проверки» выполняется: подэтап6А опубликован, весь пункт6 НЕ завершён. Начать с раздела37; следующий подэтап — source-bound предметные пакеты, реальные нормы и семантика расчётного комплекта. Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/specialist-checks-stage6-20261006`; local `e1475715c7fb7066a2a3ddaec715b946c03a96ef`, remote `f006d1efea7072eaa1ffc60a716edd4c49378869`, одинаковое tree `b80f78cfa8db9a00132444d8363f158bdc57521e`, draftPR58 наPR57. 410Python/4Node/actualHTTP+DOM PASS. Main/deploy не менялись, acceptance=false, FINAL AUDIT NOT_RUN. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -838,3 +838,24 @@ Initial CI PR37504947830 PASS, push37504942036 FAIL из-за ZIPfixture timesta
 
 GitHub CI final PR57 PASS: push37505430193 и PR37505435661, включая actualHTTP/DOM; head386cde2e, testmerge69a6d07c tree70b36f9f совпадает с опубликованным/локальным. Начальный ZIPfixture failure устранён, не скрыт повтором.
 Дальше: пункт6 — Довести профильные проверки.
+
+
+## 37. 06.10.2026 — пункт 6 в работе: подэтап 6А, PR58
+
+**Сделано:** усилены normative/calculation intake contracts: скаляры неверного типа, строка вместо evidence array, нетипизированные artifact/role и чрезмерные размеры не создают готовность. Полная нормативная цепочка остаётся только READY_FOR_EXPERT_VERIFICATION, комплект — READY_FOR_SEMANTIC_REVIEW; это не проверенные нормы/расчёты.
+
+**Арифметика:** отдельный bounded Decimal/SI primitive для длины/силы/давления/площади/безразмерных. Перевод единиц перед сравнением (<=, <, >=, >, ==); неизвестная единица, размерностное несоответствие, NaN/Infinity/огромный диапазон — BLOCK. satisfied=true/false относится только к арифметике предоставленных значений; статус UNCERTAINTY, истинность входов/нормативная применимость не проверены. Примитив ещё НЕ связан с source facts и UI/API, не выдавать за полноценную нормативную проверку.
+
+**CORE/QC/UI:** `specialist_checks` отдельно от model draft; requested normative — явные document/edition/scope/clause/actual/comparison NOT_VERIFIED; calculation — все 9 ролей комплекта unbound, semantic review NOT_VERIFIED, solver NOT_RUN/NOT_CONFIGURED. Не выводить роли файлов из названий/ответов модели. Отчёт передаётся всем ролям, включая предварительную финальную сверку; сохраняется в SQLite checkpoint/results, после restart и отображается в UI безопасными text nodes. CORE_RUN/CORE_PLAN и верхний engineering_status сохраняют BLOCK; выполнение модели COMPLETED не снимает его. Изменения модулей включены в resume identity.
+
+**Проверки:** 410 Python (10новыхfocused),4 Node, actuallauncher/HTTP/jsdom app+Drive PASS; compileall/JS/diff PASS. Controlled model/Drive,12 model requests; это не live Qwen/OAuth/визуальный браузер/Windows. Один независимый read-only whole-branch review: Critical/Important не найдено; Minor о conflicting CORE_PLAN text/status regraded mandatory для копируемого плана, воспроизведён RED→GREEN и исправлен заодинfixpass. Два inherited test expectations о UNCERTAINTY выявлены fullsuite и обновлены на новое BLOCK+причину; финальный410suitePASS. Повторное ревью не запускалось.
+
+**Публикация:** draft https://github.com/maxim505885-jpg/engineer-os/pull/58 наPR57 `feat/evidence-tz-stage5-20261006`; remote `f006d1efea7072eaa1ffc60a716edd4c49378869`,local `e1475715c7fb7066a2a3ddaec715b946c03a96ef`,identicaltree `b80f78cfa8db9a00132444d8363f158bdc57521e`;15 files / 249 additions / 15 deletions. Отчёт `docs/development/stage6-specialist-checks.md`; метаданные `docs/qa/2026-10-06-stage6-prerequisites.json`. Main/deploy не менялись.
+
+**Что НЕ сделано — пункт 6 остаётся открытым:** источник/редакция/применимость/пункт реальной нормы; typed source-bound предметный пакет и верификация data_class; числа привязанные к подтверждённым фактам/единицам; семантика геометрии/материалов/сечений/нагрузок/комбинаций/опор/результатов/logs/actualstructure; nativeLIR/SCAD adapter/solverreceipt; прогон реального расчётного комплекта. `command -v lira/scad` не нашёл команд в текущемPATH; это не обследование всех машин/Windows. В приложении solver runner не настроен и не выполнялся. FullV4/11BLOCK/0ACCEPTED и inheritedconverterlauncher-onlyfingerprint прежние.
+
+✅ Подэтап6А: строгие контракты, ограниченная арифметика и явные предметные блокировки с QC/UI/persistence.
+❌ Пункт 6 полностью, реальные нормы/расчёты и инженерное принятие не выполнены. Не переходить кпункту 7 и неставитьгалочку6 заэтотподэтап.
+Дальше: пункт 6 — Довести профильные проверки. Начать source-bound предметные пакеты поверх candidates/reviews, затем проверить комплект ЛИРА и конкретную нормативную цепочку; Windows 9 последней.
+
+GitHub CI PR58 PASS: push37508689975 и PR37508694510, включая actual HTTP/DOM. Head f006d1efea7072eaa1ffc60a716edd4c49378869; test-merge 87ac8fdea85e6470328303e1e42ac82b8a8f767e, tree b80f78cfa8db9a00132444d8363f158bdc57521e совпадает с опубликованным и локальным.
