@@ -917,3 +917,20 @@ Ruling: роль источника и нормативная цепочка aut
 ❌ Пункт6 всё ещё не завершён. Не выполнены: внешний/независимый authority verification конкретной нормы, native LIR/SCAD semantic decoder, solver execution receipt, проверка results/logs и сопоставление с фактической конструкцией.
 
 Следующий подэтап пункта6: воспроизводимый solver/input route и реальный parser семантики экспортируемого расчётного комплекта. Windows остаётся пунктом9.
+
+
+## 41. Пункт 6 — подэтап 6Г: solver/input route — 06.10.2026
+
+✅ Создан отдельный кандидат поверх 6В: ветка `feat/solver-input-route-stage6d-20261006`, draft PR62.
+
+✅ Добавлен детерминированный ENGINEER OS calculation exchange manifest. Это собственный UTF-8 JSON interchange, а не попытка угадывать проприетарный LIR/SCAD binary. Обязательные разделы: GEOMETRY, MATERIALS_SECTIONS, LOADS_COMBINATIONS, SUPPORTS_RELEASES, UNITS; source SHA и SHA каждой секции обязательны. Полный manifest даёт только `READY_FOR_SEMANTIC_CROSSCHECK`.
+
+✅ Добавлен fail-closed solver receipt: solver_name/version, input/output/log SHA256, exit_code, started/finished. Non-zero exit -> BLOCK; exit0 -> только `READY_FOR_RESULT_VERIFICATION`.
+
+✅ CALCULATION domain packet может хранить exchange_manifest/solver_receipt; fresh report перепроверяет их. Если receipt есть, система не говорит SOLVER_NOT_RUN, а показывает `SOLVER_EXECUTION_NOT_ACCEPTED`. Общий status всё равно BLOCK, acceptance=false, FINAL AUDIT NOT_RUN.
+
+✅ Regression tests добавлены для missing/empty/duplicate/unknown exchange sections, non-zero/zero solver exit и invariant: semantic reviews + complete exchange + exit0 receipt всё равно не дают engineering acceptance.
+
+❌ Пункт6 ещё открыт. Нет адаптера конкретного экспортного формата ЛИРА/SCAD, реального solver runner, проверки result semantics/logs и actual-structure correlation.
+
+Следующий подэтап пункта6: adapter конкретного текстового/обменного экспорта ЛИРА/SCAD + real solver execution bridge с immutable identity, затем result verification. Windows остаётся пунктом9.
