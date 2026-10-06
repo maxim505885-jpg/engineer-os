@@ -80,14 +80,14 @@ def execute_solver(command:SolverCommand)->SolverReceipt:
         stderr=subprocess.STDOUT,
         timeout=command.timeout_seconds,
         check=False,
-        env={k:v for k,v in os.environ.items() if k.upper() not in {
-            "ENGINEER_OS_LOCAL_MODEL_KEY","OPENAI_API_KEY","SUPABASE_SERVICE_ROLE_KEY"}},
+        env={k:os.environ[k] for k in ("SYSTEMROOT","WINDIR","TEMP","TMP","PATH","HOME")
+             if k in os.environ},
     )
     log.parent.mkdir(parents=True,exist_ok=True)
     log.write_bytes(proc.stdout or b"")
     finished=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
-    if not out.exists():
-        out.write_bytes(b"")
+    if not out.is_file():
+        raise RuntimeError("solver did not produce expected output artifact")
     return SolverReceipt(
         solver_name=command.solver_name,
         solver_version=command.solver_version,
