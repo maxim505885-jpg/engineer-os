@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
-from .contracts import AgentResult, AgentStatus, EngineerTask, SpecialistTask
+from .contracts import AgentResult, AgentStatus, EngineerTask, MaterialRef, SpecialistTask
 
 
 CHECK_REGISTRY: dict[str, tuple[str, str, str]] = {
@@ -20,6 +20,18 @@ class CoreState:
     task: EngineerTask
     planned: list[SpecialistTask]
     results: list[AgentResult]
+    _origin_task: tuple = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._origin_task = self.task_binding(self.task)
+
+    @staticmethod
+    def task_binding(task: EngineerTask) -> tuple:
+        # Immutable values, not aliases to mutable task lists. Metadata is
+        # informational; the controlling execution scope is these fields.
+        return (task.task_id, task.tz,
+                tuple((m.id, m.kind, m.name, m.uri) for m in task.materials),
+                tuple(task.requested_checks))
 
 
 AgentHandler = Callable[[SpecialistTask], AgentResult]
@@ -52,9 +64,9 @@ class AgentRuntimeAdapter:
                 )
                 continue
             result = handler(task)
+            EngineerCore._validate_result_contract(result)
             if result.task_id != task.task_id or result.agent != task.agent:
                 raise ValueError("Runtime handler returned a result for the wrong task or agent")
-            EngineerCore._validate_result_contract(result)
             results.append(result)
         return results
 
@@ -91,23 +103,19 @@ class EngineerCore:
         return self.collect(state, runtime.execute(state.planned))
 
     def collect(self, state: CoreState, results: Iterable[AgentResult]) -> CoreState:
-        allowed = {p.agent for p in state.planned}
-        seen: set[str] = {result.agent for result in state.results}
+        self._validate_state(state)
         incoming = tuple(results)
-        for result in incoming:
-            if result.agent not in allowed:
-                raise ValueError(f"Result from unplanned agent: {result.agent}")
-            if result.task_id != state.task.task_id:
-                raise ValueError("Result task_id does not match core task")
-            if result.agent in seen:
-                raise ValueError(f"Duplicate result from agent: {result.agent}")
-            self._validate_result_contract(result)
-            seen.add(result.agent)
+        # Validate the whole proposed batch before changing the live state.
+        self._validate_state(CoreState(state.task, state.planned, [*state.results, *incoming]))
         state.results.extend(incoming)
         return state
 
     def final_status(self, state: CoreState) -> AgentStatus:
-        if not state.task.tz.strip() or not state.task.materials:
+        # CoreState is deliberately mutable during collection. Never trust a
+        # caller's old validation when computing the authoritative status.
+        try:
+            self._validate_state(state)
+        except ValueError:
             return AgentStatus.BLOCK
         if any(r.status == AgentStatus.ERROR for r in state.results):
             return AgentStatus.ERROR
@@ -153,6 +161,31 @@ class EngineerCore:
 
         return AgentStatus.ACCEPTED
 
+    def _validate_state(self, state: CoreState) -> None:
+        if not isinstance(state, CoreState):
+            raise ValueError("CoreState is required")
+        canonical = self.plan(state.task).planned
+        if state.task_binding(state.task) != state._origin_task:
+            raise ValueError("Core task scope changed; generate a new state and rerun specialists")
+        if not isinstance(state.planned, list) or state.planned != canonical:
+            raise ValueError("Core plan does not match the controlling task")
+        if not isinstance(state.results, list):
+            raise ValueError("Core results must be a list")
+        allowed = {p.agent for p in canonical}
+        seen: set[str] = set()
+        for result in state.results:
+            self._validate_result_contract(result)
+            if result.task_id != state.task.task_id or result.agent not in allowed:
+                raise ValueError("Stored result does not match the core task and plan")
+            if result.agent in seen:
+                raise ValueError("Duplicate stored agent result")
+            if (result.agent == CHECK_REGISTRY["final_audit"][0]
+                    and result.status in {AgentStatus.PASS, AgentStatus.ACCEPTED,
+                                          AgentStatus.ACCEPTED_ALTERNATIVE}
+                    and seen != allowed - {result.agent}):
+                raise ValueError("An accepting FINAL AUDIT must follow all specialist results")
+            seen.add(result.agent)
+
     @staticmethod
     def _validate_result_contract(result: AgentResult) -> None:
         """Fail closed for statuses that claim an accepted engineering conclusion.
@@ -162,6 +195,30 @@ class EngineerCore:
         runtime boundary and at Core.collect() so alternate runtimes cannot
         bypass the invariant.
         """
+        if not isinstance(result, AgentResult) or not isinstance(result.status, AgentStatus):
+            raise ValueError("A typed AgentResult with a valid AgentStatus is required")
+        if any(not isinstance(value, str) or not value.strip()
+               for value in (result.task_id, result.agent)):
+            raise ValueError("Result task_id and agent are required")
+        for name in ("evidence_ids", "checked_agents"):
+            values = getattr(result, name)
+            if not isinstance(values, (tuple, list)) or any(
+                not isinstance(item, str) or not item.strip() for item in values
+            ):
+                raise ValueError(f"{name} must be an array of nonblank strings")
+        if not isinstance(result.acceptance_basis, dict):
+            raise ValueError("acceptance_basis must be an object")
+        for key, values in result.acceptance_basis.items():
+            if (not isinstance(key, str) or not key.strip()
+                    or not isinstance(values, (tuple, list))
+                    or any(not isinstance(item, str) or not item.strip() for item in values)):
+                raise ValueError("acceptance_basis must map domain names to arrays of IDs")
+        if not isinstance(result.findings, (tuple, list)) or any(
+            not isinstance(item, dict) for item in result.findings
+        ):
+            raise ValueError("findings must be an array of objects")
+        if result.message is not None and not isinstance(result.message, str):
+            raise ValueError("message must be a string or null")
         if result.status in {
             AgentStatus.PASS,
             AgentStatus.ACCEPTED,
@@ -202,11 +259,27 @@ class EngineerCore:
 
     @staticmethod
     def _validate(task: EngineerTask) -> None:
-        if not task.task_id.strip():
+        if not isinstance(task, EngineerTask):
+            raise ValueError("EngineerTask is required")
+        if not isinstance(task.task_id, str) or not task.task_id.strip():
             raise ValueError("task_id is required")
-        if not task.tz.strip():
+        if not isinstance(task.tz, str) or not task.tz.strip():
             raise ValueError("ТЗ is required")
-        if not task.materials:
+        if not isinstance(task.materials, (tuple, list)) or not task.materials:
             raise ValueError("At least one material is required")
-        if not task.requested_checks:
+        seen: set[str] = set()
+        for material in task.materials:
+            if not isinstance(material, MaterialRef) or any(
+                not isinstance(value, str) or not value.strip()
+                for value in (material.id, material.kind, material.name)
+            ):
+                raise ValueError("Each material requires a nonblank id, kind and name")
+            if material.id in seen:
+                raise ValueError("Material IDs must be unique")
+            seen.add(material.id)
+            if material.uri is not None and not isinstance(material.uri, str):
+                raise ValueError("Material URI must be a string or null")
+        if (not isinstance(task.requested_checks, (tuple, list)) or not task.requested_checks
+                or any(not isinstance(check, str) or not check.strip()
+                       for check in task.requested_checks)):
             raise ValueError("At least one requested check is required")

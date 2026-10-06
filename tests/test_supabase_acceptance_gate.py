@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from engineering.core.contracts import AgentResult, AgentStatus, EngineerTask
+from engineering.core.contracts import AgentResult, AgentStatus, EngineerTask, MaterialRef
 from engineering.core.engineer_core import AgentRuntimeAdapter, EngineerCore
 from engineering.core.supabase_acceptance_gate import SupabaseAcceptanceGate
 
@@ -20,7 +20,7 @@ class SupabaseAcceptanceGateTests(unittest.TestCase):
         return EngineerTask(
             task_id="gate-task",
             tz="test tz",
-            materials=("material",),
+            materials=(MaterialRef("material", "report", "report.pdf"),),
             requested_checks=("inspection",),
         )
 
