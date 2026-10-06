@@ -22,7 +22,9 @@ class Stage8OfflineFinalAuditTests(unittest.TestCase):
     def test_no_upstream_blocks_is_only_offline_acceptance_path(self):
         case=dict(schema='ENGINEER_OS_STAGE7_REAL_CASE_V1',case_sha256='a'*64,
                   stage7_completion='COMPLETE',source_identity_status='PASS',missing_roles=[],
-                  workflow_complete=True,engineering_status='READY_FOR_FINAL_AUDIT',block_reasons=[])
+                  workflow_complete=True,engineering_status='READY_FOR_FINAL_AUDIT',block_reasons=[],
+                  tz_traceability_status='PASS',evidence_review_status='PASS',specialist_coverage_status='PASS',
+                  domain_prerequisites_status='PASS',case_qc_status='PASS')
         result=evaluate_offline_stage7(case)
         self.assertEqual(result['decision'],'ACCEPTED');self.assertTrue(result['acceptance_granted'])
         self.assertIsNotNone(result['acceptance_certificate'])
