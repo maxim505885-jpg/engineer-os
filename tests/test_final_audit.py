@@ -1,6 +1,8 @@
 import json
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from pathlib import Path
 
 from engineering.local_app.final_audit import evaluate_case,acceptance_gate
@@ -88,6 +90,27 @@ class FinalAuditStoreTests(unittest.TestCase):
         state=report(self.store,self.sid)
         self.assertFalse(state['current_fresh']);self.assertFalse(state['acceptance_granted'])
         self.assertIn('TZ_STATE_CHANGED',state['audits'][-1]['stale_reasons'])
+
+
+class FinalAuditCoreGateTests(unittest.TestCase):
+    def test_core_gate_accepts_only_same_task_fresh_accepted_audit(self):
+        from engineering.local_app.final_audit import LocalFinalAuditAcceptanceGate
+        state=SimpleNamespace(task=SimpleNamespace(task_id='job-1'))
+        audit_report=dict(status='ACCEPTED',acceptance_granted=True,current_fresh=True,
+                          audits=[dict(case_id='case-1',effective_acceptance_granted=True)])
+        cases=dict(cases=[dict(id='case-1',current=True,identity=dict(core_job_id='job-1'))])
+        with patch('engineering.local_app.final_audit.report',return_value=audit_report), \
+             patch('engineering.local_app.final_audit.real_case_report',return_value=cases):
+            self.assertTrue(LocalFinalAuditAcceptanceGate(object(),'session')(state))
+            wrong=SimpleNamespace(task=SimpleNamespace(task_id='job-other'))
+            self.assertFalse(LocalFinalAuditAcceptanceGate(object(),'session')(wrong))
+
+    def test_core_gate_fails_closed_for_stale_or_blocked_audit(self):
+        from engineering.local_app.final_audit import LocalFinalAuditAcceptanceGate
+        state=SimpleNamespace(task=SimpleNamespace(task_id='job-1'))
+        with patch('engineering.local_app.final_audit.report',
+                   return_value=dict(status='BLOCK',acceptance_granted=False,current_fresh=False,audits=[])):
+            self.assertFalse(LocalFinalAuditAcceptanceGate(object(),'session')(state))
 
 
 if __name__=='__main__':
