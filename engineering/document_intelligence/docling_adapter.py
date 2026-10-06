@@ -11,6 +11,7 @@ import hashlib
 import os
 import math
 import re
+import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -44,7 +45,17 @@ class DoclingDocumentParser:
             return self._converter_factory()
         if self._artifacts_path is not None and not self._artifacts_path.is_dir():
             raise DocumentParseError(f'Docling model artifacts folder not found: {self._artifacts_path}')
+        # The non-Windows ORT uploader starts during import. API suppression
+        # alone is too late for its initialization event; opt out first.
+        if 'onnxruntime' in sys.modules and os.environ.get('ORT_DISABLE_TELEMETRY') != '1':
+            raise DocumentParseError(
+                'ONNX Runtime telemetry opt-out was not set before import; restart '
+                'the process with ORT_DISABLE_TELEMETRY=1 before parsing documents'
+            )
+        os.environ['ORT_DISABLE_TELEMETRY'] = '1'
         try:
+            import onnxruntime
+            onnxruntime.disable_telemetry_events()
             from docling.datamodel.base_models import InputFormat
             from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions, TableFormerMode
             from docling.document_converter import DocumentConverter, PdfFormatOption

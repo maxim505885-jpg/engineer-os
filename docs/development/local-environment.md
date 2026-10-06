@@ -43,8 +43,10 @@ ENGINEER_OS_LOCAL_MODEL=qwen3:8b по умолчанию. Open WebUI выбир�
 
 Минимальное окружение не содержит Docling и не обещает распознавание сканов.
 Для OCR создать отдельную .venv-ocr, установить в неё requirements-local-app.txt
-и совместимый Docling с RapidOCR/onnxruntime. Версии этого полного набора будут
-закреплены после живой проверки в пункте 2; сейчас проверенного OCR lock нет.
+и совместимый Docling с RapidOCR/onnxruntime. Состав испытанного Linux/Python3.12 CPU окружения
+закреплён в requirements-ocr-linux-cpu.lock; ограничения качества и совместимости
+описаны в [отчёте живой проверки](live-document-runtime-2026-10-06.md).
+Этот snapshot не является Windows lock и не подтверждает полноту OCR.
 Не считать произвольный latest Docling воспроизводимым рабочим окружением.
 
 Официальные инструкции: [установка Docling](https://github.com/docling-project/docling/blob/main/docs/getting_started/installation.md),
@@ -54,15 +56,18 @@ ENGINEER_OS_LOCAL_MODEL=qwen3:8b по умолчанию. Open WebUI выбир�
 
 В процессе, запускаемом именно Python этого OCR-окружения, задать:
 
+- ORT_DISABLE_TELEMETRY=1 — до любого импорта ONNX Runtime;
+- HF_HUB_DISABLE_TELEMETRY=1; HF_HUB_OFFLINE=1 — после подготовки весов;
 - ENGINEER_OS_DOCUMENT_INTELLIGENCE=true;
 - ENGINEER_OS_DOCLING_ARTIFACTS_PATH — абсолютный каталог подготовленных моделей;
 - ENGINEER_OS_ATTACHMENT_PARSER=docling — для автоматической обработки вложений.
 
 Start_ENGINEER_OS.cmd по умолчанию выбирает .venv, а не .venv-ocr. OCR-режим
-запускать явно Python из .venv-ocr через scripts/run_local_app.py. До его запуска
+запускать явно Python из .venv-ocr через scripts/run_local_app.py. Сначала выставить ORT_DISABLE_TELEMETRY=1; затем
 проверить import docling/onnxruntime, состав весов и конвертацию representative
 PDF. Это не подтверждает правильность OCR/таблиц: результат ещё сверяется с
-источником. Live Docling/OCR в текущем кабинете пока NOT_RUN.
+источником. Результаты живой проверки относятся к пункту 2;
+[правила отключения телеметрии](docling-privacy.md).
 
 ## Среда разработки и CI
 
