@@ -16,6 +16,11 @@ from engineering.normative.authority import NormativeAuthorityReview,audit_norma
 from engineering.calculation.semantic_review import CalculationSemanticReview,audit_calculation_semantics
 from engineering.calculation.exchange_manifest import parse_exchange_manifest,audit_exchange_manifest
 from engineering.calculation.solver_receipt import SolverReceipt,audit_solver_receipt
+from engineering.calculation.execution_identity import SolverExecutionIdentity,audit_execution_identity
+from engineering.calculation.result_verification import SolverResultVerification,audit_solver_results
+from engineering.calculation.structure_correlation import StructureCorrelationItem,audit_structure_correlation
+from engineering.normative.source_verification import NormativeSourceVerification,audit_normative_source
+from .data_classification import DataClassReview,audit_data_classes
 
 CHAIN=('document','edition','scope','clause','requirement','actual_condition','comparison','conclusion')
 ALIASES={'м':'m','мм':'mm','см':'cm','Н':'N','кН':'kN','Па':'Pa','кПа':'kPa','МПа':'MPa','м2':'m2','мм2':'mm2'}
@@ -54,7 +59,8 @@ def save(store,session_id,*,packet,expected_revision):
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']}
     kind=packet.get('kind');refs=[];files=[]
     if kind=='NORMATIVE':
-        if set(packet) not in ({'kind','chain','norm_ids','actual_ids','quantities'},{'kind','chain','norm_ids','actual_ids','quantities','authority_review'}):raise ValueError('Invalid normative packet fields')
+        if not {'kind','chain','norm_ids','actual_ids','quantities'}<=set(packet) or not set(packet)<= {'kind','chain','norm_ids','actual_ids','quantities','authority_review','authority_source','data_class_reviews'}:
+            raise ValueError('Invalid normative packet fields')
         chain=packet['chain']
         if not isinstance(chain,dict) or set(chain)!=set(CHAIN) or any(not isinstance(v,str) or not v.strip() or len(v)>1000 for v in chain.values()):raise ValueError('Complete bounded normative chain required')
         norm=ids(packet['norm_ids']);actual=ids(packet['actual_ids']);refs=norm+actual
@@ -74,8 +80,17 @@ def save(store,session_id,*,packet,expected_revision):
             if any(a[k]!=chain[k] for k in ('document','edition','clause')):
                 raise ValueError('Authority review must match normative chain identity')
             audit_normative_authority(NormativeAuthorityReview(**a))
+        if 'authority_source' in packet:
+            a=packet['authority_source']
+            expected={'candidate_id','document','edition','authority','source_ref','source_sha256','verification_method','decision'}
+            if not isinstance(a,dict) or set(a)!=expected:raise ValueError('Invalid normative source verification')
+            if a['candidate_id'] not in norm or a['candidate_id'] not in candidates:raise ValueError('Normative authority source must belong to norm sources')
+            source_file=store.get_file(candidates[a['candidate_id']]['file_id'])
+            if a['source_sha256']!=source_file['sha256']:raise ValueError('Normative authority source hash mismatch')
+            if a['document']!=chain['document'] or a['edition']!=chain['edition']:raise ValueError('Normative source identity must match chain')
+            audit_normative_source(NormativeSourceVerification(**a))
     elif kind=='CALCULATION':
-        if not isinstance(packet,dict) or packet.get('kind')!='CALCULATION' or not set(packet)<= {'kind','bindings','semantic_reviews','exchange_manifest','solver_receipt'} or not {'kind','bindings'}<=set(packet) or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
+        if not isinstance(packet,dict) or packet.get('kind')!='CALCULATION' or not set(packet)<= {'kind','bindings','semantic_reviews','exchange_manifest','solver_receipt','execution_identity','result_verification','structure_correlation','data_class_reviews'} or not {'kind','bindings'}<=set(packet) or not isinstance(packet['bindings'],list) or not 1<=len(packet['bindings'])<=9:raise ValueError('Select at most nine calculation roles')
         roles=[]
         for binding in packet['bindings']:
             if not isinstance(binding,dict) or set(binding)!={'role','file_id','candidate_ids'}:raise ValueError('Invalid calculation binding')
@@ -108,8 +123,44 @@ def save(store,session_id,*,packet,expected_revision):
             sr=packet['solver_receipt']
             if not isinstance(sr,dict) or set(sr)!={'solver_name','solver_version','input_sha256','output_sha256','log_sha256','exit_code','started_at','finished_at'}:
                 raise ValueError('Invalid solver receipt')
-            audit_solver_receipt(SolverReceipt(**sr))
+            receipt=SolverReceipt(**sr);audit_solver_receipt(receipt)
+        else:
+            receipt=None
+        if 'execution_identity' in packet:
+            if receipt is None:raise ValueError('Execution identity requires solver receipt')
+            x=packet['execution_identity']
+            expected={'solver_name','solver_version','executable_sha256','command_sha256','input_sha256','output_sha256','log_sha256'}
+            if not isinstance(x,dict) or set(x)!=expected:raise ValueError('Invalid solver execution identity')
+            audit_execution_identity(SolverExecutionIdentity(**x),receipt)
+        if 'result_verification' in packet:
+            if receipt is None:raise ValueError('Result verification requires solver receipt')
+            x=packet['result_verification']
+            expected={'input_sha256','output_sha256','log_sha256','output_source_ref','log_source_ref','completeness','consistency','log_review','critical_findings'}
+            if not isinstance(x,dict) or set(x)!=expected:raise ValueError('Invalid solver result verification')
+            audit_solver_results(SolverResultVerification(**dict(x,critical_findings=tuple(x['critical_findings']))),receipt)
+        if 'structure_correlation' in packet:
+            if not isinstance(packet['structure_correlation'],list) or len(packet['structure_correlation'])>4:raise ValueError('Invalid structure correlation')
+            by_role={b['role']:set(b['candidate_ids']) for b in packet['bindings']}
+            actual=by_role.get('ACTUAL_STRUCTURE_REFERENCE',set())
+            reviews=[]
+            for x in packet['structure_correlation']:
+                expected={'role','calculation_source_ids','actual_source_ids','statement','basis','decision'}
+                if not isinstance(x,dict) or set(x)!=expected:raise ValueError('Invalid structure correlation item')
+                calc=ids(x['calculation_source_ids']);actual_ids=ids(x['actual_source_ids'])
+                if x['role'] not in by_role or not set(calc)<=by_role[x['role']] or not set(actual_ids)<=actual:
+                    raise ValueError('Structure correlation sources must match calculation and actual-structure roles')
+                reviews.append(StructureCorrelationItem(x['role'],tuple(calc),tuple(actual_ids),x['statement'],x['basis'],x['decision']))
+            audit_structure_correlation(tuple(reviews))
     else:raise ValueError('Unknown domain packet kind')
+    if 'data_class_reviews' in packet:
+        if not isinstance(packet['data_class_reviews'],list) or len(packet['data_class_reviews'])>100:raise ValueError('Invalid data-class reviews')
+        reviews=[]
+        for x in packet['data_class_reviews']:
+            if not isinstance(x,dict) or set(x)!={'candidate_id','data_class','decision','basis'}:raise ValueError('Invalid data-class review')
+            if x['candidate_id'] not in refs or x['candidate_id'] not in candidates:raise ValueError('Data-class review candidate outside packet')
+            if candidates[x['candidate_id']]['data_class']!=x['data_class']:raise ValueError('Data-class review does not match candidate declaration')
+            reviews.append(DataClassReview(**x))
+        audit_data_classes(tuple(reviews),tuple(dict.fromkeys(refs)))
     snapshots=[]
     for eid in dict.fromkeys(refs):
         r=candidates[eid];base=store.get_evidence(session_id,eid)
@@ -131,7 +182,7 @@ def report(store,session_id,*,selected_files=None):
     state=store.domain_packets_state(session_id)
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']};rows=[]
     for event in latest(state):
-        p=event['packet'];sources=[];reasons=[];authority_review=None;semantic_review=None;exchange_review=None;solver_review=None
+        p=event['packet'];sources=[];reasons=[];authority_review=None;authority_source=None;data_class_review=None;semantic_review=None;exchange_review=None;solver_review=None;execution_review=None;result_review=None;structure_review=None
         for expected in event['sources']:
             r=candidates.get(expected['candidate_id'])
             if not r:reasons.append('CANDIDATE_MISSING');continue
@@ -158,7 +209,20 @@ def report(store,session_id,*,selected_files=None):
                     reasons.append('NORMATIVE_AUTHORITY_REVIEW_INVALID')
             else:
                 reasons.append('NORMATIVE_AUTHORITY_REVIEW_MISSING')
-            reasons.extend(['NORMATIVE_APPLICABILITY_NOT_VERIFIED','NORMATIVE_EDITION_NOT_VERIFIED','DATA_CLASS_NOT_VERIFIED','INPUT_TRUTH_NOT_VERIFIED'])
+            if p.get('authority_source'):
+                try:
+                    x=p['authority_source'];candidate=candidates.get(x['candidate_id'])
+                    if not candidate:raise ValueError('candidate missing')
+                    f=store.get_file(candidate['file_id'])
+                    if f['sha256']!=x['source_sha256'] or x['document']!=p['chain']['document'] or x['edition']!=p['chain']['edition']:
+                        raise ValueError('normative source identity changed')
+                    authority_source=audit_normative_source(NormativeSourceVerification(**x))
+                    reasons.extend(authority_source['reasons'])
+                except (ValueError,TypeError,KeyError):
+                    reasons.append('NORMATIVE_SOURCE_VERIFICATION_INVALID')
+            else:
+                reasons.append('NORMATIVE_EDITION_NOT_VERIFIED')
+            reasons.extend(['NORMATIVE_APPLICABILITY_NOT_VERIFIED','INPUT_TRUTH_NOT_VERIFIED'])
         else:
             artifacts=[]
             for b in p['bindings']:
@@ -193,12 +257,65 @@ def report(store,session_id,*,selected_files=None):
                     reasons.append('SOLVER_RECEIPT_INVALID')
             else:
                 reasons.append('SOLVER_RECEIPT_MISSING')
-            reasons.append('CALCULATION_SEMANTICS_NOT_VERIFIED')
+            receipt=None
+            if p.get('solver_receipt'):
+                try:receipt=SolverReceipt(**p['solver_receipt'])
+                except (ValueError,TypeError,KeyError):receipt=None
+            if p.get('execution_identity') and receipt is not None:
+                try:
+                    execution_review=audit_execution_identity(SolverExecutionIdentity(**p['execution_identity']),receipt)
+                    reasons.extend(execution_review['reasons'])
+                except (ValueError,TypeError,KeyError):reasons.append('SOLVER_EXECUTION_IDENTITY_INVALID')
+            else:
+                reasons.append('SOLVER_EXECUTION_IDENTITY_MISSING')
+            if p.get('result_verification') and receipt is not None:
+                try:
+                    x=p['result_verification']
+                    result_review=audit_solver_results(SolverResultVerification(**dict(x,critical_findings=tuple(x['critical_findings']))),receipt)
+                    reasons.extend(result_review['reasons'])
+                except (ValueError,TypeError,KeyError):reasons.append('SOLVER_RESULT_VERIFICATION_INVALID')
+            else:
+                reasons.append('SOLVER_RESULT_VERIFICATION_MISSING')
+            if p.get('structure_correlation'):
+                try:
+                    structure_review=audit_structure_correlation(tuple(
+                        StructureCorrelationItem(x['role'],tuple(x['calculation_source_ids']),tuple(x['actual_source_ids']),x['statement'],x['basis'],x['decision'])
+                        for x in p['structure_correlation']))
+                    reasons.extend(structure_review['reasons'])
+                except (ValueError,TypeError,KeyError):reasons.append('ACTUAL_STRUCTURE_CORRELATION_INVALID')
+            else:
+                reasons.append('ACTUAL_STRUCTURE_NOT_VERIFIED')
+            if semantic_review is None or semantic_review['status']!='READY_FOR_SOLVER_VERIFICATION':
+                reasons.append('CALCULATION_SEMANTICS_NOT_VERIFIED')
             reasons.append('SOLVER_NOT_RUN' if solver_review is None else 'SOLVER_EXECUTION_NOT_ACCEPTED')
-            reasons.append('ACTUAL_STRUCTURE_NOT_VERIFIED')
+        if p.get('data_class_reviews'):
+            try:
+                reviewed=[]
+                for x in p['data_class_reviews']:
+                    if x['candidate_id'] not in candidates or candidates[x['candidate_id']]['data_class']!=x['data_class']:
+                        raise ValueError('data class changed')
+                    reviewed.append(DataClassReview(**x))
+                data_class_review=audit_data_classes(tuple(reviewed),tuple(dict.fromkeys(
+                    list(p.get('norm_ids',[]))+list(p.get('actual_ids',[]))+
+                    [eid for b in p.get('bindings',[]) for eid in b['candidate_ids']]))))
+                reasons.extend(data_class_review['reasons'])
+            except (ValueError,TypeError,KeyError):reasons.append('DATA_CLASS_REVIEW_INVALID')
+        else:
+            reasons.append('DATA_CLASS_NOT_VERIFIED')
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
-            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,authority_review=authority_review,semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
+            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,
+            authority_review=authority_review,authority_source=authority_source,data_class_review=data_class_review,
+            semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
+            execution_review=execution_review,result_review=result_review,structure_review=structure_review,
+            point6_readiness=(
+                'READY_FOR_ENGINEERING_DECISION'
+                if (
+                    data_class_review and data_class_review['status']=='READY_FOR_DOMAIN_REVIEW' and
+                    ((p['kind']=='NORMATIVE' and authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW' and authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW')
+                     or
+                     (p['kind']=='CALCULATION' and intake and intake['status']=='READY_FOR_SEMANTIC_REVIEW' and semantic_review and semantic_review['status']=='READY_FOR_SOLVER_VERIFICATION' and exchange_review and exchange_review['status']=='READY_FOR_SEMANTIC_CROSSCHECK' and solver_review and solver_review['status']=='READY_FOR_RESULT_VERIFICATION' and execution_review and execution_review['status']=='READY_FOR_RESULT_INTEGRITY_REVIEW' and result_review and result_review['status']=='READY_FOR_STRUCTURE_CORRELATION' and structure_review and structure_review['status']=='READY_FOR_ENGINEERING_REVIEW'))
+                ) else 'BLOCKED_PREREQUISITES'),
             origin=event['origin'],acceptance_granted=False,engineering_verified=False))
     return dict(packets=rows,revision=state[-1]['revision'] if state else 0,status='BLOCK' if rows else 'NOT_PROVIDED',
                 scope='SOURCE_BOUND_DOMAIN_INPUTS',acceptance_granted=False,final_audit='NOT_RUN')
