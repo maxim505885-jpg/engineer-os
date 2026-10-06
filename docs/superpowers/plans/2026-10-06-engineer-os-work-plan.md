@@ -64,12 +64,12 @@
 Результат: same-job resume, identity/response/source/config guards, failed/incomplete calls/pages повторяются, completed parts сохраняются. Изменившийся upstream CORE outcome инвалидирует зависимые drafts. 362Python/4Node/actualHTTP+DOMPASS; clipping/time/call budgets раскрыты. OpenWebUI/unknownidentity resume отключён, semantic completeness NOT_CHECKED. DraftPR55 наPR54; main/deployне менялись.
 Файлы: automatic_analysis.py, Store/Worker/API/UI, tests/test_automatic_document_analysis.py.
 
-## 4. Подключить остальные форматы — НЕ СДЕЛАНО
+## 4. Подключить остальные форматы — ВЫПОЛНЕНО (ПОДДЕРЖАННЫЕ ЧАСТИ, НЕ ACCEPTED)
 
-- [ ] DOCX: абзацы и таблицы с привязкой к источнику.
-- [ ] XLSX: листы, адреса ячеек, формулы и доступные сохранённые значения.
-- [ ] DOC: отдельная контролируемая конвертация с сохранением оригинала.
-- [ ] Объединить upload/Drive/parser/analysis через текущий пользовательский сценарий.
+- [x] DOCX: абзацы и таблицы с привязкой к источнику.
+- [x] XLSX: листы, адреса ячеек, формулы и доступные сохранённые значения.
+- [x] DOC: отдельная контролируемая конвертация с сохранением оригинала.
+- [x] Объединить upload/Drive/parser/analysis через текущий пользовательский сценарий.
 
 Результат: поддержанные форматы анализируются с проверяемой привязкой и явными ограничениями.
 Файлы: local_app/files.py, drive_import.py, automatic_analysis.py, UI; новые format adapters/tests.
@@ -182,3 +182,12 @@ CI PR53 push37484724688 и PR37484965521 SUCCESS, включая actual HTTP/DOM
 ✅ Safe model/parser resume, durableRUNNING receipts, identity/response/session guards, cumulativebudgets, summarylossdisclosure и persistedBLOCK. 362Python/4Node/actualHTTP+DOMPASS. Одинreview, дваImportant исправленыRED→GREEN. GitHub CI PR55 PASS: push37497252188 и PR37497256126, включая actualHTTP/DOM; test-merge tree совпадает с опубликованным.. ❌FullV4ACCEPTED/semanticcompleteness/liveQwenresumerepeat/OpenWebUIresume/Windows не заявляются выполненными. Main/deployне менялись. Картараздел34.
 
 Дальше: пункт4 — Подключить остальные форматы: DOCXparagraphs/tablesrefs,XLSXaddresses/formulas/cache,DOCcontrolledconversion,общийupload/Drive/analysis.
+
+
+## Актуальный итог 06.10.2026: пункт4 завершён, PR56
+
+✅ DOCXparagraphs/tables/locators, XLSXsheets/addresses/formulas/storedvalues, controlledLinuxDOCconversion с original/derivedSHA и cachedresume. Общие upload/Drive/automaticCHAT/CORE. Реальные DOC/DOCX/XLSX492/487/125units;53/48/0BLOCK раскрыты; модельcontrolled, actualparser/converter. 376Python/4Node/оба actualHTTP+DOMPASS. Один review, дваImportant RED→GREEN. DraftPR56 наPR55; tree4c6e8f96e0e4d694773a6283506ae64e46506991. Картараздел35.
+❌ Officecomplexlayout/semanticcompleteness/evidenceacceptance/liveQwenOffice/liveOAuth/Windows не заявляются выполненными. Converter identity пока launcher-only: не обновлять LibreOffice runtime во время задания. Main/deploy не менялись.
+Дальше: пункт5 — Связать анализ с доказательствами и ТЗ.
+
+GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. 

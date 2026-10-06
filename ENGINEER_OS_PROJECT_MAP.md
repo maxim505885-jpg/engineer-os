@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–34. Пункты1–3 выполнены: проверенный кандидат, оценка OCR/модели и безопасное продолжение больших документов. Main не обновлён, инженерное принятие не выдано. **Следующий — пункт4 «Подключить остальные форматы». Начать с раздела34.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `fix/document-resume-stage3-20261006`; local `a86a63f81bc8d49de40c1faff979bcf81ec08075`, remote `1bab99e7e624901e1b64e685c4a478849825d158`, одинаковое tree `970679286a05b9874ff1f66736c53de7959c6c1c`, draftPR55 на PR54. 362Python/4Node/actualHTTP+DOM PASS. GitHub CI PR55 PASS: push37497252188 и PR37497256126, включая actualHTTP/DOM; test-merge tree совпадает с опубликованным.. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** девять пунктов, разделы30–35. Пункты1–4 выполнены как проверенные кандидаты: окружение, оценка OCR/модели, безопасное продолжение и Office-форматы. Main не обновлён, инженерное принятие не выдано. **Следующий — пункт5 «Связать анализ с доказательствами и ТЗ». Начать с раздела35.** Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/office-documents-stage4-20261006`; local `cc6c05412a6d7ce786c918c928f14fc8bc230f64`, remote `ec52dd3f553a1f6e7c31d340eb80469ec27bf0b7`, одинаковое tree `4c6e8f96e0e4d694773a6283506ae64e46506991`, draftPR56 на PR55. 376Python/4Node/actualHTTP+DOM PASS. GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -780,3 +780,29 @@ Queue SUCCEEDED всех6 extraction jobs не означает валидную
 **Публикация:** draft https://github.com/maxim505885-jpg/engineer-os/pull/55, basePR54/fix/document-quality-stage2-20261006;remote `1bab99e7e624901e1b64e685c4a478849825d158`,local `a86a63f81bc8d49de40c1faff979bcf81ec08075`,identicaltree `970679286a05b9874ff1f66736c53de7959c6c1c`,14files/614add/25del. GitHub CI PR55 PASS: push37497252188 и PR37497256126, включая actualHTTP/DOM; test-merge tree совпадает с опубликованным.. Main/deployне меняли. Отчёты `docs/development/document-analysis-resume-2026-10-06.md`,`docs/qa/2026-10-06-stage3-resume.json`. Фактические realOCR/Qwen качества остаются в разделе33/PR54; full534pageV4 не запускали, прежний11BLOCK/0ACCEPTED не снят.
 
 **Дальше — пункт4 «Подключить остальные форматы»:** DOCX paragraphs/tables/source refs;XLSX sheets/cell addresses/formulas/cachedvalues;контролируемаяDOCconversion с original preserved;единый upload/Drive/analysis маршрут. Начать с currentPR55tree, а не старого478dfe5: scratch снова был восстановлен из publishedPR54, hashes сверены доизменений. Пункт5—evidence/ТЗ,7—acceptedengineeringcase,9—Windowsпоследней.
+
+
+## 35. 06.10.2026 — пункт4 завершён: DOCX/XLSX/DOC, PR56
+
+**Сделано:** файлы upload и оригиналы Drive `.docx/.xlsx/.doc` идут в существующий automatic CHAT/CORE. DOCX main-body абзацы/ячейки таблиц с XML-part/paragraph/table/row/column; XLSX sheet/cell/formula/stored cache раздельно, без вычисления формул. Office refs page=None, UI показывает логические элементы, физические страницы не выдумываются. Оригиналы сохранены; parser/config/source identity и completed units/receipts переиспользуются при resume.
+
+**DOC:** actual Linux LibreOfficeDev26.8.0.0.alpha0; isolated profile/MacroSecurityLevel3, seccomp network syscall deny, timeout90/resource limits. Это не filesystem sandbox и не exhaustive malicious macro test. Original/derived SHA отдельно, locator DERIVED_DOCX_LOCATION; cached derivative проверяется при resume и не конвертируется повторно. Minor review: fingerprint идентифицирует launcher, а не весь converter runtime; не обновлять runtime внутри незавершённого задания, усилить identity перед обновлениями/Windows. Обязательной новой OOXML Python dependency нет: bounded stdlib ZIP/XML.
+
+| Проверка | Факт | Ограничение |
+|---|---|---|
+| Реальный «Расчет  .doc» |492/492units,53BLOCK,0FAILED,23parts/45controlled modelcalls; original unchanged; actual DOC conversion |Derived layout unverified; source/model engineering acceptance=false |
+| Реальный «Расчет  .docx» |487/487units,48BLOCK,0FAILED,23parts/45controlled calls; original unchanged |Drawings/equations/headers/footnotes/merged layout disclosed |
+| Реальный «Таблицы.xlsx» |125/125units,0BLOCK,0FAILED,7parts/13controlled calls; original unchanged |Raw styles/formulas/charts unverified;0BLOCK не подтверждает полноту |
+| Общий маршрут |DOCX/XLSX controlled Drive transport→Worker; CHAT/CORE; same-job model resume; DOC derivative resume |Живые Google OAuth и Qwen Office quality здесь не проверялись |
+| Actual launcher/HTTP/DOM |Оба сценария PASS; XLSX upload, logical counters, Нагрузки!C1 receipt;12inference requests |Jsdom, не screenshot/browser/Windows |
+| Финальные checks |376Python/4Node/compileall/JS/diff PASS |FINAL AUDIT NOT_RUN, acceptance=false |
+
+**Review:** один независимый whole-branch read-only reviewer; два Important воспроизведены RED→GREEN и исправлены за один fixpass. Word noBreakHyphen/softHyphen сохраняются; font-specific sym передаётся исходным токеном с SYMBOL_NOT_DECODED/BLOCK. Excel phonetic rPh исключены из shared/inline cell value. Полный376suite прошёл послеfix. Дополнительные RED→GREEN: derivative cache при DOC resume и запрет Office logical unit→PDF evidence page. npm-prefix сценарий выявил относительный fixture tests path; исправлен repo cwd, оба DOM PASS.
+
+**Публикация:** draft https://github.com/maxim505885-jpg/engineer-os/pull/56, basePR55/fix/document-resume-stage3-20261006; remote `ec52dd3f553a1f6e7c31d340eb80469ec27bf0b7`, local `cc6c05412a6d7ce786c918c928f14fc8bc230f64`, identicaltree `4c6e8f96e0e4d694773a6283506ae64e46506991`,18files/671add/14del. Main/deployне меняли. Отчёты `docs/development/office-documents-2026-10-06.md`, `docs/development/stage4-office-plan.md`, `docs/qa/2026-10-06-stage4-office.json`. QA содержит только метаданные; полные source/extractedtext/prompts не публиковались.
+
+**Открыто:** сложные Office structures раскрыты, semantic completeness NOT_CHECKED; Office evidence API явно отклоняет fakePDFpage, source-review/evidence пока пункт5. Полный V4/прежние11BLOCK/0ACCEPTED не менялись. Windows9 последняя.
+
+**Дальше — пункт5 «Связать анализ с доказательствами и ТЗ»:** построить проверяемый перечень требований ТЗ, существенные выводы связать с цитатой/местом/типом данных и source review, включить evidence gates и видимые непроверенные требования/противоречия. Начать с currentPR56tree; сохранять Office locators и оригинальные/производные границы. Не выдавать COMPLETED/SUCCEEDED за инженерное принятие.
+
+GitHub CI PR56 PASS: push37501193754 и PR37501199607, включая actualHTTP/DOM; test-merge83f0a6c tree совпадает с published4c6e8f96. 
