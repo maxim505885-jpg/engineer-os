@@ -41,3 +41,11 @@ UNIQUE вызывает существующие DI evidence_candidates и valid
 Независимое ревью нашло исчезновение рамки при offset CropBox + rotation90/180/270. Три subtests сначала FAIL; временно обнуляется rotation в копии PDF при рисовании unrotated geometry, затем восстанавливается перед get_pixmap. Pixel position/original-byte регрессия PASS во всех трёх ориентациях; полный набор PASS. Других Critical/Important нет. PDF parsing complexity не ограничена лимитом PNG, жесткий total deadline не заявляется.
 
 Просмотр не подтверждает содержание и не меняет UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN. Исходный V4 не перепроверялся; 11 BLOCK неизменны. Windows/live qwen3/real-browser layout по-прежнему NOT_RUN.
+
+## Дополнение 06.10.2026 — журнал source review и контекст CORE
+
+258 Python +4 Node PASS; compileall/JS syntax/diff PASS; DOM smoke дополнен сохранением решения, инертным замечанием, сохранностью черновика при poll и очисткой при смене диалога. Первые пять journal тестов сначала FAIL; changed-source CORE план отдельно FAIL→FAILED-job после rehash. Missing persistent review-form DOM сначала FAIL, после UI PASS.
+
+Проверяются неизменяемая история/повторное открытие, revision conflict, invalid/empty fields, чужой session/изменённый original, запрет подтверждения unchecked PDF, source-only CORE context. HTTP проверяет token, 409 при stale revision, игнорирование acceptance/actor_verified из body. Независимое ревью: 18 review/HTTP тестов PASS; 8 одновременных revision0 запросов сохранили ровно1 event, остальные7 ReviewConflict. Critical/Important не найдено.
+
+Это SOURCE_REVIEW_ONLY с подписью, указанной пользователем. Инженерное содержание, классы данных, полнота, нормы и расчёты не приняты; UNVERIFIED/acceptance=false/FINAL AUDIT NOT_RUN сохраняются. CORE делает versioned snapshot решения по выбранным файлам, до100 кандидатов с explicit truncation; специалистов не исполняет. Windows/live qwen3/realbrowser остаются NOT_RUN, PDF V4 не перепроверялся.

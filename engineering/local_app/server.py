@@ -7,6 +7,7 @@ import threading
 import time
 from urllib.parse import urlsplit,parse_qs,quote
 from .files import preserve_file,MAX_FILE_BYTES
+from .store import ReviewConflict
 
 UI=Path(__file__).parent/'ui'
 CSP="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
@@ -96,6 +97,10 @@ def make_server(store,model,host='127.0.0.1',port=0):
                         if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
                         try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
                         finally:self.server.upload_slots.release()
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='reviews' and post:
+                    from .review import record_review
+                    body=self.json_body()
+                    return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
                     from .preview import render_preview
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
@@ -111,6 +116,7 @@ def make_server(store,model,host='127.0.0.1',port=0):
                     return
                 raise RequestProblem(404,'Route not found')
             except RequestProblem as exc:self.respond(exc.status,dict(error=exc.message))
+            except ReviewConflict as exc:self.respond(409,dict(error=str(exc)))
             except ValueError as exc:self.respond(400,dict(error=str(exc)))
             except (BrokenPipeError,ConnectionResetError):pass
             except Exception:self.respond(500,dict(error='Local application error; original data retained'))

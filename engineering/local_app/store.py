@@ -1,6 +1,7 @@
 """Transactional, disk-backed conversations and single-claim jobs."""
 from contextlib import contextmanager
 import json
+import hashlib
 from pathlib import Path
 import sqlite3
 import time
@@ -15,6 +16,10 @@ def identifier(value):
     return value
 
 
+class ReviewConflict(ValueError):
+    pass
+
+
 class Store:
     def __init__(self,root):
         self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
@@ -27,6 +32,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
@@ -59,6 +65,11 @@ class Store:
             jobs=[self.job_dict(r) for r in db.execute('SELECT * FROM jobs WHERE session_id=? ORDER BY created DESC LIMIT 200',(session_id,))]
             files=[self.file_dict(r) for r in db.execute('SELECT * FROM files WHERE session_id=? ORDER BY created LIMIT 200',(session_id,))]
             evidence=[json.loads(r['record']) for r in db.execute('SELECT record FROM local_evidence WHERE session_id=? ORDER BY created LIMIT 500',(session_id,))]
+            review_rows=db.execute('SELECT candidate_id,record FROM source_reviews WHERE session_id=? ORDER BY revision',(session_id,))
+            reviews={}
+            for row in review_rows:reviews.setdefault(row['candidate_id'],[]).append(json.loads(row['record']))
+            for item in evidence:
+                item['reviews']=reviews.get(item['id'],[]);item['review_revision']=len(item['reviews']);item['latest_review']=item['reviews'][-1] if item['reviews'] else None
             count=db.execute('SELECT count(*) FROM messages WHERE session_id=?',(session_id,)).fetchone()[0]
         return dict(session=dict(session),messages=messages,jobs=jobs,files=files,evidence=evidence,history_windowed=count>len(messages),message_count=count)
 
@@ -94,6 +105,18 @@ class Store:
         with self.connection() as db:r=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(candidate_id,session_id)).fetchone()
         if r is None:raise ValueError('Source candidate not found in this conversation')
         return json.loads(r['record'])
+
+    def append_review(self,event,expected_revision):
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT record FROM local_evidence WHERE id=? AND session_id=?',(event['candidate_id'],event['session_id'])).fetchone()
+            if row is None:raise ValueError('Candidate not found in this conversation')
+            count=db.execute('SELECT count(*) FROM source_reviews WHERE candidate_id=?',(event['candidate_id'],)).fetchone()[0]
+            if count!=expected_revision:raise ReviewConflict('Review changed; reopen candidate before saving your decision')
+            if count>=50 or db.execute('SELECT count(*) FROM source_reviews WHERE session_id=?',(event['session_id'],)).fetchone()[0]>=500:raise ValueError('Review history limit reached (50 per candidate, 500 per conversation)')
+            event=dict(event,revision=count+1,candidate_digest=hashlib.sha256(json.dumps(json.loads(row['record']),sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest(),acceptance_granted=False,actor_verified=False)
+            db.execute('INSERT INTO source_reviews VALUES(?,?,?,?,?,?)',(event['id'],event['candidate_id'],event['session_id'],event['revision'],json.dumps(event,ensure_ascii=False),event['created']))
+        return event
 
     def add_evidence(self,record):
         with self.connection() as db:

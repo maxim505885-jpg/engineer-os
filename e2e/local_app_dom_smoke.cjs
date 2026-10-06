@@ -73,7 +73,25 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
   assert.equal(doc.querySelector('#source-viewer').hidden,true,'Preview must not cross conversations');
-  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation'],requests:requests.length}));
+  assert.ok(doc.querySelector('#review-form'),'Persistent review form missing');
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
+  await until(()=>doc.querySelector('.review-button'));
+  doc.querySelector('.review-button').click();
+  doc.querySelector('#review-decision').value='SOURCE_CONFIRMED';
+  doc.querySelector('#review-note').value='Source checked <script>window.reviewInjected=true</script>';
+  doc.querySelector('#review-actor').value='Local reviewer';
+  await new Promise(resolve=>setTimeout(resolve,1700));
+  assert.ok(doc.querySelector('#review-note').value.includes('Source checked'),'Polling must preserve review draft');
+  doc.querySelector('#review-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('.review-history'));
+  assert.equal(dom.window.reviewInjected,undefined);
+  assert.ok(doc.querySelector('.review-history').textContent.includes('Source checked'));
+  doc.querySelector('.review-button').click();doc.querySelector('#review-note').value='Unsaved review';
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
+  await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#review-panel').hidden,true);
+  assert.equal(doc.querySelector('#review-note').value,'');
+  assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});

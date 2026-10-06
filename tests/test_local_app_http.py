@@ -113,6 +113,20 @@ class LocalHTTPTests(unittest.TestCase):
         try:self.assertEqual(self.request('GET',path)[0],429)
         finally:self.server.preview_slots.release();self.server.preview_slots.release()
 
+    def test_source_review_api_is_private_and_detects_stale_revision(self):
+        from engineering.local_app.evidence import register
+        session=self.create()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.txt',b'height 4m',{'Content-Type':'application/octet-stream'})
+        f=json.loads(raw);r=register(self.store,session,file_id=f['id'],quote='height 4m',statement='Unknown')
+        path=f"/api/sessions/{session}/evidence/{r['id']}/reviews"
+        payload=dict(expected_revision=0,decision='SOURCE_CONFIRMED',note='Checked quote',actor='Local',acceptance_granted=True,actor_verified=True)
+        self.assertEqual(self.request('POST',path,payload,token=False)[0],403)
+        status,_,raw=self.request('POST',path,payload);event=json.loads(raw)
+        self.assertEqual(status,201);self.assertFalse(event['acceptance_granted']);self.assertFalse(event['actor_verified'])
+        self.assertEqual(self.request('POST',path,payload)[0],409)
+        self.assertEqual(self.request('POST',path,dict(payload,expected_revision=True))[0],400)
+        self.assertEqual(len(json.loads(self.request('GET',f'/api/sessions/{session}')[2])['evidence'][0]['reviews']),1)
+
     def test_html_bootstrap_and_api_require_token(self):
         status,h,body=self.request('GET','/',token=False)
         self.assertEqual(status,200);self.assertIn(self.server.token.encode(),body)
