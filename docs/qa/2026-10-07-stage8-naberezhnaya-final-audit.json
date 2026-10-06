@@ -1,0 +1,39 @@
+{
+  "acceptance_certificate": null,
+  "acceptance_granted": false,
+  "audit_sha256": "4e032ee1ca9716fc4511e5dedb1efa3f9ec18c8b6493d8a02bf8fae94aabc298",
+  "blocker_codes": [
+    "ACTUAL_STRUCTURE_CORRELATION_PENDING",
+    "POINT6_NORMATIVE_DECISION_PENDING",
+    "POINT6_SOLVER_DECISION_PENDING",
+    "V4_DOCUMENT_COMPLETENESS_BLOCK",
+    "CASE_ENGINEERING_STATUS_NOT_READY"
+  ],
+  "case_id": null,
+  "case_sha256": "eb6f21893534b84ed2c5088347c530e3289b07b34c8ba0460d222d9b87e37060",
+  "checked_dimensions": [
+    "CASE_FRESHNESS",
+    "SOURCE_IDENTITY",
+    "TZ_TRACEABILITY",
+    "EVIDENCE_REVIEW",
+    "SPECIALIST_COVERAGE",
+    "DOMAIN_PREREQUISITES",
+    "CASE_QC",
+    "ACCEPTANCE_BASIS"
+  ],
+  "checks": [
+    {"dimension":"CASE_FRESHNESS","status":"PASS","reasons":[]},
+    {"dimension":"SOURCE_IDENTITY","status":"PASS","reasons":[]},
+    {"dimension":"TZ_TRACEABILITY","status":"BLOCK","reasons":["V4_DOCUMENT_COMPLETENESS_BLOCK"]},
+    {"dimension":"EVIDENCE_REVIEW","status":"PASS","reasons":[]},
+    {"dimension":"SPECIALIST_COVERAGE","status":"BLOCK","reasons":["POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING"]},
+    {"dimension":"DOMAIN_PREREQUISITES","status":"BLOCK","reasons":["ACTUAL_STRUCTURE_CORRELATION_PENDING"]},
+    {"dimension":"CASE_QC","status":"BLOCK","reasons":["ACTUAL_STRUCTURE_CORRELATION_PENDING","POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING","V4_DOCUMENT_COMPLETENESS_BLOCK","CASE_ENGINEERING_STATUS_NOT_READY"]},
+    {"dimension":"ACCEPTANCE_BASIS","status":"BLOCK","reasons":["ACTUAL_STRUCTURE_CORRELATION_PENDING","POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING","V4_DOCUMENT_COMPLETENESS_BLOCK","CASE_ENGINEERING_STATUS_NOT_READY"]}
+  ],
+  "decision": "BLOCK",
+  "engineering_verified": false,
+  "final_audit": "COMPLETED",
+  "schema": "ENGINEER_OS_FINAL_AUDIT_V1",
+  "source_schema": "ENGINEER_OS_STAGE7_REAL_CASE_V1"
+}
