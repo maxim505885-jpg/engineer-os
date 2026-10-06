@@ -1,0 +1,3 @@
+# Minimal local cabinet with native PDF support; no cloud API or agent framework.
+# OCR/Docling belongs in a separate optional environment (see local-environment.md).
+-r requirements-pdf-review.txt

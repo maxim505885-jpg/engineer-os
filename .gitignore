@@ -9,6 +9,8 @@ token*.json
 # Python
 __pycache__/
 *.py[cod]
+.venv*/
+node_modules/
 
 # Local ENGINEER OS state
 .engineer-os/

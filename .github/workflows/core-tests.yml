@@ -5,25 +5,47 @@ on:
     branches:
       - main
       - "fix/**"
+      - "feat/**"
   pull_request:
-    branches:
-      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   core-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
       - name: Check browser JavaScript syntax
-        run: node --check app.js
+        run: |
+          node --check app.js
+          node --check engineering/local_app/ui/app.js
       - name: Check dashboard behavior
         run: node --test tests/dashboard_counts.test.cjs
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: Install pinned PDF review dependency
-        run: python -m pip install -r requirements-pdf-review.txt
+          python-version: "3.12"
+      - name: Install pinned regression dependencies
+        run: |
+          python -m pip install -r requirements-dev.txt
+          python -m pip check
+      - name: Install locked development-only DOM dependencies
+        run: npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
       - name: Run full Python regression suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Compile runtime
-        run: python -m compileall -q engineering runtime e2e
+        run: python -m compileall -q engineering runtime e2e scripts
+      - name: Check actual local HTTP and DOM workflows
+        env:
+          PYTHON: python
+          ENGINEER_OS_ATTACHMENT_PARSER: native
+        run: npm test --prefix e2e
