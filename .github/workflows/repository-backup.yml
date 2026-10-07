@@ -24,7 +24,7 @@ jobs:
           git bundle create backup/engineer-os.bundle --all
           sha256sum backup/engineer-os.bundle > backup/engineer-os.bundle.sha256
           git bundle verify backup/engineer-os.bundle
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: engineer-os-git-bundle-${{ github.run_id }}
           path: backup/
