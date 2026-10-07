@@ -1,0 +1,32 @@
+name: Repository Bundle Backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  git-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Fetch all branch refs visible to Actions
+        run: git fetch --force --prune origin "+refs/heads/*:refs/remotes/origin/*"
+      - name: Create repository bundle
+        run: |
+          mkdir -p backup
+          git bundle create backup/engineer-os.bundle --all
+          sha256sum backup/engineer-os.bundle > backup/engineer-os.bundle.sha256
+          git bundle verify backup/engineer-os.bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engineer-os-git-bundle-${{ github.run_id }}
+          path: backup/
+          retention-days: 30
+          if-no-files-found: error
