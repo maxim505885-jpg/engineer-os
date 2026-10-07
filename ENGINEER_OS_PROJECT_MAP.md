@@ -1176,14 +1176,15 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
 | 10 | Release consolidation / единый source of truth | ❌ | stacked PR собраны в один release-candidate и затем проверенный main |
-| 11 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
-| 12 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
-| 13 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/12 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
-| 14 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
-| 15 | Report Generator | ❌ | evidence-bound DOCX/PDF выпуск с таблицами/рисунками/выводами и FINAL AUDIT |
-| 16 | CAD/DWG Agent | ❌ | безопасный DWG/DXF workflow: import/read/review/edit/export/verification |
-| 17 | Multi-AI connector | ❌ | одинаковые инженерные gates для локального и optional external providers; платные провайдеры не обязательны |
-| 18 | v1.0 FINAL RELEASE AUDIT | ❌ | clean install/release candidate/backup/restore/Windows/real accepted case/docs/version tag полностью воспроизводимы |
+| 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
+| 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
+| 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
+| 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
+| 15 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
+| 16 | Report Generator | ❌ | evidence-bound DOCX/PDF выпуск с таблицами/рисунками/выводами и FINAL AUDIT |
+| 17 | CAD/DWG Agent | ❌ | безопасный DWG/DXF workflow: import/read/review/edit/export/verification |
+| 18 | Multi-AI connector | ❌ | одинаковые инженерные gates для локального и optional external providers; платные провайдеры не обязательны |
+| 19 | v1.0 FINAL RELEASE AUDIT | ❌ | clean install/release candidate/backup/restore/Windows/real accepted case/docs/version tag полностью воспроизводимы |
 
 ---
 
@@ -1255,7 +1256,43 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №11 — Reliability / Backup / Restore / Browser Gate
+### №11 — Product Design / UI/UX проработка
+
+**Почему здесь:** дизайн должен выполняться после №10, когда продукт уже собран в единый release-candidate, но до финальных browser/reliability проверок. Иначе UI придётся повторно переделывать после объединения веток.
+
+Сделать:
+- аудит всех экранов и пользовательских сценариев;
+- единая информационная архитектура приложения;
+- чёткое разделение: чат / файлы / ТЗ / evidence / domain packets / CORE_RUN / Stage7 / FINAL AUDIT / настройки;
+- дизайн-система: typography, spacing, buttons, forms, tables, status badges, panels, dialogs;
+- визуальная иерархия инженерных статусов PASS / WARNING / UNCERTAINTY / BLOCK / ACCEPTED;
+- понятное отображение причин BLOCK и следующего действия;
+- desktop-first UX для инженерной работы;
+- адаптация под ноутбук/планшет/мобильный просмотр;
+- loading / empty / error / offline / reconnect states;
+- большие документы и длинные таблицы без поломки layout;
+- accessibility: keyboard navigation, focus states, contrast, readable text;
+- drag-and-drop/upload UX;
+- progress/resume UI для больших документов;
+- понятный workflow от загрузки файлов до FINAL AUDIT;
+- дизайн Stage7/Stage8 экранов без скрытия доказательной трассировки;
+- минимизация количества технических JSON-полей в обычном пользовательском режиме;
+- advanced/debug mode оставить отдельно;
+- визуальный аудит в реальном Chromium;
+- screenshots/reference states для regression;
+- никакой дизайн-полировки не должна менять инженерную семантику или обходить fail-closed.
+
+Критерий ✅:
+1. все основные пользовательские сценарии проходят без ручного редактирования JSON;
+2. интерфейс визуально и поведенчески единообразен;
+3. ключевые BLOCK/UNCERTAINTY понятны пользователю;
+4. desktop/mobile layout проверены;
+5. accessibility smoke пройден;
+6. дизайн зафиксирован в release-candidate до reliability/browser gate.
+
+---
+
+### №12 — Reliability / Backup / Restore / Browser Gate
 
 Сделать:
 - `Backup_ENGINEER_OS.cmd`;
@@ -1274,7 +1311,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №12 — Document Intelligence production completeness
+### №13 — Document Intelligence production completeness
 
 Не ставить целью «сделать любой OCR PASS». Цель — универсальный воспроизводимый workflow.
 
@@ -1327,9 +1364,9 @@ LIRA/SCAD:
 
 ---
 
-### №13 — Повтор реального кейса после закрытия BLOCK
+### №14 — Повтор реального кейса после закрытия BLOCK
 
-После №6 и №12:
+После №6 и №13:
 1. повторить Stage7 на «Набережная 28А» либо на другом полностью подтверждаемом объекте;
 2. все source identities/reviews fresh;
 3. requirements/evidence/domain/specialists/QC complete;
@@ -1340,7 +1377,7 @@ LIRA/SCAD:
 
 ---
 
-### №14 — Confirmed engineering memory
+### №15 — Confirmed engineering memory
 
 Текущая memory boundary безопасна, но read-only/contextual.
 
@@ -1359,7 +1396,7 @@ LIRA/SCAD:
 
 ---
 
-### №15 — Report Generator
+### №16 — Report Generator
 
 Сделать production workflow:
 `accepted evidence + calculations + normative decisions → structured report → DOCX/PDF → review → FINAL AUDIT`.
@@ -1381,7 +1418,7 @@ LIRA/SCAD:
 
 ---
 
-### №16 — CAD/DWG Agent
+### №17 — CAD/DWG Agent
 
 Текущий CAD/DWG функционал практически не реализован, хотя он входит в исходную концепцию.
 
@@ -1400,7 +1437,7 @@ LIRA/SCAD:
 
 ---
 
-### №17 — Multi-AI connector
+### №18 — Multi-AI connector
 
 Не делать обязательной зависимостью v1 local mode.
 
@@ -1417,7 +1454,7 @@ LIRA/SCAD:
 
 ---
 
-### №18 — v1.0 FINAL RELEASE AUDIT
+### №19 — v1.0 FINAL RELEASE AUDIT
 
 Финальная проверка 100%:
 - clean checkout;
@@ -1442,7 +1479,7 @@ LIRA/SCAD:
 - no open critical/high defects;
 - FINAL RELEASE AUDIT record.
 
-**Только после выполнения №18 проект считать 100% завершённым по полной исходной концепции.**
+**Только после выполнения №19 проект считать 100% завершённым по полной исходной концепции.**
 
 ---
 
@@ -1474,5 +1511,5 @@ LIRA/SCAD:
 **№9 — фактическая Windows one-click verification на компьютере пользователя.**
 
 После №9:
-**№10 — release consolidation**, затем **№11 reliability**, **№12 Document Intelligence completeness**, затем возврат к **№6 real engineering verification**, после чего №13–18.
+**№10 — release consolidation**, затем **№11 Product Design / UI/UX**, **№12 reliability**, **№13 Document Intelligence completeness**, затем возврат к **№6 real engineering verification**, после чего №14–19.
 
