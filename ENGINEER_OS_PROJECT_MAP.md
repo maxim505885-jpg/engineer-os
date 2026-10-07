@@ -1615,3 +1615,186 @@ Repository hardening: **✅ выполнен программно и админ�
 Следующий активный пункт MASTER PLAN не меняется:
 
 **№9 — фактическая Windows one-click verification.**
+
+
+## 50. Внешние reference sources для №10–12 — 07.10.2026
+
+Для следующих этапов официально добавлены два внешних reference-репозитория. Они используются как источники практик и идей, **не как новая база ENGINEER OS**.
+
+### A. `di-sukharev/vibe`
+
+Repository:
+`https://github.com/di-sukharev/vibe`
+
+License:
+Apache-2.0. При прямом переносе/модификации кода или существенных частей сохранять LICENSE/NOTICE/attribution согласно лицензии.
+
+Использовать в ENGINEER OS как reference для:
+
+#### №10 — Release consolidation
+- agent engineering discipline;
+- scoped work / минимальные завершённые изменения;
+- explicit architecture boundaries;
+- architecture checks;
+- запрет утверждать проверку без фактического run;
+- TDD/defect-first verification;
+- локальные safety rules для Codex/агентов.
+
+Полезные safety идеи:
+- запрещать `git reset --hard`;
+- запрещать `git clean`;
+- запрещать массовый destructive `git restore/checkout -- .`;
+- запрещать `git push --force`;
+- не трогать чужую незакоммиченную работу;
+- secrets никогда не печатать/коммитить;
+- destructive infra operations только через контролируемый wrapper.
+
+#### №11 — Product Design / UI/UX
+- design tokens вместо случайных raw styles;
+- одинаковая задача → одинаковый UI pattern;
+- loading / empty / error / success states;
+- реальное API/evidence data вместо фейковых dashboard values;
+- keyboard focus / accessibility;
+- responsive layouts;
+- reduced motion;
+- короткие и конкретные error messages;
+- один primary action на view;
+- visual hierarchy через typography/spacing, не через лишние цвета/cards.
+
+#### №12 — Reliability / Browser gate
+- автоматический screenshot tour;
+- multiple viewport checks;
+- light/dark states;
+- visual regression review;
+- Playwright browser journeys только там, где lower-level tests не доказывают интеграцию;
+- architecture/UI checks как отдельные release gates.
+
+**Не переносить как основу проекта:**
+- Bun/Hono/Prisma/PostgreSQL стек;
+- ecommerce/auth/payment части;
+- Docker/PostgreSQL обязательность;
+- deployment architecture;
+- mobile Expo branch;
+- generic SaaS assumptions.
+
+ENGINEER OS сохраняет текущий Python/local-first/Ollama/Open WebUI инженерный фундамент.
+
+---
+
+### B. `nextlevelbuilder/ui-ux-pro-max-skill`
+
+Repository:
+`https://github.com/nextlevelbuilder/ui-ux-pro-max-skill`
+
+License:
+MIT. При прямом включении substantial portions сохранять copyright/license notice.
+
+Основное применение:
+**№11 — Product Design / UI/UX**.
+
+Использовать как reference для:
+- design system generation methodology;
+- searchable UI styles;
+- design reasoning rules;
+- color/typography selection;
+- anti-pattern library;
+- accessibility pre-delivery checklist;
+- responsive checks;
+- performance/accessibility tradeoff notes;
+- structured design recommendation output.
+
+Адаптировать под ENGINEER OS собственные product categories:
+- Engineering Inspection;
+- Technical Report Review;
+- Document Intelligence;
+- Evidence Review;
+- ToR / Requirements;
+- Normative Verification;
+- Structural Calculation;
+- LIRA / SCAD Model Review;
+- Real Engineering Case;
+- FINAL AUDIT;
+- BLOCK Resolution;
+- Confirmed Engineering Memory.
+
+Отдельно создать ENGINEER OS design rules для статусов:
+- PASS;
+- WARNING;
+- UNCERTAINTY;
+- ERROR;
+- BLOCK;
+- READY_FOR_FINAL_AUDIT;
+- ACCEPTED.
+
+Для каждого статуса определить:
+- token;
+- icon;
+- text label;
+- contrast;
+- allowed background/border;
+- severity hierarchy;
+- whether action is required;
+- how reason codes are displayed;
+- mobile/table rendering;
+- screen-reader label.
+
+**Не применять вслепую:**
+- landing-page conversion patterns;
+- ecommerce/lifestyle visual rules;
+- decorative style recommendations;
+- industry palettes, которые ухудшают инженерную читаемость;
+- dark/light assumptions без проверки contrast;
+- дизайн, скрывающий provenance, BLOCK reason или audit trail.
+
+---
+
+### Решение по интеграции
+
+Оба репозитория считаются **reference sources**, а не dependencies ENGINEER OS.
+
+Прямое добавление их полного кода в ENGINEER OS запрещено без отдельного review:
+1. license/NOTICE check;
+2. dependency impact;
+3. local-first compatibility;
+4. security review;
+5. architecture impact;
+6. test coverage;
+7. необходимость именно кода, а не адаптации идеи.
+
+### Обязательные deliverables по этим reference sources
+
+#### На №10
+- `docs/development/agent-safety-rules.md`;
+- ENGINEER OS destructive-command policy;
+- architecture guard extensions;
+- release checklist, вдохновлённый workflow discipline из `vibe`.
+
+#### На №11
+- `docs/design/ENGINEER_OS_DESIGN_SYSTEM.md`;
+- UI token schema;
+- status semantics mapping;
+- core screen inventory;
+- responsive matrix;
+- accessibility checklist;
+- loading/empty/error/success rules;
+- screenshot reference set;
+- advanced/debug mode rules;
+- simplified normal-user mode;
+- ENGINEER OS-specific anti-patterns;
+- design recommendation process, адаптированный по `ui-ux-pro-max-skill`.
+
+#### На №12
+- Chromium/Playwright screen tour;
+- automated screenshots;
+- viewport/theme matrix;
+- accessibility smoke;
+- visual regression review gate.
+
+### Текущий вывод
+
+`ui-ux-pro-max-skill`: **высокая ценность для №11**.
+
+`vibe`: **высокая ценность как reference для agent safety / architecture / UI workflow №10–12**, но не как replacement stack.
+
+Следующий активный пункт MASTER PLAN по-прежнему:
+**№9 — фактическая Windows one-click verification.**
