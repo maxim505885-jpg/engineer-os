@@ -1,4 +1,6 @@
 import json
+import hashlib
+import hmac
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -34,9 +36,30 @@ def ready_case():
     )
 
 
+TEST_VERIFICATION_KEY=b'0123456789abcdef0123456789abcdef'
+
+def verified_case():
+    """Controlled server-verifier contract; not a verified real object."""
+    case=ready_case()
+    def checked(value):
+        value['engineering_verified']=True
+        sha=hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+        value['engineering_verification']=dict(decision='ACCEPTED',reviewer='controlled-reviewer',
+            method='controlled source comparison',version='1',verified_at='2026-10-08T00:00:00Z',
+            source_refs=['f1'],subject_sha256=sha)
+        record=value['engineering_verification']
+        record['signature']=hmac.new(TEST_VERIFICATION_KEY,b'ENGINEER_OS_VERIFICATION_V1\x00'+
+            json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode(),hashlib.sha256).hexdigest()
+        return value
+    case['requirements']=checked({'requirements':[{'id':'r1','status':'ACCEPTED'}]})
+    case['evidence']=[checked(dict(candidate_id='e1',file_id='f1',source_sha256='b'*64,data_class_verified=True))]
+    case['stages']['specialists']['results']=[checked(dict(agent='report-audit-agent',status='ACCEPTED',execution='COMPLETED'))]
+    return case
+
+
 class FinalAuditContractTests(unittest.TestCase):
     def test_only_clean_fresh_case_can_be_accepted(self):
-        r=evaluate_case(ready_case(),fresh=True)
+        r=evaluate_case(verified_case(),fresh=True,store_revalidated=True,verification_key=TEST_VERIFICATION_KEY)
         self.assertEqual(r['decision'],'ACCEPTED');self.assertTrue(r['acceptance_granted'])
         self.assertTrue(r['engineering_verified']);self.assertIsNotNone(r['acceptance_certificate'])
         self.assertEqual(len(r['audit_sha256']),64)

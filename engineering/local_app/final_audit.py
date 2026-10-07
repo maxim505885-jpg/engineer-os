@@ -6,6 +6,7 @@ all required case dimensions are ready and no upstream blockers remain.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import time
 import uuid
@@ -35,7 +36,31 @@ _READY_STAGE={
 def _digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()).hexdigest()
 
-def evaluate_case(case,*,fresh:bool,stale_reasons=()):
+def _verified_record(subject,verification_key):
+    """A server-owned verification record binds its decision to exact content.
+
+    No local HTTP/model/import path currently issues these records. The MAC
+    authenticates the local issuer, not the reviewer's civil identity or truth
+    of a calculation. Source checks and live store revalidation remain required.
+    """
+    if not isinstance(subject,dict):return False
+    if not isinstance(verification_key,bytes) or len(verification_key)!=32:return False
+    record=subject.get('engineering_verification')
+    if not isinstance(record,dict):return False
+    if record.get('decision') not in {'ACCEPTED','ACCEPTED ALTERNATIVE'}:return False
+    for key in ('reviewer','method','version','verified_at'):
+        if not isinstance(record.get(key),str) or not record[key].strip():return False
+    refs=record.get('source_refs')
+    if not isinstance(refs,list) or not refs or any(not isinstance(x,str) or not x.strip() for x in refs):return False
+    if record.get('subject_sha256')!=_digest({k:v for k,v in subject.items() if k!='engineering_verification'}):return False
+    signature=record.get('signature')
+    if not isinstance(signature,str) or len(signature)!=64 or any(c not in '0123456789abcdef' for c in signature):return False
+    body={k:v for k,v in record.items() if k!='signature'}
+    expected=hmac.new(verification_key,b'ENGINEER_OS_VERIFICATION_V1\x00'+
+        json.dumps(body,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode(),hashlib.sha256).hexdigest()
+    return hmac.compare_digest(signature,expected)
+
+def evaluate_case(case,*,fresh:bool,stale_reasons=(),store_revalidated=False,verification_key=None):
     if not isinstance(case,dict):raise ValueError("Stage-7 case object required")
     if type(fresh) is not bool:raise ValueError("fresh flag required")
     reasons=[];checks=[]
@@ -57,7 +82,7 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=()):
         allowed=_READY_STAGE[key]
         if not isinstance(stage,dict):
             status="BLOCK";why=[f"{key.upper()}_STAGE_MISSING"]
-        elif stage.get("status") not in allowed:
+        elif stage.get("status") not in allowed or stage.get('reasons'):
             status="BLOCK";why=list(stage.get("reasons") or [f"{key.upper()}_NOT_READY"])
         else:
             status="PASS";why=[]
@@ -68,12 +93,37 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=()):
     domains=case.get("domain_packets")
     identity=case.get("identity")
     basis_reasons=[]
+    if store_revalidated is not True:
+        basis_reasons.append('CASE_NOT_STORE_REVALIDATED')
     if not isinstance(identity,dict) or not identity.get("core_job_id") or not identity.get("originals"):
         basis_reasons.append("CASE_IDENTITY_BASIS_MISSING")
     if not isinstance(evidence,list) or not evidence:
         basis_reasons.append("EVIDENCE_ACCEPTANCE_BASIS_MISSING")
     if not isinstance(domains,dict):
         basis_reasons.append("DOMAIN_ACCEPTANCE_BASIS_MISSING")
+    requirements=case.get('requirements') or {}
+    if (not isinstance(requirements,dict) or requirements.get('engineering_verified') is not True
+            or not _verified_record(requirements,verification_key)):
+        basis_reasons.append('TZ_ENGINEERING_VERIFICATION_REQUIRED')
+    if not isinstance(evidence,list) or not evidence or any(
+            not isinstance(row,dict) or row.get('data_class_verified') is not True
+            or row.get('engineering_verified') is not True or not _verified_record(row,verification_key)
+            for row in evidence):
+        basis_reasons.append('EVIDENCE_ENGINEERING_VERIFICATION_REQUIRED')
+    results=(stages.get('specialists') or {}).get('results') or []
+    if not isinstance(results,list) or not results or any(
+            not isinstance(row,dict) or row.get('status') not in {'PASS','ACCEPTED','ACCEPTED ALTERNATIVE'}
+            or row.get('engineering_verified') is not True or not _verified_record(row,verification_key) for row in results):
+        basis_reasons.append('SPECIALIST_ENGINEERING_VERIFICATION_REQUIRED')
+    packets=domains.get('packets') if isinstance(domains,dict) else None
+    if not isinstance(packets,list) or any(
+            not isinstance(row,dict) or row.get('status') not in {'ACCEPTED','ACCEPTED ALTERNATIVE'}
+            or row.get('engineering_verified') is not True or row.get('acceptance_granted') is not True
+            or row.get('reasons') or not _verified_record(row,verification_key) for row in packets):
+        basis_reasons.append('DOMAIN_ENGINEERING_VERIFICATION_REQUIRED')
+    required=(stages.get('domain_prerequisites') or {}).get('required_kinds') or []
+    if not isinstance(packets,list) or not set(required)<={row.get('kind') for row in packets if isinstance(row,dict)}:
+        basis_reasons.append('REQUIRED_DOMAIN_DECISION_MISSING')
     checks.append(dict(dimension="ACCEPTANCE_BASIS",status="BLOCK" if basis_reasons else "PASS",reasons=basis_reasons))
     reasons.extend(basis_reasons)
 
@@ -114,6 +164,8 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=()):
 def evaluate_offline_stage7(case):
     if not isinstance(case,dict):raise ValueError("Stage-7 offline case required")
     reasons=list(case.get("block_reasons") or [])
+    # Imported JSON is an inventory/workflow report, never an acceptance issuer.
+    reasons.append('OFFLINE_SNAPSHOT_NOT_ACCEPTANCE_AUTHORITY')
     if case.get("stage7_completion") not in {"COMPLETE","COMPLETE_WITH_OPEN_ENGINEERING_BLOCKS"}:
         reasons.append("STAGE7_WORKFLOW_NOT_COMPLETE")
     if case.get("source_identity_status")!="PASS":reasons.append("SOURCE_IDENTITY_NOT_PASS")
@@ -178,7 +230,7 @@ def build(store,session_id,*,case_id,expected_revision):
     current=next((x for x in report["cases"] if x.get("current")),None)
     if current is None:raise ValueError("Current Stage-7 case not found")
     if current["id"]!=case_id:raise ValueError("FINAL AUDIT must target the current Stage-7 case")
-    result=evaluate_case(current,fresh=bool(report.get("current_fresh")),stale_reasons=current.get("stale_reasons") or [])
+    result=evaluate_case(current,fresh=bool(report.get("current_fresh")),stale_reasons=current.get("stale_reasons") or [],store_revalidated=True,verification_key=store.verification_key())
     event=dict(result,id=str(uuid.uuid4()),session_id=session_id,case_id=case_id,created=time.time(),
                scope="FINAL_AUDIT",case_revision=current["revision"])
     return store.add_final_audit(event,expected_revision)
@@ -196,6 +248,12 @@ def report(store,session_id):
         if latest["case_id"]!=current_case["id"]:stale.append("AUDITED_CASE_SUPERSEDED")
         if latest.get("case_sha256")!=current_case.get("case_sha256"):stale.append("AUDITED_CASE_IDENTITY_CHANGED")
         if not case_report.get("current_fresh"):stale.extend(current_case.get("stale_reasons") or ["CURRENT_CASE_STALE"])
+        # Recompute the authoritative decision, including its content digest.
+        # Persisted ACCEPTED flags/certificates cannot override current inputs.
+        expected=evaluate_case(current_case,fresh=bool(case_report.get('current_fresh')),
+                               stale_reasons=current_case.get('stale_reasons') or [],store_revalidated=True,verification_key=store.verification_key())
+        if any(latest.get(k)!=v for k,v in expected.items()):
+            stale.append('FINAL_AUDIT_INTEGRITY_OR_BASIS_CHANGED')
     rows=[]
     for audit in state:
         row=dict(audit)

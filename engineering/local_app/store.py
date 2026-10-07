@@ -22,6 +22,20 @@ class ReviewConflict(ValueError):
 
 
 class Store:
+    def verification_key(self):
+        """Read a provisioned local issuer key; never mint authority on audit.
+
+        The current app has no verification issuer/provisioning HTTP endpoint.
+        A missing, malformed or symlinked key fails closed. Backup must preserve
+        this key together with verification records once an issuer is added.
+        """
+        path=self.root/'engineering-verification.key'
+        try:
+            if path.is_symlink():return None
+            with path.open('rb') as stream:key=stream.read(33)
+            return key if len(key)==32 else None
+        except OSError:return None
+
     def __init__(self,root):
         self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
         self.path=self.root/'history.sqlite3'
