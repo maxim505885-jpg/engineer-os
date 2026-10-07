@@ -1513,3 +1513,105 @@ LIRA/SCAD:
 После №9:
 **№10 — release consolidation**, затем **№11 Product Design / UI/UX**, **№12 reliability**, **№13 Document Intelligence completeness**, затем возврат к **№6 real engineering verification**, после чего №14–19.
 
+
+
+## 49. Защита GitHub-репозитория — 07.10.2026
+
+Проведён отдельный repository-hardening проход. Это не заменяет MASTER PLAN, а защищает исходный код и историю проекта.
+
+### Фактически применено
+
+✅ `main` защищён GitHub branch protection:
+- изменения через pull request;
+- правила действуют и на администратора;
+- force-push запрещён;
+- удаление `main` запрещено;
+- linear history required;
+- conversation resolution required;
+- required checks работают в strict mode;
+- текущий required check для исторического `main`: `repository-guard`.
+
+`core-tests` намеренно НЕ добавлен обязательным на старый `main`, потому что исторический `main` не содержал этого workflow. После пункта №10 Release consolidation, когда актуальный release-candidate станет основой `main`, обязательно добавить `core-tests` вторым required check.
+
+✅ Repository settings:
+- auto-merge enabled;
+- update branch enabled;
+- merge commits disabled;
+- squash/rebase enabled;
+- merged head branches auto-delete;
+- web commit signoff required.
+
+✅ Security:
+- secret scanning enabled;
+- secret scanning push protection enabled;
+- private vulnerability reporting enabled;
+- CodeQL default setup включён для Python + JavaScript/TypeScript;
+- CodeQL setup run `37676414879` SUCCESS;
+- open secret-scanning alerts на момент проверки: 0.
+
+✅ Access audit:
+- единственный collaborator: `maxim505885-jpg` (admin);
+- deploy keys: 0;
+- repository webhooks: 0;
+- скрытых внешних write-path через deploy keys/webhooks не обнаружено.
+
+✅ В `main` добавлены:
+- `.github/CODEOWNERS`;
+- `SECURITY.md`;
+- `.github/dependabot.yml`;
+- `.github/workflows/repository-security.yml`;
+- `.github/workflows/repository-backup.yml`;
+- `scripts/repository_guard.py`;
+- hardened `.gitignore`;
+- PR safety checklist;
+- one-click repository backup:
+  `Backup_ENGINEER_OS_REPOSITORY.cmd` + `scripts/backup_repository.ps1`.
+
+Main security baseline:
+- PR69 merged;
+- main commit `0bb024b188895b2db7f931afc106ef14b42ca97c`;
+- security-status docs PR73 merged;
+- main docs commit `a2a7b2d974b9ba1b186ef6bd4a97cd2a9d61a077`.
+
+✅ Тот же hardening интегрирован в active Stage-9 branch:
+- PR68 merged;
+- Stage-9 head after merge: `87fccbafbf6a944443e2f503acddf48f33e3b17e`;
+- Core Tests run `37677169227` SUCCESS;
+- Repository Security Guard run `37677169290` SUCCESS.
+
+### Backup
+
+GitHub Actions создаёт scheduled/manual git-bundle artifact.
+
+Для независимой копии от полного удаления GitHub-репозитория использовать:
+
+`Backup_ENGINEER_OS_REPOSITORY.cmd`
+
+Он создаёт verified git bundle + SHA256 + metadata в
+`Documents\ENGINEER_OS_BACKUPS\<timestamp>`.
+
+Минимум одна копия должна храниться вне GitHub-аккаунта.
+
+### Единственная незавершённая repository security настройка
+
+🟡 GitHub server-side `Dependabot alerts / Dependabot security updates` пока сообщает `disabled`.
+
+`.github/dependabot.yml` уже находится в `main`, но подключённые GitHub admin tools не экспонируют отдельный endpoint для включения этого server-side toggle.
+
+Нужен один ручной переключатель в GitHub UI:
+
+**Settings → Security / Advanced Security → Dependabot alerts → Enable**
+
+и, если показан отдельно:
+
+**Dependabot security updates → Enable**.
+
+После включения перепроверить API и заменить этот 🟡 на ✅.
+
+### Статус
+
+Repository hardening: **✅ выполнен программно и административно, кроме одного Dependabot server-side toggle**.
+
+Следующий активный пункт MASTER PLAN не меняется:
+
+**№9 — фактическая Windows one-click verification.**
