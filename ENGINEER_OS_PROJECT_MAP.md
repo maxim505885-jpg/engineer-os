@@ -1,6 +1,6 @@
 # ENGINEER OS — живая карта проекта
 
-Обновлено: 06.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
+Обновлено: 08.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
 
 Идентичность этой карты: пользовательский файл `libfile_947c39aad11c81918c7887832c1411bb`, имя `ENGINEER_OS_PROJECT_MAP.md`. Для обновления использовать этот же ID и фактическую текущую версию. Правило сопровождения добавлено в `AGENTS.md`, указатель — в `docs/development/project-map-handoff.md` и README. Локальный HEAD отдельного PDF-checkout после нового прогона: `13200ab1a042ff1d4e2835844e275afacbfb13f4`; проверенная PDF-реализация: `e6498854bc8012d698afabb7c62e56db9b900d02`. Эти PDF-коммиты пока не опубликованы в GitHub.
 
@@ -12,7 +12,7 @@
 
 Проверенный код восстановления: локальный commit `e6498854bc8012d698afabb7c62e56db9b900d02`, ветка `fix/pdf-completeness-audit`. Эти изменения НЕ опубликованы: автоматическая проверка отклонила push без явного разрешения на публикацию. PR #35 содержит прежний head `d20d8595094f452bd70d28c18f52cb7d0eede665`. Не пытайся воспроизвести новый результат старым кодом.
 
-**Активный план:** девять пунктов, разделы30–38. Пункты1–5 выполнены как проверенные кандидаты. Пункт6 «Довести профильные проверки» выполняется: подэтапы6А/6Б опубликованы, весь пункт6 НЕ завершён. Начать с раздела38: source-bound предметные пакеты уже есть; дальше семантика расчётного комплекта и подтверждённая нормативная цепочка. Active checkout `/workspace/scratch/499af82b6df5/engineer-os-local-app`, branch `feat/domain-packets-stage6b-20261006`; local `16b28a4d729a393e58f5f1c8bdee6fb97732dc24`, remote `19a31cfb7d1a032b1bf922cfa1b4c1245281c950`, одинаковое tree `35b4579f5b77728b944cb21926088e7b313bd1f3`, draftPR59 наPR58. 424 Python/4 Node/actual HTTP+DOM PASS. Main/deploy не менялись, acceptance=false, FINAL AUDIT NOT_RUN. Windows — пункт9, последняя. Каждый итог: ✅/❌, затем номер и название следующего пункта.
+**Активный план:** MASTER PLAN из19пунктов, разделы47–51. Пункты1–5 и программные workflow7/8 выполнены; реальный объект BLOCK/acceptance=false. №6 реальные нормативные/solver decisions и №13/14 остаются открыты. Сейчас №10 — единый release candidate: branch `integration/release-candidate-v1`, draftPR74; remoteHEAD `07b33bd05533951c9cc2e58f41c983c55e0d11c3`, localHEAD `d2e91474d8877134174d2562e648d0e6aaa521ec`, одинаковоеtree `765086ff7915ef7e17676bf52dfd71806bc66cb8`. Здесь работать в `/workspace/scratch/499af82b6df5/engineer-os-release-candidate`; старый `engineer-os-local-app` не является текущей версией. Main не содержит полный продукт; merge не выполнялся. Windows9 по указанию пользователя последней. Каждый итог: ✅/❌/🟡, номер и название следующего пункта.
 
 ## 2. Зачем создаём систему
 
@@ -1147,7 +1147,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 ## 47. MASTER PLAN ДО 100% — актуальный план завершения ENGINEER OS — 07.10.2026
 
 **Этот раздел является текущим главным планом проекта и имеет приоритет над более ранними промежуточными статусами в этой карте.**
-Старые разделы сохраняются как история разработки. Новый чат обязан начинать работу с разделов 47–48 и не возвращать проект к старому состоянию.
+Старые разделы сохраняются как история разработки. Новый чат обязан начинать работу с разделов 47–51 и не возвращать проект к старому состоянию.
 
 ### Правило работы по плану
 
@@ -1175,7 +1175,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 7 | Полный реальный инженерный case workflow | ✅ | Stage-7 real case выполнен воспроизводимо |
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
-| 10 | Release consolidation / единый source of truth | ❌ | stacked PR собраны в один release-candidate и затем проверенный main |
+| 10 | Release consolidation / единый source of truth | 🟡 | stacked PR собраны в один release-candidate и затем проверенный main |
 | 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
@@ -1188,9 +1188,9 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №9 — Windows one-click runtime — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+### №9 — Windows one-click runtime — ОТЛОЖЕНО ДО WINDOWS
 
-**Почему сейчас:** код уже подготовлен и это самый дешёвый способ обнаружить реальные Windows/runtime проблемы до дальнейшего расширения системы.
+Код подготовлен, фактическая Windows проверка не выполнена. По указанию пользователя Windows последней; сейчас активен №10.
 
 Текущий кандидат:
 - branch: `feat/windows-one-click-stage9-20261007`;
@@ -1798,3 +1798,27 @@ MIT. При прямом включении substantial portions сохраня�
 
 Следующий активный пункт MASTER PLAN по-прежнему:
 **№9 — фактическая Windows one-click verification.**
+
+## 51. №10 — единый кандидат выпуска, 08.10.2026
+
+✅ Подготовлена ветка `integration/release-candidate-v1`, draft [PR74](https://github.com/maxim505885-jpg/engineer-os/pull/74) относительно main. Включены Stage9, боковой PR60 с Chromium и актуальный main security baseline. PR38–59 и61–67 проверены по ancestry; PR68 включён squash: его дерево точно совпадает со Stage9. Опубликованный merge сохраняет main и PR60 как дополнительные parents. Первоначальная API-публикация потеряла эти связи и показала конфликт; история исправлена fast-forward без force. Теперь PR mergeable, относительно main ahead319/behind0. Старые stacked PR сохранены.
+
+✅ Playwright1.55.0 закреплён в dev lock-файле; CI проверяет integration pushes, HTTP/jsdom, настоящий Chromium и PowerShell syntax. Добавлены правила безопасности агента, статическая проверка границ архитектуры, release checklist и актуальный MASTER PLAN из19пунктов. Legacy runtime paths не удалялись. Architecture guard — ограниченная проверка imports/явного shell keyword; это не sandbox и не анализ динамического исполнения.
+
+✅ Локально: 480 Python, 4 Node, HTTP/jsdom app+Drive, Chromium, compile, security/architecture guards и diff — PASS. Чистый checkout576059c с отдельной Python3.12venv: PyMuPDF1.26.6/Pillow12.3.0, pip check/npm ci PASS; 480 Python за39.715с, HTTP/jsdom и Chromium PASS. После этого менялись только docs/README/QA; runtime/workflow/lock остались теми же. Модель в браузерных тестах controlled, не live Ollama; OAuth не проверялся. Первый CDN archive был неполным, штатный mirror успешно загрузил browser. Один независимый review: Critical0/Important0; три замечания к документации исправлены, deferred minors нет.
+
+| Идентичность | Значение |
+|---|---|
+| Local HEAD | `d2e91474d8877134174d2562e648d0e6aaa521ec` |
+| Remote HEAD | `07b33bd05533951c9cc2e58f41c983c55e0d11c3` |
+| Одинаковое дерево | `765086ff7915ef7e17676bf52dfd71806bc66cb8` |
+| Test merge с тем же деревом | `07ade56f0d9deb1eda39cd4955fee0c98074a61e` |
+| Рабочий checkout | `/workspace/scratch/499af82b6df5/engineer-os-release-candidate` |
+
+Отчёт: `docs/qa/2026-10-07-release-consolidation.json`. План исполнения: `docs/development/release-consolidation-plan.md`. Актуальный план: `docs/development/master-plan.md`. Старый девятиэтапный документ сохранён с пометкой SUPERSEDED. Старая локальная ветка геометрии содержит только незакоммиченный план и не является продолжением актуальной реализации.
+
+🟡 №10 частично выполнен: единый проверяемый кандидат есть; merge в main, окончательные release criteria и закрытие superseded PR ещё открыты. №6/9/12/13/14–19 не завершены. Реальный Stage8 FINAL AUDIT COMPLETED с решением BLOCK; ACCEPTED нет. Резервирование Git-репозитория не заменяет Backup/Restore данных приложения.
+
+Следующий шаг после фиксации кандидата: **№11 — Product Design / UI/UX проработка**. №10 остаётся открыт до согласованной интеграции и соответствующих release criteria. Windows9 по указанию пользователя последней.
+
+**CI кандидата:** [Core push37690932823](https://github.com/maxim505885-jpg/engineer-os/actions/runs/37690932823) SUCCESS на HEAD07b33bd, включая Python/Node/HTTPjsdom/Chromium/PowerShell syntax. Security push37690932858 и PR37690937261 SUCCESS. Core PR37690937253 ещё выполняется; PASS этого отдельного прогона пока не заявляется. Parent после git fetch независимо проверил ancestry всех remote PR38–67 и равенство деревьев PR68/Stage9; различий remote/local tree нет.
