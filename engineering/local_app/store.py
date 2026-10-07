@@ -2,6 +2,8 @@
 from contextlib import contextmanager
 import json
 import hashlib
+import os
+import tempfile
 from pathlib import Path
 import sqlite3
 import time
@@ -19,6 +21,34 @@ def identifier(value):
 
 class ReviewConflict(ValueError):
     pass
+
+
+def _migration_backup(db,root):
+    target=root/'history.pre-migration-v0.sqlite3'
+    def verify(path):
+        if path.is_symlink():raise ValueError('Linked migration recovery copy')
+        saved=sqlite3.connect(path)
+        try:
+            if saved.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or saved.execute('PRAGMA user_version').fetchone()[0]!=0:
+                raise ValueError('Invalid migration recovery copy')
+            # A structurally valid empty or older unrelated database is not a
+            # recovery copy of the data that is about to be migrated.
+            def digest_dump(connection):
+                digest=hashlib.sha256()
+                for line in connection.iterdump():digest.update(line.encode('utf-8'));digest.update(b'\n')
+                return digest.digest()
+            if digest_dump(saved)!=digest_dump(db):raise ValueError('Migration recovery copy does not match current data')
+        finally:saved.close()
+    if target.exists():verify(target);return
+    fd,name=tempfile.mkstemp(prefix='migration-',suffix='.sqlite3',dir=root);os.close(fd)
+    temporary=Path(name)
+    try:
+        saved=sqlite3.connect(temporary)
+        try:db.backup(saved)
+        finally:saved.close()
+        verify(temporary)
+        os.link(temporary,target)
+    finally:temporary.unlink(missing_ok=True)
 
 
 class Store:
@@ -39,9 +69,15 @@ class Store:
     def __init__(self,root):
         self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
         self.path=self.root/'history.sqlite3'
+        existed=self.path.exists()
         with self.connection() as db:
+            version=db.execute('PRAGMA user_version').fetchone()[0]
+            if version>1:raise RuntimeError('Database is from a newer ENGINEER OS version; use the matching application')
+            if existed and version==0:
+                _migration_backup(db,self.root)
             db.executescript('''
             PRAGMA journal_mode=WAL;
+            BEGIN IMMEDIATE;
             CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,title TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS messages(seq INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL REFERENCES sessions(id),role TEXT NOT NULL,content TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL);
@@ -65,6 +101,7 @@ class Store:
             file_columns={r['name'] for r in db.execute('PRAGMA table_info(files)')}
             if 'source_metadata' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
             if 'extraction_coverage' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
+            db.execute('PRAGMA user_version=1')
 
     @contextmanager
     def connection(self):
