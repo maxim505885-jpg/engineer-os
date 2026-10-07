@@ -6,6 +6,7 @@ on:
       - main
       - "fix/**"
       - "feat/**"
+      - "integration/**"
   pull_request:
 
 permissions:
@@ -31,6 +32,8 @@ jobs:
           node --check engineering/local_app/ui/app.js
       - name: Check dashboard behavior
         run: node --test tests/dashboard_counts.test.cjs
+      - name: Check architecture boundaries
+        run: python scripts/architecture_guard.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -40,6 +43,8 @@ jobs:
           python -m pip check
       - name: Install locked development-only DOM dependencies
         run: npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
+      - name: Install locked Playwright Chromium
+        run: npx --prefix e2e playwright install --with-deps chromium
       - name: Check Windows launcher PowerShell syntax
         shell: pwsh
         run: |
@@ -63,3 +68,8 @@ jobs:
           PYTHON: python
           ENGINEER_OS_ATTACHMENT_PARSER: native
         run: npm test --prefix e2e
+      - name: Check real Chromium local UI workflow
+        env:
+          PYTHON: python
+          ENGINEER_OS_ATTACHMENT_PARSER: native
+        run: npm run test:browser --prefix e2e
