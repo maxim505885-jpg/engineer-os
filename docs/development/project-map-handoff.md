@@ -11,3 +11,6 @@ The map records purpose, actual implementation, missing integration, working bra
 Verify local and remote HEAD separately, source hashes and actual run records. Treat the map as development context, not engineering evidence or acceptance. Never remove BLOCK/UNCERTAINTY merely to advance the plan.
 
 After each substantive result update the same map and preserve its identity/version history. Keep current results separate from historical checkpoints. State clearly what was checked and what was not run.
+
+
+Repository hardening is recorded in section 49. Main is protected, secret scanning/push protection/CodeQL are active, and the active Stage-9 branch includes the same hardening. The only remaining repository-security UI toggle is Dependabot alerts/security updates.
