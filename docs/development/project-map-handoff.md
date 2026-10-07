@@ -14,3 +14,10 @@ After each substantive result update the same map and preserve its identity/vers
 
 
 Repository hardening is recorded in section 49. Main is protected, secret scanning/push protection/CodeQL are active, and the active Stage-9 branch includes the same hardening. The only remaining repository-security UI toggle is Dependabot alerts/security updates.
+
+
+Reference sources for stages 10–12 are recorded in section 50:
+- `di-sukharev/vibe` for agent safety, architecture/UI discipline and screenshot/browser workflow;
+- `nextlevelbuilder/ui-ux-pro-max-skill` for design-system reasoning, accessibility and UI anti-patterns.
+
+Treat both as reference sources, not replacement stacks or automatic dependencies. Adapt ideas under their licenses and preserve ENGINEER OS local-first/fail-closed architecture.
