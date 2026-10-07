@@ -3,6 +3,7 @@ import argparse
 import os
 from pathlib import Path
 import sys
+import sqlite3
 import threading
 import webbrowser
 
@@ -48,7 +49,7 @@ def main(argv=None):
             finally:
                 worker.stop_event.set();server.server_close();thread.join(timeout=1)
         return 0
-    except (RuntimeError,ValueError,OSError) as exc:
+    except (RuntimeError,ValueError,OSError,sqlite3.Error) as exc:
         print('Cannot start ENGINEER OS:',str(exc),file=sys.stderr)
         return 2
 

@@ -21,8 +21,8 @@ Restore проверяет инвентарь, запрещает обход к�
 Версия SQLite schema=1. Известная legacy schema0 обновляется транзакционно, предварительно создаётся проверенная эксклюзивная копия history.pre-migration-v0.sqlite3. Она должна совпадать с содержимым мигрируемой базы. Сбой копии позволяет повтор; сбой DDL откатывает изменения. Новая неизвестная версия отвергается. После аварии startup по-прежнему переводит RUNNING в FAILED; QUEUED остаются в очереди, повтор выполняется явно.
 
 ## Проверки
-- 12 новых тестов backup/restore/migration: PASS.
-- Полная регрессия: 506 Python-тестов PASS (42.609 s), 4 Node PASS, architecture guard, compileall, diff check PASS.
+- 13 новых тестов backup/restore/migration: PASS.
+- Полная регрессия: 507 Python-тестов PASS (полный прогон), 4 Node PASS, architecture guard, compileall, diff check PASS.
 - HTTP/DOM и Chromium проходят с контролируемой моделью; реальная Windows проверка — №16.
 - Реальный исходник Набережной V4: 74522583 bytes, SHA256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916. Копия 56665342 bytes; восстановленный исходник имеет тот же хеш, история и queued job сохранились.
 - Проверены занятый каталог, существующий output/target, повреждённый архив, traversal, дисковый сбой, прерванная migration-copy с повтором, rollback DDL, future schema, исключение секретов и гонка публикации.

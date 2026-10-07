@@ -119,6 +119,15 @@ class DataBackupTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):Store(self.root)
         with sqlite3.connect(self.store.path) as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],999)
 
+    def test_launcher_reports_corrupt_database_without_traceback(self):
+        from scripts.run_local_app import main
+        from contextlib import redirect_stderr
+        import io
+        broken=self.base/'corrupt';broken.mkdir();(broken/'history.sqlite3').write_bytes(b'not sqlite')
+        output=io.StringIO()
+        with redirect_stderr(output):self.assertEqual(main(['--data-dir',str(broken),'--no-browser']),2)
+        self.assertIn('Cannot start',output.getvalue());self.assertNotIn('Traceback',output.getvalue())
+
     def test_only_nonsecret_settings_are_restored(self):
         from engineering.local_app.backup import create_backup,restore_backup
         from unittest.mock import patch
