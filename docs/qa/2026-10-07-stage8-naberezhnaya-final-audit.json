@@ -1,12 +1,13 @@
 {
   "acceptance_certificate": null,
   "acceptance_granted": false,
-  "audit_sha256": "46d1454834921437a1d1e27a427bebecfcc68106c40d823a6845c8e80c7bf6e4",
+  "audit_sha256": "e10197f39e3edb6c81144c101757b57ccd95f5c25d7042187d52916f749144ba",
   "blocker_codes": [
     "ACTUAL_STRUCTURE_CORRELATION_PENDING",
     "POINT6_NORMATIVE_DECISION_PENDING",
     "POINT6_SOLVER_DECISION_PENDING",
     "V4_DOCUMENT_COMPLETENESS_BLOCK",
+    "OFFLINE_SNAPSHOT_NOT_ACCEPTANCE_AUTHORITY",
     "TZ_TRACEABILITY_NOT_RECORDED",
     "EVIDENCE_REVIEW_NOT_RECORDED",
     "SPECIALIST_COVERAGE_NOT_RECORDED",
@@ -27,14 +28,72 @@
     "ACCEPTANCE_BASIS"
   ],
   "checks": [
-    {"dimension":"CASE_FRESHNESS","status":"PASS","reasons":[]},
-    {"dimension":"SOURCE_IDENTITY","status":"PASS","reasons":[]},
-    {"dimension":"TZ_TRACEABILITY","status":"BLOCK","reasons":["V4_DOCUMENT_COMPLETENESS_BLOCK","TZ_TRACEABILITY_NOT_RECORDED"]},
-    {"dimension":"EVIDENCE_REVIEW","status":"BLOCK","reasons":["EVIDENCE_REVIEW_NOT_RECORDED"]},
-    {"dimension":"SPECIALIST_COVERAGE","status":"BLOCK","reasons":["POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING","SPECIALIST_COVERAGE_NOT_RECORDED"]},
-    {"dimension":"DOMAIN_PREREQUISITES","status":"BLOCK","reasons":["ACTUAL_STRUCTURE_CORRELATION_PENDING","DOMAIN_PREREQUISITES_NOT_RECORDED"]},
-    {"dimension":"CASE_QC","status":"BLOCK","reasons":["CASE_QC_NOT_RECORDED"]},
-    {"dimension":"ACCEPTANCE_BASIS","status":"BLOCK","reasons":["ACTUAL_STRUCTURE_CORRELATION_PENDING","POINT6_NORMATIVE_DECISION_PENDING","POINT6_SOLVER_DECISION_PENDING","V4_DOCUMENT_COMPLETENESS_BLOCK","TZ_TRACEABILITY_NOT_RECORDED","EVIDENCE_REVIEW_NOT_RECORDED","SPECIALIST_COVERAGE_NOT_RECORDED","DOMAIN_PREREQUISITES_NOT_RECORDED","CASE_QC_NOT_RECORDED","CASE_ENGINEERING_STATUS_NOT_READY"]}
+    {
+      "dimension": "CASE_FRESHNESS",
+      "reasons": [],
+      "status": "PASS"
+    },
+    {
+      "dimension": "SOURCE_IDENTITY",
+      "reasons": [],
+      "status": "PASS"
+    },
+    {
+      "dimension": "TZ_TRACEABILITY",
+      "reasons": [
+        "V4_DOCUMENT_COMPLETENESS_BLOCK",
+        "TZ_TRACEABILITY_NOT_RECORDED"
+      ],
+      "status": "BLOCK"
+    },
+    {
+      "dimension": "EVIDENCE_REVIEW",
+      "reasons": [
+        "EVIDENCE_REVIEW_NOT_RECORDED"
+      ],
+      "status": "BLOCK"
+    },
+    {
+      "dimension": "SPECIALIST_COVERAGE",
+      "reasons": [
+        "POINT6_NORMATIVE_DECISION_PENDING",
+        "POINT6_SOLVER_DECISION_PENDING",
+        "SPECIALIST_COVERAGE_NOT_RECORDED"
+      ],
+      "status": "BLOCK"
+    },
+    {
+      "dimension": "DOMAIN_PREREQUISITES",
+      "reasons": [
+        "ACTUAL_STRUCTURE_CORRELATION_PENDING",
+        "DOMAIN_PREREQUISITES_NOT_RECORDED"
+      ],
+      "status": "BLOCK"
+    },
+    {
+      "dimension": "CASE_QC",
+      "reasons": [
+        "CASE_QC_NOT_RECORDED"
+      ],
+      "status": "BLOCK"
+    },
+    {
+      "dimension": "ACCEPTANCE_BASIS",
+      "reasons": [
+        "ACTUAL_STRUCTURE_CORRELATION_PENDING",
+        "POINT6_NORMATIVE_DECISION_PENDING",
+        "POINT6_SOLVER_DECISION_PENDING",
+        "V4_DOCUMENT_COMPLETENESS_BLOCK",
+        "OFFLINE_SNAPSHOT_NOT_ACCEPTANCE_AUTHORITY",
+        "TZ_TRACEABILITY_NOT_RECORDED",
+        "EVIDENCE_REVIEW_NOT_RECORDED",
+        "SPECIALIST_COVERAGE_NOT_RECORDED",
+        "DOMAIN_PREREQUISITES_NOT_RECORDED",
+        "CASE_QC_NOT_RECORDED",
+        "CASE_ENGINEERING_STATUS_NOT_READY"
+      ],
+      "status": "BLOCK"
+    }
   ],
   "decision": "BLOCK",
   "engineering_verified": false,

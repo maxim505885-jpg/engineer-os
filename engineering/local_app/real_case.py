@@ -125,6 +125,12 @@ def _domain_stage(job,domains):
             reasons.append(kind+'_DOMAIN_PACKET_MISSING')
         elif by_kind[kind].get('point6_readiness')!='READY_FOR_ENGINEERING_DECISION':
             reasons.append(kind+'_POINT6_ENGINEERING_DECISION_PENDING')
+        packet=by_kind.get(kind)
+        if packet and (packet.get('status') not in {'ACCEPTED','ACCEPTED ALTERNATIVE'}
+                       or packet.get('engineering_verified') is not True
+                       or packet.get('acceptance_granted') is not True
+                       or packet.get('reasons')):
+            reasons.extend(packet.get('reasons') or [kind+'_ENGINEERING_DECISION_NOT_ACCEPTED'])
     return dict(status='BLOCK' if reasons else 'READY_FOR_CASE_QC',
                 reasons=reasons,required_kinds=required,
                 packet_revisions={kind:by_kind[kind]['revision'] for kind in required if kind in by_kind})
@@ -199,7 +205,16 @@ def report(store,session_id):
     current=state[-1]
     stale_reasons=[]
     try:
+        # revision/current/fresh are storage or presentation fields, not part of
+        # the immutable snapshot originally hashed by build().
+        hashed={k:v for k,v in current.items() if k not in {'case_sha256','revision'}}
+        if _digest(hashed)!=current.get('case_sha256'):
+            stale_reasons.append('CASE_SNAPSHOT_INTEGRITY_CHANGED')
         snapshot=store.snapshot(session_id);job=_job(snapshot,current['job_id'])
+        expected_job=(current['identity'].get('core_job_id'),current['identity'].get('core_job_state'),
+                      current['identity'].get('prompt'),current['identity'].get('requested_checks'))
+        if expected_job!=(job['id'],job['state'],job['prompt'],job['requested_checks']) or job['mode']!='CORE_RUN':
+            stale_reasons.append('CORE_JOB_SCOPE_CHANGED')
         files=[store.get_file(fid) for fid in job['file_ids']]
         verify_originals(files)
         requirements=requirements_report(store,session_id,selected_files=job['file_ids'])
@@ -209,8 +224,8 @@ def report(store,session_id):
         if _digest(candidates)!=current['identity']['evidence_digest']:stale_reasons.append('EVIDENCE_STATE_CHANGED')
         if _digest(domains)!=current['identity']['domain_digest']:stale_reasons.append('DOMAIN_STATE_CHANGED')
         if _digest(job.get('result'))!=current['identity']['core_result_digest']:stale_reasons.append('CORE_RESULT_CHANGED')
-        current_ids=[(f['id'],f['sha256'],f['size']) for f in files]
-        expected=[(f['id'],f['sha256'],f['size']) for f in current['identity']['originals']]
+        current_ids=[(f['id'],f['name'],f['sha256'],f['size']) for f in files]
+        expected=[(f['id'],f['name'],f['sha256'],f['size']) for f in current['identity']['originals']]
         if current_ids!=expected:stale_reasons.append('ORIGINAL_SET_CHANGED')
     except Exception:
         stale_reasons.append('CASE_REVALIDATION_FAILED')
