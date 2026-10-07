@@ -4,7 +4,7 @@ Read [ENGINEER_OS_PROJECT_MAP.md](../../ENGINEER_OS_PROJECT_MAP.md) in the repos
 
 **Start with sections 47–48.** They are the current master plan to 100% and the new-chat handoff. If an older section conflicts with sections 47–48, use sections 47–48, then verify the actual GitHub head/PR/CI before acting.
 
-Current next active item: **№9 — real Windows one-click verification**. After each substantive result update the same map with ✅/🟡/❌ status, branch/PR/head/CI when code changed, and the next active item.
+Current next active item: **№9 — real Windows one-click verification**. After №9 the order is: **№10 release consolidation → №11 Product Design / UI/UX → №12 reliability/backup/browser gate → №13 Document Intelligence completeness → return to №6 real engineering verification → №14–19**. After each substantive result update the same map with ✅/🟡/❌ status, branch/PR/head/CI when code changed, and the next active item.
 
 The map records purpose, actual implementation, missing integration, working branches, source/checkpoint identities, verified results and the next concrete action. It describes the development branch state; do not assume everything recorded is merged into main.
 
