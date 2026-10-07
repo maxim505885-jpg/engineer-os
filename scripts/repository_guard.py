@@ -5,7 +5,10 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 FORBIDDEN_EXACT={".env"}
-FORBIDDEN_PARTS=("client_secret","credentials.json","token.json","refresh_token")
+FORBIDDEN_PARTS=("client_secret","credentials.json","token.json","refresh_token","service-account")
+FORBIDDEN_NAMES={".npmrc",".pypirc",".netrc"}
+FORBIDDEN_SUFFIXES={".pem",".key",".p12",".pfx"}
+FORBIDDEN_PREFIXES=("id_rsa","id_ed25519")
 ALLOWED_ENV={".env.example"}
 
 def tracked_files()->list[str]:
@@ -25,6 +28,8 @@ def main()->int:
             errors.append(f"tracked environment file: {path}")
         if any(part in low for part in FORBIDDEN_PARTS):
             errors.append(f"tracked credential-like path: {path}")
+        if name in FORBIDDEN_NAMES or Path(name).suffix in FORBIDDEN_SUFFIXES or any(name.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
+            errors.append(f"tracked private credential/key file: {path}")
 
     required={
         ".github/CODEOWNERS",
