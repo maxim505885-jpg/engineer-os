@@ -1,0 +1,26 @@
+# Local secrets and OAuth credentials
+.env
+.env.*
+!.env.example
+client_secret*.json
+credentials*.json
+token*.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+.npmrc
+.pypirc
+.netrc
+
+# Python
+__pycache__/
+*.py[cod]
+.venv*/
+node_modules/
+
+# Local ENGINEER OS state
+.engineer-os/

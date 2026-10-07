@@ -1,0 +1,34 @@
+name: Repository Security Guard
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "fix/**"
+      - "chore/**"
+      - "integration/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check repository protection invariants
+        run: python scripts/repository_guard.py
+      - name: Confirm ignored local secret classes
+        run: |
+          git check-ignore -q .env
+          git check-ignore -q .env.google-drive
+          git check-ignore -q client_secret.json
+          git check-ignore -q token.json
