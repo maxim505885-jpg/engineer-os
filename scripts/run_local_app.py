@@ -13,6 +13,7 @@ from engineering.local_app.model import LocalModel, thinking_setting
 from engineering.local_app.server import make_server
 from engineering.local_app.store import Store
 from engineering.local_app.worker import Worker
+from engineering.local_app.settings import load as load_settings
 
 
 def main(argv=None):
@@ -23,12 +24,13 @@ def main(argv=None):
     args=parser.parse_args(argv)
     if not 0<=args.port<=65535:parser.error('Port must be 0–65535')
     if sys.version_info<(3,12):parser.error('Python 3.12 or newer is required')
-    origin=os.environ.get('ENGINEER_OS_LOCAL_MODEL_URL','http://127.0.0.1:11434')
-    model_name=os.environ.get('ENGINEER_OS_LOCAL_MODEL','qwen3:8b')
     key=os.environ.get('ENGINEER_OS_LOCAL_MODEL_KEY','')
     try:
-        model=LocalModel(origin,model_name,key,provider=os.environ.get('ENGINEER_OS_LOCAL_PROVIDER','ollama'),
-                         thinking=thinking_setting(os.environ.get('ENGINEER_OS_LOCAL_THINK')))
+        settings=load_settings(args.data_dir)
+        origin=settings.get('ENGINEER_OS_LOCAL_MODEL_URL','http://127.0.0.1:11434')
+        model_name=settings.get('ENGINEER_OS_LOCAL_MODEL','qwen3:8b')
+        model=LocalModel(origin,model_name,key,provider=settings.get('ENGINEER_OS_LOCAL_PROVIDER','ollama'),
+                         thinking=thinking_setting(settings.get('ENGINEER_OS_LOCAL_THINK')))
         with DataLock(args.data_dir):
             store=Store(args.data_dir)
             server=make_server(store,model,port=args.port)
