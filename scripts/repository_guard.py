@@ -35,7 +35,6 @@ def main()->int:
         ".github/CODEOWNERS",
         "SECURITY.md",
         ".github/dependabot.yml",
-        ".github/workflows/core-tests.yml",
         ".github/workflows/repository-security.yml",
         ".github/workflows/repository-backup.yml",
     }
