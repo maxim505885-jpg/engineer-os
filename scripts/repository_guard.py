@@ -43,6 +43,8 @@ def main()->int:
 
     conflict_tokens=("<<<<<<< ","=======",">>>>>>> ")
     for path in files:
+        if path=="scripts/repository_guard.py":
+            continue
         p=ROOT/path
         if not p.is_file() or p.suffix.lower() in {".png",".jpg",".jpeg",".gif",".pdf",".doc",".docx",".xls",".xlsx",".lir",".zip"}:
             continue
