@@ -30,8 +30,8 @@ class Store:
             PRAGMA journal_mode=WAL;
             CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,title TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS messages(seq INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL REFERENCES sessions(id),role TEXT NOT NULL,content TEXT NOT NULL,created REAL NOT NULL);
-            CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL);
-            CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
+            CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL,source_metadata TEXT NOT NULL DEFAULT '{}',extraction_coverage TEXT NOT NULL DEFAULT '{}');
+            CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL,parent_id TEXT,mode TEXT NOT NULL DEFAULT 'CHAT',requested_checks TEXT NOT NULL DEFAULT '[]');
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_receipts(seq INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES jobs(id),record TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
@@ -45,12 +45,18 @@ class Store:
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
-            if 'parent_id' not in columns:db.execute('ALTER TABLE jobs ADD COLUMN parent_id TEXT')
-            if 'mode' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
-            if 'requested_checks' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
             file_columns={r['name'] for r in db.execute('PRAGMA table_info(files)')}
-            if 'source_metadata' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
-            if 'extraction_coverage' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
+            job_missing=[name for name in ('parent_id','mode','requested_checks') if name not in columns]
+            file_missing=[name for name in ('source_metadata','extraction_coverage') if name not in file_columns]
+            if job_missing or file_missing:
+                backup_dir=self.root/'pre-migration';backup_dir.mkdir(exist_ok=True)
+                backup_path=backup_dir/('history-'+str(int(time.time()*1000))+'.sqlite3')
+                with sqlite3.connect(backup_path) as snapshot:db.backup(snapshot)
+                if 'parent_id' in job_missing:db.execute('ALTER TABLE jobs ADD COLUMN parent_id TEXT')
+                if 'mode' in job_missing:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
+                if 'requested_checks' in job_missing:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
+                if 'source_metadata' in file_missing:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
+                if 'extraction_coverage' in file_missing:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
 
     @contextmanager
     def connection(self):

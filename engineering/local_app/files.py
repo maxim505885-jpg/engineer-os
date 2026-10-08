@@ -1,5 +1,6 @@
 """Immutable originals with bounded, explicitly unverified text candidates."""
 import hashlib
+import os
 from pathlib import Path
 import time
 import uuid
@@ -9,6 +10,16 @@ from .coverage import unknown_coverage
 MAX_FILE_BYTES=100*1024*1024
 MAX_TEXT=100000
 SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc'}
+
+
+def _atomic_write_original(path,data):
+    temp=path.with_name(path.name+'.partial-'+uuid.uuid4().hex)
+    try:
+        with temp.open('xb') as stream:
+            stream.write(data);stream.flush();os.fsync(stream.fileno())
+        os.replace(temp,path)
+    finally:
+        temp.unlink(missing_ok=True)
 
 
 def extract_preview(name,data):
@@ -75,7 +86,7 @@ def preserve_file(store,session_id,name,data,*,source_metadata=None):
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)
     path=folder/(ident+Path(name).suffix.lower())
     text,status,note,truncated,coverage=extract_preview(name,data)
-    path.write_bytes(data)
+    _atomic_write_original(path,data)
     record=dict(id=ident,session_id=session_id,name=name,path=str(path),sha256=hashlib.sha256(data).hexdigest(),size=len(data),text=text,extraction_status=status,extraction_note=note,text_truncated=int(truncated),created=time.time())
     record['source_metadata']=source_metadata or {}
     record['extraction_coverage']=coverage
