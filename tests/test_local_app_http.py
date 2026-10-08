@@ -56,6 +56,23 @@ class LocalHTTPTests(unittest.TestCase):
             c.request(method,path,body=body,headers=h);r=c.getresponse();return r.status,dict(r.headers),r.read()
         finally:c.close()
 
+    def test_model_settings_and_task_actions_require_token_and_project(self):
+        session=self.create()
+        status,_,_=self.request('POST','/api/model/settings',{'ENGINEER_OS_LOCAL_MODEL_TIMEOUT':'12'},token=False)
+        self.assertEqual(status,403)
+        status,_,_=self.request('POST','/api/model/settings',{'ENGINEER_OS_LOCAL_MODEL_TIMEOUT':'12'})
+        self.assertEqual(status,200);self.assertEqual(self.model.timeout,12)
+        job=self.store.enqueue(session,'Queued',[])
+        status,_,_=self.request('POST',f'/api/sessions/{session}/jobs/{job["id"]}/cancel',{},token=False)
+        self.assertEqual(status,403)
+        other=self.create()
+        status,_,_=self.request('POST',f'/api/sessions/{other}/jobs/{job["id"]}/cancel',{})
+        self.assertEqual(status,400)
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/jobs/{job["id"]}/cancel',{})
+        self.assertEqual(status,202);self.assertEqual(json.loads(raw)['state'],'CANCELLED')
+        status,_,raw=self.request('POST',f'/api/sessions/{session}/jobs/{job["id"]}/retry',{})
+        self.assertEqual(status,202);self.assertNotEqual(json.loads(raw)['id'],job['id'])
+
     def create(self):
         status,_,raw=self.request('POST','/api/sessions',{'title':'Объект'})
         self.assertEqual(status,201);return json.loads(raw)['id']

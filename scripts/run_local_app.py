@@ -33,7 +33,8 @@ def main(argv=None):
         origin=settings.get('ENGINEER_OS_LOCAL_MODEL_URL','http://127.0.0.1:11434')
         model_name=settings.get('ENGINEER_OS_LOCAL_MODEL','qwen3:8b')
         model=LocalModel(origin,model_name,key,provider=settings.get('ENGINEER_OS_LOCAL_PROVIDER','ollama'),
-                         thinking=thinking_setting(settings.get('ENGINEER_OS_LOCAL_THINK')))
+                         thinking=thinking_setting(settings.get('ENGINEER_OS_LOCAL_THINK')),
+                         timeout=int(settings.get('ENGINEER_OS_LOCAL_MODEL_TIMEOUT','180')))
         with DataLock(args.data_dir):
             store=Store(args.data_dir)
             server=make_server(store,model,port=args.port)

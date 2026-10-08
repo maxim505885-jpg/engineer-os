@@ -39,17 +39,20 @@ def thinking_setting(value):
 
 
 class LocalModel:
-    def __init__(self,origin='http://127.0.0.1:11434',model='qwen3:8b',key='',*,provider='ollama',thinking=None):
+    def __init__(self,origin='http://127.0.0.1:11434',model='qwen3:8b',key='',*,provider='ollama',thinking=None,timeout=180):
         try:self.origin=local_url(origin)
         except IntegrationError as exc:raise ValueError(str(exc)) from None
         if not isinstance(model,str) or not model.strip() or len(model)>200:raise ValueError('Invalid model')
         if provider not in {'ollama','openwebui'}:raise ValueError('Provider must be ollama or openwebui')
         if thinking is not None and type(thinking) is not bool:raise ValueError('Thinking must be a boolean or None')
         if thinking is not None and provider!='ollama':raise ValueError('Explicit thinking control requires the Ollama provider')
+        if type(timeout) is not int or not 1<=timeout<=600:raise ValueError('Timeout must be 1–600 seconds')
+        self.timeout=timeout
         self.provider=provider
         self.thinking=thinking
         self.model=model;self.key=key;self.opener=build_opener(ProxyHandler({}),NoRedirect())
         def open_bounded(req,timeout):
+            timeout=self.timeout
             if self.provider=='openwebui':req=Request(self.origin+'/api/chat/completions',data=req.data,headers=dict(req.header_items()),method='POST')
             if self.thinking is not None:
                 original=json.loads(req.data)
@@ -75,8 +78,9 @@ class LocalModel:
             if len(raw)>2*1024*1024:raise ValueError
             body=json.loads(raw)
             available=any(isinstance(x,dict) and x.get('id')==self.model for x in body.get('data',[]))
-        except (OSError,ValueError,TypeError,AttributeError):available=False
-        return dict(available=available,model=self.model,origin=self.origin,provider=self.provider,note='Model listed; inference not yet verified.' if available else 'Start the local model service and check the configured model.')
+            state='MODEL_LISTED' if available else 'MODEL_MISSING'
+        except (OSError,ValueError,TypeError,AttributeError):available=False;state='SERVICE_UNAVAILABLE'
+        return dict(available=available,state=state,inference_verified=False,model=self.model,origin=self.origin,provider=self.provider,thinking=self.thinking,timeout=self.timeout,note={'MODEL_LISTED':'Модель найдена; выполнение запроса ещё не проверено.','MODEL_MISSING':'Сервер отвечает, но выбранная модель отсутствует.','SERVICE_UNAVAILABLE':'Сервер модели недоступен или вернул неверный ответ.'}[state])
 
     def checkpoint_identity(self):
         if self.provider!='ollama':return None
@@ -93,5 +97,5 @@ class LocalModel:
             if not isinstance(show,dict) or 'parameters' not in show:return None
             config={k:show.get(k) for k in ('parameters','template','system','model_info')}
             return dict(provider=self.provider,origin=self.origin,model=self.model,model_digest=matches[0]['digest'],
-                        config_sha256=digest(config),thinking=self.thinking,temperature=0,timeout=180,response_chars=32000)
+                        config_sha256=digest(config),thinking=self.thinking,temperature=0,timeout=self.timeout,response_chars=32000)
         except (OSError,ValueError,TypeError,AttributeError):return None
