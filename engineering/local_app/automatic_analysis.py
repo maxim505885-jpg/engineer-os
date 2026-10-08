@@ -138,10 +138,33 @@ class DocumentModel:
         if role=='CHAT':base=self.store.analysis_context(self.job['id'],role,base)
         allowed=set(self.job['file_ids'])|{r['id'] for r in self.store.snapshot(self.job['session_id'])['evidence'] if r['file_id'] in self.job['file_ids']}
         task=SimpleNamespace(task_id=self.job['id'],agent=role)
+        requirement_ids={r['id'] for r in data['sources']['requirements']['requirements']} if role!='CHAT' else set()
         block_seen=bool(self.report['roles'].get(role,{}).get('block_seen'))
-        self.report['roles'][role]=dict(status='RUNNING',total=len(self.prepared['batches']),completed=0,block_seen=block_seen)
+        self.report['roles'][role]=dict(status='RUNNING',total=len(self.prepared['batches']),completed=0,block_seen=block_seen,intermediate_gates=[],intermediate_gates_omitted=0)
         self.report.update(stage='ANALYZING',current_role=role,batches_completed=0,all_batches_completed=False)
         self.store.analysis_progress(self.job['id'],self.report)
+        def retain_gates(raw,rid,kind):
+            # Summaries are lossy. Recompute gates from every verified receipt,
+            # including cached receipts, independently of the final model answer.
+            if role=='CHAT':return
+            from .requirements import finding_gates
+            from .analysis_identity import digest
+            parsed,_=parse_draft(task,raw,allowed,allowed_requirement_ids=requirement_ids)
+            gates=finding_gates(self.store,self.job['session_id'],list(parsed.findings),self.job['file_ids'])
+            state=self.report['roles'][role]
+            for index,(finding,gate) in enumerate(zip(parsed.findings,gates)):
+                reasons=[]
+                if not finding.get('requirement_ids'):reasons.append('OBSERVATION_NOT_TZ_BOUND')
+                if finding.get('relation','UNKNOWN')=='CONTRADICTS':reasons.append('ROLE_DECLARED_CONTRADICTION')
+                if finding.get('relation','UNKNOWN')=='UNKNOWN':reasons.append('ROLE_RELATION_UNKNOWN')
+                if gate['status']=='BLOCK':reasons.extend(gate['reasons'])
+                if not reasons:continue
+                if len(state['intermediate_gates'])>=200:
+                    state['intermediate_gates_omitted']+=1
+                    continue
+                state['intermediate_gates'].append(dict(receipt_id=rid,kind=kind,finding=index,
+                    response_sha256=digest(raw),requirement_ids=finding.get('requirement_ids',[]),
+                    source_ids=finding['source_ids'],relation=finding.get('relation','UNKNOWN'),reasons=list(dict.fromkeys(reasons))))
         def call(payload,kind):
             nonlocal block_seen
             from .analysis_identity import digest
@@ -159,10 +182,11 @@ class DocumentModel:
             if cached:
                 if digest(cached['text'])!=cached.get('response_sha256'):raise PartialAnalysisFailure(block_seen)
                 if role!='CHAT':
-                    parsed,_=parse_draft(task,cached['text'],allowed)
+                    parsed,_=parse_draft(task,cached['text'],allowed,allowed_requirement_ids=requirement_ids)
                     block_seen=block_seen or parsed.status.value=='BLOCK'
                 self.report['calls_reused']+=1
                 self.report['roles'][role]['block_seen']=block_seen
+                retain_gates(cached['text'],cached['receipt_id'],kind)
                 return cached['text'],cached['receipt_id']
             if self.attempts>=MAX_MODEL_CALLS or self.elapsed>=MAX_MODEL_SECONDS:
                 self.report.update(stage='PARTIAL',all_batches_completed=False,budget_exhausted=True)
@@ -185,7 +209,7 @@ class DocumentModel:
                 raw=self.model.chat(prompts)
                 if not isinstance(raw,str) or not raw.strip() or len(raw)>20000:raise ValueError('Invalid part response')
                 if role!='CHAT':
-                    parsed,_=parse_draft(task,raw,allowed)
+                    parsed,_=parse_draft(task,raw,allowed,allowed_requirement_ids=requirement_ids)
                     block_seen=block_seen or parsed.status.value=='BLOCK'
                 verify_originals(self.prepared['files'])
                 guard_context()
@@ -202,6 +226,7 @@ class DocumentModel:
             record=dict(metadata,elapsed_seconds=timing(),role=role,kind=kind,status='COMPLETED',refs=payload.get('refs',[]),text=raw,response_sha256=digest(raw))
             rid=self.store.save_analysis_receipt(self.job['id'],record,update_seq=active_seq)
             self.receipts.append(dict(record,receipt_id=rid))
+            retain_gates(raw,rid,kind)
             self.store.analysis_progress(self.job['id'],self.report)
             return raw,rid
         drafts=[]

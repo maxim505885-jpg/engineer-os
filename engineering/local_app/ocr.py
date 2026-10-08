@@ -81,7 +81,7 @@ class TesseractOCR:
     @staticmethod
     def _blocks(tsv,page_no,scale,width,height):
         lines={};words=0
-        for row in csv.DictReader(io.StringIO(tsv),delimiter='\t'):
+        for row in csv.DictReader(io.StringIO(tsv),delimiter='\t',quoting=csv.QUOTE_NONE):
             if row.get('level')!='5' or not (row.get('text') or '').strip():continue
             words+=1
             if words>MAX_WORDS:raise OCRError('OCR_WORD_LIMIT')

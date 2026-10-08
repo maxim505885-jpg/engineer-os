@@ -95,3 +95,10 @@ class LocalOCRTests(unittest.TestCase):
         def capture(parser,page,number):calls.append(number);return original(parser,page,number)
         with patch.object(module.TesseractOCR,'page_blocks',capture):Worker(self.store,None).run_once()
         self.assertEqual(calls,[1,2]);self.assertEqual(self.store.extraction_page(self.session,job['id'],1),saved)
+
+    def test_tsv_literal_quote_never_consumes_following_rows(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        header='level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n'
+        tsv=header+'5\t1\t1\t1\t1\t1\t10\t10\t10\t10\t90\t"\n'+'5\t1\t1\t1\t1\t2\t30\t10\t30\t10\t90\tHeight\n'
+        blocks=module.TesseractOCR._blocks(tsv,1,1,100,100)
+        self.assertEqual(blocks[0]['text'],'" Height');self.assertNotIn('\t',blocks[0]['text'])

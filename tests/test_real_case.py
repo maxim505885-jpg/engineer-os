@@ -75,6 +75,16 @@ class RealCaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.module().build(self.store,self.sid,job_id=other['id'],expected_revision=1)
 
+    def test_case_source_stage_uses_child_document_coverage(self):
+        import fitz
+        with fitz.open() as pdf:
+            page=pdf.new_page();page.insert_text((40,70),'Source text');page.draw_line((40,100),(400,100));data=pdf.tobytes()
+        self.file=preserve_file(self.store,self.sid,'mixed.pdf',data);job=self.core()
+        self.assertEqual(job['result']['document_analysis']['sources'][0]['blocked_pages'],1)
+        event=self.module().build(self.store,self.sid,job_id=job['id'],expected_revision=0,manifest={'TOR':[self.file['id']],'REPORT':[self.file['id']]})
+        self.assertEqual(event['stages']['source_identity']['status'],'BLOCK')
+        self.assertIn('DOCUMENT_BLOCKED_PAGES_PRESENT',event['stages']['source_identity']['reasons'])
+
 
 if __name__=='__main__':
     unittest.main()

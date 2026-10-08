@@ -71,8 +71,10 @@ def _source_stage(files,result,manifest):
     analysis=(result or {}).get('document_analysis')
     if analysis:
         if not analysis.get('all_batches_completed'):reasons.append('DOCUMENT_ANALYSIS_INCOMPLETE')
-        if analysis.get('blocked_pages'):reasons.append('DOCUMENT_BLOCKED_PAGES_PRESENT')
-        if analysis.get('failed_pages'):reasons.append('DOCUMENT_FAILED_PAGES_PRESENT')
+        sources=analysis.get('sources',[])
+        if analysis.get('blocked_pages') or any(s.get('blocked_pages') for s in sources):reasons.append('DOCUMENT_BLOCKED_PAGES_PRESENT')
+        if analysis.get('failed_pages') or any(s.get('failed_pages') for s in sources):reasons.append('DOCUMENT_FAILED_PAGES_PRESENT')
+        if analysis.get('text_omitted'):reasons.append('DOCUMENT_TEXT_OMITTED')
         if analysis.get('budget_exhausted'):reasons.append('DOCUMENT_ANALYSIS_BUDGET_EXHAUSTED')
     return dict(status='BLOCK' if reasons else 'READY',reasons=list(dict.fromkeys(reasons)))
 
@@ -105,6 +107,9 @@ def _specialist_stage(job):
     if not run:reasons.append('CORE_RUN_RESULT_MISSING')
     else:
         if not run.get('analysis_complete'):reasons.append('SPECIALIST_ANALYSIS_INCOMPLETE')
+        review=run.get('engineering_review')
+        if not review:reasons.append('ENGINEERING_REVIEW_NOT_RUN')
+        elif review['status']=='BLOCK':reasons.append('ENGINEERING_REVIEW_BLOCKED')
         for row in run.get('results',[]):
             if row.get('execution')!='COMPLETED':reasons.append('SPECIALIST_EXECUTION_INCOMPLETE')
             if row.get('status') in {'ERROR','BLOCK'}:reasons.append('SPECIALIST_RESULT_BLOCKED')

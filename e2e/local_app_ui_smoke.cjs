@@ -11,7 +11,7 @@ const {chromium}=require('playwright');
   const model=http.createServer((req,res)=>{
     res.setHeader('Content-Type','application/json');
     if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}
-    let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);requests.push(payload);const send=()=>res.end(JSON.stringify({choices:[{message:{content:'СИНТЕТИЧЕСКИЙ ОТВЕТ: источник требует проверки. <script>window.injected=true</script>'}}]}));if(JSON.stringify(payload).includes('CANCEL_UI'))setTimeout(send,2000);else send();});
+    let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);requests.push(payload);const send=()=>res.end(JSON.stringify({choices:[{message:{content:payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Предварительная роль',observations:[],limitations:['Нет фактических данных']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ: источник требует проверки. <script>window.injected=true</script>'}}]}));if(JSON.stringify(payload).includes('CANCEL_UI'))setTimeout(send,2000);else send();});
   });
   try{
     await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
@@ -50,6 +50,20 @@ const {chromium}=require('playwright');
     assert.equal(requests.length,4,'Retry must execute a new request');
     await page.click('[data-stage="history"]');await page.waitForSelector('#history-records .history-record');
     assert.ok(await page.locator('#history-records').textContent().then(text=>text.includes('Проверь высоту по ТЗ')));
+    await page.evaluate(async()=>{
+      await api(`/api/sessions/${current}/requirements`,{method:'POST',body:{text:'Проверить высоту\nПроверить фактические конструкции'}});
+      const snap=await api(`/api/sessions/${current}`);
+      await api(`/api/sessions/${current}/jobs`,{method:'POST',body:{prompt:'Сверить ТЗ',file_ids:snap.files.map(f=>f.id),mode:'CORE_RUN',requested_checks:['report','normative']}});
+    });
+    await page.waitForFunction(()=>document.querySelector('.core-run')?.textContent.includes('Черновик сохранён')&&!document.querySelector('#send').disabled);
+    assert.ok(await page.locator('.engineering-review').textContent().then(t=>t.includes('BLOCK')));
+    assert.equal(await page.locator('.engineering-requirement').count(),2);
+    assert.ok(await page.locator('.specialist-checks').textContent().then(t=>t.includes('BLOCK')));
+    const requestsBeforeRecovery=requests.length;
+    const reviewDigest=await page.locator('.engineering-review').textContent();
+    await page.reload();await page.getByRole('button',{name:'Проверь высоту по ТЗ',exact:true}).click();await page.waitForFunction(first=>current===first,first);await page.waitForSelector('.engineering-review',{state:'attached'});
+    assert.equal(await page.locator('.engineering-review').textContent(),reviewDigest);
+    assert.equal(errors.length,0,errors.join('\n'));
     const selection=path.join(recoveryTemp,'active-data-dir.txt'),archive=path.join(recoveryTemp,'project.zip'),restored=path.join(recoveryTemp,'восстановленный проект');
     recoveryChild=spawn(process.env.PYTHON||'python3',['scripts/run_data_recovery.py','--no-browser','--data-dir',temp,'--selection-file',selection],{cwd:root});
     const recoveryOrigin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Recovery startup timeout')),10000);recoveryChild.stdout.on('data',data=>{log+=data;const found=log.match(/ENGINEER OS recovery: (http:\/\/127\.0\.0\.1:\d+)/);if(found){clearTimeout(timer);resolve(found[1]);}});recoveryChild.on('exit',code=>{clearTimeout(timer);reject(Error('Recovery exited '+code));});});
@@ -68,7 +82,7 @@ const {chromium}=require('playwright');
     const originalFiles=fs.readdirSync(path.join(temp,'files')),restoredFiles=fs.readdirSync(path.join(restored,'files'));assert.deepEqual(restoredFiles,originalFiles);for(const name of originalFiles)assert.deepEqual(fs.readFileSync(path.join(restored,'files',name)),fs.readFileSync(path.join(temp,'files',name)));
     child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--selection-file',selection],{cwd:root,env:{...process.env,ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
     const restoredOrigin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Restored startup timeout')),10000);child.stdout.on('data',data=>{log+=data;const found=log.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(found){clearTimeout(timer);resolve(found[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error('Restored exited '+code));});});
-    await page.goto(restoredOrigin);await page.getByRole('button',{name:'Проверь высоту по ТЗ',exact:true}).click();await page.waitForFunction(first=>current===first,first);await page.waitForSelector('.file');await page.waitForSelector('.message.assistant');assert.equal(await page.locator('.file').count(),1);assert.equal(requests.length,4,'Recovery must not rerun completed work');
+    await page.goto(restoredOrigin);await page.getByRole('button',{name:'Проверь высоту по ТЗ',exact:true}).click();await page.waitForFunction(first=>current===first,first);await page.waitForSelector('.file');await page.waitForSelector('.message.assistant');assert.equal(await page.locator('.file').count(),1);assert.equal(requests.length,requestsBeforeRecovery,'Recovery must not rerun completed work');
     console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','mobile-layout','model-settings-ui','isolated-diagnostic-ui','running-cancel-ui','late-answer-refusal','retry-new-task-ui','archive-navigation','recovery-browser','busy-owner-refusal','backup-verify-restore','no-replace','original-bytes','activate-directory','restored-launch-history'],requests:requests.length}));
   }finally{
     if(browser)await browser.close();await stop(child);await stop(recoveryChild);
