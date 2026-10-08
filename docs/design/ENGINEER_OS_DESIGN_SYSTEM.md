@@ -1,6 +1,6 @@
 # ENGINEER OS Design System
 
-Stage: MASTER PLAN №11.
+Stage: MASTER PLAN №11 — VERIFIED / COMPLETE.
 
 ## Product goal
 
@@ -132,3 +132,9 @@ Stage11 can close only when:
 - desktop/mobile Chromium smoke passes;
 - static design-system guard passes;
 - existing Python/DOM regressions remain green.
+
+## Verification record
+
+Implemented by PR86 and merged into the official release candidate at `a7d39f270cf7145a3435e5ee70949a510cecb0f3`.
+
+Verified by real Chromium, full Python regression, HTTP/jsdom, repository guard and CI screenshot artifacts. See `docs/qa/2026-10-08-stage11-product-design.json`.

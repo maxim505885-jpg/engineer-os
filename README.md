@@ -1,6 +1,6 @@
 # ENGINEER OS
 
-Текущий общий кандидат: `integration/release-candidate-v1`. [MASTER PLAN](docs/development/master-plan.md) содержит19пунктов; [проверки объединения](docs/development/release-consolidation-plan.md) и [release checklist](docs/development/release-checklist.md) отделяют проверенный код от фактического выпуска. Пункт10 закрыт; следующий активный пункт — №11 Product Design / UI/UX. Windows9 последней; реальные инженерные BLOCK не сняты.
+Текущий общий кандидат: `integration/release-candidate-v1`. [MASTER PLAN](docs/development/master-plan.md) содержит19пунктов; [проверки объединения](docs/development/release-consolidation-plan.md) и [release checklist](docs/development/release-checklist.md) отделяют проверенный код от фактического выпуска. Пункты10–11 закрыты; следующий активный пункт — №12 Reliability / Backup / Restore / Browser Gate. Windows9 последней; реальные инженерные BLOCK не сняты.
 
 ## Выбранные внешние инструменты
 

@@ -1,6 +1,6 @@
 # Передача состояния ENGINEER OS
 
-Актуальный полный план: [MASTER PLAN](master-plan.md), 19 пунктов. Исторический девятиэтапный план не является текущим статусом. Рабочий кандидат выпуска — `integration/release-candidate-v1`; №10 закрыт; официальный source of truth — защищённый `integration/release-candidate-v1` / PR74. Следующий активный пункт — №11 Product Design / UI/UX. Windows №9 по указанию пользователя проверяется последней. №6/13/14 и инженерный ACCEPTED остаются открытыми.
+Актуальный полный план: [MASTER PLAN](master-plan.md), 19 пунктов. Исторический девятиэтапный план не является текущим статусом. Рабочий кандидат выпуска — `integration/release-candidate-v1`; №10 и №11 закрыты; официальный source of truth — защищённый `integration/release-candidate-v1` / PR74. Следующий активный пункт — №12 Reliability / Backup / Restore / Browser Gate. Windows №9 по указанию пользователя проверяется последней. №6/13/14 и инженерный ACCEPTED остаются открытыми.
 
 Перед продолжением прочитать [живую карту проекта](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/ENGINEER_OS_PROJECT_MAP.md). Она хранится в ветке `docs/project-map-handoff-20261005`, PR36, и пользовательском файле ENGINEER_OS_PROJECT_MAP.md.
 
