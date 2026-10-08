@@ -1178,7 +1178,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 7 | Полный реальный инженерный case workflow | ✅ | Stage-7 real case выполнен воспроизводимо |
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
-| 10 | Release consolidation / единый source of truth | 🟡 | stacked PR собраны в один release-candidate и затем проверенный main |
+| 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
 | 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
@@ -1193,13 +1193,13 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ### №9 — Windows one-click runtime — ОТЛОЖЕНО ДО WINDOWS
 
-Код подготовлен, фактическая Windows проверка не выполнена. По указанию пользователя Windows последней; сейчас активен №10.
+Код подготовлен, фактическая Windows проверка не выполнена. По указанию пользователя Windows последней; №10 уже закрыт, сейчас активен №11.
 
 Текущий кандидат:
 - branch: `feat/windows-one-click-stage9-20261007`;
 - PR67;
 - current head after repository hardening: `87fccbafbf6a944443e2f503acddf48f33e3b17e`;
-- PR67 remains open/draft/mergeable;
+- PR67 закрыт как superseded официальным release-candidate PR74;
 - Core Tests run `37677169227` SUCCESS;
 - Repository Security Guard run `37677169290` SUCCESS;
 - previous Stage-9 regression: 473 Python tests PASS;
@@ -1240,26 +1240,40 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №10 — Release consolidation / единый source of truth
+### №10 — Release consolidation / единый source of truth — ✅ ЗАКРЫТ
 
-**Проблема:** рабочая версия сейчас живёт в stacked PR, а `main` значительно старее. Текущий Stage-9 head примерно на 308 commits впереди main и затрагивает около 280 файлов.
+Официальный source of truth разработки:
+- branch: `integration/release-candidate-v1`;
+- PR74;
+- exact head после closeout: `1f2d3481132fe8ca27d1e8d602d79c2db851a622`;
+- branch protected;
+- force-push/delete запрещены;
+- обязательные checks: `core-tests` + `repository-guard`.
 
-Сделать:
-1. создать `integration/release-candidate-v1` от полного проверенного Stage-9 tree;
-2. проверить ancestry/trees всех нужных PR #38–#67;
-3. убедиться, что боковые полезные изменения не потеряны;
-4. вернуть настоящий Playwright/Chromium gate из UI/QA stream;
-5. удалить только реально obsolete/dead compatibility paths после проверки;
-6. полный CI на release candidate;
-7. clean checkout smoke;
-8. после №6/№12 и release criteria — merge в `main`;
-9. закрыть/архивировать старые stacked draft PR с документированным superseded-by.
+Фактически выполнено:
+1. stacked PR38–67 проверены по ancestry/trees и включены в candidate;
+2. PR60 настоящий Playwright/Chromium gate включён;
+3. актуальный main security baseline включён;
+4. architecture guard добавлен и тестируется;
+5. runtime compatibility paths не удалялись без доказательств ненужности;
+6. отдельный clean checkout прошёл: 480 Python tests, pip check, npm ci, HTTP/jsdom, actual Chromium;
+7. final candidate CI exact head:
+   - Core Tests run `37834960586` SUCCESS;
+   - Repository Security Guard run `37834960650` SUCCESS;
+   - push Core Tests run `37834951579` SUCCESS;
+   - push Security Guard run `37834951740` SUCCESS;
+8. PR38–67 закрыты как superseded официальным PR74;
+9. closeout PR85 прошёл required checks и слит в release-candidate.
 
-Критерий ✅: один официальный reproducible branch/main содержит весь актуальный продукт.
+`main` намеренно пока не заменяется этим candidate: merge в main остаётся частью поздних release criteria после следующих MASTER PLAN этапов. Это не мешает считать №10 закрытым, потому что один официальный воспроизводимый и защищённый source of truth уже существует.
+
+Критерий ✅ выполнен.
+
+**Следующий активный пункт: №11 — Product Design / UI/UX.**
 
 ---
 
-### №11 — Product Design / UI/UX проработка
+### №11 — Product Design / UI/UX проработка — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 **Почему здесь:** дизайн должен выполняться после №10, когда продукт уже собран в единый release-candidate, но до финальных browser/reliability проверок. Иначе UI придётся повторно переделывать после объединения веток.
 
@@ -1511,9 +1525,9 @@ LIRA/SCAD:
 
 ### Текущий следующий активный пункт
 
-**№10 — Release consolidation / единый source of truth.**
+**№11 — Product Design / UI/UX.**
 
-№9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. После №10: **№11 Product Design / UI/UX → №12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
+№10 Release consolidation закрыт. №9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. Далее: **№11 Product Design / UI/UX → №12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
 
 
 
@@ -1616,9 +1630,9 @@ Repository hardening: **✅ выполнен программно и админ�
 
 Следующий активный пункт MASTER PLAN:
 
-**№10 — Release consolidation / единый source of truth.**
+**№11 — Product Design / UI/UX.**
 
-№9 Windows verification остаётся 🟡 и отложен до финального Windows-прохода.
+№10 закрыт. №9 Windows verification остаётся 🟡 и отложен до финального Windows-прохода.
 
 
 ## 50. Внешние reference sources для №10–12 — 07.10.2026
@@ -1801,9 +1815,9 @@ MIT. При прямом включении substantial portions сохраня�
 `vibe`: **высокая ценность как reference для agent safety / architecture / UI workflow №10–12**, но не как replacement stack.
 
 Следующий активный пункт MASTER PLAN:
-**№10 — Release consolidation / единый source of truth.**
+**№11 — Product Design / UI/UX.**
 
-№9 Windows one-click verification остаётся отложенным до финального Windows-прохода.
+№10 закрыт. №9 Windows one-click verification остаётся отложенным до финального Windows-прохода.
 
 ## 51. №10 — единый кандидат выпуска, 08.10.2026
 
@@ -2396,3 +2410,47 @@ Native preview сохраняет UNAVAILABLE/BLOCK; ZIP inventory ограни�
 Полный прогон608 Python PASS без пропусков;20 новых тестов(14 solver,6 native),4 Node PASS; Chromium document-intake,основной DOM smoke PASS;architecture_guard/compileall/diff-check PASS. Основные отрицательные сценарии RED→GREEN,ZIP64 отдельно воспроизведён независимым reviewer. Первоначальные Important hardlink/подмена лога и Minor ZIP budget исправлены; повторное ревью без Critical/Important/Minor. Вендорный расчёт и инженерное принятие вне ревью. QA:docs/qa/2026-10-08-calculation-source-solver-integrity.md. Частные отчёты:ENGINEER_OS_CALCULATION_SOURCE_REVIEW_20261008.md и .json; исходные материалы в git не публикуются.
 
 Для завершения№9 нужны документированный экспорт каждой модели с ID,координатами,элементами,сечениями/материалами,опорами,нагрузками/сочетаниями и единицами; численные результаты и журнал успешного расчёта; доступный solver конкретной версии и сопоставление с конструкцией. Современный COM/ActiveX API нельзя считать автоматически доступным в старой установленной версии. Не закрывать№9 по инвентаризации контейнера или subprocess fixture; не переходить к№10 как к следующему после закрытого№9.
+
+
+## 51. Закрытие MASTER PLAN №10 — Release consolidation — 08.10.2026
+
+Статус: **✅ CLOSED**.
+
+Официальный кандидат:
+- `integration/release-candidate-v1`;
+- PR74 — ready for review / официальный release-candidate;
+- exact head: `1f2d3481132fe8ca27d1e8d602d79c2db851a622`;
+- protected branch;
+- required checks: `core-tests`, `repository-guard`;
+- force-push: blocked;
+- delete: blocked.
+
+Доказательства:
+- stacked PR38–67 включены или эквивалентны tree;
+- PR60 Chromium side stream включён;
+- main security baseline включён;
+- 480 Python tests;
+- 4 Node tests;
+- architecture guard PASS;
+- security guard PASS;
+- compile PASS;
+- HTTP/jsdom PASS;
+- real Chromium PASS;
+- clean checkout PASS;
+- closeout PR85 PASS + merged;
+- final exact-head Core Tests `37834960586` SUCCESS;
+- final exact-head Repository Security Guard `37834960650` SUCCESS.
+
+Организационный хвост:
+- PR38–67 закрыты как superseded PR74;
+- старые ветки можно сохранять как историю до отдельной repository cleanup-политики;
+- `main` пока не заменён release-candidate и это намеренно.
+
+Это **не** означает:
+- Windows №9 выполнен;
+- реальный normative/LIRA/SCAD №6 закрыт;
+- Document Intelligence №13 завершён;
+- реальный объект ACCEPTED;
+- v1.0 released.
+
+**Следующий активный пункт: №11 — Product Design / UI/UX.**
