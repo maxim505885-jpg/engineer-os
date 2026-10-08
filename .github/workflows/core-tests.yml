@@ -72,4 +72,13 @@ jobs:
         env:
           PYTHON: python
           ENGINEER_OS_ATTACHMENT_PARSER: native
+          ENGINEER_OS_UI_SCREENSHOT_DIR: e2e/.artifacts/stage11
         run: npm run test:browser --prefix e2e
+      - name: Upload Chromium UI reference screens
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engineer-os-ui-reference-${{ github.run_id }}
+          path: e2e/.artifacts/stage11/
+          retention-days: 30
+          if-no-files-found: warn
