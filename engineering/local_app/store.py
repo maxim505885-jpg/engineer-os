@@ -92,6 +92,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE TABLE IF NOT EXISTS real_case_snapshots(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),job_id TEXT NOT NULL REFERENCES jobs(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
             CREATE TABLE IF NOT EXISTS final_audits(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),case_id TEXT NOT NULL REFERENCES real_case_snapshots(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
+            CREATE TABLE IF NOT EXISTS conclusion_drafts(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
