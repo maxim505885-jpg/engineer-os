@@ -266,7 +266,8 @@ def main(argv=None) -> int:
         if args.command=="backup": result=create_backup(args.source,args.out)
         elif args.command=="validate": result=validate_backup(args.archive)
         else: result=restore_backup(args.archive,args.target)
-        print(json.dumps(result,ensure_ascii=False,sort_keys=True))
+        public={key:result[key] for key in ("schema","status","archive","target","originals","table_counts","database_sha256") if key in result}
+        print(json.dumps(public,ensure_ascii=False,sort_keys=True))
         return 0
     except (BackupError,RuntimeError,OSError,sqlite3.Error) as exc:
         print(json.dumps(dict(schema=SCHEMA,status="BLOCK",error=str(exc)),ensure_ascii=False,sort_keys=True))
