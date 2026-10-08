@@ -5,3 +5,6 @@
 QA:docs/qa/2026-10-08-calculation-source-solver-integrity.md. DataLock/no-replace/NOT_EVIDENCE/FINAL AUDIT не ослаблять.
 
 Stage11 closeout is recorded in project-map section 52 and `docs/qa/2026-10-08-stage11-product-design.json`.
+
+
+Current next active item: **№13 — Document Intelligence production completeness**. №10 Release consolidation, №11 Product Design / UI/UX and №12 Reliability / Backup / Restore / Browser Gate are closed. Official source of truth is protected `integration/release-candidate-v1`, current exact head `fce4367bee6fbf2b2be2bfcebc6a7f166b467b0a`. Stage12 QA: `docs/qa/2026-10-08-stage12-reliability.json` = COMPLETE. Final exact-head Core Tests `37841977020` and Repository Security Guard `37841977084` are SUCCESS. №9 Windows one-click verification remains 🟡 and is intentionally postponed until the final Windows pass. Continue: **№13 Document Intelligence completeness → return to №6 real engineering verification → №14–19**.
