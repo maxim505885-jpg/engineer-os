@@ -21,6 +21,7 @@ from engineering.calculation.result_verification import SolverResultVerification
 from engineering.calculation.structure_correlation import StructureCorrelationItem,audit_structure_correlation
 from engineering.normative.source_verification import NormativeSourceVerification,audit_normative_source
 from .data_classification import DataClassReview,audit_data_classes
+from engineering.normative.substantive_review import NormativeSubstantiveReview,evaluate_substantive_review
 
 CHAIN=('document','edition','scope','clause','requirement','actual_condition','comparison','conclusion')
 ALIASES={'м':'m','мм':'mm','см':'cm','Н':'N','кН':'kN','Па':'Pa','кПа':'kPa','МПа':'MPa','м2':'m2','мм2':'mm2'}
@@ -59,7 +60,7 @@ def save(store,session_id,*,packet,expected_revision):
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']}
     kind=packet.get('kind');refs=[];files=[]
     if kind=='NORMATIVE':
-        if not {'kind','chain','norm_ids','actual_ids','quantities'}<=set(packet) or not set(packet)<= {'kind','chain','norm_ids','actual_ids','quantities','authority_review','authority_source','data_class_reviews'}:
+        if not {'kind','chain','norm_ids','actual_ids','quantities'}<=set(packet) or not set(packet)<= {'kind','chain','norm_ids','actual_ids','quantities','authority_review','authority_source','data_class_reviews','substantive_review'}:
             raise ValueError('Invalid normative packet fields')
         chain=packet['chain']
         if not isinstance(chain,dict) or set(chain)!=set(CHAIN) or any(not isinstance(v,str) or not v.strip() or len(v)>1000 for v in chain.values()):raise ValueError('Complete bounded normative chain required')
@@ -73,6 +74,10 @@ def save(store,session_id,*,packet,expected_revision):
             numeric=compare_quantity(actual=q['actual']['value'].replace(',','.'),actual_unit=ALIASES.get(q['actual']['unit'],q['actual']['unit']),limit=q['limit']['value'].replace(',','.'),limit_unit=ALIASES.get(q['limit']['unit'],q['limit']['unit']),operator=q['operator'])
             if numeric['status']=='BLOCK':raise ValueError('Invalid numeric comparison: '+','.join(numeric['reasons']))
         gate_normative_verification(NormativeVerificationRecord(**chain,evidence_ids=tuple(dict.fromkeys(refs))))
+        if 'substantive_review' in packet:
+            if not isinstance(packet['substantive_review'],dict):raise ValueError('Invalid substantive review')
+            try:NormativeSubstantiveReview(**packet['substantive_review'])
+            except TypeError:raise ValueError('Invalid substantive review fields') from None
         if 'authority_review' in packet:
             a=packet['authority_review']
             if not isinstance(a,dict) or set(a)!={'document','edition','clause','authority','source_ref','applicability_basis','decision'}:
@@ -169,12 +174,19 @@ def save(store,session_id,*,packet,expected_revision):
     event=dict(id=str(uuid.uuid4()),session_id=session_id,kind=kind,packet=packet,sources=snapshots,
         files=[dict(id=f['id'],sha256=f['sha256']) for f in {f['id']:f for f in files}.values()],
         origin='USER_AUTHORED_DOMAIN_PACKET',created=time.time(),acceptance_granted=False)
+    if kind=='NORMATIVE' and 'substantive_review' in packet:
+        event['review_basis_sha256']=digest(dict(chain=packet['chain'],review=packet['substantive_review']))
     return store.add_domain_packet(event,expected_revision)
 
 
 def latest(state):
     out={}
-    for event in state:out[event['kind']]=event
+    for event in state:
+        key=event['kind']
+        if key=='NORMATIVE':
+            p=event['packet'];c=p['chain']
+            key=(key,c['document'],c['edition'],c['clause'],c['scope'],tuple(sorted(p['actual_ids'])))
+        out[key]=event
     return list(out.values())
 
 
@@ -182,7 +194,7 @@ def report(store,session_id,*,selected_files=None):
     state=store.domain_packets_state(session_id)
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']};rows=[]
     for event in latest(state):
-        p=event['packet'];sources=[];reasons=[];authority_review=None;authority_source=None;data_class_review=None;semantic_review=None;exchange_review=None;solver_review=None;execution_review=None;result_review=None;structure_review=None
+        p=event['packet'];sources=[];reasons=[];authority_review=None;authority_source=None;data_class_review=None;semantic_review=None;exchange_review=None;solver_review=None;execution_review=None;result_review=None;structure_review=None;substantive_decision=None
         for expected in event['sources']:
             r=candidates.get(expected['candidate_id'])
             if not r:reasons.append('CANDIDATE_MISSING');continue
@@ -229,6 +241,17 @@ def report(store,session_id,*,selected_files=None):
             else:
                 reasons.append('NORMATIVE_APPLICABILITY_NOT_VERIFIED')
             reasons.append('INPUT_TRUTH_NOT_VERIFIED')
+            if p.get('substantive_review'):
+                try:
+                    substantive_decision=evaluate_substantive_review(
+                        NormativeSubstantiveReview(**p['substantive_review']),source_linked=linked,
+                        edition_verified=bool(authority_source and authority_source['status']=='READY_FOR_APPLICABILITY_REVIEW'),
+                        authority_verified=bool(authority_review and authority_review['status']=='READY_FOR_EXPERT_APPLICABILITY_REVIEW'),
+                        basis_current=event.get('review_basis_sha256')==digest(dict(chain=p['chain'],review=p['substantive_review'])))
+                    reasons.extend(substantive_decision['reasons'])
+                except (ValueError,TypeError,KeyError):
+                    substantive_decision=dict(status='BLOCK',declared_outcome=None,reasons=['NORMATIVE_SUBSTANTIVE_REVIEW_INVALID'],acceptance_granted=False,engineering_verified=False)
+                    reasons.extend(substantive_decision['reasons'])
         else:
             artifacts=[]
             for b in p['bindings']:
@@ -325,6 +348,7 @@ def report(store,session_id,*,selected_files=None):
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
             reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,
             authority_review=authority_review,authority_source=authority_source,data_class_review=data_class_review,
+            substantive_decision=substantive_decision,
             semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,
             execution_review=execution_review,result_review=result_review,structure_review=structure_review,
             point6_readiness='READY_FOR_ENGINEERING_DECISION' if software_ready else 'BLOCKED_PREREQUISITES',
@@ -334,9 +358,12 @@ def report(store,session_id,*,selected_files=None):
 
 
 def context(report):
-    rows=[];budget=14000
+    rows=[]
+    # All persisted checks remain addressable even if full details do not fit.
+    index=[[r['id'],r['kind'],r['status'],(r.get('substantive_decision') or {}).get('status')] for r in report['packets']]
+    result=dict(report,packets=rows,packet_index=index,total_packets=len(report['packets']),context_truncated=True)
     for row in report['packets']:
-        cost=len(json.dumps(row,ensure_ascii=False))
-        if cost>budget:break
-        rows.append(row);budget-=cost
-    return dict(report,packets=rows,total_packets=len(report['packets']),context_truncated=len(rows)<len(report['packets']))
+        candidate=dict(result,packets=rows+[row],context_truncated=False)
+        if len(json.dumps(candidate,ensure_ascii=False))>14000:continue
+        rows.append(row)
+    return dict(result,packets=rows,context_truncated=len(rows)<len(report['packets']))

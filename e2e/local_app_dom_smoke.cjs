@@ -119,6 +119,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   const actualCandidate=await reviewedDomainSource('domain-actual.txt','Height 2500 mm');
   await until(()=>[...doc.querySelector('[name="norm-source"]').options].some(o=>o.value===normCandidate.id));
   const nf=doc.querySelector('#normative-packet-form');
+  assert.ok(nf.querySelector('[name="reviewer"]'),'Dated substantive normative review must be available without JSON');
   const chain={document:'TEST',edition:'2026',scope:'Synthetic scope declaration',clause:'clause1',requirement:'Limit 2.5 m',actual_condition:'Height 2500 mm',comparison:'Compare synthetic quantities',conclusion:'Arithmetic matches, norm unverified'};
   for(const [name,value] of Object.entries(chain))nf.querySelector(`[name="${name}"]`).value=value;
   nf.querySelector('[name="norm-source"]').value=normCandidate.id;nf.querySelector('[name="actual-source"]').value=actualCandidate.id;
@@ -134,6 +135,14 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>[...doc.querySelectorAll('.domain-packet-result')].some(c=>c.textContent.includes('Арифметика: 2.500 <= 2.5')));
   assert.ok(doc.querySelector('.domain-panel').textContent.includes('NORMATIVE_APPLICABILITY_NOT_VERIFIED'));
+  for(const [name,value] of Object.entries(chain))nf.querySelector(`[name="${name}"]`).value=value;
+  nf.querySelector('[name="norm-source"]').value=normCandidate.id;nf.querySelector('[name="actual-source"]').value=actualCandidate.id;
+  nf.querySelector('#normative-review-toggle').click();
+  for(const [name,value] of Object.entries({reviewer:'DOM reviewer',reviewed_at:'2026-10-08',assessment_date:'2026-07-28',edition_basis:'Registry inspected',applicability_basis:'Synthetic concrete scope',rationale:'Calibration requires additional data',limitations:'Not field verified'}))nf.querySelector(`[name="${name}"]`).value=value;
+  nf.querySelector('[name="applicability"]').value='APPLIES';nf.querySelector('[name="input_status"]').value='DOCUMENTED';nf.querySelector('[name="outcome"]').value='BLOCK';
+  nf.dispatchEvent(new dom.window.Event('input',{bubbles:true}));nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>[...doc.querySelectorAll('.domain-packet-result')].some(c=>c.textContent.includes('DOM reviewer')));
+  assert.ok(doc.querySelector('.domain-panel').textContent.includes('Calibration requires additional data'));
   nf.querySelector('[name="document"]').value='Unsaved domain from previous session';
   doc.querySelector('.review-button').click();doc.querySelector('#review-note').value='Unsaved review';
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
