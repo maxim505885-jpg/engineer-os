@@ -61,7 +61,8 @@ class LocalCoreRunTests(unittest.TestCase):
         self.assertTrue(all(not r['evidence_ids'] for r in run['results']))
         self.assertFalse(result['acceptance_granted'])
         self.assertEqual(result['final_audit'], 'NOT_RUN')
-        self.assertEqual(run['status'], 'UNCERTAINTY')
+        self.assertEqual(run['status'], 'BLOCK')
+        self.assertIn('TZ_CHECKLIST_MISSING',run['engineering_review']['reasons'])
         saved = Store(Path(self.tmp.name)).snapshot(self.session)['jobs'][0]['result']
         self.assertEqual(saved, result)
 

@@ -532,7 +532,7 @@ class Store:
     def checkpoint(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str):raise ValueError('Invalid progress result')
-        status='UNCERTAINTY'
+        status=(result.get('core_run') or {}).get('status','UNCERTAINTY')
         if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
             status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
         result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
@@ -545,7 +545,7 @@ class Store:
     def finish(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str) or not result['text'].strip():raise ValueError('Nonempty model response required')
-        status='UNCERTAINTY'
+        status=(result.get('core_run') or {}).get('status','UNCERTAINTY')
         if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
             status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
         result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')

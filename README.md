@@ -1,6 +1,6 @@
 # ENGINEER OS
 
-Активная работа: `feat/document-intake-coverage-20261008`, [draft PR79](https://github.com/maxim505885-jpg/engineer-os/pull/79) в цепочке кандидата PR74. [Карта проекта](ENGINEER_OS_PROJECT_MAP.md), разделы1 и58, и [план из17пунктов](docs/development/master-plan.md) — источники текущего состояния. №1–6 выполнены в объявленных границах; следующий №7 — содержательная работа инженерного ядра. Windows — №16. Реальные инженерные BLOCK не сняты; main не содержит завершённый выпуск. [Краткая передача](docs/development/project-map-handoff.md).
+Активная работа: `feat/engineering-core-traceability-20261008`, [draft PR80](https://github.com/maxim505885-jpg/engineer-os/pull/80) в цепочке PR74. [Карта проекта](ENGINEER_OS_PROJECT_MAP.md), разделы1 и59, и [план из17пунктов](docs/development/master-plan.md) — текущее состояние. №1–6 выполнены в объявленных границах; №7 открыт: программная сверка проверена, содержательные исходные данные не подтверждены. Windows — №16. Main не содержит завершённый выпуск. [Краткая передача](docs/development/project-map-handoff.md).
 
 ## Выбранные внешние инструменты
 

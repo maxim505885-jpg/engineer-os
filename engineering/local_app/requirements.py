@@ -44,7 +44,7 @@ def source_check(store,session_id,r,expected=None,selected_files=None):
     except Exception:reasons.append('SOURCE_IDENTITY_OR_LOCATION_CHANGED')
     return dict(candidate_id=r['id'],file_id=r['file_id'],quote=r['quote'],statement=r['statement'],page=r['page'],locator=r.get('locator'),
         data_class=r['data_class'],data_class_verified=False,source_sha256=r['source_sha256'],review_revision=r['review_revision'],
-        review_event_id=(r['latest_review'] or {}).get('id'),status='BLOCK' if reasons else 'SOURCE_REVIEWED',reasons=reasons,
+        review_event_id=(r['latest_review'] or {}).get('id'),reviewer=(r['latest_review'] or {}).get('actor'),reviewer_verified=False,status='BLOCK' if reasons else 'SOURCE_REVIEWED',reasons=reasons,
         limitations=(r.get('source_binding') or {}).get('limitations',[]),scope='SOURCE_REVIEW_ONLY',acceptance_granted=False)
 
 

@@ -153,6 +153,8 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.core-run').textContent.includes('Черновик'));
   assert.ok(doc.querySelector('.specialist-checks')?.textContent.includes('Редакция нормы не подтверждена'),'Domain prerequisites must be visible');
   assert.ok(doc.querySelector('.core-run summary').textContent.includes('BLOCK'),'Domain BLOCK must survive a completed draft');
+  assert.ok(doc.querySelector('.engineering-review').textContent.includes('BLOCK'));
+  assert.ok(doc.querySelector('.engineering-review').textContent.includes('Воспроизводимый снимок'));
   assert.ok(JSON.stringify(requests.at(-1)).includes('NORMATIVE_EDITION_NOT_VERIFIED'),'Audit must receive deterministic domain gaps');
   assert.equal(dom.window.coreInjected,undefined);
   assert.ok(doc.querySelector('.finding-gate')?.textContent.includes('NO_CANDIDATE_REFERENCE'),'Unlinked findings must show their deterministic source BLOCK');
