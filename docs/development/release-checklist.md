@@ -7,7 +7,7 @@
 - [x] Actual HTTP/jsdom и real Chromium workflows проходят на этом же HEAD; synthetic model явно обозначена.
 - [x] Нет секретов/приватных исходников в diff, QA, logs, artifacts.
 - [ ] Windows cold-start/restart/reboot и local end-to-end фактически проверены.
-- [ ] Backup/Restore данных приложения, crash recovery и migration проверены.
+- [x] Backup/Restore данных приложения, crash recovery и migration проверены.
 - [ ] Полнота документов и реальные normative/calculation decisions подтверждены.
 - [ ] Реальный ACCEPTED case, confirmed memory, report/CAD и остальные MASTER PLAN criteria закрыты.
 - [ ] В main после согласованной интеграции обязательны repository-guard и core-tests; старые PR закрыты с superseded-by.
