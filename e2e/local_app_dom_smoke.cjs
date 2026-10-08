@@ -30,6 +30,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.message').length===0);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();await until(()=>doc.querySelector('.message.assistant'));
   assert.ok(doc.querySelector('#task-mode'),'Explicit engineering preparation mode must be available');
+  assert.ok(doc.querySelector('#tz-sources'),'ToR source selector missing');
   doc.querySelector('#task-mode').value='CORE_PLAN';doc.querySelector('.file input').click();
   doc.querySelector('#prompt').value='ТЗ: проверить отчёт и нормы';
   doc.querySelector('#composer').dispatchEvent(new win.Event('submit',{cancelable:true}));
@@ -217,11 +218,13 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('#review-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
   await until(()=>[...doc.querySelectorAll('.evidence-card')].some(c=>c.textContent.includes('Снег по таблице')&&c.querySelector('.review-history'))&&doc.querySelector('#review-panel').hidden);
   let req=doc.querySelector('.requirement-card');req.querySelector('.requirement-conclusion').value='Снег указан в ячейке';
-  req.querySelector('.requirement-relation').value='SUPPORTS';
+  req.querySelector('.requirement-relation').value='SUPPORTS';req.querySelector('.requirement-actor').value='DOM reviewer';
   [...req.querySelectorAll('input[type=checkbox]')].find(c=>c.parentElement.textContent.includes('Снег по таблице')).checked=true;
   req.querySelector('form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
   await until(()=>doc.querySelector('.requirement-card').textContent.includes('SOURCE_LINKED'));
   assert.ok(doc.querySelector('.requirement-card').textContent.includes('UNCERTAINTY'),'Source match must not become engineering PASS');
+  assert.ok(doc.querySelector('.requirement-card').textContent.includes('DOM reviewer'));
+  assert.ok(doc.querySelector('#tz-status').textContent.includes('TZ_SOURCE_NOT_BOUND'));
   dom.window.close();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();

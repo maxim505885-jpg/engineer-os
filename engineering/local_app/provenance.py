@@ -20,7 +20,7 @@ def locate(pdf_page,quote,text,sha256,file_id,page):
     regions=[dict(left=r.x0,top=r.y0,right=r.x1,bottom=r.y1) for r in rects[:100]
         if all(math.isfinite(v) for v in r) and r.x0<r.x1 and r.y0<r.y1]
     unique=(occurrences==1 and len(rects)==1 and len(regions)==1 and '\n' not in quote and '\r' not in quote
-        and pdf_page.get_textbox(rects[0])==quote)
+        and pdf_page.get_textbox(rects[0]).rstrip(' \t')==quote.rstrip(' \t'))
     status='UNIQUE' if unique else ('AMBIGUOUS' if regions else 'NOT_LOCATED')
     provenance=dict(status=status,regions=regions,regions_total=len(rects),regions_truncated=len(rects)>100,
         coordinate_system='unrotated_page_points_top_left',page_rotation=pdf_page.rotation,

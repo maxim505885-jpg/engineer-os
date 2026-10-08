@@ -146,11 +146,12 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and parts[5]=='assessments' and post:
                     from .requirements import assess
                     body=self.json_body()
-                    return self.respond(201,assess(store,parts[2],set_id=body.get('set_id'),requirement_id=parts[4],expected_revision=body.get('expected_revision'),conclusion=body.get('conclusion'),evidence_ids=body.get('evidence_ids',[]),relation=body.get('relation')))
+                    return self.respond(201,assess(store,parts[2],set_id=body.get('set_id'),requirement_id=parts[4],expected_revision=body.get('expected_revision'),conclusion=body.get('conclusion'),evidence_ids=body.get('evidence_ids',[]),relation=body.get('relation'),actor=body.get('actor')))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
                     if parts[3]=='requirements':
                         from .requirements import create_set
-                        return self.respond(201,create_set(store,parts[2],text=self.json_body().get('text')))
+                        body=self.json_body()
+                        return self.respond(201,create_set(store,parts[2],text=body.get('text'),source_evidence_ids=body.get('source_evidence_ids')))
                     if parts[3]=='extraction':
                         body=self.json_body()
                         return self.respond(202,store.enqueue_extraction(parts[2],body.get('file_id'),body.get('backend','native')))

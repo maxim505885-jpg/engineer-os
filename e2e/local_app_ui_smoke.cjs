@@ -50,8 +50,22 @@ const {chromium}=require('playwright');
     assert.equal(requests.length,4,'Retry must execute a new request');
     await page.click('[data-stage="history"]');await page.waitForSelector('#history-records .history-record');
     assert.ok(await page.locator('#history-records').textContent().then(text=>text.includes('Проверь высоту по ТЗ')));
+    const torCandidate=await page.evaluate(async()=>{
+      const snap=await api(`/api/sessions/${current}`);
+      const candidate=await api(`/api/sessions/${current}/evidence`,{method:'POST',body:{file_id:snap.files[0].id,quote:'Высота по ТЗ 4 м',statement:'Исходная цитата ТЗ'}});
+      await api(`/api/sessions/${current}/evidence/${candidate.id}/reviews`,{method:'POST',body:{expected_revision:0,decision:'SOURCE_CONFIRMED',note:'Точная цитата TXT',actor:'Browser source reviewer'}});await refresh();return candidate.id;
+    });
+    await page.locator('#tz-form').evaluate(form=>form.closest('details').open=true);
+    await page.fill('#tz-text','Проверить высоту\nПроверить фактические конструкции');
+    await page.selectOption('#tz-sources',torCandidate);await page.click('#tz-save');
+    await page.waitForFunction(()=>document.querySelectorAll('.requirement-card').length===2&&!document.querySelector('#tz-save').disabled);
+    assert.ok(await page.locator('#tz-status').textContent().then(t=>t.includes('SOURCE_REVIEWED')));
+    const requirement=page.locator('.requirement-card').first();
+    await requirement.locator('.requirement-conclusion').fill('ТЗ задаёт высоту; фактическое значение не подтверждено');
+    await requirement.locator('.requirement-actor').fill('Browser assessment reviewer');
+    await requirement.locator('input[type=checkbox]').check();await requirement.locator('.requirement-save').click();
+    await page.waitForFunction(()=>document.querySelector('.requirement-card').textContent.includes('Browser assessment reviewer')&&!document.querySelector('#tz-save').disabled);
     await page.evaluate(async()=>{
-      await api(`/api/sessions/${current}/requirements`,{method:'POST',body:{text:'Проверить высоту\nПроверить фактические конструкции'}});
       const snap=await api(`/api/sessions/${current}`);
       await api(`/api/sessions/${current}/jobs`,{method:'POST',body:{prompt:'Сверить ТЗ',file_ids:snap.files.map(f=>f.id),mode:'CORE_RUN',requested_checks:['report','normative']}});
     });
