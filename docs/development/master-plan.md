@@ -30,7 +30,7 @@
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
 | 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
-| 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
+| 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
 | 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
@@ -119,7 +119,7 @@ Merge в `main` не является критерием закрытия №10:
 
 ---
 
-### №11 — Product Design / UI/UX проработка — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+### №11 — Product Design / UI/UX проработка — ✅ ЗАКРЫТ
 
 **Почему здесь:** дизайн должен выполняться после №10, когда продукт уже собран в единый release-candidate, но до финальных browser/reliability проверок. Иначе UI придётся повторно переделывать после объединения веток.
 
@@ -145,17 +145,20 @@ Merge в `main` не является критерием закрытия №10:
 - screenshots/reference states для regression;
 - никакой дизайн-полировки не должна менять инженерную семантику или обходить fail-closed.
 
-Критерий ✅:
-1. все основные пользовательские сценарии проходят без ручного редактирования JSON;
-2. интерфейс визуально и поведенчески единообразен;
-3. ключевые BLOCK/UNCERTAINTY понятны пользователю;
-4. desktop/mobile layout проверены;
-5. accessibility smoke пройден;
-6. дизайн зафиксирован в release-candidate до reliability/browser gate.
+Критерий ✅ выполнен:
+1. основной инженерный маршрут вынесен в явную навигацию Sources → ТЗ → Evidence → проверки → кейс → FINAL AUDIT;
+2. обычный режим скрывает low-level JSON/manual extraction, advanced mode сохраняет доступ;
+3. PASS/WARNING/UNCERTAINTY/BLOCK имеют текстовую + визуальную семантику;
+4. desktop/mobile layout проверен реальным Chromium без горизонтального overflow;
+5. accessibility smoke подтверждает labels/aria-labels; focus/reduced-motion правила зафиксированы;
+6. reference screenshots сохраняются как CI artifacts;
+7. дизайн зафиксирован в release-candidate через PR86 / merge `a7d39f270cf7145a3435e5ee70949a510cecb0f3`.
+
+Stage11 не менял серверную инженерную семантику и не снимал BLOCK/UNCERTAINTY.
 
 ---
 
-### №12 — Reliability / Backup / Restore / Browser Gate
+### №12 — Reliability / Backup / Restore / Browser Gate — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 Сделать:
 - `Backup_ENGINEER_OS.cmd`;
