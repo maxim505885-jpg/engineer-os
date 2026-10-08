@@ -28,12 +28,16 @@ def register(store,session_id,*,file_id,quote,statement,page=None,data_class='U'
     if len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256']:raise ValueError('Original identity check failed')
     provenance,document_validation=unavailable()
     suffix=Path(f['name']).suffix.lower();text=None;note='Цитата не проверена по оригиналу; требуется ручная проверка.'
-    if suffix in {'.txt','.md'}:
+    if suffix in {'.txt','.md','.json','.csv'}:
         provenance,document_validation=unavailable('NOT_APPLICABLE')
-        if page is not None:raise ValueError('TXT/MD do not have PDF page numbers')
+        if page is not None:raise ValueError('Text originals do not have PDF page numbers')
         try:text=data.decode('utf-8-sig')
         except UnicodeDecodeError:pass
+    elif suffix in {'.png','.jpg','.jpeg'}:
+        if page!=1:raise ValueError('Image source has one page; use page 1')
+        note='Цитата изображения/OCR не сверена визуально; автоматическое подтверждение недоступно.'
     else:
+        if suffix!='.pdf':raise ValueError('This original requires a documented semantic decoder; quote location unavailable')
         if page is None:raise ValueError('PDF source page required')
         try:
             import fitz

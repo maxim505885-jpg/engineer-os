@@ -75,3 +75,12 @@ class LocalPreviewTests(unittest.TestCase):
                     self.assertTrue(red,'CropBox plus rotation must not lose outline')
                     self.assertTrue(all(box.x0*scale-4<=x<=box.x1*scale+4 and box.y0*scale-4<=y<=box.y1*scale+4 for x,y in red))
                 self.assertEqual(Path(self.store.get_file(f['id'])['path']).read_bytes(),data)
+
+    def test_original_preview_needs_no_candidate_and_checks_identity(self):
+        from engineering.local_app.preview import render_original
+        f,_,data=self.source(rotation=90)
+        self.assertTrue(render_original(self.store,self.session,f['id'],1).startswith(b'\x89PNG'))
+        with self.assertRaises(ValueError):render_original(self.store,self.session,f['id'],2)
+        with self.assertRaises(ValueError):render_original(self.store,self.store.create_session()['id'],f['id'],1)
+        Path(self.store.get_file(f['id'])['path']).write_bytes(b'changed')
+        with self.assertRaises(ValueError):render_original(self.store,self.session,f['id'],1)

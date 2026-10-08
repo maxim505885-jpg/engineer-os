@@ -1,6 +1,6 @@
 # ENGINEER OS
 
-Текущий общий кандидат: `integration/release-candidate-v1`. [MASTER PLAN](docs/development/master-plan.md) содержит19пунктов; [проверки объединения](docs/development/release-consolidation-plan.md) и [release checklist](docs/development/release-checklist.md) отделяют проверенный код от фактического выпуска. Пункт10 в работе, Windows9 последней; реальные инженерные BLOCK не сняты.
+Активная работа: `feat/document-intake-coverage-20261008`, [draft PR79](https://github.com/maxim505885-jpg/engineer-os/pull/79) в цепочке кандидата PR74. [Карта проекта](ENGINEER_OS_PROJECT_MAP.md), разделы1 и58, и [план из17пунктов](docs/development/master-plan.md) — источники текущего состояния. №1–6 выполнены в объявленных границах; следующий №7 — содержательная работа инженерного ядра. Windows — №16. Реальные инженерные BLOCK не сняты; main не содержит завершённый выпуск. [Краткая передача](docs/development/project-map-handoff.md).
 
 ## Выбранные внешние инструменты
 

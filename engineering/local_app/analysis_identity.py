@@ -21,13 +21,17 @@ def parser_identity(backend):
             from .doc_conversion import converter_identity
             value['converter']=converter_identity()
         return value
-    packages=['PyMuPDF']+(['docling','docling-core','rapidocr','onnxruntime','torch'] if backend=='docling' else [])
+    packages=['PyMuPDF']+(['Pillow'] if backend=='ocr' else [])+(['docling','docling-core','rapidocr','onnxruntime','torch'] if backend=='docling' else [])
     versions={}
     for name in packages:
         try:versions[name]=importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:versions[name]='NOT_INSTALLED'
     code=[Path(extraction.__file__)]
     artifacts=[]
+    if backend=='ocr':
+        from . import ocr,files
+        code.extend([Path(ocr.__file__),Path(files.__file__)])
+        artifacts=ocr.identity()
     if backend=='docling':
         from engineering.document_intelligence import docling_adapter
         code.append(Path(docling_adapter.__file__))
@@ -57,7 +61,7 @@ def identity(store,job,model):
     if any(f['session_id']!=job['session_id'] for f in files):raise ValueError('Source isolation failure')
     verify_originals(files)
     backend=os.environ.get('ENGINEER_OS_ATTACHMENT_PARSER','native')
-    if backend not in {'native','docling'}:raise ValueError('Unknown parser')
+    if backend not in {'native','docling','ocr'}:raise ValueError('Unknown parser')
     selected=model.checkpoint_identity() if hasattr(model,'checkpoint_identity') else None
     implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible,requirements,source_binding,specialist_checks,domain_packets,verification,numeric_comparison,model_intake)}
     implementation['identity']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -71,7 +75,7 @@ def identity(store,job,model):
                evidence_sha256=context_identity(store,job)['evidence_sha256'],
                domain_packets_sha256=context_identity(store,job)['domain_packets_sha256'],
                requirements_sha256=digest(store.requirements_state(job['session_id'])),
-               parsers={f['id']:parser_identity(Path(f['name']).suffix.lower()[1:]) for f in files if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc'}},
+               parsers={f['id']:parser_identity('ocr' if Path(f['name']).suffix.lower() in {'.png','.jpg','.jpeg'} else Path(f['name']).suffix.lower()[1:]) for f in files if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc','.png','.jpg','.jpeg'}},
                implementation=implementation,budgets=dict(part_chars=automatic_analysis.PART_CHARS,source_chars=automatic_analysis.MAX_SOURCE_CHARS,
                max_calls=automatic_analysis.MAX_MODEL_CALLS,max_seconds=automatic_analysis.MAX_MODEL_SECONDS,summary_chars=automatic_analysis.SUMMARY_CHARS))
     return value,digest(value),selected is not None

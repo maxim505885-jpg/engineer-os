@@ -24,7 +24,7 @@ class PartialAnalysisFailure(RuntimeError):
 
 def prepare(store,job,stop,*,model=None):
     files=[store.get_file(fid) for fid in job['file_ids']]
-    pdfs=[f for f in files if Path(f['name']).suffix.lower() in {'.pdf','.docx','.xlsx','.doc'}]
+    pdfs=[f for f in files if Path(f['name']).suffix.lower() in {'.pdf','.docx','.xlsx','.doc','.png','.jpg','.jpeg'}]
     if not pdfs:return None
     from .analysis_identity import identity
     config,fingerprint,supported=identity(store,job,model)
@@ -37,7 +37,7 @@ def prepare(store,job,stop,*,model=None):
                 resume_supported=supported,resume_count=prior.get('resume_count',0),calls_reused=0,
                 summary_input_clipped=False,summary_omitted_chars=0,budget_exhausted=False)
     backend=os.environ.get('ENGINEER_OS_ATTACHMENT_PARSER','native')
-    if backend not in {'native','docling'}:raise ExtractionFailure('Неизвестный режим обработки прикреплённых PDF.')
+    if backend not in {'native','docling','ocr'}:raise ExtractionFailure('Неизвестный режим обработки прикреплённых PDF.')
     store.analysis_progress(job['id'],report)
     batches=[];current=dict(text='',refs=[]);remaining=MAX_SOURCE_CHARS
     def flush():
@@ -46,14 +46,14 @@ def prepare(store,job,stop,*,model=None):
         current=dict(text='',refs=[])
     for file in pdfs:
         if stop.is_set():raise ExtractionFailure('Обработка документа остановлена; результаты сохранены.')
-        suffix=Path(file['name']).suffix.lower();selected_backend=backend if suffix=='.pdf' else suffix[1:]
+        suffix=Path(file['name']).suffix.lower();selected_backend=backend if suffix=='.pdf' else 'ocr' if suffix in {'.png','.jpg','.jpeg'} else suffix[1:]
         child,created=store.automatic_extraction(job,file['id'],selected_backend,config['parser'] if suffix=='.pdf' else config['parsers'][file['id']])
         source=dict(file_id=file['id'],name=file['name'],extraction_job=child['id'],source_sha256=file['sha256'],backend=selected_backend)
         report['sources'].append(source)
         def progress(run):
             source.update({k:run[k] for k in ('total_pages','processed_pages','blocked_pages','failed_pages','ocr')})
             source['budget_exhausted']=bool(run.get('budget_exhausted'))
-            for key in ('total_units','processed_units','unit_label','physical_pages','conversion'):
+            for key in ('total_units','processed_units','unit_label','physical_pages','conversion','coverage_manifest'):
                 if key in run:source[key]=run[key]
             report['budget_exhausted']=report['budget_exhausted'] or source['budget_exhausted']
             store.analysis_progress(job['id'],report)
@@ -91,7 +91,7 @@ def prepare(store,job,stop,*,model=None):
                 size=min(PART_CHARS-len(current['text']),len(text)-start,remaining)
                 segment=text[start:start+size]
                 current['text']+=segment
-                current['refs'].append(dict(file_id=file['id'],source_job=child['id'],page=page if suffix=='.pdf' else None,
+                current['refs'].append(dict(file_id=file['id'],source_job=child['id'],page=page if suffix in {'.pdf','.png','.jpg','.jpeg'} else None,
                                             logical_unit=record.get('logical_unit'),locator=record.get('locator'),start=start,end=start+size,
                                             batch_start=batch_start,batch_end=batch_start+size,
                                             text_sha256=hashlib.sha256(segment.encode()).hexdigest()))

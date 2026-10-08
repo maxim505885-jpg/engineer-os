@@ -195,6 +195,12 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .review import record_review
                     body=self.json_body()
                     return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='preview' and not post:
+                    from .preview import render_original
+                    query=parse_qs(path.query)
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                    try:return self.respond(200,render_original(store,parts[2],parts[4],int(query.get('page',['1'])[0])),'image/png')
+                    finally:self.server.preview_slots.release()
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
                     from .preview import render_preview
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
