@@ -33,6 +33,82 @@ class DomainPacketTests(unittest.TestCase):
 
     def report(self,selected=None):return self.module().report(self.store,self.sid,selected_files=selected)
 
+    def substantive(self):
+        return dict(reviewer='Document reviewer',reviewed_at='2026-10-08',assessment_date='2026-07-28',
+            edition_basis='Edition and effective dates checked against registry',
+            applicability='APPLIES',applicability_basis='Concrete test within declared scope',
+            input_status='DOCUMENTED',outcome='BLOCK',rationale='Calibration basis unresolved',
+            limitations=['Field truth and reviewer authority not authenticated'])
+
+    def test_distinct_normative_clauses_remain_visible_after_restart(self):
+        first=self.save()
+        f=preserve_file(self.store,self.sid,'other-norm.txt',b'TEST 2026 clause2 Limit 2.5 m')
+        n=self.candidate(f,'TEST 2026 clause2 Limit 2.5 m')
+        p=self.packet();p['chain']['clause']='clause2';p['norm_ids']=[n['id']];p['quantities']=None
+        second=self.save(p,revision=1)
+        self.assertEqual([r['id'] for r in self.report()['packets']],[first['id'],second['id']])
+        self.assertEqual(self.module().report(Store(self.store.root),self.sid),self.report())
+
+    def test_same_clause_different_actual_groups_remain_visible(self):
+        self.save()
+        f=preserve_file(self.store,self.sid,'other-actual.txt',b'Height 2000 mm')
+        a=self.candidate(f,'Height 2000 mm')
+        p=self.packet();p['actual_ids']=[a['id']];p['chain']['actual_condition']='Height 2000 mm';p['quantities']=None
+        self.save(p,revision=1)
+        self.assertEqual(len(self.report()['packets']),2)
+
+    def test_substantive_review_is_persisted_but_never_grants_acceptance(self):
+        p=self.packet();p['substantive_review']=self.substantive();self.save(p)
+        r=self.report()['packets'][0]
+        self.assertEqual(r['substantive_decision']['declared_outcome'],'BLOCK')
+        self.assertEqual(r['substantive_decision']['status'],'BLOCK')
+        self.assertIn('NORMATIVE_EDITION_NOT_VERIFIED',r['substantive_decision']['reasons'])
+        self.assertFalse(r['engineering_verified']);self.assertFalse(r['acceptance_granted'])
+        self.assertEqual(self.module().report(Store(self.store.root),self.sid),self.report())
+
+    def test_source_review_change_invalidates_subject_decision(self):
+        p=self.packet();p['substantive_review']=self.substantive();self.save(p)
+        record_review(self.store,self.sid,self.a['id'],expected_revision=1,decision='REJECTED',note='Changed',actor='Test')
+        r=self.report()['packets'][0]
+        self.assertEqual(r['substantive_decision']['status'],'BLOCK')
+        self.assertIn('NORMATIVE_REVIEW_SOURCE_CHANGED',r['substantive_decision']['reasons'])
+
+    def test_future_invalid_or_reversed_review_dates_rejected(self):
+        for field,value in [('reviewed_at','2026-02-30'),('assessment_date','2027-01-01'),('reviewed_at','9999-01-01')]:
+            p=self.packet();p['substantive_review']=self.substantive();p['substantive_review'][field]=value
+            with self.subTest(field=field,value=value),self.assertRaises(ValueError):self.save(p)
+
+    def test_unknown_scope_or_missing_inputs_cannot_record_positive_outcome(self):
+        for field,value in [('applicability','UNKNOWN'),('applicability','CONFLICT'),('input_status','MISSING'),('input_status','UNVERIFIED')]:
+            p=self.packet();p['substantive_review']=self.substantive();p['substantive_review'].update(outcome='PASS',**{field:value})
+            with self.subTest(field=field,value=value),self.assertRaises(ValueError):self.save(p)
+
+    def test_changed_comparison_invalidates_saved_review_basis(self):
+        import json
+        p=self.packet();p['substantive_review']=self.substantive();event=self.save(p)
+        event['packet']['chain']['comparison']='Changed engineering comparison'
+        with self.store.connection() as db:db.execute('UPDATE domain_packets SET record=? WHERE id=?',(json.dumps(event),event['id']))
+        self.assertIn('NORMATIVE_REVIEW_BASIS_CHANGED',self.report()['packets'][0]['substantive_decision']['reasons'])
+
+    def test_context_indexes_late_block_even_when_first_packet_exceeds_budget(self):
+        import json
+        rows=[dict(id=str(i),kind='NORMATIVE',status='BLOCK',substantive_decision=dict(status='BLOCK'),packet=dict(chain=dict(comparison='"'*15000))) for i in range(100)]
+        r=self.module().context(dict(packets=rows,status='BLOCK',revision=100))
+        self.assertEqual(len(r['packet_index']),100)
+        self.assertEqual(r['packet_index'][-1][0],'99')
+        self.assertTrue(r['context_truncated']);self.assertEqual(r['status'],'BLOCK')
+        self.assertLessEqual(len(json.dumps(r,ensure_ascii=False)),14000)
+
+    def test_complete_context_accounts_for_longer_false_flag_at_budget_boundary(self):
+        import json
+        row=dict(id='x'*36,kind='NORMATIVE',status='BLOCK',substantive_decision=dict(status='BLOCK'),packet=dict(chain=dict(comparison='')))
+        source=dict(packets=[row],status='BLOCK',revision=1)
+        candidate=dict(source,packet_index=[[row['id'],'NORMATIVE','BLOCK','BLOCK']],total_packets=1,context_truncated=True)
+        row['packet']['chain']['comparison']='x'*(14000-len(json.dumps(candidate,ensure_ascii=False)))
+        result=self.module().context(source)
+        self.assertLessEqual(len(json.dumps(result,ensure_ascii=False)),14000)
+        self.assertEqual(len(result['packet_index']),1)
+
     def test_bound_arithmetic_survives_restart_without_normative_acceptance(self):
         self.save();r=self.report()['packets'][0]
         self.assertTrue(r['arithmetic']['satisfied']);self.assertEqual(r['traceability'],'SOURCE_LINKED')

@@ -62,7 +62,7 @@ class AutomaticDocumentAnalysisTests(unittest.TestCase):
         self.store.enqueue(self.session,'Review',[f['id']],mode='CORE_RUN',requested_checks=['report'])
         model,calls=self.model(core=True);Worker(self.store,model).run_once()
         self.assertIn('CORE_TAIL21',str(calls))
-        r=self.result()['result'];self.assertEqual(r['core_run']['status'],'UNCERTAINTY')
+        r=self.result()['result'];self.assertEqual(r['core_run']['status'],'BLOCK');self.assertIn('TZ_CHECKLIST_MISSING',r['core_run']['engineering_review']['reasons'])
         self.assertIn('document_analysis',r);self.assertFalse(r['acceptance_granted'])
 
     def test_bad_pdf_fails_before_model_and_unknown_text_is_disclosed(self):

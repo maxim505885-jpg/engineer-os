@@ -60,6 +60,19 @@ class LocalDocumentExtractionTests(unittest.TestCase):
         self.assertEqual(calls,[1,2,3]);self.assertEqual(self.job()['state'],'SUCCEEDED')
         with self.assertRaises(ValueError):self.store.resume_extraction(self.session,job['id'])
 
+    def test_cancelled_extraction_resumes_saved_pages(self):
+        f=self.source(['first','second']);job=self.store.enqueue_extraction(self.session,f['id'],'native')
+        original=self.module.native_page;calls=[]
+        def cancel(pdf,page):
+            calls.append(page);result=original(pdf,page)
+            self.store.cancel(self.session,job['id']);return result
+        with patch.object(self.module,'native_page',cancel):Worker(self.store,None).run_once()
+        self.assertEqual(self.job()['state'],'CANCELLED')
+        self.store.resume_extraction(self.session,job['id'])
+        with patch.object(self.module,'native_page',side_effect=lambda pdf,page:(calls.append(page),original(pdf,page))[1]):
+            Worker(self.store,None).run_once()
+        self.assertEqual(calls,[1,2]);self.assertEqual(self.job()['state'],'SUCCEEDED')
+
     def test_restart_keeps_pages_and_requires_explicit_resume(self):
         f=self.source(['first','second']);job=self.store.enqueue_extraction(self.session,f['id'],'native')
         worker=Worker(self.store,None);original=self.module.native_page

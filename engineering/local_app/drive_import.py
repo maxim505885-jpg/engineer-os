@@ -79,7 +79,7 @@ def validate_metadata(meta, requested_id):
         raise DriveImportError('Некорректное имя оригинала Drive')
     suffix=Path(meta.name).suffix.lower()
     if suffix not in SUPPORTED_SUFFIXES or not isinstance(meta.mime_type,str) or meta.mime_type.startswith('application/vnd.google-apps.'):
-        raise DriveImportError('Импортируются оригиналы PDF/TXT/MD/DOCX/XLSX/DOC; экспорт Google Docs и папки пока не поддерживаются')
+        raise DriveImportError('Импортируются оригиналы PDF/TXT/MD/DOCX/XLSX/DOC/PNG/JPG/LIR/JSON/CSV; экспорт Google Docs и папки пока не поддерживаются')
     if type(meta.size) is not int or not 0<meta.size<=MAX_FILE_BYTES:
         raise DriveImportError('Оригинал должен содержать 1 байт–100 МБ')
     if not isinstance(meta.md5_checksum,str) or not re.fullmatch('[0-9a-fA-F]{32}',meta.md5_checksum):

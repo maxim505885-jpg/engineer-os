@@ -1,4 +1,3 @@
 # Regression suite dependencies, separate from the user application's minimum.
 -r requirements-local-app.txt
-# Pixel assertions for rotated/cropped PDF previews; not used by the cabinet.
-Pillow==12.3.0
+# Pillow for image input and pixel assertions is included by requirements-local-app.txt.

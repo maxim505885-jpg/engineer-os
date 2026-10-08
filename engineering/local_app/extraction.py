@@ -25,6 +25,8 @@ def parse_failure_message(error):
     }
     if isinstance(error,DocumentParseError) and str(error) in table_errors:
         return 'TABLE_STRUCTURE_UNVERIFIED: структура таблицы неоднозначна; требуется сверка с исходной страницей.'
+    from .ocr import OCRError
+    if isinstance(error,OCRError):return str(error).split(':')[0]+': локальный OCR не выполнен; требуется проверка.'
     return 'PARSE_FAILED: извлечение страницы недоступно; проверьте parser/OCR/таблицы.'
 
 
@@ -46,9 +48,22 @@ def docling_parser():
 
 
 def native_page(pdf,page):
-    text=pdf[page-1].get_text()
-    return [dict(block_id=f'native:page:{page}',kind='text',text=text,
-                 provenance=[dict(page_no=page,bbox=None)])] if text.strip() else []
+    blocks=[]
+    for index,block in enumerate(pdf[page-1].get_text('blocks'),1):
+        if block[6]!=0 or not block[4].strip():continue
+        bbox=dict(zip(('left','top','right','bottom'),block[:4]))
+        blocks.append(dict(block_id=f'native:page:{page}:block:{index}',kind='text',text=block[4],
+                           provenance=[dict(page_no=page,bbox=bbox)]))
+    return blocks
+
+
+def visual_components(page):
+    images=page.get_image_info();vectors=page.get_drawings()
+    reasons=[]
+    if images:reasons.append('IMAGE_CONTENT_UNVERIFIED')
+    if vectors:reasons.append('VECTOR_CONTENT_UNVERIFIED')
+    return dict(images=len(images),vector_paths=len(vectors),tables='NOT_PARSED',
+                image_regions=[dict(zip(('left','top','right','bottom'),i['bbox'])) for i in images[:100]]),reasons
 
 
 def retain_blocks(blocks,page,budget):
@@ -74,13 +89,20 @@ def execute(store,job,stop_event,*,progress=None):
     file=store.get_file(job['file_ids'][0])
     if file['session_id']!=job['session_id']:raise ValueError('Source isolation failure')
     verify_originals([file])
-    backend='docling' if job['mode']=='EXTRACT_DOCLING' else 'native'
+    backend={'EXTRACT_DOCLING':'docling','EXTRACT_OCR':'ocr'}.get(job['mode'],'native')
     prior=(job['result'] or {}).get('extraction',{})
     from .analysis_identity import parser_identity
     config=parser_identity(backend)
     if prior and (prior.get('source_sha256')!=file['sha256'] or prior.get('parser_identity')!=config):
         raise ExtractionFailure('Идентичность parser/источника изменилась; создайте новое задание.')
-    with fitz.open(file['path']) as pdf:
+    image=Path(file['name']).suffix.lower() in {'.png','.jpg','.jpeg'}
+    if image:
+        from .files import validate_image
+        try:validate_image(Path(file['path']).read_bytes())
+        except Exception:raise ExtractionFailure('IMAGE_UNAVAILABLE_OR_PIXEL_LIMIT: оригинал сохранён; OCR недоступен.') from None
+        with fitz.open(file['path']) as source:pdf=fitz.open('pdf',source.convert_to_pdf())
+    else:pdf=fitz.open(file['path'])
+    with pdf:
         if pdf.needs_pass or not 0<len(pdf)<=MAX_PAGES:raise ExtractionFailure('PDF защищён или превышает лимит 5000 страниц.')
         run=dict(file_id=file['id'],name=file['name'],source_sha256=file['sha256'],backend=backend,parser_identity=config,
                  total_pages=len(pdf),processed_pages=0,failed_pages=0,blocked_pages=0,
@@ -94,17 +116,30 @@ def execute(store,job,stop_event,*,progress=None):
             if progress:progress(run)
         checkpoint()
         parser=docling_parser() if backend=='docling' else None
+        if backend=='ocr':
+            from .ocr import TesseractOCR
+            parser=TesseractOCR()
         for page in range(1,len(pdf)+1):
             if stop_event.is_set():break
             if store.extraction_completed(job['id'],page):continue
             if run['stored_chars']>=MAX_TOTAL_TEXT:
                 run['budget_exhausted']=True;break
             run['current_page']=page;checkpoint();verify_originals([file])
+            if backend=='ocr' and parser_identity(backend)!=config:raise ExtractionFailure('Идентичность OCR изменилась; создайте новое задание.')
             record=dict(page=page,execution='COMPLETED',status='UNCERTAINTY',blocks=[],stored_chars=0,
                         text_truncated=False,limitations=[],source_sha256=file['sha256'],
                         scope='UNVERIFIED_EXTRACTION',ocr='NOT_RUN',acceptance_granted=False)
             try:
+                record['visual_components'],visual_limits=visual_components(pdf[page-1])
+                record['limitations'].extend(visual_limits)
+                if visual_limits:record['status']='BLOCK'
                 if parser is None:blocks=native_page(pdf,page)
+                elif backend=='ocr':
+                    blocks=parser.page_blocks(pdf[page-1],page)
+                    record['ocr']=run['ocr']='EXECUTED_UNVERIFIED'
+                    record['limitations'].append('OCR_TEXT_UNVERIFIED')
+                    if any(b['ocr_confidence']<50 for b in blocks):
+                        record['limitations'].append('OCR_LOW_CONFIDENCE');record['status']='BLOCK'
                 else:
                     run['ocr']='REQUESTED_NOT_VERIFIED'
                     record['ocr']='REQUESTED_NOT_VERIFIED'
@@ -116,11 +151,12 @@ def execute(store,job,stop_event,*,progress=None):
                 record.update(blocks=kept,stored_chars=used,text_truncated=clipped)
                 if not kept or clipped:
                     record['status']='BLOCK'
-                    record['limitations']=['TEXT_LIMIT' if clipped else 'NO_NATIVE_TEXT' if backend=='native' else 'NO_CONTENT']
+                    record['limitations'].append('TEXT_LIMIT' if clipped else 'NO_NATIVE_TEXT' if backend=='native' else 'NO_CONTENT')
             except Exception as exc:
                 record.update(execution='FAILED',status='BLOCK',blocks=[],stored_chars=0,
                               limitations=[parse_failure_message(exc)])
             verify_originals([file])
+            if backend=='ocr' and parser_identity(backend)!=config:raise ExtractionFailure('Идентичность OCR изменилась; результат страницы не сохранён.')
             store.save_extraction_page(job['id'],record);checkpoint()
         run['current_page']=None
         run['cycle_complete']=run['processed_pages']==run['total_pages']

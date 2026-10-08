@@ -2,6 +2,8 @@
 from contextlib import contextmanager
 import json
 import hashlib
+import os
+import tempfile
 from pathlib import Path
 import sqlite3
 import time
@@ -21,13 +23,61 @@ class ReviewConflict(ValueError):
     pass
 
 
+def _migration_backup(db,root):
+    target=root/'history.pre-migration-v0.sqlite3'
+    def verify(path):
+        if path.is_symlink():raise ValueError('Linked migration recovery copy')
+        saved=sqlite3.connect(path)
+        try:
+            if saved.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or saved.execute('PRAGMA user_version').fetchone()[0]!=0:
+                raise ValueError('Invalid migration recovery copy')
+            # A structurally valid empty or older unrelated database is not a
+            # recovery copy of the data that is about to be migrated.
+            def digest_dump(connection):
+                digest=hashlib.sha256()
+                for line in connection.iterdump():digest.update(line.encode('utf-8'));digest.update(b'\n')
+                return digest.digest()
+            if digest_dump(saved)!=digest_dump(db):raise ValueError('Migration recovery copy does not match current data')
+        finally:saved.close()
+    if target.exists():verify(target);return
+    fd,name=tempfile.mkstemp(prefix='migration-',suffix='.sqlite3',dir=root);os.close(fd)
+    temporary=Path(name)
+    try:
+        saved=sqlite3.connect(temporary)
+        try:db.backup(saved)
+        finally:saved.close()
+        verify(temporary)
+        os.link(temporary,target)
+    finally:temporary.unlink(missing_ok=True)
+
+
 class Store:
+    def verification_key(self):
+        """Read a provisioned local issuer key; never mint authority on audit.
+
+        The current app has no verification issuer/provisioning HTTP endpoint.
+        A missing, malformed or symlinked key fails closed. Backup must preserve
+        this key together with verification records once an issuer is added.
+        """
+        path=self.root/'engineering-verification.key'
+        try:
+            if path.is_symlink():return None
+            with path.open('rb') as stream:key=stream.read(33)
+            return key if len(key)==32 else None
+        except OSError:return None
+
     def __init__(self,root):
         self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
         self.path=self.root/'history.sqlite3'
+        existed=self.path.exists()
         with self.connection() as db:
+            version=db.execute('PRAGMA user_version').fetchone()[0]
+            if version>1:raise RuntimeError('Database is from a newer ENGINEER OS version; use the matching application')
+            if existed and version==0:
+                _migration_backup(db,self.root)
             db.executescript('''
             PRAGMA journal_mode=WAL;
+            BEGIN IMMEDIATE;
             CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,title TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS messages(seq INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL REFERENCES sessions(id),role TEXT NOT NULL,content TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),name TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,size INTEGER NOT NULL,text TEXT NOT NULL,extraction_status TEXT NOT NULL,extraction_note TEXT NOT NULL,text_truncated INTEGER NOT NULL,created REAL NOT NULL,source_metadata TEXT NOT NULL DEFAULT '{}',extraction_coverage TEXT NOT NULL DEFAULT '{}');
@@ -42,21 +92,17 @@ class Store:
             CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE TABLE IF NOT EXISTS real_case_snapshots(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),job_id TEXT NOT NULL REFERENCES jobs(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
             CREATE TABLE IF NOT EXISTS final_audits(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),case_id TEXT NOT NULL REFERENCES real_case_snapshots(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
+            CREATE TABLE IF NOT EXISTS conclusion_drafts(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
             columns={r['name'] for r in db.execute('PRAGMA table_info(jobs)')}
             file_columns={r['name'] for r in db.execute('PRAGMA table_info(files)')}
-            job_missing=[name for name in ('parent_id','mode','requested_checks') if name not in columns]
-            file_missing=[name for name in ('source_metadata','extraction_coverage') if name not in file_columns]
-            if job_missing or file_missing:
-                backup_dir=self.root/'pre-migration';backup_dir.mkdir(exist_ok=True)
-                backup_path=backup_dir/('history-'+str(int(time.time()*1000))+'.sqlite3')
-                with sqlite3.connect(backup_path) as snapshot:db.backup(snapshot)
-                if 'parent_id' in job_missing:db.execute('ALTER TABLE jobs ADD COLUMN parent_id TEXT')
-                if 'mode' in job_missing:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
-                if 'requested_checks' in job_missing:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
-                if 'source_metadata' in file_missing:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
-                if 'extraction_coverage' in file_missing:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
+            if 'parent_id' not in columns:db.execute('ALTER TABLE jobs ADD COLUMN parent_id TEXT')
+            if 'mode' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN mode TEXT NOT NULL DEFAULT 'CHAT'")
+            if 'requested_checks' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
+            if 'source_metadata' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
+            if 'extraction_coverage' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
+            db.execute('PRAGMA user_version=1')
 
     @contextmanager
     def connection(self):
@@ -91,6 +137,26 @@ class Store:
                 item['reviews']=reviews.get(item['id'],[]);item['review_revision']=len(item['reviews']);item['latest_review']=item['reviews'][-1] if item['reviews'] else None
             count=db.execute('SELECT count(*) FROM messages WHERE session_id=?',(session_id,)).fetchone()[0]
         return dict(session=dict(session),messages=messages,jobs=jobs,files=files,evidence=evidence,history_windowed=count>len(messages),message_count=count)
+
+    def history(self,session_id,*,kind='messages',before=None,limit=50):
+        identifier(session_id)
+        if kind not in {'messages','jobs'}:raise ValueError('Unknown history kind')
+        if type(limit) is not int or not 1<=limit<=200:raise ValueError('History limit must be 1–200')
+        if before is not None and (type(before) is not int or not 1<=before<=9223372036854775807):raise ValueError('Invalid history cursor')
+        table=kind;column='seq' if kind=='messages' else 'rowid'
+        with self.connection() as db:
+            if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
+            conditions='session_id=?'+(' AND parent_id IS NULL' if kind=='jobs' else '')
+            args=[session_id]
+            if before is not None:conditions+=f' AND {column}<?';args.append(before)
+            rows=db.execute(f'SELECT {column} AS history_cursor,* FROM {table} WHERE {conditions} ORDER BY {column} DESC LIMIT ?',(*args,limit+1)).fetchall()
+        has_more=len(rows)>limit;rows=rows[:limit]
+        cursor=rows[-1]['history_cursor'] if rows else None
+        records=[]
+        for row in rows:
+            record=dict(row);record.pop('history_cursor')
+            records.append(record if kind=='messages' else self.job_dict(record))
+        return dict(records=records,has_more=has_more,next_before=cursor if has_more else None,kind=kind)
 
     @staticmethod
     def file_dict(row,private=False):
@@ -251,7 +317,7 @@ class Store:
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
-        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING'}:raise ValueError('Unknown task mode')
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING','EXTRACT_OCR'}:raise ValueError('Unknown task mode')
         checks=requested_checks if requested_checks is not None else (['report','normative'] if mode in {'CORE_PLAN','CORE_RUN'} else [])
         from engineering.core.engineer_core import CHECK_REGISTRY
         if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
@@ -260,7 +326,8 @@ class Store:
         if mode.startswith('EXTRACT_'):
             if len(file_ids)!=1:raise ValueError('Extraction requires one PDF')
             original=self.get_file(file_ids[0])
-            if Path(original['name']).suffix.lower()!='.pdf':raise ValueError('Extraction requires a PDF original')
+            allowed={'.pdf','.png','.jpg','.jpeg'} if mode=='EXTRACT_OCR' else {'.pdf'}
+            if Path(original['name']).suffix.lower() not in allowed:raise ValueError('Unsupported original for extraction backend')
         for value in file_ids:identifier(value)
         now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now,mode=mode,requested_checks=json.dumps(checks))
         try:
@@ -359,7 +426,7 @@ class Store:
                 row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=? AND parent_id IS NULL',(job_id,session_id)).fetchone()
                 if row is None:raise ValueError('Analysis not found in conversation')
                 job=self.job_dict(row);report=(job['result'] or {}).get('document_analysis',{})
-                if job['mode'] not in {'CHAT','CORE_RUN'} or job['state'] not in {'FAILED','SUCCEEDED'} or not report or report.get('all_batches_completed') or report.get('budget_exhausted') or not report.get('resume_supported'):
+                if job['mode'] not in {'CHAT','CORE_RUN'} or job['state'] not in {'FAILED','SUCCEEDED','CANCELLED'} or not report or report.get('all_batches_completed') or report.get('budget_exhausted') or not report.get('resume_supported'):
                     raise ValueError('Analysis cannot be resumed; create a new task if inputs/settings changed')
                 _,fingerprint,supported=identity(self,job,model)
                 if not supported or fingerprint!=report.get('identity_sha256'):raise ValueError('Analysis identity changed; submit a new task')
@@ -370,7 +437,7 @@ class Store:
         except sqlite3.IntegrityError:raise ValueError('Conversation already has an active task') from None
 
     def enqueue_extraction(self,session_id,file_id,backend):
-        if not isinstance(backend,str) or backend not in {'native','docling'}:raise ValueError('Unknown extraction backend')
+        if not isinstance(backend,str) or backend not in {'native','docling','ocr'}:raise ValueError('Unknown extraction backend')
         return self.enqueue(session_id,'Извлечение PDF · '+backend,[file_id],mode='EXTRACT_'+backend.upper())
 
     def extraction_job(self,session_id,job_id):
@@ -383,7 +450,7 @@ class Store:
         job=self.extraction_job(session_id,job_id)
         if job.get('parent_id'):raise ValueError('Resubmit the parent task to process attachments')
         run=(job['result'] or {}).get('extraction',{})
-        if job['state'] not in {'FAILED','SUCCEEDED'} or not run or run.get('budget_exhausted'):
+        if job['state'] not in {'FAILED','SUCCEEDED','CANCELLED'} or not run or run.get('budget_exhausted'):
             raise ValueError('Task cannot be resumed')
         if run.get('cycle_complete') and not run.get('failed_pages'):raise ValueError('Extraction cycle already complete')
         from .core_plan import verify_originals
@@ -440,10 +507,33 @@ class Store:
             db.execute("UPDATE jobs SET state='RUNNING',updated=? WHERE id=?",(time.time(),r['id']))
             return self.job_dict(dict(r,state='RUNNING'))
 
+    def cancel(self,session_id,job_id):
+        identifier(session_id);identifier(job_id)
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
+            if row is None or row['parent_id'] or row['state'] not in {'QUEUED','RUNNING'}:raise ValueError('Task cannot be cancelled')
+            state='CANCELLED' if row['state']=='QUEUED' else 'RUNNING'
+            db.execute('UPDATE jobs SET state=?,error=?,updated=? WHERE id=?',(state,'CANCEL_REQUESTED' if state=='RUNNING' else 'Отменено пользователем до начала выполнения.',time.time(),job_id))
+        return dict(id=job_id,state=state,cancel_requested=True)
+
+    def cancellation_requested(self,job_id):
+        with self.connection() as db:
+            row=db.execute('SELECT error FROM jobs WHERE id=?',(job_id,)).fetchone()
+        return bool(row and row['error']=='CANCEL_REQUESTED')
+
+    def retry(self,session_id,job_id):
+        identifier(session_id);identifier(job_id)
+        with self.connection() as db:
+            row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
+        if row is None or row['parent_id'] or row['mode'].startswith('EXTRACT_') or row['state'] not in {'FAILED','CANCELLED'}:raise ValueError('Task cannot be retried; extraction uses its preserved journal')
+        job=self.job_dict(row)
+        return self.enqueue(session_id,job['prompt'],job['file_ids'],mode=job['mode'],requested_checks=job['requested_checks'])
+
     def checkpoint(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str):raise ValueError('Invalid progress result')
-        status='UNCERTAINTY'
+        status=(result.get('core_run') or {}).get('status','UNCERTAINTY')
         if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
             status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
         result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
@@ -456,13 +546,13 @@ class Store:
     def finish(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str) or not result['text'].strip():raise ValueError('Nonempty model response required')
-        status='UNCERTAINTY'
+        status=(result.get('core_run') or {}).get('status','UNCERTAINTY')
         if (result.get('specialist_checks') or {}).get('status')=='BLOCK':
             status='ERROR' if (result.get('core_run') or {}).get('status')=='ERROR' else 'BLOCK'
         result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
-            r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone()
+            r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING' AND (error IS NULL OR error!='CANCEL_REQUESTED')",(job_id,)).fetchone()
             if r is None:raise ValueError('Task is not running')
             prior=json.loads(r['result']) if r['result'] else {}
             if 'document_analysis' in prior:result['document_analysis']=prior['document_analysis']
@@ -473,7 +563,7 @@ class Store:
         identifier(job_id)
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
-            row=db.execute("SELECT result FROM jobs WHERE id=? AND state IN ('RUNNING','ATTACHMENT')",(job_id,)).fetchone()
+            row=db.execute("SELECT result,error FROM jobs WHERE id=? AND state IN ('RUNNING','ATTACHMENT')",(job_id,)).fetchone()
             if row is None:return
             result=json.loads(row['result']) if row['result'] else None
             if result and 'document_analysis' in result:
@@ -485,7 +575,8 @@ class Store:
                             run['status']='BLOCK'
                             for r in run['results']:
                                 if r['agent']==role:r.update(status='BLOCK',execution='INTERRUPTED' if r['execution']=='RUNNING' else r['execution'])
-            db.execute("UPDATE jobs SET state='FAILED',error=?,result=?,updated=? WHERE id=?",(str(error)[:500],json.dumps(result,ensure_ascii=False) if result else None,time.time(),job_id))
+            cancelled=row['error']=='CANCEL_REQUESTED'
+            db.execute("UPDATE jobs SET state=?,error=?,result=?,updated=? WHERE id=?",('CANCELLED' if cancelled else 'FAILED','Отменено пользователем; сохранённые материалы оставлены.' if cancelled else str(error)[:500],json.dumps(result,ensure_ascii=False) if result else None,time.time(),job_id))
 
     def interrupt_running(self):
         # The caller must own the exclusive data-directory lock.

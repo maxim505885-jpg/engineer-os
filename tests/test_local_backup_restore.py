@@ -143,10 +143,15 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
             CREATE TABLE jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL,prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL);
             """)
         Store(legacy)
-        snapshots=list((legacy/"pre-migration").glob("history-*.sqlite3"))
+        # The unified migration engine takes one verified snapshot before any
+        # DDL, rather than a second snapshot after CREATE TABLE statements.
+        snapshots=list(legacy.glob("history.pre-migration-v0.sqlite3"))
         self.assertEqual(len(snapshots),1)
         with sqlite3.connect(snapshots[0]) as db:
             names={r[1] for r in db.execute("PRAGMA table_info(jobs)")}
+            self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+            self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0], 0)
+            self.assertIsNone(db.execute("SELECT name FROM sqlite_master WHERE name='conclusion_drafts'").fetchone())
         self.assertNotIn("mode",names)
         with sqlite3.connect(db_path) as db:
             names={r[1] for r in db.execute("PRAGMA table_info(jobs)")}

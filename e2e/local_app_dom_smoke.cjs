@@ -5,15 +5,19 @@ const http=require('node:http');const {spawn}=require('node:child_process');cons
 async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(check())return;await new Promise(resolve=>setTimeout(resolve,40));}throw new Error('DOM condition timeout');}
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-dom-'));
- const requests=[],errors=[];let child,dom,failAt;
+ const requests=[],errors=[];let child,dom,failAt,closing=false;const browserTimers=new Set();
  const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify(req.url==='/api/tags'?{models:[{name:'qwen3:8b',digest:'sha256:'+'a'.repeat(64)}]}:{data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);if(req.url==='/api/show'){res.end(JSON.stringify({parameters:'num_ctx 8192',template:'stable'}));return;}requests.push(payload);if(requests.length===failAt){res.statusCode=503;res.end('{}');return;}const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[{text:"Пример непроверенного наблюдения",source_ids:[]}],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
  try{
   await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,GOOGLE_DRIVE_CLIENT_ID:'',GOOGLE_DRIVE_CLIENT_SECRET:'',GOOGLE_DRIVE_REFRESH_TOKEN:'',ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
   const origin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Launcher timeout')),10000);child.stdout.on('data',data=>{log+=data;const f=log.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(f){clearTimeout(timer);resolve(f[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error(`Launcher exited ${code}`));});});
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
-  async function open(){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){win.fetch=(input,options)=>fetch(new URL(input,origin),options);}});}
-  dom=await open();let win=dom.window,doc=win.document;await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);
+  async function open(){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){const nativeTimeout=win.setTimeout.bind(win);win.setTimeout=(callback,delay,...args)=>{const id=nativeTimeout(()=>{browserTimers.delete(id);if(!closing)callback(...args);},delay);browserTimers.add(id);return id;};win.fetch=(input,options)=>fetch(new URL(input,origin),options);}});}
+  dom=await open();let win=dom.window,doc=win.document;try{await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
+  assert.equal(doc.querySelectorAll('#project-route button').length,6,'Six project stages must be reachable');
+  assert.ok(doc.querySelector('#project-next').textContent.includes('документ'),'Empty project needs an actionable next step');
+  doc.querySelector('[data-stage="documents"]').click();
+  assert.equal(doc.querySelector('.drive-panel').open,true,'Document navigation must open import');
   const source=Buffer.from('ТЗ: высота 4 м');const upload=doc.querySelector('#upload');Object.defineProperty(upload,'files',{value:[{name:'ТЗ.md',size:source.length,arrayBuffer:async()=>new win.Uint8Array(source).buffer}]});
   upload.dispatchEvent(new win.Event('change'));try{await until(()=>doc.querySelector('.file')&&!doc.querySelector('#send').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
   assert.ok(doc.querySelector('.file .coverage'),'File extraction coverage must be visible');
@@ -26,6 +30,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.message').length===0);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();await until(()=>doc.querySelector('.message.assistant'));
   assert.ok(doc.querySelector('#task-mode'),'Explicit engineering preparation mode must be available');
+  assert.ok(doc.querySelector('#tz-sources'),'ToR source selector missing');
   doc.querySelector('#task-mode').value='CORE_PLAN';doc.querySelector('.file input').click();
   doc.querySelector('#prompt').value='ТЗ: проверить отчёт и нормы';
   doc.querySelector('#composer').dispatchEvent(new win.Event('submit',{cancelable:true}));
@@ -114,6 +119,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   const actualCandidate=await reviewedDomainSource('domain-actual.txt','Height 2500 mm');
   await until(()=>[...doc.querySelector('[name="norm-source"]').options].some(o=>o.value===normCandidate.id));
   const nf=doc.querySelector('#normative-packet-form');
+  assert.ok(nf.querySelector('[name="reviewer"]'),'Dated substantive normative review must be available without JSON');
   const chain={document:'TEST',edition:'2026',scope:'Synthetic scope declaration',clause:'clause1',requirement:'Limit 2.5 m',actual_condition:'Height 2500 mm',comparison:'Compare synthetic quantities',conclusion:'Arithmetic matches, norm unverified'};
   for(const [name,value] of Object.entries(chain))nf.querySelector(`[name="${name}"]`).value=value;
   nf.querySelector('[name="norm-source"]').value=normCandidate.id;nf.querySelector('[name="actual-source"]').value=actualCandidate.id;
@@ -129,6 +135,14 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>[...doc.querySelectorAll('.domain-packet-result')].some(c=>c.textContent.includes('Арифметика: 2.500 <= 2.5')));
   assert.ok(doc.querySelector('.domain-panel').textContent.includes('NORMATIVE_APPLICABILITY_NOT_VERIFIED'));
+  for(const [name,value] of Object.entries(chain))nf.querySelector(`[name="${name}"]`).value=value;
+  nf.querySelector('[name="norm-source"]').value=normCandidate.id;nf.querySelector('[name="actual-source"]').value=actualCandidate.id;
+  nf.querySelector('#normative-review-toggle').click();
+  for(const [name,value] of Object.entries({reviewer:'DOM reviewer',reviewed_at:'2026-10-08',assessment_date:'2026-07-28',edition_basis:'Registry inspected',applicability_basis:'Synthetic concrete scope',rationale:'Calibration requires additional data',limitations:'Not field verified'}))nf.querySelector(`[name="${name}"]`).value=value;
+  nf.querySelector('[name="applicability"]').value='APPLIES';nf.querySelector('[name="input_status"]').value='DOCUMENTED';nf.querySelector('[name="outcome"]').value='BLOCK';
+  nf.dispatchEvent(new dom.window.Event('input',{bubbles:true}));nf.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>[...doc.querySelectorAll('.domain-packet-result')].some(c=>c.textContent.includes('DOM reviewer')));
+  assert.ok(doc.querySelector('.domain-panel').textContent.includes('Calibration requires additional data'));
   nf.querySelector('[name="document"]').value='Unsaved domain from previous session';
   doc.querySelector('.review-button').click();doc.querySelector('#review-note').value='Unsaved review';
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
@@ -149,6 +163,8 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.core-run').textContent.includes('Черновик'));
   assert.ok(doc.querySelector('.specialist-checks')?.textContent.includes('Редакция нормы не подтверждена'),'Domain prerequisites must be visible');
   assert.ok(doc.querySelector('.core-run summary').textContent.includes('BLOCK'),'Domain BLOCK must survive a completed draft');
+  assert.ok(doc.querySelector('.engineering-review').textContent.includes('BLOCK'));
+  assert.ok(doc.querySelector('.engineering-review').textContent.includes('Воспроизводимый снимок'));
   assert.ok(JSON.stringify(requests.at(-1)).includes('NORMATIVE_EDITION_NOT_VERIFIED'),'Audit must receive deterministic domain gaps');
   assert.equal(dom.window.coreInjected,undefined);
   assert.ok(doc.querySelector('.finding-gate')?.textContent.includes('NO_CANDIDATE_REFERENCE'),'Unlinked findings must show their deterministic source BLOCK');
@@ -211,11 +227,13 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   doc.querySelector('#review-form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
   await until(()=>[...doc.querySelectorAll('.evidence-card')].some(c=>c.textContent.includes('Снег по таблице')&&c.querySelector('.review-history'))&&doc.querySelector('#review-panel').hidden);
   let req=doc.querySelector('.requirement-card');req.querySelector('.requirement-conclusion').value='Снег указан в ячейке';
-  req.querySelector('.requirement-relation').value='SUPPORTS';
+  req.querySelector('.requirement-relation').value='SUPPORTS';req.querySelector('.requirement-actor').value='DOM reviewer';
   [...req.querySelectorAll('input[type=checkbox]')].find(c=>c.parentElement.textContent.includes('Снег по таблице')).checked=true;
   req.querySelector('form').dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));
   await until(()=>doc.querySelector('.requirement-card').textContent.includes('SOURCE_LINKED'));
   assert.ok(doc.querySelector('.requirement-card').textContent.includes('UNCERTAINTY'),'Source match must not become engineering PASS');
+  assert.ok(doc.querySelector('.requirement-card').textContent.includes('DOM reviewer'));
+  assert.ok(doc.querySelector('#tz-status').textContent.includes('TZ_SOURCE_NOT_BOUND'));
   dom.window.close();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
@@ -233,21 +251,48 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('#real-case-panel'),'Stage-7 real case panel missing');
   await until(()=>[...doc.querySelector('#real-case-form select').options].some(o=>o.value));
   const caseSelect=doc.querySelector('#real-case-form select');caseSelect.value=[...caseSelect.options].find(o=>o.value).value;
+  caseSelect.dispatchEvent(new dom.window.Event('change'));
+  const roleChecks=[...doc.querySelectorAll('#case-source-roles input[data-case-role="TOR"]')];
+  assert.equal(roleChecks.length,1,'Only files selected in CORE_RUN may be assigned');
+  roleChecks[0].checked=true;
+  doc.querySelector('#case-source-roles input[data-case-role="REPORT"]').checked=true;
+  await new Promise(resolve=>setTimeout(resolve,1700));
+  assert.equal(doc.querySelector('#case-source-roles input[data-case-role="TOR"]').checked,true,'Polling must preserve role selection');
   doc.querySelector('#real-case-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>doc.querySelector('.real-case-result'));
   await until(()=>!doc.querySelector('#send').disabled);
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
+  const caseReport=await (await fetch(origin+`/api/sessions/${id}/real-case`,{headers:{'X-Engineer-Token':token}})).json();
+  assert.deepEqual(Object.keys(caseReport.cases[0].source_manifest).sort(),['REPORT','TOR'],'Role form must persist a manifest without JSON');
   assert.ok(doc.querySelector('#final-audit-panel'),'Stage-8 FINAL AUDIT panel missing');
+  doc.querySelector('#project-next').click();
+  assert.equal(doc.querySelector('#final-audit-panel').open,true,'Next audit action must reveal final audit controls');
   doc.querySelector('#final-audit-run').click();
   await until(()=>doc.querySelector('.final-audit-result'));
   await until(()=>!doc.querySelector('#send').disabled);
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('FINAL AUDIT COMPLETED'));
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('NOT ACCEPTED'));
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('BLOCK'));
+  doc.querySelector('#tz-text').value='Новая версия ТЗ после аудита';
+  doc.querySelector('#tz-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('#project-next').textContent.includes('Обновить снимок'));
+  assert.ok(doc.querySelector('#project-state').textContent.includes('устарел'),'Stale audit must direct rebuilding, not imply current decision');
+  dom.window.renderRoute({jobs:[],files:[]},{requirements:[]},{cases:[]},{audits:[{current:true,fresh:true,effective_decision:'ACCEPTED',effective_acceptance_granted:true}]});
+  assert.ok(doc.querySelector('#project-next').textContent.includes('Посмотреть решение'),'Accepted fixture should show a decision, not imaginary blockers');
+  doc.querySelector('[data-stage="history"]').click();
+  await until(()=>doc.querySelector('#history-records .history-record'));
+  assert.ok(doc.querySelector('#history-panel').open,'History route must reveal archived records');
+  doc.querySelector('#history-kind').value='jobs';
+  doc.querySelector('#history-kind').dispatchEvent(new dom.window.Event('change'));
+  await until(()=>doc.querySelector('#history-records .job'));
+  assert.ok(doc.querySelector('#history-records').textContent.includes('Проверь высоту по ТЗ'));
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
+  await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#history-records').children.length,0,'Archive must not leak across projects');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
-  if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
+  closing=true;if(dom){for(const id of browserTimers)dom.window.clearTimeout(id);await new Promise(resolve=>setTimeout(resolve,150));dom.window.close();}if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

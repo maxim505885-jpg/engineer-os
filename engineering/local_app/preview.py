@@ -35,3 +35,32 @@ def render_preview(store,session_id,candidate_id):
             if len(png)>10*1024*1024:raise ValueError('Preview exceeds byte limit')
             return png
     except Exception:raise ValueError('PDF preview unavailable; download original for separate review') from None
+
+
+def render_original(store,session_id,file_id,number=1):
+    """Authenticated project original, without registering a claim or changing bytes."""
+    f=store.get_file(file_id)
+    suffix=Path(f['name']).suffix.lower()
+    if f['session_id']!=session_id or suffix not in {'.pdf','.png','.jpg','.jpeg'}:raise ValueError('Preview original in this conversation required')
+    with Path(f['path']).open('rb') as stream:data=stream.read(100*1024*1024+1)
+    if len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256']:raise ValueError('Original identity check failed')
+    try:
+        import fitz
+        with fitz.open(stream=data,filetype=suffix[1:]) as source:
+            if suffix!='.pdf':
+                from .files import validate_image
+                validate_image(data)
+                pdf=fitz.open('pdf',source.convert_to_pdf())
+            else:pdf=source
+            try:
+                if pdf.needs_pass or type(number) is not int or not 1<=number<=len(pdf):raise ValueError('Unavailable original page')
+                page=pdf[number-1];width,height=page.rect.width,page.rect.height
+                if not all(math.isfinite(v) and v>0 for v in (width,height)):raise ValueError('Invalid page geometry')
+                pixels=page.get_pixmap(matrix=fitz.Matrix(min(1.5,1600/max(width,height)),min(1.5,1600/max(width,height))),colorspace=fitz.csRGB,alpha=False)
+                if max(pixels.width,pixels.height)>1601:raise ValueError('Preview pixel limit')
+                png=pixels.tobytes('png')
+                if len(png)>10*1024*1024:raise ValueError('Preview byte limit')
+                return png
+            finally:
+                if pdf is not source:pdf.close()
+    except Exception:raise ValueError('Original preview unavailable; download original for separate review') from None

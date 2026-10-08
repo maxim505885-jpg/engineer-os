@@ -24,3 +24,6 @@ node_modules/
 
 # Local ENGINEER OS state
 .engineer-os/
+
+# Private implementation ledger
+.superpowers/

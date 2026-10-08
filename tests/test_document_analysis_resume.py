@@ -49,6 +49,23 @@ class DocumentResumeTests(unittest.TestCase):
         self.assertGreater(current['jobs'][0]['result']['document_analysis']['calls_reused'],0)
         with self.assertRaises(ValueError):restarted.resume_analysis(self.session,job['id'],model)
 
+    def test_cancelled_analysis_resumes_completed_receipts(self):
+        model=ControlledModel();f=self.pdf(['source '*500]*4)
+        job=self.store.enqueue(self.session,'Read source',[f['id']])
+        original=model.chat
+        def cancel(messages):
+            reply=original(messages)
+            if len(model.calls)==1:self.store.cancel(self.session,job['id'])
+            return reply
+        model.chat=cancel;Worker(self.store,model).run_once()
+        self.assertEqual(self.result()['state'],'CANCELLED')
+        model.chat=original
+        self.store.resume_analysis(self.session,job['id'],model)
+        Worker(self.store,model).run_once()
+        self.assertEqual(self.result()['state'],'SUCCEEDED')
+        first=model.calls[0][-1]['content']
+        self.assertEqual(sum(c[-1]['content']==first for c in model.calls),1)
+
     def test_changed_model_parser_source_and_foreign_session_reject_resume(self):
         model=ControlledModel(fail_at=2);f,job=self.start(model)
         self.assertTrue(hasattr(self.store,'resume_analysis'))

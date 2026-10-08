@@ -1,6 +1,6 @@
 # ENGINEER OS
 
-Текущий общий кандидат: `integration/release-candidate-v1`. [MASTER PLAN](docs/development/master-plan.md) содержит19пунктов; [проверки объединения](docs/development/release-consolidation-plan.md) и [release checklist](docs/development/release-checklist.md) отделяют проверенный код от фактического выпуска. Пункты10–11 закрыты; следующий активный пункт — №12 Reliability / Backup / Restore / Browser Gate. Windows9 последней; реальные инженерные BLOCK не сняты.
+Объединение потоков: `integration/engineering-streams-20261009`, база официального `integration/release-candidate-v1`. [Единый MASTER PLAN](docs/development/master-plan.md) использует19пунктов и сохраняет соответствие прежним17. [Карта](ENGINEER_OS_PROJECT_MAP.md) и [передача состояния](docs/development/project-map-handoff.md) отделяют опубликованный код, проверки и принятие объекта. Черновики заключений не означают принятый отчёт. Расчёт и physical Windows остаются отложенными; финальный выпуск открыт.
 
 ## Выбранные внешние инструменты
 

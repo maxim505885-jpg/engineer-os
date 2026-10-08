@@ -74,7 +74,7 @@
 
     <div id="error" role="alert" hidden></div>
 
-    <div class="workspace">
+    <section id="project-overview" aria-label="Маршрут проекта"><p>Один диалог — один проект: документы, ТЗ, проверки и история хранятся вместе.</p><nav id="project-route" aria-label="Этапы проекта"><button type="button" data-stage="project">Проект и чат</button><button type="button" data-stage="documents">ТЗ и документы</button><button type="button" data-stage="review">Проверка источников</button><button type="button" data-stage="calculations">Нормы и расчёты</button><button type="button" data-stage="conclusion">Итог и ограничения</button><button type="button" data-stage="history">История</button></nav><p id="project-state" role="status"></p><button id="project-next" type="button" class="text-button"></button></section><div class="workspace">
       <section class="conversation" aria-label="Диалог ENGINEER OS">
         <div id="messages" aria-live="polite">
           <div class="empty">
@@ -104,10 +104,10 @@
               </select>
             </label>
             <label class="upload" for="upload">+ Прикрепить файл</label>
-            <input id="upload" type="file" accept=".txt,.md,.pdf,.docx,.xlsx,.doc" hidden>
+            <input id="upload" type="file" accept=".txt,.md,.pdf,.docx,.xlsx,.doc,.png,.jpg,.jpeg,.lir,.json,.csv" hidden>
             <button id="send" class="primary" type="submit">Отправить ↗</button>
           </div>
-          <small>TXT, Markdown, PDF, DOCX, XLSX, DOC · оригинал сохраняется · до 100 МБ</small>
+          <small>TXT, MD, PDF, DOCX, XLSX, DOC, PNG/JPG, LIR, JSON/CSV · оригинал сохраняется · до 100 МБ</small>
         </form>
       </section>
 
@@ -191,6 +191,8 @@
           <form id="tz-form">
             <label for="tz-text">Перечень требований</label>
             <textarea id="tz-text" maxlength="50000" rows="4" required></textarea>
+            <label for="tz-sources">Исходные цитаты ТЗ (выбор не подтверждает полноту)</label>
+            <select id="tz-sources" multiple aria-label="Исходные цитаты ТЗ"></select>
             <button id="tz-save" type="submit" class="primary">Сохранить новую версию ТЗ</button>
           </form>
           <p id="tz-status"></p>
