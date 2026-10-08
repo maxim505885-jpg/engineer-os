@@ -138,7 +138,8 @@ class DocumentModel:
         if role=='CHAT':base=self.store.analysis_context(self.job['id'],role,base)
         allowed=set(self.job['file_ids'])|{r['id'] for r in self.store.snapshot(self.job['session_id'])['evidence'] if r['file_id'] in self.job['file_ids']}
         task=SimpleNamespace(task_id=self.job['id'],agent=role)
-        requirement_ids={r['id'] for r in data['sources']['requirements']['requirements']} if role!='CHAT' else set()
+        from .requirements import context_requirement_ids
+        requirement_ids=context_requirement_ids(data['sources']['requirements']) if role!='CHAT' else set()
         block_seen=bool(self.report['roles'].get(role,{}).get('block_seen'))
         self.report['roles'][role]=dict(status='RUNNING',total=len(self.prepared['batches']),completed=0,block_seen=block_seen,intermediate_gates=[],intermediate_gates_omitted=0)
         self.report.update(stage='ANALYZING',current_role=role,batches_completed=0,all_batches_completed=False)

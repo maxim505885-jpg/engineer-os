@@ -83,19 +83,31 @@ def report(store,session_id,*,selected_files=None):
         rows.append(dict(requirement,status='UNCERTAINTY' if linked else 'BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
             assessment_actor=event.get('actor') if event else None,assessment_actor_verified=False,conclusion=event['conclusion'] if event else None,relation=event['relation'] if event else 'UNKNOWN',revision=event['revision'] if event else 0,
             sources=sources,history=history,reasons=list(dict.fromkeys(reasons)),acceptance_granted=False))
-    return dict(set_id=current['id'],requirements=rows,set_versions=len(sets),tor_sources=tor_sources,tor_source_status=tor_status,tor_source_reasons=tor_reasons,tor_transcription_verified=False,status='BLOCK' if any(r['status']=='BLOCK' for r in rows) else 'UNCERTAINTY',
+    global_reasons=list(tor_reasons) if tor_status=='BLOCK' else []
+    if any(not row['assessment_actor'] for row in rows):global_reasons.append('ASSESSMENT_REVIEWER_MISSING')
+    return dict(set_id=current['id'],requirements=rows,set_versions=len(sets),tor_sources=tor_sources,tor_source_status=tor_status,tor_source_reasons=tor_reasons,tor_transcription_verified=False,status='BLOCK' if global_reasons or any(r['status']=='BLOCK' for r in rows) else 'UNCERTAINTY',reasons=list(dict.fromkeys(global_reasons)),
         scope='REQUIREMENT_TRACEABILITY_ONLY',engineering_verified=False,acceptance_granted=False,final_audit='NOT_RUN')
 
 
 def context(store,session_id,selected_files):
     result=report(store,session_id,selected_files=selected_files);items=[];budget=14000
+    index=[dict(id=r['id'],text=r['text'][:120],text_truncated=len(r['text'])>120,status=r['status']) for r in result['requirements']]
+    row_budget=(budget-2-2*max(0,len(index)-1))//max(1,len(index))
+    for row in index:
+        while len(json.dumps(row,ensure_ascii=False))>row_budget:
+            row['text']=row['text'][:-1];row['text_truncated']=True
+    budget-=len(json.dumps(index,ensure_ascii=False))
     for r in result['requirements']:
         row={k:v for k,v in r.items() if k!='history'};cost=len(json.dumps(row,ensure_ascii=False))
         if cost>budget:break
         items.append(row);budget-=cost
     tor=[dict(s,quote=s.get('quote','')[:1000],statement=s.get('statement','')[:1000]) for s in result.get('tor_sources',[])[:5]]
     clipped=len(tor)<len(result.get('tor_sources',[])) or any(len(s.get('quote',''))>1000 or len(s.get('statement',''))>1000 for s in result.get('tor_sources',[]))
-    return dict(result,tor_sources=tor,requirements=items,total_requirements=len(result['requirements']),context_truncated=clipped or len(items)<len(result['requirements']))
+    return dict(result,tor_sources=tor,requirements=items,requirement_index=index,total_requirements=len(result['requirements']),context_truncated=clipped or len(items)<len(result['requirements']) or any(r['text_truncated'] for r in index))
+
+
+def context_requirement_ids(requirements):
+    return {r['id'] for r in requirements.get('requirement_index',requirements['requirements'])}
 
 
 def finding_gates(store,session_id,findings,selected_files):
