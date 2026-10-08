@@ -29,7 +29,7 @@
 | 7 | Полный реальный инженерный case workflow | ✅ | Stage-7 real case выполнен воспроизводимо |
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
-| 10 | Release consolidation / единый source of truth | 🟡 | stacked PR собраны в один release-candidate и затем проверенный main |
+| 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
 | 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
@@ -93,7 +93,14 @@
 
 ### №10 — Release consolidation / единый source of truth
 
-Активная ветка: integration/release-candidate-v1. Stage9, боковой Chromium streamPR60 и актуальный main security baseline включены; локальные480Python/4Node/HTTPjsdom/ChromiumPASS. Публикация и CI exact head фиксируются в release-consolidation-plan.md и живой карте. Кандидат не слит в main, №10 целиком ещё открыт.
+Статус: ✅ ЗАКРЫТ.
+
+Официальный source of truth разработки: `integration/release-candidate-v1`, PR74.
+Включены Stage9, stacked PR38–67, боковой Chromium stream PR60 и актуальный main security baseline.
+Release-candidate защищён: force-push/delete запрещены, обязательны `core-tests` и `repository-guard`.
+Проверено: 480 Python tests, 4 Node tests, HTTP/jsdom, real Chromium, architecture guard, security guard, compile и отдельный clean checkout.
+
+Merge в `main` не является критерием закрытия №10: он намеренно отложен до последующих release criteria, чтобы старый стабильный main не подменять незавершённым продуктом. PR74 является официальным воспроизводимым release-candidate.
 
 **Проблема:** рабочая версия сейчас живёт в stacked PR, а `main` значительно старее. Текущий Stage-9 head примерно на 308 commits впереди main и затрагивает около 280 файлов.
 
@@ -112,7 +119,7 @@
 
 ---
 
-### №11 — Product Design / UI/UX проработка
+### №11 — Product Design / UI/UX проработка — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 **Почему здесь:** дизайн должен выполняться после №10, когда продукт уже собран в единый release-candidate, но до финальных browser/reliability проверок. Иначе UI придётся повторно переделывать после объединения веток.
 
