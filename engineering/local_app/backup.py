@@ -261,7 +261,7 @@ def main(argv=None) -> int:
         else: result=restore_backup(args.archive,args.target)
         print(json.dumps(result,ensure_ascii=False,sort_keys=True))
         return 0
-    except (BackupError,OSError,sqlite3.Error) as exc:
+    except (BackupError,RuntimeError,OSError,sqlite3.Error) as exc:
         print(json.dumps(dict(schema=SCHEMA,status="BLOCK",error=str(exc)),ensure_ascii=False,sort_keys=True))
         return 2
 
