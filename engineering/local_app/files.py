@@ -25,8 +25,11 @@ def extract_preview(name,data):
     suffix=Path(name).suffix.lower()
     c=unknown_coverage('EXTRACTION_UNAVAILABLE')
     if suffix=='.lir':
-        c.update(method='LIR_ORIGINAL_ONLY',stop_reasons=['MODEL_DECODER_UNAVAILABLE'])
-        return '', 'UNAVAILABLE','Модель LIR сохранена. Декодер не подключён; геометрия, нагрузки и результаты не прочитаны. Нужен документированный экспорт; расчёт не выполнен.',False,c
+        from engineering.calculation.native_source import inspect_lir
+        metadata=inspect_lir(data)
+        c.update(method='LIR_ORIGINAL_ONLY',stop_reasons=metadata['reasons'],model_metadata=metadata)
+        header=('Заявленный формат '+metadata['declared_format']+' ver.'+metadata['declared_version']+'. ' if metadata['declared_version'] else 'Заголовок формата не распознан. ')
+        return '', 'UNAVAILABLE','Модель LIR сохранена. '+header+'Декодер не подключён; геометрия, нагрузки и результаты не прочитаны. Нужен документированный экспорт; расчёт не выполнен.',False,c
     if suffix in {'.png','.jpg','.jpeg'}:
         try:
             width,height=validate_image(data)
