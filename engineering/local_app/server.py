@@ -55,9 +55,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
             if len(data)!=size:raise RequestProblem(400,'Incomplete body')
             return data
 
-        def json_body(self):
+        def json_body(self,maximum=65536):
             if self.headers.get('Content-Type','').split(';')[0]!='application/json':raise RequestProblem(415,'JSON content type required')
-            try:value=json.loads(self.body(65536))
+            try:value=json.loads(self.body(maximum))
             except (UnicodeDecodeError,json.JSONDecodeError):raise RequestProblem(400,'Invalid JSON') from None
             if not isinstance(value,dict):raise RequestProblem(400,'JSON object required')
             return value
@@ -143,6 +143,17 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if not post:return self.respond(200,report(store,parts[2]))
                     body=self.json_body()
                     return self.respond(201,build(store,parts[2],case_id=body.get('case_id'),expected_revision=body.get('expected_revision')))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='conclusions':
+                    from .conclusions import build,report
+                    if not post:return self.respond(200,report(store,parts[2]))
+                    body=self.json_body(262144)
+                    return self.respond(201,build(store,parts[2],expected_revision=body.get('expected_revision'),
+                        author=body.get('author'),summary=body.get('summary',''),recommendations=body.get('recommendations',''),
+                        limitations=body.get('limitations',''),expected_basis_sha256=body.get('expected_basis_sha256')))
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='conclusions' and not post:
+                    from .conclusions import export
+                    data,mime=export(store,parts[2],revision=int(parts[4]),format=parts[5])
+                    return self.respond(200,data,mime,extra={'Content-Disposition':'attachment; filename="ENGINEER_OS_draft_v'+str(int(parts[4]))+'.'+parts[5]+'"'})
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and parts[5]=='assessments' and post:
                     from .requirements import assess
                     body=self.json_body()

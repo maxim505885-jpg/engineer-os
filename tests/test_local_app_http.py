@@ -77,6 +77,36 @@ class LocalHTTPTests(unittest.TestCase):
         status,_,raw=self.request('POST','/api/sessions',{'title':'Объект'})
         self.assertEqual(status,201);return json.loads(raw)['id']
 
+    def test_conclusion_draft_authenticated_save_edit_export_and_stale_basis(self):
+        from engineering.local_app.files import preserve_file
+        from engineering.local_app.worker import Worker
+        from engineering.local_app.real_case import build
+        sid=self.create();f=preserve_file(self.store,sid,'source.txt',b'Controlled source')
+        self.core_reply=json.dumps(dict(status='UNCERTAINTY',summary='Controlled draft',observations=[],limitations=['Not accepted']))
+        job=self.store.enqueue(sid,'Review',[f['id']],mode='CORE_RUN',requested_checks=['report'])
+        Worker(self.store,self.model).run_once()
+        build(self.store,sid,job_id=job['id'],expected_revision=0)
+        url=f'/api/sessions/{sid}/conclusions'
+        body=dict(expected_revision=0,author='Reviewer',summary='Editable draft')
+        self.assertEqual(self.request('POST',url,body,token=False)[0],403)
+        status,_,raw=self.request('POST',url,body);self.assertEqual(status,201)
+        saved=json.loads(raw);self.assertFalse(saved['acceptance_granted'])
+        status,_,raw=self.request('GET',url);self.assertEqual(status,200);self.assertEqual(json.loads(raw)['revision'],1)
+        for format in ('pdf','docx'):
+            status,headers,data=self.request('GET',url+'/1/'+format)
+            self.assertEqual(status,200);self.assertIn('attachment',headers['Content-Disposition']);self.assertGreater(len(data),100)
+            self.assertEqual(self.request('GET',url+'/1/'+format,token=False)[0],403)
+        self.assertEqual(self.request('POST',url,body)[0],409)
+        body.update(expected_revision=1,summary='Edited version',expected_basis_sha256=saved['basis']['case_sha256'])
+        self.assertEqual(self.request('POST',url,body)[0],201)
+        other=self.create();self.assertEqual(self.request('GET',f'/api/sessions/{other}/conclusions/2/pdf')[0],400)
+        self.assertEqual(self.request('GET',url+'/1/pdf')[0],400)
+        body.update(expected_revision=2,summary='я'*20000,recommendations='я'*20000,limitations='я'*20000)
+        self.assertEqual(self.request('POST',url,body)[0],201,'Supported Cyrillic fields must fit the HTTP body budget')
+        from engineering.local_app.requirements import create_set
+        create_set(self.store,sid,text='Changed assignment')
+        self.assertEqual(self.request('GET',url+'/3/pdf')[0],400)
+
     def test_history_api_is_authenticated_bounded_and_project_isolated(self):
         session=self.create();self.store.enqueue(session,'Private project history',[])
         second=self.create()
