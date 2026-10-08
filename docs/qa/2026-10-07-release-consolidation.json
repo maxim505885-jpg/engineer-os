@@ -198,7 +198,7 @@
     "real_model": false,
     "windows": "NOT_RUN"
   },
-  "stage10_complete": false,
+  "stage10_complete": true,
   "main_merged": false,
   "engineering_accepted": false,
   "clean_checkout": {
@@ -223,5 +223,19 @@
     "main_parent": "a2a7b2d974b9ba1b186ef6bd4a97cd2a9d61a077",
     "ui_qa_parent": "01c4f321596a92f05078ead08e4d3774c841fd7e",
     "history": "Published merge preserves Stage9, current main and PR60 ancestry; exact final tree equals local tree"
-  }
+  },
+  "official_release_candidate": {
+    "branch": "integration/release-candidate-v1",
+    "pr": 74,
+    "protected": true,
+    "required_checks": [
+      "core-tests",
+      "repository-guard"
+    ],
+    "force_pushes": false,
+    "deletions": false
+  },
+  "stacked_prs_superseded": "PR38-67 by PR74",
+  "next_active_stage": 11,
+  "next_active_title": "Product Design / UI/UX"
 }
