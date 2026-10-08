@@ -31,7 +31,7 @@
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
 | 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
 | 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
-| 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
+| 12 | Reliability: Backup/Restore + browser release gate + recovery | ✅ | validated backup/restore, manifest/SHA256, migration safety, crash/restart/data-lock и real Chromium gate подтверждены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
 | 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
 | 15 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
@@ -158,7 +158,7 @@ Stage11 не менял серверную инженерную семантик
 
 ---
 
-### №12 — Reliability / Backup / Restore / Browser Gate — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+### №12 — Reliability / Backup / Restore / Browser Gate — ✅ ЗАКРЫТ
 
 Сделать:
 - `Backup_ENGINEER_OS.cmd`;
@@ -173,11 +173,21 @@ Stage11 не менял серверную инженерную семантик
 - backup before schema migration;
 - restore test на отдельном data-dir.
 
-Критерий ✅: потеря процесса/обновление/backup+restore не теряют проект и не создают ложный ACCEPTED.
+Критерий ✅ выполнен:
+- backup/restore local data реализован и протестирован;
+- SQLite snapshot + SHA256 manifest + originals verification;
+- restore выполняется только после полной validation и не перезаписывает непустой target;
+- absolute file paths перепривязываются к restored data-dir;
+- atomic original writes и pre-migration snapshot добавлены;
+- crash/restart/stale-lock recovery проверены;
+- real Chromium/Playwright release gate остаётся обязательным;
+- backup/restore не создаёт и не повышает ACCEPTED.
+
+QA: `docs/qa/2026-10-08-stage12-reliability.json`.
 
 ---
 
-### №13 — Document Intelligence production completeness
+### №13 — Document Intelligence production completeness — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 Не ставить целью «сделать любой OCR PASS». Цель — универсальный воспроизводимый workflow.
 
