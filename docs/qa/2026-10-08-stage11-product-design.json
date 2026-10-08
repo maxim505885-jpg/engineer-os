@@ -1,0 +1,47 @@
+{
+  "stage": 11,
+  "title": "Product Design / UI/UX",
+  "status": "COMPLETE",
+  "implementation_pr": 86,
+  "implementation_head": "2c91d6dc0a3a75e9be00d5a7c68084833742d407",
+  "merged_head": "a7d39f270cf7145a3435e5ee70949a510cecb0f3",
+  "source_of_truth_branch": "integration/release-candidate-v1",
+  "scope": [
+    "local cabinet workflow navigation",
+    "normal/advanced UI modes",
+    "tokenized design system",
+    "semantic engineering status presentation",
+    "responsive desktop/mobile layout",
+    "accessibility focus/reduced-motion/labeled-controls",
+    "real Chromium responsive smoke",
+    "reference screenshot artifacts"
+  ],
+  "checks": {
+    "repository_guard": "PASS",
+    "python_regression": "PASS",
+    "compile": "PASS",
+    "http_jsdom": "PASS",
+    "chromium": "PASS",
+    "labeled_controls": "PASS",
+    "desktop_no_horizontal_overflow": "PASS",
+    "mobile_no_horizontal_overflow": "PASS",
+    "screenshot_artifact_upload": "PASS"
+  },
+  "runs": {
+    "push_core_tests": 37836336390,
+    "pr_core_tests": 37836344900,
+    "pr_repository_guard": 37836344768
+  },
+  "constraints": [
+    "No server acceptance semantics changed",
+    "No BLOCK/UNCERTAINTY downgraded",
+    "Reference screenshots use synthetic-model browser fixture, not real engineering acceptance",
+    "Windows physical verification remains deferred"
+  ],
+  "reference_sources": [
+    "di-sukharev/vibe (reference only)",
+    "nextlevelbuilder/ui-ux-pro-max-skill (reference only)"
+  ],
+  "next_active_stage": 12,
+  "next_active_title": "Reliability / Backup / Restore / Browser Gate"
+}
