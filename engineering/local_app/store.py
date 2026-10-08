@@ -424,7 +424,7 @@ class Store:
                 row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=? AND parent_id IS NULL',(job_id,session_id)).fetchone()
                 if row is None:raise ValueError('Analysis not found in conversation')
                 job=self.job_dict(row);report=(job['result'] or {}).get('document_analysis',{})
-                if job['mode'] not in {'CHAT','CORE_RUN'} or job['state'] not in {'FAILED','SUCCEEDED'} or not report or report.get('all_batches_completed') or report.get('budget_exhausted') or not report.get('resume_supported'):
+                if job['mode'] not in {'CHAT','CORE_RUN'} or job['state'] not in {'FAILED','SUCCEEDED','CANCELLED'} or not report or report.get('all_batches_completed') or report.get('budget_exhausted') or not report.get('resume_supported'):
                     raise ValueError('Analysis cannot be resumed; create a new task if inputs/settings changed')
                 _,fingerprint,supported=identity(self,job,model)
                 if not supported or fingerprint!=report.get('identity_sha256'):raise ValueError('Analysis identity changed; submit a new task')
@@ -448,7 +448,7 @@ class Store:
         job=self.extraction_job(session_id,job_id)
         if job.get('parent_id'):raise ValueError('Resubmit the parent task to process attachments')
         run=(job['result'] or {}).get('extraction',{})
-        if job['state'] not in {'FAILED','SUCCEEDED'} or not run or run.get('budget_exhausted'):
+        if job['state'] not in {'FAILED','SUCCEEDED','CANCELLED'} or not run or run.get('budget_exhausted'):
             raise ValueError('Task cannot be resumed')
         if run.get('cycle_complete') and not run.get('failed_pages'):raise ValueError('Extraction cycle already complete')
         from .core_plan import verify_originals
@@ -505,6 +505,29 @@ class Store:
             db.execute("UPDATE jobs SET state='RUNNING',updated=? WHERE id=?",(time.time(),r['id']))
             return self.job_dict(dict(r,state='RUNNING'))
 
+    def cancel(self,session_id,job_id):
+        identifier(session_id);identifier(job_id)
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
+            if row is None or row['parent_id'] or row['state'] not in {'QUEUED','RUNNING'}:raise ValueError('Task cannot be cancelled')
+            state='CANCELLED' if row['state']=='QUEUED' else 'RUNNING'
+            db.execute('UPDATE jobs SET state=?,error=?,updated=? WHERE id=?',(state,'CANCEL_REQUESTED' if state=='RUNNING' else 'Отменено пользователем до начала выполнения.',time.time(),job_id))
+        return dict(id=job_id,state=state,cancel_requested=True)
+
+    def cancellation_requested(self,job_id):
+        with self.connection() as db:
+            row=db.execute('SELECT error FROM jobs WHERE id=?',(job_id,)).fetchone()
+        return bool(row and row['error']=='CANCEL_REQUESTED')
+
+    def retry(self,session_id,job_id):
+        identifier(session_id);identifier(job_id)
+        with self.connection() as db:
+            row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
+        if row is None or row['parent_id'] or row['mode'].startswith('EXTRACT_') or row['state'] not in {'FAILED','CANCELLED'}:raise ValueError('Task cannot be retried; extraction uses its preserved journal')
+        job=self.job_dict(row)
+        return self.enqueue(session_id,job['prompt'],job['file_ids'],mode=job['mode'],requested_checks=job['requested_checks'])
+
     def checkpoint(self,job_id,result):
         identifier(job_id)
         if not isinstance(result,dict) or not isinstance(result.get('text'),str):raise ValueError('Invalid progress result')
@@ -527,7 +550,7 @@ class Store:
         result=dict(result,engineering_status=status,evidentiary_status='NOT_EVIDENCE',acceptance_granted=False,final_audit='NOT_RUN')
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
-            r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone()
+            r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING' AND (error IS NULL OR error!='CANCEL_REQUESTED')",(job_id,)).fetchone()
             if r is None:raise ValueError('Task is not running')
             prior=json.loads(r['result']) if r['result'] else {}
             if 'document_analysis' in prior:result['document_analysis']=prior['document_analysis']
@@ -538,7 +561,7 @@ class Store:
         identifier(job_id)
         with self.connection() as db:
             db.execute('BEGIN IMMEDIATE')
-            row=db.execute("SELECT result FROM jobs WHERE id=? AND state IN ('RUNNING','ATTACHMENT')",(job_id,)).fetchone()
+            row=db.execute("SELECT result,error FROM jobs WHERE id=? AND state IN ('RUNNING','ATTACHMENT')",(job_id,)).fetchone()
             if row is None:return
             result=json.loads(row['result']) if row['result'] else None
             if result and 'document_analysis' in result:
@@ -550,7 +573,8 @@ class Store:
                             run['status']='BLOCK'
                             for r in run['results']:
                                 if r['agent']==role:r.update(status='BLOCK',execution='INTERRUPTED' if r['execution']=='RUNNING' else r['execution'])
-            db.execute("UPDATE jobs SET state='FAILED',error=?,result=?,updated=? WHERE id=?",(str(error)[:500],json.dumps(result,ensure_ascii=False) if result else None,time.time(),job_id))
+            cancelled=row['error']=='CANCEL_REQUESTED'
+            db.execute("UPDATE jobs SET state=?,error=?,result=?,updated=? WHERE id=?",('CANCELLED' if cancelled else 'FAILED','Отменено пользователем; сохранённые материалы оставлены.' if cancelled else str(error)[:500],json.dumps(result,ensure_ascii=False) if result else None,time.time(),job_id))
 
     def interrupt_running(self):
         # The caller must own the exclusive data-directory lock.

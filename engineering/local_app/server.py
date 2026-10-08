@@ -114,6 +114,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if route=='/api/drive/status' and not post:
                     configured=self.server.drive_client is not None
                     return self.respond(200,dict(configured=configured,connection_verified=False,note='Настройки Drive есть; доступ проверяется при импорте.' if configured else 'Drive не настроен на локальном сервере. Можно загрузить файл вручную.'))
+                if route=='/api/model/settings' and post:
+                    from .settings import configure
+                    with self.server.health_lock:
+                        result=configure(store,model,self.json_body());self.server.health_at=0
+                    return self.respond(200,result)
                 if route=='/api/sessions':
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
@@ -168,6 +173,10 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
                         finally:self.server.upload_slots.release()
                 if len(parts)>=6 and parts[:2]==['api','sessions'] and parts[3]=='jobs':
+                    if len(parts)==6 and parts[5] in {'cancel','retry'} and post:
+                        self.json_body()
+                        operation=store.cancel if parts[5]=='cancel' else store.retry
+                        return self.respond(202,operation(parts[2],parts[4]))
                     if len(parts)==6 and parts[5]=='analysis' and not post:
                         query=parse_qs(path.query)
                         return self.respond(200,store.analysis_receipts(parts[2],parts[4],offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0])))

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from urllib.parse import urlsplit
 
-KEYS={'ENGINEER_OS_LOCAL_MODEL_URL','ENGINEER_OS_LOCAL_MODEL','ENGINEER_OS_LOCAL_PROVIDER','ENGINEER_OS_LOCAL_THINK'}
+KEYS={'ENGINEER_OS_LOCAL_MODEL_URL','ENGINEER_OS_LOCAL_MODEL','ENGINEER_OS_LOCAL_PROVIDER','ENGINEER_OS_LOCAL_THINK','ENGINEER_OS_LOCAL_MODEL_TIMEOUT'}
 
 
 def validate(value):
@@ -26,6 +26,33 @@ def load(root):
         value=validate(json.loads(path.read_text(encoding='utf-8')))
     value.update({k:os.environ[k] for k in KEYS if os.environ.get(k)})
     return validate(value)
+
+
+def configure(store,model,values):
+    """Persist non-secret settings and replace the live configuration while idle."""
+    import tempfile
+    from .model import LocalModel,thinking_setting
+    validate(values)
+    for key,value in values.items():
+        if os.environ.get(key) and os.environ[key]!=value:raise ValueError('Setting is fixed by the launch environment: '+key)
+    current=load(store.root);current.update(values)
+    candidate=LocalModel(current.get('ENGINEER_OS_LOCAL_MODEL_URL',model.origin),current.get('ENGINEER_OS_LOCAL_MODEL',model.model),model.key,
+        provider=current.get('ENGINEER_OS_LOCAL_PROVIDER',model.provider),thinking=thinking_setting(current.get('ENGINEER_OS_LOCAL_THINK','default')),
+        timeout=int(current.get('ENGINEER_OS_LOCAL_MODEL_TIMEOUT',getattr(model,'timeout',180))))
+    with store.connection() as db:
+        db.execute('BEGIN IMMEDIATE')
+        if db.execute("SELECT 1 FROM jobs WHERE state IN ('QUEUED','RUNNING','ATTACHMENT') LIMIT 1").fetchone():raise ValueError('Wait for active tasks before changing model settings')
+        path=store.root/'settings.json'
+        if path.is_symlink():raise ValueError('Linked settings are unsupported')
+        fd,name=tempfile.mkstemp(prefix='model-settings-',dir=store.root)
+        try:
+            with os.fdopen(fd,'w',encoding='utf-8') as stream:
+                json.dump(current,stream,ensure_ascii=False);stream.flush();os.fsync(stream.fileno())
+            os.replace(name,path)
+            model.__dict__.update(candidate.__dict__)
+        finally:
+            if Path(name).exists():Path(name).unlink()
+    return dict(origin=model.origin,model=model.model,provider=model.provider,thinking=model.thinking,timeout=model.timeout)
 
 
 def active_directory(selection,fallback):
