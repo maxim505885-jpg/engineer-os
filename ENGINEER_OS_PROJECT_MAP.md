@@ -1198,11 +1198,11 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 Текущий кандидат:
 - branch: `feat/windows-one-click-stage9-20261007`;
 - PR67;
-- head: `510d3b785ec44999b0d8793b655be6f2f3cc000c`;
-- PR mergeable;
-- push run 37540039590 SUCCESS;
-- PR run 37540067054 SUCCESS;
-- 473 Python tests PASS;
+- current head after repository hardening: `87fccbafbf6a944443e2f503acddf48f33e3b17e`;
+- PR67 remains open/draft/mergeable;
+- Core Tests run `37677169227` SUCCESS;
+- Repository Security Guard run `37677169290` SUCCESS;
+- previous Stage-9 regression: 473 Python tests PASS;
 - PowerShell syntax PASS;
 - compile PASS;
 - actual HTTP/DOM PASS.
@@ -1511,10 +1511,9 @@ LIRA/SCAD:
 
 ### Текущий следующий активный пункт
 
-**№9 — фактическая Windows one-click verification на компьютере пользователя.**
+**№10 — Release consolidation / единый source of truth.**
 
-После №9:
-**№10 — release consolidation**, затем **№11 Product Design / UI/UX**, **№12 reliability**, **№13 Document Intelligence completeness**, затем возврат к **№6 real engineering verification**, после чего №14–19.
+№9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. После №10: **№11 Product Design / UI/UX → №12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
 
 
 
@@ -1615,9 +1614,11 @@ GitHub Actions создаёт scheduled/manual git-bundle artifact.
 
 Repository hardening: **✅ выполнен программно и административно, кроме одного Dependabot server-side toggle**.
 
-Следующий активный пункт MASTER PLAN не меняется:
+Следующий активный пункт MASTER PLAN:
 
-**№9 — фактическая Windows one-click verification.**
+**№10 — Release consolidation / единый source of truth.**
+
+№9 Windows verification остаётся 🟡 и отложен до финального Windows-прохода.
 
 
 ## 50. Внешние reference sources для №10–12 — 07.10.2026
@@ -1799,8 +1800,10 @@ MIT. При прямом включении substantial portions сохраня�
 
 `vibe`: **высокая ценность как reference для agent safety / architecture / UI workflow №10–12**, но не как replacement stack.
 
-Следующий активный пункт MASTER PLAN по-прежнему:
-**№9 — фактическая Windows one-click verification.**
+Следующий активный пункт MASTER PLAN:
+**№10 — Release consolidation / единый source of truth.**
+
+№9 Windows one-click verification остаётся отложенным до финального Windows-прохода.
 
 ## 51. №10 — единый кандидат выпуска, 08.10.2026
 
