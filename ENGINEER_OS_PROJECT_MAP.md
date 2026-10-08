@@ -1179,7 +1179,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 8 | FINAL AUDIT / acceptance layer | ✅ | immutable audit, stale invalidation, acceptance gate и реальный BLOCK audit работают |
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
 | 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
-| 11 | Product Design / UI/UX проработка | ❌ | единая дизайн-система, ключевые пользовательские сценарии, desktop/mobile usability, accessibility и визуальная консистентность подтверждены |
+| 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
 | 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
@@ -1273,7 +1273,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №11 — Product Design / UI/UX проработка — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+### №11 — Product Design / UI/UX проработка — ✅ ЗАКРЫТ
 
 **Почему здесь:** дизайн должен выполняться после №10, когда продукт уже собран в единый release-candidate, но до финальных browser/reliability проверок. Иначе UI придётся повторно переделывать после объединения веток.
 
@@ -1309,7 +1309,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №12 — Reliability / Backup / Restore / Browser Gate
+### №12 — Reliability / Backup / Restore / Browser Gate — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 Сделать:
 - `Backup_ENGINEER_OS.cmd`;
@@ -1525,9 +1525,9 @@ LIRA/SCAD:
 
 ### Текущий следующий активный пункт
 
-**№11 — Product Design / UI/UX.**
+**№12 — Reliability / Backup / Restore / Browser Gate.**
 
-№10 Release consolidation закрыт. №9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. Далее: **№11 Product Design / UI/UX → №12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
+№10–11 закрыты. №9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. Далее: **№12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
 
 
 
@@ -1630,9 +1630,9 @@ Repository hardening: **✅ выполнен программно и админ�
 
 Следующий активный пункт MASTER PLAN:
 
-**№11 — Product Design / UI/UX.**
+**№12 — Reliability / Backup / Restore / Browser Gate.**
 
-№10 закрыт. №9 Windows verification остаётся 🟡 и отложен до финального Windows-прохода.
+№10–11 закрыты. №9 Windows verification остаётся 🟡 и отложен до финального Windows-прохода.
 
 
 ## 50. Внешние reference sources для №10–12 — 07.10.2026
@@ -1815,9 +1815,9 @@ MIT. При прямом включении substantial portions сохраня�
 `vibe`: **высокая ценность как reference для agent safety / architecture / UI workflow №10–12**, но не как replacement stack.
 
 Следующий активный пункт MASTER PLAN:
-**№11 — Product Design / UI/UX.**
+**№12 — Reliability / Backup / Restore / Browser Gate.**
 
-№10 закрыт. №9 Windows one-click verification остаётся отложенным до финального Windows-прохода.
+№10–11 закрыты. №9 Windows one-click verification остаётся отложенным до финального Windows-прохода.
 
 ## 51. №10 — единый кандидат выпуска, 08.10.2026
 
@@ -2454,3 +2454,62 @@ Native preview сохраняет UNAVAILABLE/BLOCK; ZIP inventory ограни�
 - v1.0 released.
 
 **Следующий активный пункт: №11 — Product Design / UI/UX.**
+
+
+## 52. Закрытие MASTER PLAN №11 — Product Design / UI/UX — 08.10.2026
+
+Статус: **✅ CLOSED**.
+
+Implementation:
+- branch: `feat/product-design-stage11-20261008`;
+- PR86;
+- implementation head: `2c91d6dc0a3a75e9be00d5a7c68084833742d407`;
+- merged into official release-candidate as `a7d39f270cf7145a3435e5ee70949a510cecb0f3`.
+
+Closeout:
+- PR87;
+- release-candidate head after closeout: `ea2bbdd5aa1f6b7bbe32cb3e77103d04459e8806`.
+
+Фактически выполнено:
+- явный инженерный маршрут Sources → ТЗ → Evidence → нормы/расчёты → Stage7 case → FINAL AUDIT;
+- обычный режим без обязательного low-level JSON;
+- advanced mode для manual extraction / advanced domain packets;
+- единая tokenized design system;
+- явная семантика PASS / WARNING / UNCERTAINTY / BLOCK / ACCEPTED;
+- цвет никогда не заменяет текст статуса/reason codes;
+- desktop/mobile responsive layout;
+- keyboard focus;
+- reduced-motion;
+- labeled-control accessibility smoke;
+- no-horizontal-overflow checks;
+- reference screenshots из реального Chromium сохраняются как CI artifact;
+- design system: `docs/design/ENGINEER_OS_DESIGN_SYSTEM.md`;
+- QA record: `docs/qa/2026-10-08-stage11-product-design.json`.
+
+Проверки реализации:
+- push Core Tests `37836336390` SUCCESS;
+- PR Core Tests `37836344900` SUCCESS;
+- PR Repository Security Guard `37836344768` SUCCESS;
+- Python regression PASS;
+- compile PASS;
+- HTTP/jsdom PASS;
+- real Chromium PASS;
+- reference screenshot upload PASS.
+
+Closeout PR87:
+- Core Tests `37836934635` SUCCESS;
+- Repository Security Guard `37836934422` SUCCESS.
+
+Инженерные границы сохранены:
+- server acceptance semantics не изменялись;
+- BLOCK/UNCERTAINTY не понижались;
+- model output не стал evidence;
+- UI не получил ручного пути к ACCEPTED;
+- Windows physical verification всё ещё NOT_RUN.
+
+Reference sources:
+- `di-sukharev/vibe` — workflow/UI/accessibility ideas only;
+- `nextlevelbuilder/ui-ux-pro-max-skill` — design-system reasoning/anti-patterns only;
+- runtime dependencies из них не добавлялись.
+
+**Следующий активный пункт: №12 — Reliability / Backup / Restore / Browser Gate.**
