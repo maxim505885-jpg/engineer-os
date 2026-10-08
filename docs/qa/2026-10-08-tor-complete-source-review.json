@@ -1,0 +1,52 @@
+{
+  "scope": "STAGE7_DEVELOPMENT_SOURCE_ROLE_EXERCISE",
+  "summary": {
+    "conditions": 47,
+    "addressed": 47,
+    "roles": 5,
+    "status": "BLOCK",
+    "saved_reload_equal": true,
+    "all_roles_see_full_index": true,
+    "acceptance_granted": false,
+    "formal_final_audit": "NOT_RUN",
+    "execution_origin": "GENUINE_SOURCE_SPECIALIST_EXAMINATIONS_IMPORTED_TO_CORE_NOT_LIVE_OLLAMA"
+  },
+  "original_sha256": [
+    "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+    "c48fd61a899c6f15b71f71851d570cf2fbaa47227d44553cfad38ac92664e80a",
+    "c149c0d5446ddf136fd450de44b14de73c2f0312bf69eac4aebbf63bd793edc4",
+    "18145f6d47d44e559040b9559d5b6f9af1648ea34f194f8e3683be761afb5797"
+  ],
+  "role_output_sha256": {
+    "report-audit-agent": "2cdadcfe5840005a70b253db4ebd0a39cafb35cd966439e495f09a3be3a5a7cf",
+    "inspection-agent": "3951045b1d5817b7e047c98ef4f2a67b21c7c78281c2a71900bf557f9e75618d",
+    "normative-agent": "aadaf6b7dd223171a3da2d332e155edcf995a1a1191a52ad5a4f5bf25d06fd6f",
+    "calculation-agent": "f993f9ba169a196bd4aae494749d77cb988e484431b16955dc9cb29ea95e3f63",
+    "final-audit-agent": "6dc768eba02a6e79f841fde37662c7b2f432357dc56310228f0b26ff5b0eac91"
+  },
+  "verification": {
+    "python_tests": 573,
+    "skipped": 0,
+    "node_tests": 4,
+    "dom": "PASS",
+    "chromium": "PASS",
+    "live_model": "NOT_RUN",
+    "normative_execution": "NOT_RUN",
+    "solver": "NOT_RUN",
+    "automatic_full_v4_analysis": "NOT_RUN",
+    "new_tests": 9
+  },
+  "new_tests": 9,
+  "source_conditions": 47,
+  "input_positions": 42,
+  "prior_context_exposure": true,
+  "blind_review": false,
+  "review_qualification_verified": false,
+  "controlled_replay": "BASELINE_ONLY_NOT_SUBSTANTIVE_ROLE_PROOF",
+  "automatic_full_v4_analysis": "NOT_RUN",
+  "live_ollama": "NOT_RUN",
+  "normative_current_verification": "NOT_RUN",
+  "solver": "NOT_RUN",
+  "formal_final_audit": "NOT_RUN",
+  "acceptance_granted": false
+}

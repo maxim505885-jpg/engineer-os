@@ -18,7 +18,7 @@ SYSTEM = '''Ты профильный помощник ENGINEER OS. Отвеча
 черновиков; формальный FINAL AUDIT остаётся NOT_RUN. Не создавай замечания ради замечаний.
 Верни только JSON с четырьмя полями: status (UNCERTAINTY или BLOCK), summary (строка),
 observations (массив объектов с text, source_ids, requirement_ids и relation), limitations (массив строк).
-requirement_ids — ID требований из sources.requirements.requirements; relation — SUPPORTS, CONTRADICTS или UNKNOWN. Не угадывай связь; при отсутствии основания укажи UNKNOWN.
+requirement_ids — ID требований из sources.requirements.requirement_index (полный индекс) или requirements (ограниченные подробности). Индекс может содержать сокращённый текст: text_truncated и context_truncated не означают полную проверку. relation — SUPPORTS, CONTRADICTS или UNKNOWN. Не угадывай связь; при отсутствии основания укажи UNKNOWN.
 source_ids — только ID предоставленных оригиналов или кандидатов. Такая ссылка не
 доказывает истинность наблюдения. Не добавляй acceptance, proof IDs или другие поля.'''
 
@@ -197,7 +197,8 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
                         dict(role='user', content='UNTRUSTED TASK DATA:\n' + json.dumps(data, ensure_ascii=False))]
             raw = model.chat(messages)
             guard_context()
-            parsed, limitations = parse_draft(task, raw, allowed_ids, allowed_requirement_ids={r['id'] for r in context['requirements']['requirements']})
+            from .requirements import context_requirement_ids
+            parsed, limitations = parse_draft(task, raw, allowed_ids, allowed_requirement_ids=context_requirement_ids(context['requirements']))
             execution = 'COMPLETED'
         except Exception as exc:
             saved_block=getattr(exc,'document_block_seen',False) or getattr(model,'report',{}).get('roles',{}).get(task.agent,{}).get('block_seen',False)
