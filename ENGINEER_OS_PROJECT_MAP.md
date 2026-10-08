@@ -1180,7 +1180,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 9 | Windows one-click runtime | 🟡 | код/CI готовы; нужен фактический Windows cold-start/restart/end-to-end |
 | 10 | Release consolidation / единый source of truth | ✅ | официальный защищённый release-candidate собрал stacked/side streams и прошёл clean checkout + CI |
 | 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
-| 12 | Reliability: Backup/Restore + browser release gate + recovery | ❌ | данные восстанавливаются; настоящий Chromium gate; crash/restart/data-lock проверены |
+| 12 | Reliability: Backup/Restore + browser release gate + recovery | ✅ | validated data backup/restore, SHA256 manifest, migration safety, crash/restart/data-lock и real Chromium gate подтверждены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
 | 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
 | 15 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
@@ -1309,7 +1309,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №12 — Reliability / Backup / Restore / Browser Gate — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
+### №12 — Reliability / Backup / Restore / Browser Gate — ✅ ЗАКРЫТ
 
 Сделать:
 - `Backup_ENGINEER_OS.cmd`;
@@ -1328,7 +1328,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 
 ---
 
-### №13 — Document Intelligence production completeness
+### №13 — Document Intelligence production completeness — СЛЕДУЮЩИЙ АКТИВНЫЙ ПУНКТ
 
 Не ставить целью «сделать любой OCR PASS». Цель — универсальный воспроизводимый workflow.
 
@@ -1525,9 +1525,9 @@ LIRA/SCAD:
 
 ### Текущий следующий активный пункт
 
-**№12 — Reliability / Backup / Restore / Browser Gate.**
+**№13 — Document Intelligence production completeness.**
 
-№10–11 закрыты. №9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. Далее: **№12 reliability → №13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
+№10–11 закрыты. №9 Windows one-click verification сознательно отложен до финального Windows-прохода по указанию пользователя. Далее: **№13 Document Intelligence completeness → возврат к №6 real engineering verification → №14–19 → финальная Windows verification №9 внутри release audit.**
 
 
 
@@ -2513,3 +2513,62 @@ Reference sources:
 - runtime dependencies из них не добавлялись.
 
 **Следующий активный пункт: №12 — Reliability / Backup / Restore / Browser Gate.**
+
+
+## 53. Закрытие MASTER PLAN №12 — Reliability / Backup / Restore / Browser Gate — 08.10.2026
+
+Статус: **✅ CLOSED**.
+
+Implementation:
+- PR88 merged into official release-candidate;
+- implementation head: `704b433c90e1652fca890ae22a6da4837d9583be`;
+- merged implementation head: `72dc4e303892131f5b39052da932aac19237f5f4`;
+- Stage12 closeout PR89 merged;
+- current official release-candidate head: `fce4367bee6fbf2b2be2bfcebc6a7f166b467b0a`;
+- source of truth: `integration/release-candidate-v1`.
+
+Добавлено:
+- `Backup_ENGINEER_OS.cmd`;
+- `Restore_ENGINEER_OS.cmd`;
+- validated local data backup/restore module;
+- consistent SQLite snapshot через SQLite backup API;
+- manifest SHA256 + size для БД и каждого оригинала;
+- проверка SQLite integrity + foreign keys;
+- restore только в missing/empty target;
+- абсолютные `files.path` перепривязываются к restored data-dir;
+- non-secret runtime config сохраняется, secrets/.env не копируются;
+- atomic original writes: partial + fsync + `os.replace`;
+- automatic pre-migration SQLite snapshot;
+- crash/restart recovery;
+- stale OS-lock recovery;
+- interrupted RUNNING/ATTACHMENT → FAILED, без ложного успеха;
+- real Chromium/Playwright остаётся обязательным CI gate.
+
+Fail-closed tests:
+- corrupted backup → BLOCK;
+- active data-dir backup → BLOCK;
+- nonempty restore target → BLOCK;
+- identity mismatch → BLOCK;
+- partial original write не оставляет зарегистрированный файл;
+- restore не создаёт и не повышает ACCEPTED.
+
+Security:
+- CodeQL обнаружил потенциальный clear-text config output;
+- исправлено allowlist-выводом CLI в commit `704b433c90e1652fca890ae22a6da4837d9583be`;
+- review thread разрешён после fix.
+
+QA:
+- `docs/qa/2026-10-08-stage12-reliability.json` → `status=COMPLETE`;
+- PR88 Core Tests run `37841181056` SUCCESS;
+- PR88 Repository Security Guard `37841181027` SUCCESS;
+- PR89 closeout Core Tests `37841667334` SUCCESS;
+- PR89 Repository Security Guard `37841667420` SUCCESS;
+- final exact release-candidate push Core Tests `37841977020` SUCCESS;
+- final exact release-candidate Repository Security Guard `37841977084` SUCCESS.
+
+Ограничения:
+- physical Windows verification №9 всё ещё отложен;
+- это не закрывает нормативную/расчётную инженерную проверку №6;
+- backup/restore не является инженерным доказательством и не меняет audit semantics.
+
+**Следующий активный пункт: №13 — Document Intelligence production completeness.**
