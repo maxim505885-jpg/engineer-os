@@ -26,7 +26,9 @@
 1. [x] RED→GREEN: optional explicit requirement_ids/relation in parse_draft; controlled IDs in direct and automatic role calls, unchanged legacy contract.
 2. [x] RED→GREEN: engineering_review.report(requirements, records) maps per-requirement role findings/source gates, missing mapping, declared conflict, source limitations; immutable digest and scope. CORE aggregate enforces deterministic BLOCK without replacing ERROR. Identity includes implementation.
 3. [x] RED→GREEN: UI shows requirement mapping and reasons for completed role output; HTTP/DOM/Chromium verify no manufactured acceptance; case snapshot consumes saved review.
-4. [ ] Real-source ToR/report inspection, reproducible source-bound case and negative conflicts; whole suite and independent review; GitHub draft stacked on PR79; same map/plan update with honest criterion and open inputs.
+4. [x] Real-source ToR/report inspection, reproducible source-bound case and negative conflicts; whole suite and independent review; GitHub draft stacked on PR79; same map/plan update with honest criterion and open inputs.
 
 ## Actual outcome
 556 Python,4 Node,DOM/Chromium PASS. QA: docs/qa/2026-10-08-engineering-core-traceability.md. One reviewer found2 Important; fixes passed RED→GREEN. Real-source negative case:12 BLOCK, native region AMBIGUOUS, ToR unverified. Software traceability implemented; entire №7 remains open pending substantive source/actual-structure checks.
+
+Draft PR80 published; living map §59 and master plan preserve №7 open.
