@@ -137,6 +137,26 @@ class Store:
             count=db.execute('SELECT count(*) FROM messages WHERE session_id=?',(session_id,)).fetchone()[0]
         return dict(session=dict(session),messages=messages,jobs=jobs,files=files,evidence=evidence,history_windowed=count>len(messages),message_count=count)
 
+    def history(self,session_id,*,kind='messages',before=None,limit=50):
+        identifier(session_id)
+        if kind not in {'messages','jobs'}:raise ValueError('Unknown history kind')
+        if type(limit) is not int or not 1<=limit<=200:raise ValueError('History limit must be 1–200')
+        if before is not None and (type(before) is not int or not 1<=before<=9223372036854775807):raise ValueError('Invalid history cursor')
+        table=kind;column='seq' if kind=='messages' else 'rowid'
+        with self.connection() as db:
+            if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
+            conditions='session_id=?'+(' AND parent_id IS NULL' if kind=='jobs' else '')
+            args=[session_id]
+            if before is not None:conditions+=f' AND {column}<?';args.append(before)
+            rows=db.execute(f'SELECT {column} AS history_cursor,* FROM {table} WHERE {conditions} ORDER BY {column} DESC LIMIT ?',(*args,limit+1)).fetchall()
+        has_more=len(rows)>limit;rows=rows[:limit]
+        cursor=rows[-1]['history_cursor'] if rows else None
+        records=[]
+        for row in rows:
+            record=dict(row);record.pop('history_cursor')
+            records.append(record if kind=='messages' else self.job_dict(record))
+        return dict(records=records,has_more=has_more,next_before=cursor if has_more else None,kind=kind)
+
     @staticmethod
     def file_dict(row,private=False):
         r=dict(row);r['text_truncated']=bool(r['text_truncated']);r['acceptance_granted']=False

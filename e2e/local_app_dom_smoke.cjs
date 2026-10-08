@@ -266,6 +266,16 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('#project-state').textContent.includes('устарел'),'Stale audit must direct rebuilding, not imply current decision');
   dom.window.renderRoute({jobs:[],files:[]},{requirements:[]},{cases:[]},{audits:[{current:true,fresh:true,effective_decision:'ACCEPTED',effective_acceptance_granted:true}]});
   assert.ok(doc.querySelector('#project-next').textContent.includes('Посмотреть решение'),'Accepted fixture should show a decision, not imaginary blockers');
+  doc.querySelector('[data-stage="history"]').click();
+  await until(()=>doc.querySelector('#history-records .history-record'));
+  assert.ok(doc.querySelector('#history-panel').open,'History route must reveal archived records');
+  doc.querySelector('#history-kind').value='jobs';
+  doc.querySelector('#history-kind').dispatchEvent(new dom.window.Event('change'));
+  await until(()=>doc.querySelector('#history-records .job'));
+  assert.ok(doc.querySelector('#history-records').textContent.includes('Проверь высоту по ТЗ'));
+  [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
+  await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
+  assert.equal(doc.querySelector('#history-records').children.length,0,'Archive must not leak across projects');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}

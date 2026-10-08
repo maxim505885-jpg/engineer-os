@@ -5,7 +5,9 @@ const http=require('node:http');const {spawn}=require('node:child_process');
 const {chromium}=require('playwright');
 (async()=>{
   const root=path.resolve(__dirname,'..');const temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-ui-'));
-  let child,browser;const requests=[];
+  const recoveryTemp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-recovery-ui-'));
+  let child,recoveryChild,browser;const requests=[];
+  async function stop(process){if(!process||process.exitCode!==null)return;process.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{process.kill('SIGKILL');resolve();},2500);process.once('exit',()=>{clearTimeout(timer);resolve();});});}
   const model=http.createServer((req,res)=>{
     res.setHeader('Content-Type','application/json');
     if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}
@@ -31,9 +33,30 @@ const {chromium}=require('playwright');
     await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(temp,'mobile.png'),fullPage:true});
     assert.equal(errors.length,0,errors.join('\n'));
     if(process.env.ENGINEER_OS_UI_SCREENSHOT)fs.copyFileSync(path.join(temp,'mobile.png'),process.env.ENGINEER_OS_UI_SCREENSHOT);
-    console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','mobile-layout'],requests:requests.length}));
+    await page.click('[data-stage="history"]');await page.waitForSelector('#history-records .history-record');
+    assert.ok(await page.locator('#history-records').textContent().then(text=>text.includes('Проверь высоту по ТЗ')));
+    const selection=path.join(recoveryTemp,'active-data-dir.txt'),archive=path.join(recoveryTemp,'project.zip'),restored=path.join(recoveryTemp,'восстановленный проект');
+    recoveryChild=spawn(process.env.PYTHON||'python3',['scripts/run_data_recovery.py','--no-browser','--data-dir',temp,'--selection-file',selection],{cwd:root});
+    const recoveryOrigin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Recovery startup timeout')),10000);recoveryChild.stdout.on('data',data=>{log+=data;const found=log.match(/ENGINEER OS recovery: (http:\/\/127\.0\.0\.1:\d+)/);if(found){clearTimeout(timer);resolve(found[1]);}});recoveryChild.on('exit',code=>{clearTimeout(timer);reject(Error('Recovery exited '+code));});});
+    const recoveryPage=await browser.newPage();await recoveryPage.goto(recoveryOrigin);await recoveryPage.waitForFunction(()=>!document.querySelector('#backup-create').disabled);
+    await recoveryPage.fill('#archive-path',archive);await recoveryPage.click('#backup-create');
+    await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-error').textContent.includes('already using'));
+    assert.equal(fs.existsSync(archive),false,'Active application must retain its exclusive data lock');
+    await stop(child);child=null;
+    await recoveryPage.click('#backup-create');await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-result').textContent.includes('Копия создана'));
+    await recoveryPage.click('#backup-verify');await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-result').textContent.includes('Целостность архива проверена'));
+    await recoveryPage.fill('#restore-target',restored);await recoveryPage.click('#backup-restore');await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-result').textContent.includes('Проект восстановлен'));
+    await recoveryPage.click('#activate-project');await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-result').textContent.includes('Каталог выбран'));
+    assert.equal(fs.readFileSync(selection,'utf8').trim(),restored);
+    await recoveryPage.click('#backup-restore');await recoveryPage.waitForFunction(()=>!document.querySelector('#recovery-error').hidden);
+    assert.ok(await recoveryPage.locator('#recovery-error').textContent().then(text=>text.includes('existing')||text.includes('new')),'Existing restore target must be refused');
+    const originalFiles=fs.readdirSync(path.join(temp,'files')),restoredFiles=fs.readdirSync(path.join(restored,'files'));assert.deepEqual(restoredFiles,originalFiles);for(const name of originalFiles)assert.deepEqual(fs.readFileSync(path.join(restored,'files',name)),fs.readFileSync(path.join(temp,'files',name)));
+    child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--selection-file',selection],{cwd:root,env:{...process.env,ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
+    const restoredOrigin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Restored startup timeout')),10000);child.stdout.on('data',data=>{log+=data;const found=log.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(found){clearTimeout(timer);resolve(found[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error('Restored exited '+code));});});
+    await page.goto(restoredOrigin);await page.getByRole('button',{name:'Проверь высоту по ТЗ',exact:true}).click();await page.waitForSelector('.message.assistant');assert.equal(await page.locator('.file').count(),1);assert.equal(requests.length,1,'Recovery must not rerun completed work');
+    console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','mobile-layout','archive-navigation','recovery-browser','busy-owner-refusal','backup-verify-restore','no-replace','original-bytes','activate-directory','restored-launch-history'],requests:requests.length}));
   }finally{
-    if(browser)await browser.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
-    await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
+    if(browser)await browser.close();await stop(child);await stop(recoveryChild);
+    await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});fs.rmSync(recoveryTemp,{recursive:true,force:true});
   }
 })().catch(e=>{console.error(e);process.exitCode=1;});

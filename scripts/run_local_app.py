@@ -14,19 +14,21 @@ from engineering.local_app.model import LocalModel, thinking_setting
 from engineering.local_app.server import make_server
 from engineering.local_app.store import Store
 from engineering.local_app.worker import Worker
-from engineering.local_app.settings import load as load_settings
+from engineering.local_app.settings import load as load_settings,active_directory
 
 
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port',type=int,default=8765)
-    parser.add_argument('--data-dir',type=Path,default=ROOT/'.engineer-os/local-app')
+    parser.add_argument('--data-dir',type=Path)
+    parser.add_argument('--selection-file',type=Path,default=ROOT/'.engineer-os/active-data-dir.txt')
     parser.add_argument('--no-browser',action='store_true')
     args=parser.parse_args(argv)
     if not 0<=args.port<=65535:parser.error('Port must be 0–65535')
     if sys.version_info<(3,12):parser.error('Python 3.12 or newer is required')
     key=os.environ.get('ENGINEER_OS_LOCAL_MODEL_KEY','')
     try:
+        if args.data_dir is None:args.data_dir=active_directory(args.selection_file,ROOT/'.engineer-os/local-app')
         settings=load_settings(args.data_dir)
         origin=settings.get('ENGINEER_OS_LOCAL_MODEL_URL','http://127.0.0.1:11434')
         model_name=settings.get('ENGINEER_OS_LOCAL_MODEL','qwen3:8b')

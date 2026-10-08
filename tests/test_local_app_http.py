@@ -60,6 +60,18 @@ class LocalHTTPTests(unittest.TestCase):
         status,_,raw=self.request('POST','/api/sessions',{'title':'Объект'})
         self.assertEqual(status,201);return json.loads(raw)['id']
 
+    def test_history_api_is_authenticated_bounded_and_project_isolated(self):
+        session=self.create();self.store.enqueue(session,'Private project history',[])
+        second=self.create()
+        status,_,raw=self.request('GET',f'/api/sessions/{session}/history?kind=messages&limit=1')
+        self.assertEqual(status,200);self.assertEqual(json.loads(raw)['records'][0]['content'],'Private project history')
+        self.assertEqual(self.request('GET',f'/api/sessions/{session}/history',token=False)[0],403)
+        self.assertEqual(self.request('GET',f'/api/sessions/{session}/history?limit=201')[0],400)
+        self.assertEqual(self.request('GET',f'/api/sessions/{session}/history?before=bad')[0],400)
+        status,_,raw=self.request('GET',f'/api/sessions/{second}/history')
+        self.assertEqual(status,200);self.assertEqual(json.loads(raw)['records'],[])
+        self.assertEqual(self.request('POST','/api/data/backup',{'archive':'/tmp/forbidden.zip'})[0],409)
+
     def test_analysis_resume_http_guards_and_actual_local_model_identity(self):
         import fitz
         from engineering.local_app.files import preserve_file

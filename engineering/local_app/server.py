@@ -22,7 +22,7 @@ class LocalServer(ThreadingHTTPServer):
     daemon_threads=True
 
 
-def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT):
+def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT,recovery_only=False,selection_path=None):
     if host!='127.0.0.1':raise ValueError('Application must bind to 127.0.0.1 only')
     from .drive_import import DriveImportError,configured_client,import_original
     if drive_client is _DRIVE_DEFAULT:drive_client=configured_client()
@@ -71,12 +71,40 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/styles.css'}:
-                    name={'/':'index.html','/app.js':'app.js','/styles.css':'styles.css'}[route]
+                if not post and route in {'/','/app.js','/styles.css','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
-                    if route=='/':data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
-                    ctype={'/':'text/html; charset=utf-8','/app.js':'application/javascript; charset=utf-8','/styles.css':'text/css; charset=utf-8'}[route]
+                    if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
+                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
                     return self.respond(200,data,ctype)
+                if route=='/api/data/status' and not post:
+                    return self.respond(200,dict(root=str(self.server.data_root),recovery_only=recovery_only))
+                if parts[:2]==['api','data'] and len(parts)==3 and post:
+                    if not recovery_only:raise RequestProblem(409,'Остановите основное приложение и откройте Recover_ENGINEER_OS.cmd — операции доступны в режиме обслуживания.')
+                    if not self.server.data_slots.acquire(blocking=False):raise RequestProblem(409,'Другая операция с данными ещё выполняется.')
+                    try:
+                        from .backup import create_backup,verify_backup,restore_backup
+                        from .settings import activate
+                        body=self.json_body()
+                        def absolute(key):
+                            value=body.get(key)
+                            if not isinstance(value,str) or not value.strip() or '\x00' in value or not Path(value).is_absolute():raise ValueError('Укажите полный абсолютный путь: '+key)
+                            return Path(value)
+                        action=parts[2]
+                        if action=='backup':result=create_backup(self.server.data_root,absolute('archive'))
+                        elif action=='verify':result=verify_backup(absolute('archive'))
+                        elif action=='restore':
+                            result=restore_backup(absolute('archive'),absolute('target'))
+                            self.server.data_root=Path(result['path'])
+                        elif action=='activate':
+                            root=activate(absolute('target'),self.server.selection_path)
+                            self.server.data_root=root;result=dict(status='SELECTED',path=str(root))
+                        else:raise RequestProblem(404,'Unknown data action')
+                        return self.respond(200,result)
+                    except RuntimeError as exc:raise RequestProblem(409,str(exc)) from None
+                    except OSError as exc:raise RequestProblem(400,str(exc)) from None
+                    finally:self.server.data_slots.release()
+                if recovery_only:raise RequestProblem(409,'Режим обслуживания: чат и модель не запускаются.')
                 if route=='/api/status' and not post:
                     with self.server.health_lock:
                         if time.monotonic()-self.server.health_at>15:
@@ -89,6 +117,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if route=='/api/sessions':
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='history' and not post:
+                    query=parse_qs(path.query)
+                    return self.respond(200,store.history(parts[2],kind=query.get('kind',['messages'])[0],before=int(query['before'][0]) if 'before' in query else None,limit=int(query.get('limit',['50'])[0])))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
                     from .requirements import report
                     return self.respond(200,report(store,parts[2]))
@@ -178,5 +209,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
     server=LocalServer((host,port),Handler)
     server.token=secrets.token_urlsafe(32);server.origin=f'http://127.0.0.1:{server.server_port}'
     server.drive_client=drive_client
+    server.data_root=Path(store.root).resolve();server.data_slots=threading.BoundedSemaphore(1)
+    server.selection_path=Path(selection_path) if selection_path is not None else Path(__file__).resolve().parents[2]/'.engineer-os/active-data-dir.txt'
     server.health_cache=None;server.health_at=float('-inf');server.health_lock=threading.Lock();server.upload_slots=threading.BoundedSemaphore(2);server.preview_slots=threading.BoundedSemaphore(2)
     return server

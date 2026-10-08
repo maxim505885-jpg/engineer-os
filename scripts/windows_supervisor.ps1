@@ -116,7 +116,9 @@ try{
  Ensure-EngineerOS
  $postStart=Join-Path $RuntimeDir 'poststart-smoke.json'
  Log 'Running automatic post-start smoke'
- & $VenvPython (Join-Path $RepoRoot 'scripts\windows_poststart_smoke.py') --app-url $AppUrl --ollama-url $OllamaUrl --model $Model --data-dir (Join-Path $RepoRoot '.engineer-os\local-app') --out $postStart
+ $ActiveDataDir = (& $VenvPython -X utf8 -c "from pathlib import Path;from engineering.local_app.settings import active_directory;print(active_directory(Path('.engineer-os/active-data-dir.txt'),Path('.engineer-os/local-app')))").Trim()
+ if($LASTEXITCODE -ne 0){throw 'Cannot resolve selected data directory'}
+ & $VenvPython (Join-Path $RepoRoot 'scripts\windows_poststart_smoke.py') --app-url $AppUrl --ollama-url $OllamaUrl --model $Model --data-dir $ActiveDataDir --out $postStart
  if($LASTEXITCODE-ne 0){throw 'Automatic post-start smoke failed; see poststart-smoke.json'}
  $state=[ordered]@{started_at=(Get-Date).ToString('o');engineer_os=$AppUrl;ollama=$OllamaUrl;open_webui=if(Test-Http $OpenWebUIUrl 2){$OpenWebUIUrl}else{$null};model=$Model;python=$VenvPython;log_dir=$LogDir;poststart_smoke=$postStart}
  $state|ConvertTo-Json|Set-Content -Encoding UTF8 (Join-Path $RuntimeDir 'startup-state.json')
