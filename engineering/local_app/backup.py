@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 import shutil
 import sqlite3
@@ -14,6 +15,10 @@ import zipfile
 from .lock import DataLock
 
 SCHEMA="ENGINEER_OS_DATA_BACKUP_V1"
+SAFE_CONFIG_KEYS=(
+    "ENGINEER_OS_LOCAL_PROVIDER","ENGINEER_OS_LOCAL_MODEL_URL",
+    "ENGINEER_OS_LOCAL_MODEL","ENGINEER_OS_LOCAL_THINK",
+)
 DATA_TABLES=(
     "sessions","messages","files","jobs","local_evidence","analysis_receipts",
     "analysis_contexts","extraction_pages","source_reviews","requirement_sets",
@@ -112,6 +117,7 @@ def create_backup(source, archive) -> dict:
                     table_counts=counts,
                 ),
                 files=files,
+                non_secret_config={key:os.environ[key] for key in SAFE_CONFIG_KEYS if os.environ.get(key)},
                 acceptance_note="Backup preserves records; restore never creates or upgrades acceptance.",
             )
             manifest_path=stage/"manifest.json"
@@ -245,6 +251,7 @@ def restore_backup(archive, target) -> dict:
     return dict(
         schema=SCHEMA,status="PASS",target=str(target),
         table_counts=counts,originals=validation["originals"],
+        non_secret_config=manifest.get("non_secret_config",{}),
         acceptance_note="Restore preserved stored audit records without creating new acceptance.",
     )
 
