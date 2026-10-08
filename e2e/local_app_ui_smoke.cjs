@@ -20,6 +20,8 @@ const {chromium}=require('playwright');
     assert.equal(await page.locator('body').getAttribute('data-ui-mode'),'normal');
     assert.equal(await page.locator('#ui-mode-toggle').isVisible(),true);
     assert.equal(await page.locator('.workflow-bar a').count(),6);
+    const unlabeled=await page.evaluate(()=>[...document.querySelectorAll('input:not([type="hidden"]),select,textarea')].filter(el=>!(el.labels&&el.labels.length)&&!el.getAttribute('aria-label')).map(el=>el.id||el.name||el.tagName));
+    assert.deepEqual(unlabeled,[],'All form controls need labels or aria-labels');
     await page.locator('#ui-mode-toggle').click();
     assert.equal(await page.locator('body').getAttribute('data-ui-mode'),'advanced');
     await page.locator('#ui-mode-toggle').click();
@@ -43,7 +45,8 @@ const {chromium}=require('playwright');
     await page.screenshot({path:path.join(temp,'mobile.png'),fullPage:true});
     assert.equal(errors.length,0,errors.join('\n'));
     if(process.env.ENGINEER_OS_UI_SCREENSHOT)fs.copyFileSync(path.join(temp,'mobile.png'),process.env.ENGINEER_OS_UI_SCREENSHOT);
-    console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','ui-mode-toggle','desktop-layout','mobile-layout','no-horizontal-overflow'],requests:requests.length}));
+    if(process.env.ENGINEER_OS_UI_SCREENSHOT_DIR){const dir=path.resolve(root,process.env.ENGINEER_OS_UI_SCREENSHOT_DIR);fs.mkdirSync(dir,{recursive:true});fs.copyFileSync(path.join(temp,'desktop.png'),path.join(dir,'local-cabinet-desktop.png'));fs.copyFileSync(path.join(temp,'mobile.png'),path.join(dir,'local-cabinet-mobile.png'));}
+    console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','ui-mode-toggle','labeled-controls','desktop-layout','mobile-layout','no-horizontal-overflow','reference-screenshots'],requests:requests.length}));
   }finally{
     if(browser)await browser.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
     await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
