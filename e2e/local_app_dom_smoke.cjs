@@ -14,6 +14,10 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
   async function open(){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){win.fetch=(input,options)=>fetch(new URL(input,origin),options);}});}
   dom=await open();let win=dom.window,doc=win.document;await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);
+  assert.equal(doc.querySelectorAll('#project-route button').length,6,'Six project stages must be reachable');
+  assert.ok(doc.querySelector('#project-next').textContent.includes('документ'),'Empty project needs an actionable next step');
+  doc.querySelector('[data-stage="documents"]').click();
+  assert.equal(doc.querySelector('.drive-panel').open,true,'Document navigation must open import');
   const source=Buffer.from('ТЗ: высота 4 м');const upload=doc.querySelector('#upload');Object.defineProperty(upload,'files',{value:[{name:'ТЗ.md',size:source.length,arrayBuffer:async()=>new win.Uint8Array(source).buffer}]});
   upload.dispatchEvent(new win.Event('change'));try{await until(()=>doc.querySelector('.file')&&!doc.querySelector('#send').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
   assert.ok(doc.querySelector('.file .coverage'),'File extraction coverage must be visible');
@@ -233,18 +237,35 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('#real-case-panel'),'Stage-7 real case panel missing');
   await until(()=>[...doc.querySelector('#real-case-form select').options].some(o=>o.value));
   const caseSelect=doc.querySelector('#real-case-form select');caseSelect.value=[...caseSelect.options].find(o=>o.value).value;
+  caseSelect.dispatchEvent(new dom.window.Event('change'));
+  const roleChecks=[...doc.querySelectorAll('#case-source-roles input[data-case-role="TOR"]')];
+  assert.equal(roleChecks.length,1,'Only files selected in CORE_RUN may be assigned');
+  roleChecks[0].checked=true;
+  doc.querySelector('#case-source-roles input[data-case-role="REPORT"]').checked=true;
+  await new Promise(resolve=>setTimeout(resolve,1700));
+  assert.equal(doc.querySelector('#case-source-roles input[data-case-role="TOR"]').checked,true,'Polling must preserve role selection');
   doc.querySelector('#real-case-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
   await until(()=>doc.querySelector('.real-case-result'));
   await until(()=>!doc.querySelector('#send').disabled);
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('FINAL AUDIT NOT_RUN'));
   assert.ok(doc.querySelector('.real-case-result').textContent.includes('Кейс #1'));
+  const caseReport=await (await fetch(origin+`/api/sessions/${id}/real-case`,{headers:{'X-Engineer-Token':token}})).json();
+  assert.deepEqual(Object.keys(caseReport.cases[0].source_manifest).sort(),['REPORT','TOR'],'Role form must persist a manifest without JSON');
   assert.ok(doc.querySelector('#final-audit-panel'),'Stage-8 FINAL AUDIT panel missing');
+  doc.querySelector('#project-next').click();
+  assert.equal(doc.querySelector('#final-audit-panel').open,true,'Next audit action must reveal final audit controls');
   doc.querySelector('#final-audit-run').click();
   await until(()=>doc.querySelector('.final-audit-result'));
   await until(()=>!doc.querySelector('#send').disabled);
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('FINAL AUDIT COMPLETED'));
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('NOT ACCEPTED'));
   assert.ok(doc.querySelector('.final-audit-result').textContent.includes('BLOCK'));
+  doc.querySelector('#tz-text').value='Новая версия ТЗ после аудита';
+  doc.querySelector('#tz-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await until(()=>doc.querySelector('#project-next').textContent.includes('Обновить снимок'));
+  assert.ok(doc.querySelector('#project-state').textContent.includes('устарел'),'Stale audit must direct rebuilding, not imply current decision');
+  dom.window.renderRoute({jobs:[],files:[]},{requirements:[]},{cases:[]},{audits:[{current:true,fresh:true,effective_decision:'ACCEPTED',effective_acceptance_granted:true}]});
+  assert.ok(doc.querySelector('#project-next').textContent.includes('Посмотреть решение'),'Accepted fixture should show a decision, not imaginary blockers');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
   if(dom)dom.window.close();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
