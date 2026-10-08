@@ -2,6 +2,6 @@
 
 Активная задача — объединение потоков в integration/engineering-streams-20261009: родители fce4367 (официальный кандидат) и99ca7db (инженерный поток). Канонический docs/development/master-plan.md теперь содержит19 пунктов; соответствие17 сохранено там и в двух history файлах. Читать живую карту, раздел1 и последний раздел65.
 
-Общий код:641 Python,4 Node,DOM и три настоящих Chromium сценария PASS. QA: docs/qa/2026-10-09-engineering-stream-integration.md. Одно bounded backup ядро читает два формата; новый интерфейс сохраняет source/ToR/model/conclusion controls. Свежий независимый обзор не нашёл Critical/Important. Публикация и точный CI фиксируются в карте после результата.
+Общий код:641 Python,4 Node,DOM и три настоящих Chromium сценария PASS. QA: docs/qa/2026-10-09-engineering-stream-integration.md. Одно bounded backup ядро читает два формата; новый интерфейс сохраняет source/ToR/model/conclusion controls. Свежий независимый обзор не нашёл Critical/Important. Опубликован draft PR91,merge-code head52d6f0674467c1afe107370e3a3c005ca1e19cc8;точный CI и последующий head фиксируются в актуальной карте раздел65.
 
 Main и официальный кандидат ещё не перенесены. Генератор№16 — ЧЕРНОВИК/история/DOCX/PDF, не принятый выпуск. Принятый кейс№14,полнота№13,CAD№17,память№15 и финальный выпуск№19 остаются открыты. Расчёт№6 и physical Windows№9 отложены пользователем. Не переносить старые статусы по номеру; программные проверки не означают ACCEPTED объекта.

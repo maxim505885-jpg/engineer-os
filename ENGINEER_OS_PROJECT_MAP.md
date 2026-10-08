@@ -2621,3 +2621,5 @@ QA:
 ❌ Реальный принятый объект отсутствует;полнота№13,CAD№17,confirmed memory№15 иrelease№19 не закрыты. Нормативные документальные12 BLOCK не являются дефектом конструкции. Никакие synthetic model/Drive tests или review replay не выдаются за live solver/qualified acceptance. Расчёт№6 иphysical Windows№9 отложены.
 
 QA:docs/qa/2026-10-09-engineering-stream-integration.md. Следующий организационный шаг — exact-head CI/PR и перенос общего дерева в официальный candidate;следующий программный этап —№13 completeness с сохранением реальных BLOCK и координат.
+
+Опубликовано: draft PR91 https://github.com/maxim505885-jpg/engineer-os/pull/91,merge-code head52d6f0674467c1afe107370e3a3c005ca1e19cc8,tree6be0c738bd6981952602a4f0f74455c6c989f3db. Родители обоих потоков сохранены. Проверки641 относятся к этому объединённому коду. Exact-head CI проверяется после публикации;не выдавать локальные проверки за удалённый CI. Main/официальный candidate пока не перенесены.

@@ -12,7 +12,7 @@
 - [x] Demonstrate incompatible backup interfaces, then consolidate APIs and verify legacy archive restore, missing-key limitation, tamper refusal, no-replace and all-table counts.
 - [x] Replace conflicting master-plan numbering with one19-point ledger and retain17-point history. Report Generator remains partial: draft export is implemented, accepted publication/images/templates remain open.
 - [x] Run Python, Node, architecture/security, compile, DOM and real Chromium on the stable merged tree; fix reproducible regressions with focused tests.
-- [ ] Fresh independent review of merge decisions, then publish a draft PR against the candidate and synchronize map.
+- [x] Fresh independent review of merge decisions, then publish a draft PR against the candidate and synchronize map.
 
 ## Review focus
 
