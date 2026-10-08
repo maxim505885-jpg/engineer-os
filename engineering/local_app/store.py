@@ -316,7 +316,7 @@ class Store:
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
-        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING'}:raise ValueError('Unknown task mode')
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING','EXTRACT_OCR'}:raise ValueError('Unknown task mode')
         checks=requested_checks if requested_checks is not None else (['report','normative'] if mode in {'CORE_PLAN','CORE_RUN'} else [])
         from engineering.core.engineer_core import CHECK_REGISTRY
         if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
@@ -325,7 +325,8 @@ class Store:
         if mode.startswith('EXTRACT_'):
             if len(file_ids)!=1:raise ValueError('Extraction requires one PDF')
             original=self.get_file(file_ids[0])
-            if Path(original['name']).suffix.lower()!='.pdf':raise ValueError('Extraction requires a PDF original')
+            allowed={'.pdf','.png','.jpg','.jpeg'} if mode=='EXTRACT_OCR' else {'.pdf'}
+            if Path(original['name']).suffix.lower() not in allowed:raise ValueError('Unsupported original for extraction backend')
         for value in file_ids:identifier(value)
         now=time.time();record=dict(id=str(uuid.uuid4()),session_id=session_id,prompt=prompt.strip(),file_ids=json.dumps(file_ids),state='QUEUED',result=None,error=None,created=now,updated=now,mode=mode,requested_checks=json.dumps(checks))
         try:
@@ -435,7 +436,7 @@ class Store:
         except sqlite3.IntegrityError:raise ValueError('Conversation already has an active task') from None
 
     def enqueue_extraction(self,session_id,file_id,backend):
-        if not isinstance(backend,str) or backend not in {'native','docling'}:raise ValueError('Unknown extraction backend')
+        if not isinstance(backend,str) or backend not in {'native','docling','ocr'}:raise ValueError('Unknown extraction backend')
         return self.enqueue(session_id,'Извлечение PDF · '+backend,[file_id],mode='EXTRACT_'+backend.upper())
 
     def extraction_job(self,session_id,job_id):

@@ -195,10 +195,23 @@ def execute(store,job,stop,*,progress=None):
              total_pages=len(units),processed_pages=0,failed_pages=0,blocked_pages=0,stored_chars=0,current_page=None,
              total_units=len(units),unit_label='абзацы/ячейки' if backend in {'docx','doc'} else 'ячейки/листы',physical_pages=None,
              limitations=limits,cycle_complete=False,budget_exhausted=False,scope='UNVERIFIED_EXTRACTION',completeness='NOT_CHECKED',ocr='NOT_APPLICABLE',acceptance_granted=False)
+    sheets={};tables={}
+    for index,item in enumerate(units,1):
+        locator=item['locator']
+        key=locator.get('sheet')
+        if key is not None:sheets.setdefault(key,[]).append(index)
+        key=locator.get('table')
+        if key is not None:tables.setdefault(str(key),[]).append(index)
+    manifest=dict(scope='PARSED_LOGICAL_UNITS',declared_units=len(units),processed_units=0,unprocessed_units=len(units),
+                  sheets=[dict(name=k,units=len(v)) for k,v in sheets.items()],
+                  tables=[dict(table=k,cells=len(v)) for k,v in tables.items()],
+                  physical_pages=None,limitations=limits,acceptance_granted=False)
+    run['coverage_manifest']=manifest
     result=dict(text='',extraction=run)
     if conversion:run['conversion']=conversion
     def checkpoint():
         run.update(store.extraction_totals(job['id']));run['processed_units']=run['processed_pages']
+        manifest.update(processed_units=run['processed_units'],unprocessed_units=len(units)-run['processed_units'])
         result['text']=f"Извлечение {file['name']} · {run['processed_units']}/{run['total_units']} логических элементов. Физические страницы неизвестны; полнота не проверена."
         store.checkpoint(job['id'],result)
         if progress:progress(run)

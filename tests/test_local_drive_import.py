@@ -87,7 +87,7 @@ class LocalDriveImportTests(unittest.TestCase):
                         {'capabilities':{'canDownload':'false'}},
                         {'capabilities':{'canDownload':1}},
                         {'mimeType':'application/vnd.google-apps.document'},
-                        {'name':'model.lir'},{'size':'104857601'},{'md5Checksum':None}):
+                        {'name':'model.dwg'},{'size':'104857601'},{'md5Checksum':None}):
             self.meta=dict(original,**changes);self.calls=[]
             with self.subTest(changes=changes),self.assertRaises(self.module.DriveImportError):self.run_import()
             self.assertFalse(any('alt=media' in c for c in self.calls))

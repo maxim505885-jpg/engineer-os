@@ -332,6 +332,20 @@ class LocalHTTPTests(unittest.TestCase):
         try:self.assertEqual(self.request('GET',path)[0],429)
         finally:self.server.preview_slots.release();self.server.preview_slots.release()
 
+    def test_original_preview_api_is_private_isolated_and_bounded(self):
+        import fitz
+        session=self.create()
+        with fitz.open() as pdf:
+            pdf.new_page().insert_text((40,40),'Height');data=pdf.tobytes()
+        _,_,raw=self.request('POST',f'/api/sessions/{session}/files?name=r.pdf',data,{'Content-Type':'application/octet-stream'})
+        file=json.loads(raw);path=f"/api/sessions/{session}/files/{file['id']}/preview?page=1"
+        self.assertEqual(self.request('GET',path,token=False)[0],403)
+        status,headers,png=self.request('GET',path)
+        self.assertEqual(status,200);self.assertEqual(headers['Content-Type'],'image/png');self.assertTrue(png.startswith(b'\x89PNG'))
+        self.assertEqual(self.request('GET',path.replace(session,self.create()))[0],400)
+        self.assertEqual(self.request('GET',path.replace('page=1','page=2'))[0],400)
+        self.assertEqual(self.store.snapshot(session)['evidence'],[])
+
     def test_source_review_api_is_private_and_detects_stale_revision(self):
         from engineering.local_app.evidence import register
         session=self.create()

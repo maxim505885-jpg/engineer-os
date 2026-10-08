@@ -156,3 +156,14 @@ class OfficeTests(unittest.TestCase):
         parts['xl/worksheets/sheet1.xml']=f'<worksheet xmlns="{S}"><sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="inlineStr"><is><r><t>東京</t></r><rPh sb="0" eb="2"><t>とうきょう</t></rPh></is></c></row></sheetData></worksheet>'
         units,_=read(package(parts),'xlsx')
         self.assertEqual([json.loads(u['text'])['stored_value'] for u in units],['東京','東京'])
+
+    def test_coverage_manifest_names_sheets_tables_and_visible_remainders(self):
+        for name,data in [('report.docx',docx()),('table.xlsx',xlsx())]:
+            _,_,_,result=self.run_doc(name,data)
+            source=result['result']['document_analysis']['sources'][0]
+            manifest=source['coverage_manifest']
+            self.assertEqual(manifest['processed_units'],manifest['declared_units'])
+            self.assertEqual(manifest['unprocessed_units'],0)
+            self.assertFalse(manifest['acceptance_granted'])
+            self.assertTrue(manifest['sheets'] if name.endswith('xlsx') else manifest['tables'])
+            self.assertTrue(manifest['limitations'])
