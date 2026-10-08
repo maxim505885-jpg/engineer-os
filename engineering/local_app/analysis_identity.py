@@ -53,7 +53,7 @@ def parser_identity(backend):
 
 def identity(store,job,model):
     from . import automatic_analysis,core_run,worker,model as model_module,core_plan,coverage,requirements,source_binding,specialist_checks,domain_packets,engineering_review,provenance
-    from engineering.normative import verification,numeric_comparison
+    from engineering.normative import verification,numeric_comparison,substantive_review
     from engineering.calculation import model_intake
     from engineering.model_gateway import openai_compatible
     files=[store.get_file(fid) for fid in job['file_ids']]
@@ -65,6 +65,7 @@ def identity(store,job,model):
     selected=model.checkpoint_identity() if hasattr(model,'checkpoint_identity') else None
     implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible,requirements,source_binding,specialist_checks,domain_packets,engineering_review,verification,numeric_comparison,model_intake,provenance)}
     implementation['identity']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    implementation['substantive_review']=hashlib.sha256(Path(substantive_review.__file__).read_bytes()).hexdigest()
     if job['mode']=='CORE_RUN':
         from engineering.core.skill_loader import SkillLoader
         from engineering.core.engineer_core import CHECK_REGISTRY
