@@ -48,3 +48,7 @@ ENGINEER OS — проект системы интеллектуальных а�
 ## Локальный кабинет
 
 После [подготовки окружения](docs/development/local-environment.md) двойной щелчок по `Start_ENGINEER_OS.cmd`: чат с локальной моделью, оригиналы файлов, история на диске и фоновые задачи. Выбранный PDF автоматически обрабатывается при отправке задачи. [Запуск, настройки и границы проверки](docs/development/local-app.md). Бесплатный режим не требует облачной базы; нужны Ollama, Python 3.12+ и зависимости requirements-local-app.txt. Живая модель/OCR и Windows ещё требуют проверки.
+
+## Резервное копирование данных
+
+`Backup_ENGINEER_OS.cmd` создаёт проверяемую копию локальных данных приложения, а `Restore_ENGINEER_OS.cmd` выполняет fail-closed восстановление только после проверки SHA256/SQLite integrity. Подробности: [Reliability / Backup / Restore](docs/development/reliability-backup-restore.md).
