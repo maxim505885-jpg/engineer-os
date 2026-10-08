@@ -4,6 +4,7 @@ from .analysis_identity import digest
 
 def report(requirements,records):
     rows=[];global_reasons=[];unmapped=[]
+    if requirements.get('tor_source_status')!='SOURCE_REVIEWED':global_reasons.extend(requirements.get('tor_source_reasons') or ['TZ_SOURCE_NOT_BOUND'])
     declared={r['id'] for r in requirements['requirements']}
     for role in records:
         if role.get('intermediate_gates'):global_reasons.append('INTERMEDIATE_ANALYSIS_BLOCKED')
@@ -16,6 +17,7 @@ def report(requirements,records):
     if unmapped:global_reasons.append('OBSERVATION_NOT_TZ_BOUND')
     for requirement in requirements['requirements']:
         observations=[];relations=set();addressed=False;reasons=[]
+        if not requirement.get('assessment_actor'):reasons.append('ASSESSMENT_REVIEWER_MISSING')
         if requirement['status']=='BLOCK':reasons.extend(requirement['reasons'])
         for role in records:
             for intermediate in role.get('intermediate_gates',[]):
@@ -37,13 +39,13 @@ def report(requirements,records):
         if len(relations)>1:reasons.append('ROLE_RELATION_CONFLICT')
         rows.append(dict(id=requirement['id'],text=requirement['text'],status='BLOCK' if reasons else 'UNCERTAINTY',
             traceability='SOURCE_LINKED' if observations and not reasons else 'NOT_ESTABLISHED',
-            assessment_revision=requirement['revision'],assessment_conclusion=requirement['conclusion'],
+            assessment_actor=requirement.get('assessment_actor'),assessment_actor_verified=False,assessment_revision=requirement['revision'],assessment_conclusion=requirement['conclusion'],
             observations=observations,reasons=list(dict.fromkeys(reasons)) or ['ENGINEERING_VERIFICATION_REQUIRED','DATA_CLASS_NOT_VERIFIED'],
             engineering_verified=False,acceptance_granted=False))
     if not rows:global_reasons.extend(requirements.get('reasons',[]) or ['TZ_REQUIREMENTS_MISSING'])
     result=dict(set_id=requirements['set_id'],scope='PRELIMINARY_REQUIREMENT_ROLE_RECONCILIATION',
         status='BLOCK' if global_reasons or any(r['status']=='BLOCK' for r in rows) else 'UNCERTAINTY',
-        requirements=rows,requirements_total=len(rows),unmapped_observations=unmapped,
+        tor_sources=requirements.get('tor_sources',[]),tor_transcription_verified=False,requirements=rows,requirements_total=len(rows),unmapped_observations=unmapped,
         reasons=list(dict.fromkeys(global_reasons)),engineering_verified=False,acceptance_granted=False,final_audit='NOT_RUN')
     result['snapshot_sha256']=digest(dict(requirements=requirements,records=records,result=result))
     return result

@@ -12,7 +12,7 @@ from engineering.local_app.core_run import parse_draft
 class EngineeringCoreTraceabilityTests(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.store=Store(Path(self.temp.name));self.session=self.store.create_session()['id']
-  self.file=preserve_file(self.store,self.session,'report.txt','Высота 4 м'.encode());self.tz=create_set(self.store,self.session,text='Проверить высоту');self.rid=self.tz['requirements'][0]['id']
+  self.file=preserve_file(self.store,self.session,'report.txt','Высота 4 м'.encode());tor=preserve_file(self.store,self.session,'tor.txt','Проверить высоту'.encode());source=register(self.store,self.session,file_id=tor['id'],quote='Проверить высоту',statement='Исходное ТЗ');record_review(self.store,self.session,source['id'],expected_revision=0,decision='SOURCE_CONFIRMED',note='Native ToR source',actor='Source reader');self.tor_id=tor['id'];self.tz=create_set(self.store,self.session,text='Проверить высоту',source_evidence_ids=[source['id']]);self.rid=self.tz['requirements'][0]['id']
   self.candidate=register(self.store,self.session,file_id=self.file['id'],quote='Высота 4 м',statement='Высота по источнику',data_class='P')
   record_review(self.store,self.session,self.candidate['id'],expected_revision=0,decision='SOURCE_CONFIRMED',note='Точная цитата сверена',actor='Test reviewer')
  def reply(self,relation='SUPPORTS',mapped=True):
@@ -20,12 +20,12 @@ class EngineeringCoreTraceabilityTests(unittest.TestCase):
   if mapped:item.update(requirement_ids=[self.rid],relation=relation)
   return json.dumps(dict(status='UNCERTAINTY',summary='Непроверенный инженерный черновик',observations=[item],limitations=['P не подтверждает F']),ensure_ascii=False)
  def execute(self,replies):
-  job=self.store.enqueue(self.session,'Проверить высоту',[self.file['id']],mode='CORE_RUN',requested_checks=['report']);values=iter(replies)
+  job=self.store.enqueue(self.session,'Проверить высоту',[self.file['id'],self.tor_id],mode='CORE_RUN',requested_checks=['report']);values=iter(replies)
   class Model:
    def chat(inner,messages):return next(values)
   Worker(self.store,Model()).run_once();return self.store.snapshot(self.session)['jobs'][0]
  def assessed(self):
-  assess(self.store,self.session,set_id=self.tz['id'],requirement_id=self.rid,expected_revision=0,conclusion='Исходник содержит проектную высоту; F не проверена',evidence_ids=[self.candidate['id']],relation='SUPPORTS')
+  assess(self.store,self.session,set_id=self.tz['id'],requirement_id=self.rid,expected_revision=0,conclusion='Исходник содержит проектную высоту; F не проверена',evidence_ids=[self.candidate['id']],relation='SUPPORTS',actor='Test assessor')
  def test_explicit_requirement_relation_contract(self):
   parsed,_=parse_draft(SimpleNamespace(task_id='task',agent='report-audit-agent'),self.reply(),{self.candidate['id']},allowed_requirement_ids={self.rid})
   self.assertEqual(parsed.findings[0]['requirement_ids'],[self.rid])
@@ -71,7 +71,7 @@ class EngineeringCoreTraceabilityTests(unittest.TestCase):
      for _ in range(4):
       page=doc.new_page();page.insert_textbox((30,30,570,800),'native source '*450,fontsize=8)
      pdf=preserve_file(self.store,self.session,'large.pdf',doc.tobytes())
-    job=self.store.enqueue(self.session,'Проверить высоту',[self.file['id'],pdf['id']],mode='CORE_RUN',requested_checks=['report'])
+    job=self.store.enqueue(self.session,'Проверить высоту',[self.file['id'],self.tor_id,pdf['id']],mode='CORE_RUN',requested_checks=['report'])
     outer=self
     class Model:
      def chat(inner,messages):
