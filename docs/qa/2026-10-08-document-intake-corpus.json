@@ -1,0 +1,610 @@
+{
+  "scope": "OBSERVED_DECLARED_CORPUS_NOT_ENGINEERING_ACCEPTANCE",
+  "sources": [
+    {
+      "name": "v4-drive-source.pdf",
+      "size": 74522583,
+      "sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "RECORDED",
+        "method": "NATIVE_PDF",
+        "total_pages": 534,
+        "attempted_pages": 20,
+        "pages_with_text": 20,
+        "pages_without_text": [],
+        "unattempted_pages": 514,
+        "page_records": [
+          {
+            "page": 1,
+            "text_chars": 949,
+            "stored_chars": 949,
+            "status": "TEXT"
+          },
+          {
+            "page": 2,
+            "text_chars": 1064,
+            "stored_chars": 1064,
+            "status": "TEXT"
+          },
+          {
+            "page": 3,
+            "text_chars": 4052,
+            "stored_chars": 4052,
+            "status": "TEXT"
+          },
+          {
+            "page": 4,
+            "text_chars": 2202,
+            "stored_chars": 2202,
+            "status": "TEXT"
+          },
+          {
+            "page": 5,
+            "text_chars": 160,
+            "stored_chars": 160,
+            "status": "TEXT"
+          },
+          {
+            "page": 6,
+            "text_chars": 137,
+            "stored_chars": 137,
+            "status": "TEXT"
+          },
+          {
+            "page": 7,
+            "text_chars": 139,
+            "stored_chars": 139,
+            "status": "TEXT"
+          },
+          {
+            "page": 8,
+            "text_chars": 137,
+            "stored_chars": 137,
+            "status": "TEXT"
+          },
+          {
+            "page": 9,
+            "text_chars": 137,
+            "stored_chars": 137,
+            "status": "TEXT"
+          },
+          {
+            "page": 10,
+            "text_chars": 944,
+            "stored_chars": 944,
+            "status": "TEXT"
+          },
+          {
+            "page": 11,
+            "text_chars": 2118,
+            "stored_chars": 2118,
+            "status": "TEXT"
+          },
+          {
+            "page": 12,
+            "text_chars": 1138,
+            "stored_chars": 1138,
+            "status": "TEXT"
+          },
+          {
+            "page": 13,
+            "text_chars": 762,
+            "stored_chars": 762,
+            "status": "TEXT"
+          },
+          {
+            "page": 14,
+            "text_chars": 462,
+            "stored_chars": 462,
+            "status": "TEXT"
+          },
+          {
+            "page": 15,
+            "text_chars": 1384,
+            "stored_chars": 1384,
+            "status": "TEXT"
+          },
+          {
+            "page": 16,
+            "text_chars": 1976,
+            "stored_chars": 1976,
+            "status": "TEXT"
+          },
+          {
+            "page": 17,
+            "text_chars": 2084,
+            "stored_chars": 2084,
+            "status": "TEXT"
+          },
+          {
+            "page": 18,
+            "text_chars": 1437,
+            "stored_chars": 1437,
+            "status": "TEXT"
+          },
+          {
+            "page": 19,
+            "text_chars": 1080,
+            "stored_chars": 1080,
+            "status": "TEXT"
+          },
+          {
+            "page": 20,
+            "text_chars": 1552,
+            "stored_chars": 1552,
+            "status": "TEXT"
+          }
+        ],
+        "source_chars": null,
+        "stored_chars": 24265,
+        "stop_reasons": [
+          "PAGE_LIMIT"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN",
+        "page_limit": 20,
+        "char_limit": 100000
+      },
+      "extraction": {
+        "file_id": "08df92b6-8f6b-43fa-a162-479bfc20db5c",
+        "name": "v4-drive-source.pdf",
+        "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+        "backend": "native",
+        "parser_identity": {
+          "schema": 1,
+          "backend": "native",
+          "versions": {
+            "PyMuPDF": "1.26.6"
+          },
+          "implementation": {
+            "extraction.py": "ea3b0945903147ab8fd2dfef1409d32abb1099b2f6e325a76b1a373e5590d9ae"
+          },
+          "budgets": [
+            5000,
+            20000,
+            1000,
+            2000000
+          ],
+          "artifacts": [],
+          "document_intelligence": null,
+          "table_mode": "accurate",
+          "ocr_languages": []
+        },
+        "total_pages": 534,
+        "processed_pages": 534,
+        "failed_pages": 0,
+        "blocked_pages": 534,
+        "stored_chars": 361035,
+        "current_page": null,
+        "cycle_complete": true,
+        "budget_exhausted": false,
+        "scope": "UNVERIFIED_EXTRACTION",
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN",
+        "acceptance_granted": false
+      },
+      "journal_count": 534
+    },
+    {
+      "name": "Таблицы.xlsx",
+      "size": 10004,
+      "sha256": "305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "UNKNOWN",
+        "method": "XLSX",
+        "total_pages": null,
+        "attempted_pages": null,
+        "pages_with_text": null,
+        "pages_without_text": [],
+        "unattempted_pages": null,
+        "page_records": [],
+        "source_chars": null,
+        "stored_chars": null,
+        "stop_reasons": [
+          "BACKGROUND_EXTRACTION_REQUIRED"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN"
+      },
+      "extraction": {
+        "file_id": "0398760f-48fd-4caa-bf08-4fe6bb2b675a",
+        "name": "Таблицы.xlsx",
+        "source_sha256": "305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f",
+        "backend": "xlsx",
+        "parser_identity": {
+          "schema": 1,
+          "backend": "xlsx",
+          "python": "3.12.14",
+          "implementation": "4f2b46d1651342c40d0d5e96baf91343e63e6f09c436eee9a0456a86ca0053fe",
+          "limits": [
+            8388608,
+            33554432,
+            10000,
+            50000,
+            20000,
+            2000000
+          ]
+        },
+        "total_pages": 125,
+        "processed_pages": 125,
+        "failed_pages": 0,
+        "blocked_pages": 0,
+        "stored_chars": 16690,
+        "current_page": null,
+        "total_units": 125,
+        "unit_label": "ячейки/листы",
+        "physical_pages": null,
+        "limitations": [
+          "FORMULAS_NOT_EVALUATED",
+          "RAW_VALUES_STYLES_NOT_APPLIED",
+          "DRAWINGS_CHARTS_NOT_READ"
+        ],
+        "cycle_complete": true,
+        "budget_exhausted": false,
+        "scope": "UNVERIFIED_EXTRACTION",
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_APPLICABLE",
+        "acceptance_granted": false,
+        "coverage_manifest": {
+          "scope": "PARSED_LOGICAL_UNITS",
+          "declared_units": 125,
+          "processed_units": 125,
+          "unprocessed_units": 0,
+          "sheets": [
+            {
+              "name": "Лист1",
+              "units": 125
+            }
+          ],
+          "tables": [],
+          "physical_pages": null,
+          "limitations": [
+            "FORMULAS_NOT_EVALUATED",
+            "RAW_VALUES_STYLES_NOT_APPLIED",
+            "DRAWINGS_CHARTS_NOT_READ"
+          ],
+          "acceptance_granted": false
+        },
+        "processed_units": 125
+      },
+      "journal_count": 125
+    },
+    {
+      "name": "Расчет  .docx",
+      "size": 2754000,
+      "sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "UNKNOWN",
+        "method": "DOCX",
+        "total_pages": null,
+        "attempted_pages": null,
+        "pages_with_text": null,
+        "pages_without_text": [],
+        "unattempted_pages": null,
+        "page_records": [],
+        "source_chars": null,
+        "stored_chars": null,
+        "stop_reasons": [
+          "BACKGROUND_EXTRACTION_REQUIRED"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN"
+      },
+      "extraction": {
+        "file_id": "fb3f6bc2-ac4f-4c04-b7c5-31f17576bbeb",
+        "name": "Расчет  .docx",
+        "source_sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+        "backend": "docx",
+        "parser_identity": {
+          "schema": 1,
+          "backend": "docx",
+          "python": "3.12.14",
+          "implementation": "4f2b46d1651342c40d0d5e96baf91343e63e6f09c436eee9a0456a86ca0053fe",
+          "limits": [
+            8388608,
+            33554432,
+            10000,
+            50000,
+            20000,
+            2000000
+          ]
+        },
+        "total_pages": 487,
+        "processed_pages": 487,
+        "failed_pages": 0,
+        "blocked_pages": 48,
+        "stored_chars": 15501,
+        "current_page": null,
+        "total_units": 487,
+        "unit_label": "абзацы/ячейки",
+        "physical_pages": null,
+        "limitations": [
+          "PHYSICAL_PAGES_UNKNOWN",
+          "LAYOUT_NOT_VERIFIED",
+          "HEADERS_FOOTNOTES_NOT_READ"
+        ],
+        "cycle_complete": true,
+        "budget_exhausted": false,
+        "scope": "UNVERIFIED_EXTRACTION",
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_APPLICABLE",
+        "acceptance_granted": false,
+        "coverage_manifest": {
+          "scope": "PARSED_LOGICAL_UNITS",
+          "declared_units": 487,
+          "processed_units": 487,
+          "unprocessed_units": 0,
+          "sheets": [],
+          "tables": [
+            {
+              "table": "1",
+              "cells": 125
+            },
+            {
+              "table": "2",
+              "cells": 9
+            },
+            {
+              "table": "3",
+              "cells": 37
+            },
+            {
+              "table": "4",
+              "cells": 42
+            },
+            {
+              "table": "5",
+              "cells": 24
+            },
+            {
+              "table": "6",
+              "cells": 40
+            }
+          ],
+          "physical_pages": null,
+          "limitations": [
+            "PHYSICAL_PAGES_UNKNOWN",
+            "LAYOUT_NOT_VERIFIED",
+            "HEADERS_FOOTNOTES_NOT_READ"
+          ],
+          "acceptance_granted": false
+        },
+        "processed_units": 487
+      },
+      "journal_count": 487
+    },
+    {
+      "name": "Расчет  .doc",
+      "size": 3029504,
+      "sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "UNKNOWN",
+        "method": "DOC",
+        "total_pages": null,
+        "attempted_pages": null,
+        "pages_with_text": null,
+        "pages_without_text": [],
+        "unattempted_pages": null,
+        "page_records": [],
+        "source_chars": null,
+        "stored_chars": null,
+        "stop_reasons": [
+          "BACKGROUND_EXTRACTION_REQUIRED"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN"
+      },
+      "extraction": {
+        "file_id": "ce962518-7af2-42c1-97b7-66c934054f95",
+        "name": "Расчет  .doc",
+        "source_sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+        "backend": "doc",
+        "parser_identity": {
+          "schema": 1,
+          "backend": "doc",
+          "python": "3.12.14",
+          "implementation": "4f2b46d1651342c40d0d5e96baf91343e63e6f09c436eee9a0456a86ca0053fe",
+          "limits": [
+            8388608,
+            33554432,
+            10000,
+            50000,
+            20000,
+            2000000
+          ],
+          "converter": {
+            "available": true,
+            "executable_sha256": "35c5a2736f68e6370a7b9fe5082e66bc438c1a8de11261d6c4bc847073ced45b",
+            "sandbox_sha256": "8b0a1b37e46d57676ecb7f6aba08821f471af905d57403b658711c09c0829c45",
+            "adapter_sha256": "be25527ca7b05cf3985ec501ede0868ff19084c192617e25a3a1c6ec2dbca15b",
+            "platform": "linux",
+            "timeout": 90,
+            "max_derived": 33554432,
+            "macros": "DISABLED",
+            "network": "DENIED"
+          }
+        },
+        "total_pages": 492,
+        "processed_pages": 492,
+        "failed_pages": 0,
+        "blocked_pages": 53,
+        "stored_chars": 15571,
+        "current_page": null,
+        "total_units": 492,
+        "unit_label": "абзацы/ячейки",
+        "physical_pages": null,
+        "limitations": [
+          "PHYSICAL_PAGES_UNKNOWN",
+          "LAYOUT_NOT_VERIFIED",
+          "HEADERS_FOOTNOTES_NOT_READ",
+          "DOC_CONVERSION_LAYOUT_UNVERIFIED"
+        ],
+        "cycle_complete": true,
+        "budget_exhausted": false,
+        "scope": "UNVERIFIED_EXTRACTION",
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_APPLICABLE",
+        "acceptance_granted": false,
+        "coverage_manifest": {
+          "scope": "PARSED_LOGICAL_UNITS",
+          "declared_units": 492,
+          "processed_units": 492,
+          "unprocessed_units": 0,
+          "sheets": [],
+          "tables": [
+            {
+              "table": "1",
+              "cells": 125
+            },
+            {
+              "table": "2",
+              "cells": 9
+            },
+            {
+              "table": "3",
+              "cells": 37
+            },
+            {
+              "table": "4",
+              "cells": 50
+            },
+            {
+              "table": "5",
+              "cells": 24
+            },
+            {
+              "table": "6",
+              "cells": 40
+            }
+          ],
+          "physical_pages": null,
+          "limitations": [
+            "PHYSICAL_PAGES_UNKNOWN",
+            "LAYOUT_NOT_VERIFIED",
+            "HEADERS_FOOTNOTES_NOT_READ",
+            "DOC_CONVERSION_LAYOUT_UNVERIFIED"
+          ],
+          "acceptance_granted": false
+        },
+        "conversion": {
+          "original_sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+          "derived_sha256": "a3b8669b6cbffa07a8dd87713df91947c3c9cdd6aaae54837ad05326c125c45f",
+          "converter": {
+            "available": true,
+            "executable_sha256": "35c5a2736f68e6370a7b9fe5082e66bc438c1a8de11261d6c4bc847073ced45b",
+            "sandbox_sha256": "8b0a1b37e46d57676ecb7f6aba08821f471af905d57403b658711c09c0829c45",
+            "adapter_sha256": "be25527ca7b05cf3985ec501ede0868ff19084c192617e25a3a1c6ec2dbca15b",
+            "platform": "linux",
+            "timeout": 90,
+            "max_derived": 33554432,
+            "macros": "DISABLED",
+            "network": "DENIED"
+          },
+          "scope": "DERIVED_UNVERIFIED",
+          "network_denied": true,
+          "macros_disabled": true,
+          "acceptance_granted": false
+        },
+        "processed_units": 492
+      },
+      "journal_count": 492
+    },
+    {
+      "name": "Секция 3 _S 011123(1).lir",
+      "size": 32397127,
+      "sha256": "fd300a06f23f455a00d120276c2daed3e6142de4abe9edb39d036c2a50f990ca",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "UNKNOWN",
+        "method": "LIR_ORIGINAL_ONLY",
+        "total_pages": null,
+        "attempted_pages": null,
+        "pages_with_text": null,
+        "pages_without_text": [],
+        "unattempted_pages": null,
+        "page_records": [],
+        "source_chars": null,
+        "stored_chars": null,
+        "stop_reasons": [
+          "MODEL_DECODER_UNAVAILABLE"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN"
+      },
+      "decoder": "NOT_AVAILABLE"
+    },
+    {
+      "name": "048 секция 1_А2_011123(1).lir",
+      "size": 42047193,
+      "sha256": "a753162adf1f1b2de8ab92ab1355eac4d0c23e9241bf6e0e97f39d3ee6205ca9",
+      "intake": {
+        "scope": "TEXT_PREVIEW_ONLY",
+        "status": "UNKNOWN",
+        "method": "LIR_ORIGINAL_ONLY",
+        "total_pages": null,
+        "attempted_pages": null,
+        "pages_with_text": null,
+        "pages_without_text": [],
+        "unattempted_pages": null,
+        "page_records": [],
+        "source_chars": null,
+        "stored_chars": null,
+        "stop_reasons": [
+          "MODEL_DECODER_UNAVAILABLE"
+        ],
+        "completeness": "NOT_CHECKED",
+        "ocr": "NOT_RUN"
+      },
+      "decoder": "NOT_AVAILABLE"
+    }
+  ],
+  "live_ocr": {
+    "parser": {
+      "available": true,
+      "engine": "TESSERACT",
+      "binary_sha256": "9f831cab7525c3dab04af41bda35182af7ea1df9dceeaaa2f3bf207ac45c06a5",
+      "languages": {
+        "rus": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+        "eng": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2"
+      },
+      "limits": [
+        9000000,
+        2097152,
+        20000,
+        60
+      ],
+      "render_scale": 2.5,
+      "psm": 3
+    },
+    "pages": [
+      {
+        "page": 1,
+        "blocks": 24,
+        "chars": 798,
+        "bbox_present": true,
+        "ocr": "EXECUTED_UNVERIFIED",
+        "acceptance_granted": false
+      },
+      {
+        "page": 160,
+        "blocks": 98,
+        "chars": 707,
+        "bbox_present": true,
+        "ocr": "EXECUTED_UNVERIFIED",
+        "acceptance_granted": false
+      },
+      {
+        "page": 534,
+        "blocks": 51,
+        "chars": 1060,
+        "bbox_present": true,
+        "ocr": "EXECUTED_UNVERIFIED",
+        "acceptance_granted": false
+      }
+    ]
+  }
+}
