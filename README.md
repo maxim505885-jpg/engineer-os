@@ -1,6 +1,6 @@
 # ENGINEER OS
 
-Активная работа: `feat/engineering-core-traceability-20261008`, [draft PR80](https://github.com/maxim505885-jpg/engineer-os/pull/80) в цепочке PR74. [Карта проекта](ENGINEER_OS_PROJECT_MAP.md), разделы1 и59, и [план из17пунктов](docs/development/master-plan.md) — текущее состояние. №1–6 выполнены в объявленных границах; №7 открыт: программная сверка проверена, содержательные исходные данные не подтверждены. Windows — №16. Main не содержит завершённый выпуск. [Краткая передача](docs/development/project-map-handoff.md).
+Активная работа: `feat/engineering-source-dossier-20261008`, [draft PR81](https://github.com/maxim505885-jpg/engineer-os/pull/81). [Карта проекта](ENGINEER_OS_PROJECT_MAP.md), разделы1 и60, и [план](docs/development/master-plan.md). №7 открыт: код проверен,6 документов предметно разобраны, но исходные инженерные основания не подтверждены. Windows — №16. [Передача состояния](docs/development/project-map-handoff.md).
 
 ## Выбранные внешние инструменты
 
