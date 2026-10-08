@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 import shutil
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -149,6 +151,69 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
         with sqlite3.connect(db_path) as db:
             names={r[1] for r in db.execute("PRAGMA table_info(jobs)")}
         self.assertIn("mode",names)
+
+    def test_stale_lock_file_and_crashed_owner_are_recoverable(self):
+        lock_root=Path(self.tmp.name)/"lock-crash"
+        marker=Path(self.tmp.name)/"locked.marker"
+        code=(
+            "import time;from pathlib import Path;"
+            "from engineering.local_app.lock import DataLock;"
+            + "root=Path(r'"+lock_root.as_posix()+"');marker=Path(r'"+marker.as_posix()+"');"
+            + "ctx=DataLock(root);ctx.__enter__();marker.write_text('locked');time.sleep(60)"
+        )
+        child=subprocess.Popen([sys.executable,"-c",code],cwd=Path(__file__).resolve().parents[1])
+        try:
+            deadline=time.time()+5
+            while not marker.exists() and time.time()<deadline:
+                time.sleep(.05)
+            self.assertTrue(marker.exists(),"child did not acquire data lock")
+            with self.assertRaises(RuntimeError):
+                with DataLock(lock_root):
+                    pass
+        finally:
+            child.kill();child.wait(timeout=5)
+        self.assertTrue((lock_root/"app.lock").exists(),"lock file is intentionally persistent")
+        with DataLock(lock_root):
+            pass
+
+    def test_launcher_can_restart_after_forced_process_exit(self):
+        data=Path(self.tmp.name)/"launcher-data"
+        root=Path(__file__).resolve().parents[1]
+        def start():
+            return subprocess.Popen(
+                [sys.executable,"scripts/run_local_app.py","--no-browser","--port","0","--data-dir",str(data)],
+                cwd=root,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,
+            )
+        first=start()
+        try:
+            line=""
+            deadline=time.time()+10
+            while time.time()<deadline:
+                current=first.stdout.readline()
+                if current:
+                    line+=current
+                    if "ENGINEER OS: http://127.0.0.1:" in line:
+                        break
+                elif first.poll() is not None:
+                    break
+            self.assertIn("ENGINEER OS: http://127.0.0.1:",line)
+        finally:
+            first.kill();first.wait(timeout=5)
+        second=start()
+        try:
+            line=""
+            deadline=time.time()+10
+            while time.time()<deadline:
+                current=second.stdout.readline()
+                if current:
+                    line+=current
+                    if "ENGINEER OS: http://127.0.0.1:" in line:
+                        break
+                elif second.poll() is not None:
+                    break
+            self.assertIn("ENGINEER OS: http://127.0.0.1:",line)
+        finally:
+            second.kill();second.wait(timeout=5)
 
 
 if __name__=="__main__":
