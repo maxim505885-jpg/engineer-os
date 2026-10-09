@@ -12,6 +12,7 @@ function Export-LiraResultsPackage {
  if($source.Length -gt 536870912){throw 'INPUT_SOURCE_BYTE_LIMIT: maximum 512 MiB'}
  $app=$Application;$access=$ResultsAccess;$ownedAccess=$false
 $batch=Join-Path $OutputRoot ('ENGINEER_OS_LIRA_RESULT_PACKAGE_'+[guid]::NewGuid().ToString('N'))
+if([IO.Path]::GetFullPath($batch).StartsWith('\\')){throw 'LOCAL_OUTPUT_REQUIRED: use a local folder, for example C:\LiraExports'}
 New-Item -ItemType Directory -Path $batch | Out-Null
 $drive=New-Object IO.DriveInfo([IO.Path]::GetPathRoot([IO.Path]::GetFullPath($batch)))
 if($drive.IsReady -and $drive.AvailableFreeSpace -lt 6442450944){throw 'PACKAGE_FREE_SPACE: reserve 6 GiB'}
@@ -50,6 +51,8 @@ try {
  $directory=[EngineerLiraResultsReader]::Export($access,$title,$before,$batch,$nodes,$elements,$MaxValues,$MaxBytes)
  $unchanged=((Get-FileHash -LiteralPath $source.FullName -Algorithm SHA256).Hash.ToLower() -eq $before)
  $summary=Get-Content (Join-Path $directory 'summary.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+ $summary | Add-Member -NotePropertyName package_disk_allowance_bytes -NotePropertyValue 6442450944
+ $summary | Add-Member -NotePropertyName input_limits_bytes -NotePropertyValue @{source=536870912;table=134217728;table_total=536870912;manifest=16777216}
  $summary | Add-Member -NotePropertyName original_unchanged -NotePropertyValue $unchanged
  if(-not $unchanged){$summary.status='SOURCE_CHANGED'}
  $summary | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath (Join-Path $directory 'summary.json') -Encoding UTF8
