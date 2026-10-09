@@ -95,7 +95,7 @@ public static class EngineerLiraResultsReader {
  }
  public static string Export(object access,string documentName,string sourceHash,string outputRoot,int[] nodeIDs,int[] elementIDs,int maxValues,long maxBytes) {
   if(String.IsNullOrEmpty(documentName)||documentName.Length>240||documentName.IndexOfAny(new char[]{'/','\\','\r','\n'})>=0)throw new ArgumentException("DocumentName must have no path");
-  if(sourceHash==null||sourceHash.Length!=64)throw new ArgumentException("Source hash required");IDs(nodeIDs);IDs(elementIDs);
+  if(sourceHash==null||sourceHash.Length!=64||!System.Text.RegularExpressions.Regex.IsMatch(sourceHash,"^[0-9a-fA-F]{64}$"))throw new ArgumentException("Source hash required");IDs(nodeIDs);IDs(elementIDs);
   if(maxValues<1||maxValues>50000000||maxBytes<1024||maxBytes>2L*1024*1024*1024)throw new ArgumentException("Invalid export budgets");
   string directory=Path.Combine(outputRoot,"ENGINEER_OS_LIRA_RESULTS_"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);
   var requests=new List<object>();var report=new Dictionary<string,object>{{"schema",1},{"kind","ENGINEER_OS_LIRA_RESULTS_EXPORT"},{"document_name",documentName},{"source_sha256",sourceHash},{"scope","PRIMARY_SHAPE0_HISTORY0_AND_REQUEST_AVAILABILITY"},{"full_information_extracted",false},{"source_result_binding_verified",false},{"completed_solver_run_verified",false},{"engineering_verified",false},{"acceptance_granted",false},{"solver_execution","NOT_RUN"},{"requests",requests},{"requested_nodes",nodeIDs.Length},{"requested_elements",elementIDs.Length},{"limitations",new string[]{"Only primary shape 0/history 0 values; histories, dynamic forms and super-elements are not exhaustively exported.","RSN/RSU/reinforcement are availability probes, not complete value exports.","Fragment and punching loads are result quantities, not original applied-load records.","Result identity is resolved by task name; original model/result/run binding is unverified.","Native input auxiliary KE57 stiffnesses and full load records are not exposed by this export.","A returned value is not proof of a completed solver run or engineering acceptance."}}};
@@ -106,6 +106,7 @@ public static class EngineerLiraResultsReader {
     var item=new Dictionary<string,object>{{"type_id",type},{"method",RequestMethods[type]},{"status","NOT_ATTEMPTED"}};requests.Add(item);
     if(exhausted)continue;
     int startAttempts=run.Attempts,startValues=run.Values;int[] subjects=(type==2||type==5||type==7||type==9)?elementIDs:nodeIDs;
+    if(type!=8&&type!=10&&subjects.Length==0){item["status"]="NO_SUBJECTS";continue;}
     try {
      int chunks=(type>=1&&type<=4)?Math.Max(1,(subjects.Length+127)/128):1;
      for(int chunk=0;chunk<chunks;chunk++) {
@@ -131,6 +132,7 @@ public static class EngineerLiraResultsReader {
    }
    output.Dispose();
    report["status"]=exhausted?"BUDGET_EXHAUSTED":run.Values>0?"PARTIAL_RESULT_EXPORT":availableRequests==0?"RESULT_ACCESS_UNAVAILABLE":"NO_NUMERICAL_VALUES_EXPORTED";
+   report["byte_budget_scope"]="TSV_ONLY";report["max_tsv_bytes"]=maxBytes;report["counts_scope"]="WHOLE_RUN_NOT_PART";
    report["attempted_values"]=run.Attempts;report["value_rows"]=run.Values;report["unavailable_values"]=run.Unavailable;report["result_values_exported"]=run.Values>0;report["parts"]=output.Parts.Count;
    for(int i=0;i<output.Parts.Count;i++){var part=new Dictionary<string,object>(report);part["part_number"]=i+1;part["files"]=output.Files[output.Parts[i]];Json(Path.Combine(output.Parts[i],"manifest.json"),part);}
    Json(Path.Combine(directory,"summary.json"),report);
