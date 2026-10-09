@@ -13,8 +13,20 @@ def summary(coverage):
     c=coverage or unknown_coverage()
     keys=('scope','status','method','total_pages','attempted_pages','pages_with_text',
           'pages_without_text','unattempted_pages','source_chars','stored_chars',
-          'stop_reasons','completeness','ocr')
-    return {key:c.get(key) for key in keys}
+          'stop_reasons','completeness','ocr','calculation_report')
+    result = {key:c.get(key) for key in keys}
+    report = result.get('calculation_report')
+    if report and report.get('members'):
+        # Keep model context and source dossiers bounded independently of uploads.
+        import json
+        report = dict(report, members=list(report['members']))
+        original_count = len(report['members'])
+        while len(json.dumps(report, ensure_ascii=False)) > 12000 and report['members']:
+            report['members'].pop()
+        if len(report['members']) < original_count:
+            report['context_members_omitted'] = original_count-len(report['members'])
+        result['calculation_report'] = report
+    return result
 
 
 def incomplete(coverage):
