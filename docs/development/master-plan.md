@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** расчёты отложены. №13: source-linked изображения DOCX и raster preview включены в кандидат82745871 (PR104); Core/Windows/Security CI и реальные source refs PASS (§88). EMF/rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты;8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. №13: source images/raster preview в кандидате82745871 (PR104); native EMF text реализован/проверен на реальном DOCX в PR105, CI выполняется (§89). Rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты;8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков. Все4 browser маршрута, включая CAD/memory/mobile/session reset, прошли. Финальная приёмка интерфейса на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ Открыто | DOCX body/grid/auxiliary parts и source-linked images/raster preview в кандидате82745871 (PR104), real refs и Core/Windows/Security PASS (§88). EMF/rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | DOCX body/grid/auxiliary parts/images/raster preview в кандидате82745871; native EMF text и bounded model input в PR105, real3357 records PASS, CI выполняется (§89). Rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -44,7 +44,7 @@
 | 10 | 16 | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | 17 | CAD |
 | 12 | 14 | Принятый кейс |
-| 13 | 15 | Полный DOCX 14 678/14 678, 0 failed/truncated, 7 022 BLOCK. Независимо сверены 12 826 ячеек/5 759 native vertical links. Rendering, формулы, графика, OCR-конфликты/V4/qualified ground truth открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | DOCX body/grid/auxiliary parts/images/raster preview в кандидате82745871; native EMF text и bounded model input в PR105, real3357 records PASS, CI выполняется (§89). Rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | 11 | Финальный UI |
 | 15 | 12 | Надёжность |
 | 16 | 9 | Windows, отложено |
@@ -374,3 +374,20 @@ PR104 MERGED squash с expected_head guard; кандидат8274587137754a4df56d
 Финальная ограниченная Store/checkpoint/preview проверка первых2 элементов реального DOCX повторена именно финальным parser:2/14684,cycle_complete=false,model NOT_RUN;SHA оригинала неизменён. PNG1:658216 bytes/SHAea20aba0fb422ae21f68d36637d19716e0cfeb9fa004c1d493cbd8fcd0ae283a;PNG2:6823 bytes/SHA44b5bc8048dfea1843f6a9abcf7771bb9665d39ee1481c408ae6d4062a5b4a17. Alpha сохранён. Новый полный Store/model run большого отчёта не заявляется. Физические страницы/crops/transforms/содержание/EMF/V4/полный корпус не подтверждены.
 
 Закрыт только подэтап source association+raster preview; №13 остаётся❌,план8✅/8🟡/3❌. На ПК пользователя версия не обновлялась. Следующий шаг — проверенное чтение/отрисовка EMF и визуальная сверка формул/графики, без возвращения к расчётам.
+
+
+## 89. №13: native Unicode-записи EMF в DOCX — 09.10.2026
+
+Расчёты ЛИРА/RES остаются отложенными по решению пользователя. Кандидат до этого шага8274587137754a4df56dd537fd148d90ade8f40f (PR104). PR105 https://github.com/maxim505885-jpg/engineer-os/pull/105, ветка feat/emf-source-preview-20261009, опубликованный head7533c6c46beda549f5f00b6173776a23a0ae6ee3; полное дерево24469b658b2bf3a3fd5888b13c30cc766cce13f7 совпадает с проверенным локальным деревом. На момент записи PR OPEN; Core37980537335/Windows37980537449/Security37980537379 выполняются, merge ещё не заявляется.
+
+Добавлен pure Python reader EMR_EXTTEXTOUTW: literal UTF16-LE text/code units, record ordinal и byte offsets record/string/spacing, logical reference coordinates, graphics mode/options/scale. Точный image part и SHA сохранены в прежней DOCX привязке к абзацу/ячейке/auxiliary part. Glyph indices сохраняются отдельными числовыми кодами без выдуманного Unicode. Framing/header byte count/record count/EOF, bounds/alignment/string/spacing spans и strict Unicode проверяются; malformed/unsupported EMF остаётся bound original image, но native text явно UNAVAILABLE. Превышение ресурсного лимита прекращает чтение fail-closed. Лимиты100000 records/asset,10000 text records/asset,250000 UTF16 code units/asset,16MiB serialized native metadata по всем references плюс прежние image/package/text limits; hash reader и limits включены в parser identity.
+
+UI результатов по частям показывает native текст с record offset; первые100 записей показаны явно, остальные сохранены в source locator. Физическая страница неизвестна. Full image locators остаются в receipts; inference refs содержат только компактную логическую идентичность/count, сами image payload/labels исключены. Unicode-текст передаётся модели только через обычный budgeted source text. Независимый review воспроизвёл обход лимитов через полный native_emf в refs: marker вне сохранённого текста попадал в model prompt. Regression RED→GREEN; повтор review подтвердил отсутствие marker во всех model calls, сохранение full receipt и уменьшение первого prompt34189→8406 chars. Финальный review: Critical/Important/Minor нет.
+
+Реальный оригинал147210288 bytes/SHA b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5 неизменён;14684 logical units и671 image refs сохранены.138 distinct EMF assets содержат3357 Unicode records: независимая binary сверка raw UTF16 spans и record offsets совпала точно по всем assets.149 EMF references дают3394 referenced records с повторными использованиями assets. Это НЕ число восстановленных таблиц/доказательств. Первый native-text asset word/media/image300.emf находится в logical unit11451,569 text records; его label/number strings доступны reader. Полный новый Store/model run большого DOCX не выполнялся. Контролируемый DOCX прошёл Store/Worker/model/receipt и browser UI, сохраняет оригинал, physical page=None и acceptance=false.
+
+Отдельный Linux QA Inkscape1.2.2 через network-denied doc_sandbox отрисовал image12.emf и image300.emf в1600px PNG. На image300 проверены отдельные видимые подписи «№ п/п», «КМ1-1-1», «19,64» против literal source records. Image12 содержит видимые подписи схемы при0 native text records — raster/vector glyph outlines этим reader не читаются. Отрисовка image300 имеет перекрытия текста и не сверена с оригинальной страницей Word; она не принята как визуальный эталон. Production EMF preview в приложении по-прежнему недоступен, Windows renderer не добавлен. Нет выводов о дефектах/армировании/расчётах: строки таблицы — только данные источника.
+
+Локально837 Python tests/67.056s OK,17 environment skips;24 focused tests,10 Node,2 HTTP/DOM и5 Chromium маршрутов PASS. Последний browser маршрут проверяет одновременно source PNG и native EMF text/offset/limitations. Architecture guard/compile/JS/diff PASS. Windows workflow включает12 новых профильных native EMF tests без дополнительного renderer. CI ещё выполняется; физический ПК пользователя не обновлялся.
+
+№13 остаётся❌: закрыт только программный подэтап literal native EMF text и bounded inference. Графика/rendering/font mapping/shaping/порядок чтения/placement, восстановление raster/mixed tables, визуальное соответствие формул, OCR conflicts, полный V4 и qualified corpus остаются открытыми. Общий план8✅/8🟡/3❌; №14 положительный ACCEPTED и №19 стабильный выпуск не объявлены. Следующий шаг — управляемый source-bound preview EMF и сверка визуального покрытия с реальным Word/PDF, затем raster/mixed tables; расчёты не требуются. QA:docs/qa/2026-10-09-docx-emf-native-text.md.
