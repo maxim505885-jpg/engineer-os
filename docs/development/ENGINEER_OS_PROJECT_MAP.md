@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план:** итог §73.1. PR 97 принят в кандидат f83c4d5f, tree 2af4da64 равно проверенному 187b6d88 и локальному 9aa29f7. Все 9 CI checks SUCCESS: Linux 763/761 PASS/2 skips, Windows 23 теста, реальная модель и четыре браузерных сценария PASS. Полный DOCX 147 МБ: 14 678/14 678, 0 ошибок и обрезаний, 7 022 BLOCK. Документальная полнота остаётся открытой. План 8 ✅ / 8 🟡 / 3 ❌.
+**Активный план:** §74. PR98 опубликован, CI выполняется; кандидатf83c4d5f пока прежний. Source-grid12826ячеек/5759vertical links восстановлены; полный повторныйStoreпрогон выполняется. Frozen770Python/768PASS/2skips,7Node. Документальная полнота открыта; план8✅/8🟡/3❌.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -2870,3 +2870,13 @@ PR 97: `fd6f08ca51313bbf3db5415e6ba8191355da0a69`, tree `b05f085fa7110dc49feb3cd
 За проход закрыты конкретные программные дефекты: несовместимые входные лимиты большого Office, ограниченное чтение оригинала при source review, повторное полное хеширование на каждой единице, две гонки старых списков чатов и преждевременная очистка тестового процесса. Начальные падения CI сохранены, исправления проверены RED→GREEN и независимым ревью.
 
 План остаётся **8 ✅ / 8 🟡 / 3 ❌**. Из пяти критериев закрыт CodeQL/единый программный кандидат; остальные частичны. Следующий шаг №13: квалифицированная сверка rendered tables/merged cells/formulas, всей графики и числовых конфликтов, V4 PDF и полного эталонного покрытия. Затем №6: восемь семантических расчётных ролей, актуальные нормативные основания, реальный solver-run и связь с фактической конструкцией. После этого №14: положительный FINAL AUDIT; на его основании принятая память и отчёт, CAD equivalence/roundtrip и live-provider receipts. Физический Windows и №19 release/main/tag — после закрытия продуктовых критериев. BLOCK не снят автоматически.
+
+## 74. Сетка и связи объединённых ячеек Word — 09.10.2026
+
+PR 98: head d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e, tree 2c36ea304797f56e69562d1673f3ee018d364bbe равно локальному843adfe3c5e17fdf3b98cb5429837e33c7ac304d. До завершения CI кандидат остаётся f83c4d5f. Добавлены source-grid intervals, gridBefore/gridAfter, gridSpan и точные vertical restart anchors; прежние XML-cell ordinals и исходный текст сохранены, значения не распространяются. Буквальная структура источника не является rendered layout или инженерной приёмкой.
+
+Чтение полного147MBисходника:118таблиц,12826ячеек; все declared-grid intervals согласованы,5759vertical continuations восстановлены. Повторный полный Store extraction выполняется; завершение и независимая XML-сверка будут добавлены после факта. Исходные merge/layout/formula/drawing warnings сохраняются; число BLOCK искусственно не уменьшено.
+
+Тесты на missing locators, grid gaps, orphan/changed-width continuations, bounds, invalid/duplicate declarations, missing/width mismatch, wrappers и tracked row/cell properties воспроизведеныRED→GREEN. Независимое ревью выявило2Important: пропущенные wrapped rows и structural revisions; оба исправлены, остаточныхCritical/Important0. Frozen full770тестов/768PASS/2nativeWindows skips с реальнымrus+engOCR;7Node,architecture/compile/diff PASS.
+
+План8✅/8🟡/3❌. №13 открыт: rendered merged tables/formulas, графика и числовые конфликты, полныйV4PDF и qualifiedgroundtruth. После него нормы/8semantic roles/solver-run/actualcorrelation/FINAL AUDIT, accepted memory/report,CAD/providerreceipts,physicalWindows/release. Деталиdocs/qa/2026-10-09-word-table-grid.md.
