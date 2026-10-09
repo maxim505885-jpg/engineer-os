@@ -2,11 +2,13 @@
 import configparser
 import hashlib
 import io
+from itertools import islice
 import math
 from pathlib import Path, PurePosixPath
 import re
 import struct
 import zipfile
+import zlib
 from xml.etree import ElementTree as ET
 
 MAX_BYTES = 100 * 1024 * 1024
@@ -92,11 +94,15 @@ def analyze_upload(name, data):
 
 def _model(data, text):
     report = _base(data, 'LIRA_TEXT_MODEL')
-    headers = list(_HEADER.finditer(text))
+    headers = list(islice(_HEADER.finditer(text), 257))
+    if len(headers)>256:
+        report['reasons'] = ['DOCUMENT_INVENTORY_LIMIT']; return report
     docs = {}
     valid = not text[:headers[0].start()].strip()
     for i, header in enumerate(headers):
         body = text[header.end():headers[i+1].start() if i+1<len(headers) else len(text)].strip()
+        if len(header[1]) > 8:
+            valid = False; break
         ident = int(header[1])
         if ident in docs or not body.endswith(')') or '(' in body or ')' in body[:-1]:
             valid = False; break
@@ -123,7 +129,7 @@ def _model(data, text):
             invalid_rigid += values[1] not in stiffness
             repeated_nodes += len(set(values[2:]))!=len(values[2:])
         report['observations'] = dict(nodes=count, elements=elements, document_ids=sorted(docs),
-            element_types=dict(sorted(types.items())[:100]), invalid_node_references=invalid_nodes,
+            element_types=dict(sorted(types.items())[:100]), element_types_omitted=max(0,len(types)-100), invalid_node_references=invalid_nodes,
             missing_stiffness_references=invalid_rigid, elements_with_repeated_nodes=repeated_nodes,
             node_reference_convention='DOCUMENT4_RECORD_ORDINAL_NOT_VENDOR_QUALIFIED',
             load_records=sum(1 for _ in records(6)), load_value_records=sum(1 for _ in records(7)))
@@ -140,11 +146,13 @@ def _archive(data):
     # Bound the central directory before ZipFile allocates entries. No ZIP64.
     offset = data.rfind(b'PK\x05\x06', max(0,len(data)-65557))
     try:
-        fields = struct.unpack('<4s4H2LH', data[offset:offset+22]) if offset>=0 else None
+        fields = struct.unpack('<4s4H2LH', data[offset:offset+22]) if offset>=0 and len(data[offset:offset+22])==22 else None
         if not fields or fields[1]!=0 or fields[2]!=0 or fields[3]!=fields[4] or fields[4]>MAX_MEMBERS or fields[5]>65536 or data[max(0,offset-20):offset-16]==b'PK\x06\x07':
             report['reasons'] = ['ARCHIVE_INVENTORY_LIMIT_OR_INVALID']; return report
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             entries = archive.infolist(); names = set(); total = 0
+            if len(entries) != fields[4] or len(entries) > MAX_MEMBERS:
+                report['reasons'] = ['ARCHIVE_INVENTORY_LIMIT_OR_INVALID']; return report
             for info in entries:
                 name = info.filename.replace('\\', '/')
                 path = PurePosixPath(name)
@@ -158,14 +166,14 @@ def _archive(data):
                 if info.is_dir(): continue
                 with archive.open(info) as stream: member = stream.read(info.file_size+1)
                 if len(member)!=info.file_size: raise ValueError('Member size mismatch')
-                if Path(info.filename).suffix.lower()=='.zip':
+                if not member or Path(info.filename).suffix.lower()=='.zip':
                     analysis = None  # Never recurse into packages.
                 else: analysis = analyze_upload(info.filename, member)
                 report['members'].append(dict(name=info.filename,source_sha256=hashlib.sha256(member).hexdigest(),
                     bytes=len(member),report=analysis, status='OBSERVATIONS_RECORDED' if analysis else 'NOT_ANALYZED'))
         report['observations'] = dict(member_count=len(report['members']), expanded_bytes=total)
         report['reasons'] = ['PACKAGE_LINKAGE_NOT_VERIFIED', 'ENGINEERING_ACCEPTANCE_NOT_GRANTED']
-    except (zipfile.BadZipFile, RuntimeError, ValueError, NotImplementedError, OSError):
+    except (zipfile.BadZipFile, RuntimeError, ValueError, NotImplementedError, OSError, zlib.error, EOFError):
         report['members'] = []; report['reasons'] = ['ARCHIVE_UNREADABLE']
     return report
 
