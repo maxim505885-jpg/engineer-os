@@ -1,4 +1,7 @@
 Set-StrictMode -Version 2
+if (-not ('EngineerLiraComBridge' -as [type])) {
+ Add-Type -Path (Join-Path $PSScriptRoot 'com-bridge.cs')
+}
 function Export-LiraModel {
  [CmdletBinding()]
  param([Parameter(Mandatory=$true)]$Application,
@@ -17,7 +20,7 @@ function Export-LiraModel {
  Copy-Item -LiteralPath $source -Destination $copy
  if((Get-FileHash -LiteralPath $copy).Hash.ToLower() -ne $originalHash) { throw 'Source changed during copy' }
  $manifest=[ordered]@{
-  schema=1; kind='ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT'; created_utc=[DateTime]::UtcNow.ToString('o');
+  schema=2; exporter_version='2'; kind='ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT'; created_utc=[DateTime]::UtcNow.ToString('o');
   source_name=[IO.Path]::GetFileName($source); source_bytes=(Get-Item -LiteralPath $source).Length;
   source_sha256=$originalHash; inventory_sha256=$contract.inventory_sha256;
   status='NOT_OPENED'; open_messages=''; document=$null; units=[ordered]@{};
@@ -52,27 +55,38 @@ function Export-LiraModel {
   foreach($spec in $contract.tables) {
    $record=[ordered]@{type_id=[int]$spec.id; api_name=$spec.name; description=$spec.description;
     status='NOT_ATTEMPTED'; file=$null; sha256=$null; bytes=0; model_part=0;
-    parameters=$null; parameter_status='UNAVAILABLE'; error=$null}
+    parameters=$null; parameter_status='UNAVAILABLE'; error=$null; error_stage=$null; error_hresult=$null;
+    create_parameters='Typ=int; Pars=Missing(VT_ERROR/DISP_E_PARAMNOTFOUND); ModelPart=0; Name=string; AtPos=-1'}
+   $stage='CREATE_TABLE'
    try {
     # Creates an input-table view from the model; never calls SetContents/Apply/Save.
-    $table=$group.CreateNewItem([int]$spec.id,$null,0,('ENGINEER_OS_'+$spec.id),-1)
+    $table=[EngineerLiraComBridge]::CreateTable($group,[int]$spec.id,('ENGINEER_OS_'+$spec.id))
     if($null -eq $table) { throw 'CreateNewItem returned no table' }
+    $stage='TABLE_PROPERTIES'
     if([int]$table.Type -ne [int]$spec.id -or [int]$table.InitialModelPart -ne 0) { throw 'Unexpected table type or model subset' }
-    $data=''; $table.GetContents([ref]$data)
+    $stage='GET_CONTENTS'
+    $data=[EngineerLiraComBridge]::ReadContents($table)
     if($null -eq $data) { throw 'GetContents returned null, not an empty table' }
     if($data -isnot [string]) { throw 'Expected API tab-separated string; unsupported return shape' }
+    $stage='WRITE_FILE'
     $filename=('table_{0:D2}.tsv' -f [int]$spec.id)
     $file=Join-Path $directory $filename
     [IO.File]::WriteAllText($file,$data,(New-Object Text.UTF8Encoding($false)))
     $record.file=$filename; $record.bytes=(Get-Item -LiteralPath $file).Length
     $record.sha256=(Get-FileHash -LiteralPath $file).Hash.ToLower(); $record.status='EXPORTED'
     $pars=$null
-    try { $table.GetParameters([ref]$pars); $record.parameters=$pars; $record.parameter_status='READ' }
+    try { $pars=[EngineerLiraComBridge]::ReadParameters($table); $record.parameters=$pars; $record.parameter_status='READ' }
     catch { $record.parameter_status='UNAVAILABLE: '+$_.Exception.Message }
-   } catch { $record.status='UNAVAILABLE'; $record.error=$_.Exception.Message }
+   } catch {
+    $exception=$_.Exception.GetBaseException()
+    $record.status='UNAVAILABLE'; $record.error=$exception.Message; $record.error_stage=$stage
+    $record.error_hresult=('0x{0:X8}' -f ([long]$exception.HResult -band 4294967295L))
+   }
    $manifest.tables+=,$record
   }
-  $manifest.status='PARTIAL_MODEL_TABLE_EXPORT'
+  $count=@($manifest.tables | Where-Object status -eq EXPORTED).Count
+  if($count -eq 0) { $manifest.status='TABLE_EXPORT_FAILED' }
+  else { $manifest.status='PARTIAL_MODEL_TABLE_EXPORT' }
  } catch { $manifest.status='MODEL_ACCESS_FAILED'; $manifest.errors+=,$_.Exception.Message }
  finally {
   if($null -ne $doc) {
