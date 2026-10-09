@@ -22,7 +22,7 @@ def read(data):
         raise EMFError('Invalid EMF header')
     if count>MAX_RECORDS:raise EMFLimitError('EMF record limit')
     result=dict(status='PARSED_SOURCE_RECORDS',scope='NATIVE_EMF_TEXT_RECORDS_NOT_RENDERED',
-                content_verified=False,layout_verified=False,text_records=[],
+                content_verified=False,layout_verified=False,text_records=[],bitmap_records=[],
                 limitations=['EMF_GRAPHICS_NOT_RENDERED','EMF_TEXT_PLACEMENT_UNVERIFIED','EMF_FONT_MAPPING_UNVERIFIED'])
     offset=0;ordinal=0;code_units=0;ended=False
     def limitation(value):
@@ -60,6 +60,15 @@ def read(data):
                 try:item['text']=raw.decode('utf-16le',errors='strict')
                 except UnicodeError as exc:raise EMFError('Invalid EMF Unicode text') from exc
             result['text_records'].append(item)
+        elif kind in {76,81}:
+            from . import emf_bitmap
+            bitmap=emf_bitmap.record(data,offset,size,kind,ordinal)
+            if bitmap is not None:
+                if len(result['bitmap_records'])>=emf_bitmap.MAX_BITMAP_RECORDS:raise EMFLimitError('EMF bitmap record limit')
+                bitmap['bitmap']=len(result['bitmap_records'])+1
+                result['bitmap_records'].append(bitmap);limitation('EMF_BITMAP_PAYLOADS_UNTRANSFORMED')
+                if bitmap['status']=='UNAVAILABLE':limitation('EMF_BITMAP_PAYLOAD_UNAVAILABLE')
+        elif kind in {77,78,79,80,114,116}:limitation('OTHER_BITMAP_RECORDS_NOT_DECODED')
         elif kind in {83,96,97,108}:limitation('OTHER_TEXT_RECORDS_NOT_DECODED')
         elif kind==70:limitation('COMMENT_CONTENT_NOT_READ')
         offset+=size

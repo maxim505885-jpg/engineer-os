@@ -399,6 +399,8 @@ def execute(store,job,stop,*,progress=None):
         bound_image_references=sum(i['status']=='BOUND_PACKAGE_IMAGE' for u in units for i in u['locator'].get('images',[])),
         unavailable_image_references=sum(i['status']=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
         emf_text_records=sum(len(i.get('native_emf',{}).get('text_records',[])) for u in units for i in u['locator'].get('images',[])),
+        emf_bitmap_records=sum(len(i.get('native_emf',{}).get('bitmap_records',[])) for u in units for i in u['locator'].get('images',[])),
+        available_emf_bitmap_records=sum(b['status']=='AVAILABLE' for u in units for i in u['locator'].get('images',[]) for b in i.get('native_emf',{}).get('bitmap_records',[])),
         unavailable_emf_text_references=sum(i.get('native_emf',{}).get('status')=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
         image_content_verified=False,image_transforms_applied=False,
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),

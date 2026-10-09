@@ -37,13 +37,13 @@ def vector_doc(data):
     return package(parts)
 
 
-def mixed_doc():
+def mixed_doc(vector=None):
     with __import__('zipfile').ZipFile(io.BytesIO(image_doc())) as z:parts={n:z.read(n) for n in z.namelist()}
     drawing=b'<w:drawing><a:blip xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="vector"/></w:drawing>'
     parts['word/document.xml']=parts['word/document.xml'].replace(b'</w:p>',drawing+b'</w:p>',1)
     relation=b'<Relationship Id="vector" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/source.emf"/>'
     parts['word/_rels/document.xml.rels']=parts['word/_rels/document.xml.rels'].replace(b'</Relationships>',relation+b'</Relationships>')
-    parts['word/media/source.emf']=emf()
+    parts['word/media/source.emf']=emf() if vector is None else vector
     return package(parts)
 
 

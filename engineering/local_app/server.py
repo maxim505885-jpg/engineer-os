@@ -228,7 +228,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         from .preview import render_office_image
                         query=parse_qs(path.query)
                         if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
-                        try:return self.respond(200,render_office_image(store,parts[2],parts[4],int(query.get('unit',['0'])[0]),int(query.get('image',['0'])[0])),'image/png')
+                        try:return self.respond(200,render_office_image(store,parts[2],parts[4],int(query.get('unit',['0'])[0]),int(query.get('image',['0'])[0]),bitmap=int(query['bitmap'][0]) if 'bitmap' in query else None),'image/png')
                         finally:self.server.preview_slots.release()
                     if len(parts)==7 and parts[5]=='pages' and not post:
                         return self.respond(200,store.extraction_page(parts[2],parts[4],int(parts[6])))

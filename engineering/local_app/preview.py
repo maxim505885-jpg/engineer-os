@@ -4,7 +4,7 @@ import math
 from pathlib import Path
 
 
-def render_office_image(store,session_id,source_job,logical_unit,image):
+def render_office_image(store,session_id,source_job,logical_unit,image,*,bitmap=None):
     """Decode only a revalidated referenced raster; never apply Word transforms."""
     import io
     from PIL import Image
@@ -29,6 +29,15 @@ def render_office_image(store,session_id,source_job,logical_unit,image):
         asset=package.zip.read(descriptor['part'])
     finally:package.close()
     if len(asset)!=descriptor['bytes'] or hashlib.sha256(asset).hexdigest()!=descriptor['sha256']:raise ValueError('Image identity changed')
+    if bitmap is not None:
+        from . import emf_bitmap
+        records=descriptor.get('native_emf',{}).get('bitmap_records',[])
+        if type(bitmap) is not int or not 1<=bitmap<=len(records):raise ValueError('Embedded bitmap ordinal required')
+        selected=dict(records[bitmap-1]);selected.pop('bitmap',None)
+        pixels=emf_bitmap.decode(asset,selected);pixels.thumbnail((1600,1600))
+        output=io.BytesIO();pixels.save(output,format='PNG');png=output.getvalue()
+        if len(png)>10*1024*1024:raise ValueError('Preview byte limit')
+        return png
     try:
         from .files import validate_image
         validate_image(asset)
