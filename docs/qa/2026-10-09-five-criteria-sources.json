@@ -1709,5 +1709,17 @@
       "scope": "SOURCE_REVIEW_ONLY"
     }
   },
-  "full_docx_scope": "native logical structure, not rendered or engineering acceptance"
+  "full_docx_scope": "native logical structure, not rendered or engineering acceptance",
+  "full_docx_run_library_file_id": "libfile_4c370a4997548191af3556314ce3cb41",
+  "large_office_verification_receipt": "docs/qa/2026-10-09-large-office-input-ci.json",
+  "large_office_final_ci": {
+    "head_sha": "187b6d88448806f31781df7cf68f6bd6bf826b22",
+    "tree_sha": "2af4da649a69d4f60c7c51ffd7331af1ea6ccb80",
+    "candidate_sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+    "ci_checks": 9,
+    "status": "SUCCESS",
+    "receipt": "docs/qa/2026-10-09-large-office-input-ci.json",
+    "physical_windows_verified": false,
+    "acceptance_granted": false
+  }
 }
