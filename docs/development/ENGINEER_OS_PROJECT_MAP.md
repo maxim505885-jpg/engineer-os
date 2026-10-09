@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план:** итог §71.1. PR 95 принят в кандидат c4e1181a, дерево e404c539 равно проверенному 6b7674bc и локальному 4e4ce1b. Все 9 checks SUCCESS; Linux 747 тестов (745 PASS, 2 Windows skips), Windows 23 теста и реальные браузер/модель PASS. Selected OCR восстановил размер 82400, но новая сверка 2 MATCH / 1 MISMATCH; полнота документов не принята. План 8✅ / 8🟡 / 3❌.
+**Активный план:** итог §72.1. PR 96 принят в кандидат f2a58399, дерево 2ab64d8c равно проверенному 1230aa3a и локальному 10d58f3. Все 9 CI checks SUCCESS: Linux 755 тестов (753 PASS, 2 Windows skips), Windows 23 теста, реальная модель и браузерные сценарии PASS. Office 665/665 logical units; сохранены 2 Word equations, 14 Word merge declarations, 3 XLSX ranges и 4 formula cells. Это структура источника, не подтверждение layout/полноты. План 8✅ / 8🟡 / 3❌.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -14,7 +14,7 @@
 
 | № | Пункт | Статус | Что сделано / что осталось |
 |---|---|---|---|
-| 1 | Единая рабочая версия | ✅ Кандидат | PR 91/92/93/94/95 приняты; кандидат c4e1181a / tree e404c539 равен проверенному 6b7674bc и локальному 4e4ce1b. |
+| 1 | Единая рабочая версия | ✅ Кандидат | PR 91/92/93/94/95/96 приняты; кандидат f2a58399 / tree 2ab64d8c равен проверенному 1230aa3a и локальному 10d58f3. |
 | 2 | OCR и локальная модель | ✅ Программный контур | Извлечение, метрики, отрицательные проверки и Linux/Qwen проверены; полнота всех документов относится к №13. |
 | 3 | Большие документы, resume/recovery | ✅ Программный контур | Контрольные точки, идентичность, лимиты и повторный запуск реализованы и проверены. |
 | 4 | DOCX/XLSX/DOC и заявленные форматы | ✅ Программный контур | Оригиналы, координаты и происхождение данных связаны; сложные таблицы остаются в №13. |
@@ -23,10 +23,10 @@
 | 7 | Реальный инженерный сценарий | ✅ Отрицательный сценарий | 3 оригинала, 36 кандидатов, роли и повторная проверка норм пройдены с BLOCK; положительный кейс — №14. |
 | 8 | FINAL AUDIT и граница приёмки | ✅ Программный контур | Проверены неизменяемость, устаревание, подмена и чужой источник; реальное положительное принятие не подтверждено. |
 | 9 | Windows: один запуск | 🟡 Частично | Native Windows CI: clean start/cache repair/restart,23 теста,live Ollama,4 Chromium PASS. Физическая установка/перезагрузка NOT_VERIFIED. |
-| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91/92/93/94/95 merged; проверенный кандидат c4e1181a. Точные CI/SHA и ограничения — §71.1. |
+| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91/92/93/94/95/96 merged; точные CI/SHA и ограничения — §72.1. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | 4 Chromium routes PASS на Linux и Windows; мобильный экран/session reset, источник/ТЗ/черновик/CAD/память проверены. Приёмка маршрута на реальном ACCEPTED объекте остаётся. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite/keys/CAD/память/settings; symlink/hardlink gates и Windows shared metadata/locks проверены. CodeQL 29 individually reviewed FP,0open на PR91; все свежие security/CodeQL checks PASS. Physical Windows и owner-controlled residual limits отдельно. |
-| 13 | Производственная полнота документов | ❌ Открыто | Native/OCR 43/43, Office660/660, региональный OCR215 проходов; selected OCR восстановил размер82400. Выбранная новая сверка2MATCH/1MISMATCH; полнота чисел, таблиц, формул, графики, V4 и qualified ground truth не приняты. |
+| 13 | Производственная полнота документов | ❌ Открыто | Native/OCR 43/43; Office 665/665 logical units, 2 Word equations/14 merge declarations/3 XLSX ranges/4 formula cells сохранены. OCR-кандидаты, rendered layout/formula interpretation/графика, полный V4 и qualified ground truth не приняты. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
@@ -34,9 +34,9 @@
 | 18 | Несколько ИИ | 🟡 Частично | Локальный Ollama/Open WebUI/диагностика готовы; shared gateway проверяет hostname/redirect/response bounds/completion. Полный optional-provider receipt/live-provider сценарий ещё не завершён. |
 | 19 | Стабильный финальный выпуск | ❌ Открыто | Нужны все продуктовые критерии, чистая установка, Windows, ACCEPTED-кейс, release/tag и соответствующий main. |
 
-**Интеграция завершена:** PR 91/92/93/94/95 приняты после всех проверок. Следующие gates — полнота документов, подтверждённый расчёт/нормы, реальный ACCEPTED кейс/CAD и физическая Windows проверка перед выпуском.
+**Интеграция завершена:** PR 91/92/93/94/95/96 приняты после проверок. Полнота документов, подтверждённые расчёты/нормы, реальный ACCEPTED-кейс/CAD и физическая Windows остаются перед выпуском.
 
-Подробности прежнего объединения — §65; актуальная итоговая сводка — §71.1.
+Подробности прежнего объединения — §65; актуальная итоговая сводка — §72.1.
 
 
 **Историческая справка:** следующие ранние записи не заменяют итог раздела68.8.
@@ -2824,3 +2824,21 @@ RED→GREEN: отсутствовавшие API/CLI выявлены новым�
 Дополнительная выбранная сверка трёх исходных областей: размер 82400 и отметка -4.200 совпали; номер листа 513 не прочитан корректно (whole-page ранее прочитал его). Итого 2 MATCH / 1 MISMATCH, assistant spot review без qualified ground truth. Новый CLI — дополнительный проверяемый кандидат; он не заменяет прежнее извлечение и не подтверждает полноту. Оригиналы неизменны, старые противоречивые кандидаты сохранены.
 
 Готовность 8✅ / 8🟡 / 3❌. Из 5 критериев закрыт программный CodeQL/единый кандидат; остальные частичны. Следующий шаг №13: эталонное покрытие чисел/таблиц/формул/графики полного V4, с фиксацией пропусков и конфликтов; после него реальные нормы/расчёты/FINAL AUDIT и остальные product gates. Полные CI receipts: docs/qa/2026-10-09-selected-region-ocr-ci.json.
+
+## 72. Структура формул и объединений Office — 09.10.2026
+
+PR 96: `1230aa3a24c1bb46fe4dbacb30d86b1777927388`, дерево `2ab64d8c8db402ed3146327162ab19356c9809ea` равно локальному `10d58f3`. Сохранены отдельные логические кандидаты Word OMML: нормализованный XML, буквальные токены, родительский абзац/ячейка, без выдуманного номера физической страницы. Это не линеаризованная и не вычисленная формула. Word gridSpan/vMerge/hMerge сохраняются с namespace-qualified атрибутами и исходным ordinal ячейки. XLSX merged-range declarations сохраняются независимо от наличия ячеек; значения не распространяются. Formula presence отделён от text, shared followers учитываются. Прежние warnings, limits, immutable originals и parser identity gates сохранены; старые checkpoints не являются результатом нового парсера.
+
+Три реальных Office-оригинала: DOCX489/489, XLSX125/125 и51/51, всего665/665 (ранее660; добавлены2 equation units и3 range units). Failed0, text truncation0, оригиналы неизменны. Независимый source XML inventory совпал:2 Word equations и их буквальные токены,14 Word cells с merge declarations,3 XLSX ranges и4 formula cells. Исходные31 Word drawing/media members и7 XLSX media members не интерпретированы; XLSX содержит1 drawing reference. Rendering/layout/interpretation/evaluation НЕ подтверждены.
+
+Поправка прежней статистики:48 MERGED_CELLS_UNVERIFIED были48 предупреждениями на уровне units одной worksheet, а не48 отдельными merged ranges. Точные source declarations —3 ranges. Исторические предупреждения сохраняются как история; текущий критерий исправлен.
+
+TDD: четыре missing-structure asserts RED; formula count и shared-follower RED→GREEN. Ревью Important namespace collision и Minor sibling equation tail воспроизведены2RED, исправленыGREEN. Focused22PASS. Локальный frozen full755 тестов /753PASS /2native Windows skips,4Node,architecture/compile/diff PASS. Реальная parser implementation сверена по hash с проверенным кодом. Детали: docs/qa/2026-10-09-office-source-structure.md. Общий план8✅/8🟡/3❌.
+
+## 72.1. Итог Office-прохода: PR 96 принят
+
+Все 9 checks на `1230aa3a24c1bb46fe4dbacb30d86b1777927388` SUCCESS. Кандидат `f2a58399384dacaff600714cc79e7b85ad3e03a9`, дерево `2ab64d8c8db402ed3146327162ab19356c9809ea` равно проверенному опубликованному и локальному `10d58f3`. Linux PR/push: 755 тестов (753 PASS, 2 native Windows-only skips), 4 Node, 2 HTTP/DOM и 4 фактических Chromium сценария PASS. Windows: 23 теста, startup/cache/restart, реальный qwen3:0.6b через UI и 4 Chromium PASS. Physical Windows NOT_VERIFIED. Полные receipts: docs/qa/2026-10-09-office-source-structure-ci.json.
+
+Три реальных Office-оригинала обработаны полностью в пределах объявленных logical units: 665/665; native source structure и literal tokens сверены, но page/layout/document completeness не подтверждены. Приёмка не выдана. Точный XLSX merged-range count — 3; прежние 48 — unit warnings, не число объединений.
+
+План 8✅ / 8🟡 / 3❌. По пяти критериям: CodeQL/единый программный кандидат закрыт; документальная полнота, нормы/расчёты/реальный FINAL AUDIT, принятая память/отчёт/CAD/providers и physical Windows/release частичны. Далее №13: rendered tables/formulas/31 Word drawings/7 XLSX media members, числовые OCR-конфликты и полный V4 по qualified ground truth. После этого актуальные нормативные основания и 8 semantic calculation roles с реальным solver-run/actual correlation, ACCEPTED-кейс и оставшиеся product gates. Новый результат не снимает BLOCK автоматически.
