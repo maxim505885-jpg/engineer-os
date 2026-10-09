@@ -1,11 +1,11 @@
-# ENGINEER OS — актуальная передача проекта
+# Передача состояния ENGINEER OS
 
-Текущая карта: ENGINEER_OS_PROJECT_MAP.md,§67,09.10.2026. Канонический план: docs/development/master-plan.md,19 пунктов.
+Активная задача: выполнение пяти критериев, раздел68 живой карты. Единый план содержит19 пунктов:8✅/8🟡/3❌.
 
-Код: PR91 https://github.com/maxim505885-jpg/engineer-os/pull/91,head90263af601e8c491352f46d0a02b7196eeaf2bc1,tree26706230f42110ae5dc32749b6929083f6e41eeb. Ready/open,неmerged;main/официальный кандидат не перенесены.
+PR91 merged вintegration/release-candidate-v1,head22ad4c153646a9a2a2c5c17cc3a582afdd1e4130;tree2670623 совпадает с проверенным90263af.29 CodeQL alerts reviewed individually/dismissed false positive;aggregateSUCCESS. Пункт1 пяти критериев выполнен. Main/final release не перенесены.
 
-726 Python без пропусков,4 Node,2 DOM и4 Chromium PASS; повторное независимое ревью без оставшихся подтверждённых Critical/Important в рассмотренном объёме. Core/Security push/PR SUCCESS. Итоговый CodeQL check113609776255 FAILURE,29 high,неснятые предупреждения; успешный scanner workflow не означает clean security.
+Проверены7 реальных источников:43PDF pages и660Office units,ошибок0,байты оригиналов сохранены. Графика,формулы ичасть таблиц остаются NOT_CHECKED;native LIR не заменяетsolver export. Intake BLOCK:8 отсутствующих ролей. Реального accepted case иоригинального DXF/DWG нет.
 
-Итог19:6 программных критериев выполнены,10 частично,3 открыты(13,14,19). Память/3 шаблона/иллюстрации/DXF inventory+locator+аннотация готовы программно. Реальной полноты V4,положительного ACCEPTED объекта,qualified solver/correlation,physical Windows,DWG roundtrip иrelease нет.
+PR92/head e4eaf3509e953118e5e3ed8c979d5ea28bad121f:Windows clean start/cache repair/restart прошли первый запуск;Windows backup tests нашли byte-lock read иtest SQLite handles. Причины исправлены,18local testsPASS;повтор полногоWindows CI выполняется. Не считать физическийПК/перезагрузку подтверждёнными.
 
-Первый остаток: документированный triage29 CodeQL и PR→кандидат. Остальные критерии и точные доказательства — в плане и docs/qa/2026-10-09-master-plan-pass.md. Не повторять выполненные тесты без изменения кода и не снимать BLOCK по числу тестов.
+726Python,4Node,2HTTP/DOM,4Chromium былиPASS на исходном frozen tree;послеWindows исправления идёт новый full Python pass. Последний фактический результат проверять поCI иразделу68.
