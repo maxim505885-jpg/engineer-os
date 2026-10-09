@@ -58,13 +58,57 @@
     },
     "application_inventory": {
       "status": "BLOCK",
-      "reason": "CAD_ENTITY_LIMIT",
-      "limit": 10000
+      "reasons": [
+        "CAD_ENTITY_LIMIT",
+        "UNSUPPORTED_ENTITY_FOR_EDIT",
+        "OUT_OF_PLANE_SOURCE_FOR_EDIT",
+        "INVENTORY_TABLE_LIMIT",
+        "CUSTOM_BLOCK_FOR_EDIT",
+        "DXF_AUDIT_ERRORS_OR_REPAIRS"
+      ],
+      "entity_total": 10172,
+      "inventory_read_complete": true,
+      "inventory_read_limit": 50000,
+      "edit_entity_limit": 10000,
+      "entity_counts": {
+        "HATCH": 110,
+        "LWPOLYLINE": 5418,
+        "CIRCLE": 224,
+        "MTEXT": 641,
+        "DIMENSION": 208,
+        "INSERT": 601,
+        "LINE": 1765,
+        "MULTILEADER": 209,
+        "SPLINE": 95,
+        "OLE2FRAME": 1,
+        "TEXT": 22,
+        "POINT": 624,
+        "ARC": 214,
+        "ELLIPSE": 1,
+        "ATTDEF": 38,
+        "SOLID": 1
+      },
+      "inventory_complete": false,
+      "elapsed_seconds": 4.324,
+      "peak_rss_kib": 141108
     },
     "original_sha256": "544f0114ba3e5b16c737c189716ec64308f36855cf93b3fab2bfce489f72d632",
     "converter_source": {
       "release": "LibreDWG/libredwg 0.14",
       "source_archive_sha256": "62ebb73b984f865960f20ed26619ea5f8789d5e3fd088fa40a2598384da81275"
+    },
+    "read_only_inventory_progress": {
+      "source_head": "fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc",
+      "pr": 93,
+      "local_full_tests": 731,
+      "native_windows_only_skips": 2,
+      "focused_tests": 22,
+      "candidate_integrated": true,
+      "candidate_head": "9bf58d02659d9ff0f330b3c310046f406802f088",
+      "verified_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+      "all_9_checks_success": true,
+      "linux_pr_run": 37903987046,
+      "windows_pr_run": 37903987163
     }
   },
   "sources": [
@@ -267,6 +311,125 @@
     "acceptance_granted": false
   },
   "software_verification": {
+    "source_head": "fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc",
+    "source_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+    "candidate_head": "9bf58d02659d9ff0f330b3c310046f406802f088",
+    "candidate_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+    "exact_tree_match": true,
+    "pr": 93,
+    "all_9_checks_success": true,
+    "checks": [
+      {
+        "name": "CodeQL",
+        "id": 113733105670,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113733105670"
+      },
+      {
+        "name": "windows-runtime",
+        "id": 113732903828,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987163/job/113732903828"
+      },
+      {
+        "name": "core-tests",
+        "id": 113732903156,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987046/job/113732903156"
+      },
+      {
+        "name": "repository-guard",
+        "id": 113732902972,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987066/job/113732902972"
+      },
+      {
+        "name": "Analyze (javascript-typescript)",
+        "id": 113732900007,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732900007"
+      },
+      {
+        "name": "Analyze (actions)",
+        "id": 113732899979,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899979"
+      },
+      {
+        "name": "Analyze (python)",
+        "id": 113732899705,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899705"
+      },
+      {
+        "name": "core-tests",
+        "id": 113732891658,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983600/job/113732891658"
+      },
+      {
+        "name": "repository-guard",
+        "id": 113732891163,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983584/job/113732891163"
+      }
+    ],
+    "linux": {
+      "pr_run": 37903987046,
+      "push_run": 37903983600,
+      "tests_total": 731,
+      "passed": 729,
+      "skipped_native_windows": 2,
+      "node_tests": 4,
+      "http_dom_workflows": 2,
+      "chromium_workflows": 4
+    },
+    "windows": {
+      "pr_run": 37903987163,
+      "tests_passed": 23,
+      "real_ollama": true,
+      "model": "qwen3:0.6b",
+      "chromium_workflows": 4,
+      "physical_pc_verified": false
+    },
+    "engineering_acceptance_granted": false
+  },
+  "ocr_region_probe": {
+    "scope": "OFFLINE_REGION_OCR_FEASIBILITY_PROBE",
+    "source_sha256": "6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce",
+    "page": 1,
+    "original_unchanged": true,
+    "whole_page": {
+      "blocks": 40,
+      "characters": 296,
+      "median_line_confidence": 56.666397,
+      "low_confidence_lines": 15,
+      "quality_verified": false
+    },
+    "four_regions": {
+      "blocks": 22,
+      "characters": 294,
+      "median_line_confidence": 80.34860649999999,
+      "low_confidence_lines": 7,
+      "quality_verified": false
+    },
+    "limitations": [
+      "NO_GROUND_TRUTH_TRANSCRIPTION",
+      "CROP_BOUNDARY_TEXT_MAY_BE_SPLIT",
+      "NO_GEOMETRY_OR_ENGINEERING_ACCEPTANCE"
+    ],
+    "acceptance_granted": false
+  },
+  "previous_software_verification": {
     "source_head": "ff586382874774838d584339bfbfa136c26dd351",
     "source_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
     "candidate_head": "8beb55924a8e5a82029636b235c3cac64c565488",

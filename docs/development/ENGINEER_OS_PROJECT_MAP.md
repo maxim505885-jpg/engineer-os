@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план:** итог §68.8. PR 91 и PR 92 приняты в официальный кандидат `8beb55924a8e5a82029636b235c3cac64c565488`; дерево `f5f78d4fa1504259b02a2d323dd2143dd690c6c4` точно равно проверенному `ff586382874774838d584339bfbfa136c26dd351`. Все 10 CI checks SUCCESS: полный Linux, native Windows, CodeQL и security. Критерий 1 полностью закрыт; критерии 2–5 частично готовы. Реальные OCR 43/43 и DWG inventory выполнены с сохранением BLOCK; инженерная приёмка и физическая Windows install/reboot не подтверждены. Main/release/tag не публиковались. Исторические разделы сохраняются ниже.
+**Активный план:** продолжение §69; интегрированный итог — §68.8. PR 91, PR 92 и PR 93 приняты в официальный кандидат `9bf58d02659d9ff0f330b3c310046f406802f088`; дерево `2cb8e47cd4d5f199edee708cb784e4db83a7c62d` точно равно проверенному `fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc`. Все 9 CI checks нового PR93 SUCCESS; прошлый PR92 имел 10 SUCCESS checks: полный Linux, native Windows, CodeQL и security. Критерий 1 полностью закрыт; критерии 2–5 частично готовы. Реальные OCR 43/43 и DWG inventory выполнены с сохранением BLOCK; инженерная приёмка и физическая Windows install/reboot не подтверждены. Main/release/tag не публиковались. Исторические разделы сохраняются ниже.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -14,7 +14,7 @@
 
 | № | Пункт | Статус | Что сделано / что осталось |
 |---|---|---|---|
-| 1 | Единая рабочая версия | ✅ Кандидат | PR 91/92 приняты; кандидат 8beb559/tree f5f78d4 равен проверенному ff586382. Main/release отдельно. |
+| 1 | Единая рабочая версия | ✅ Кандидат | PR 91/92/93 приняты; кандидат 9bf58d0/tree 2cb8e47 равен проверенному fd4e8da9. Main/release отдельно. |
 | 2 | OCR и локальная модель | ✅ Программный контур | Извлечение, метрики, отрицательные проверки и Linux/Qwen проверены; полнота всех документов относится к №13. |
 | 3 | Большие документы, resume/recovery | ✅ Программный контур | Контрольные точки, идентичность, лимиты и повторный запуск реализованы и проверены. |
 | 4 | DOCX/XLSX/DOC и заявленные форматы | ✅ Программный контур | Оригиналы, координаты и происхождение данных связаны; сложные таблицы остаются в №13. |
@@ -23,18 +23,18 @@
 | 7 | Реальный инженерный сценарий | ✅ Отрицательный сценарий | 3 оригинала, 36 кандидатов, роли и повторная проверка норм пройдены с BLOCK; положительный кейс — №14. |
 | 8 | FINAL AUDIT и граница приёмки | ✅ Программный контур | Проверены неизменяемость, устаревание, подмена и чужой источник; реальное положительное принятие не подтверждено. |
 | 9 | Windows: один запуск | 🟡 Частично | Native Windows CI: clean start/cache repair/restart,23 теста,live Ollama,4 Chromium PASS. Физическая установка/перезагрузка NOT_VERIFIED. |
-| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91 и PR 92 merged; единый проверенный кандидат 8beb559. Точные CI/SHA и источники — §68.8; main не изменён. |
+| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91, PR 92 и PR 93 merged; единый проверенный кандидат 9bf58d0. Точные CI/SHA и источники — §68.8; main не изменён. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | 4 Chromium routes PASS на Linux и Windows; мобильный экран/session reset, источник/ТЗ/черновик/CAD/память проверены. Приёмка маршрута на реальном ACCEPTED объекте остаётся. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite/keys/CAD/память/settings; symlink/hardlink gates и Windows shared metadata/locks проверены. CodeQL 29 individually reviewed FP,0open на PR91; все свежие security/CodeQL checks PASS. Physical Windows и owner-controlled residual limits отдельно. |
 | 13 | Производственная полнота документов | ❌ Открыто | Реальный native PDF 43/43,OCR 43/43 и Office 660/660 units пройдены без failed; OCR/графика/формулы/сложные merged tables остаются UNVERIFIED/BLOCK. Полный V4, эталон полноты и corpus не приняты. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
-| 17 | CAD/DWG | 🟡 Частично | 5 копий DWG / 1 уникальный оригинал сохранены; отдельный DXF LibreDWG 0.14 инвентаризация 15 906 объектов. CAD_ENTITY_LIMIT 10000 и conversion warnings/errors сохраняют BLOCK; geometry equivalence,controlled edit,roundtrip остаются. |
+| 17 | CAD/DWG | 🟡 Частично | 5 копий DWG / 1 уникальный оригинал сохранены; отдельный DXF LibreDWG 0.14: приложение читает 10 172 графических сущности (15 906 всех entitydb records). Read budget 50 000; edit budget 10 000 и geometry/audit warnings сохраняют BLOCK; geometry equivalence,controlled edit,roundtrip остаются. |
 | 18 | Несколько ИИ | 🟡 Частично | Локальный Ollama/Open WebUI/диагностика готовы; shared gateway проверяет hostname/redirect/response bounds/completion. Полный optional-provider receipt/live-provider сценарий ещё не завершён. |
 | 19 | Стабильный финальный выпуск | ❌ Открыто | Нужны все продуктовые критерии, чистая установка, Windows, ACCEPTED-кейс, release/tag и соответствующий main. |
 
-**Интеграция завершена:** PR 91/92 приняты после всех проверок. Следующие gates — полнота документов, подтверждённый расчёт/нормы, реальный ACCEPTED кейс/CAD и физическая Windows проверка перед выпуском.
+**Интеграция завершена:** PR 91/92/93 приняты после всех проверок. Следующие gates — полнота документов, подтверждённый расчёт/нормы, реальный ACCEPTED кейс/CAD и физическая Windows проверка перед выпуском.
 
 Подробности прежнего объединения — §65; актуальная итоговая сводка — §68.8.
 
@@ -2768,3 +2768,17 @@ Windows CI подтвердил 23 теста backup/startup/native metadata и 
 Пять критериев:№1 полностью закрыт (CodeQL и candidate);№2 частично — реальные native/OCR/Office проходы завершены, полнота графики/формул/сложных таблиц не подтверждена;№3 частично — integrity и BLOCK gates готовы, но vendor exports/run/actual correlation и положительный FINAL_AUDIT отсутствуют;№4 частично — программные память/отчёт/CAD routes проверены и реальный DWG найден/отдельно прочитан, но accepted case, DWG geometry equivalence/roundtrip/controlled edit и optional live-provider receipts открыты;№5 частично — native Windows CI полностью PASS, физическая clean install/reboot и финальный выпуск открыты. В едином19пунктовом плане остаются8готовых/8частичных/3открытых. Инженерные BLOCK не сняты ради завершения списка.
 
 Следующие реальные gates: (1) проверить сложную графику/числа/таблицы и полноту V4 по эталону; (2) подтвердить8semantic calculation roles, vendor export/run и нормативные основания; (3) получить квалифицированный положительный FINAL_AUDIT, затем accepted→memory/принятый отчёт; (4) подтвердить native CAD geometry/units/resources и контролируемый roundtrip для большого исходника; (5) физический Windows install/restart/restore/reboot, после всех продуктовых gates FINAL RELEASE AUDIT/main/tag. Подробный итог: ENGINEER_OS_FIVE_CRITERIA_REPORT.md. Оригиналы инженерных файлов не изменены.
+
+## 69. Большой CAD: чтение отдельно от изменения
+
+На базе кандидата 8beb559 разработана ветка `feat/cad-large-inventory-20261009`, head `fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc`, PR 93. Read-only DXF inventory и локаторы получили отдельный лимит 50 000 графических сущностей в блоках. Annotation/export сохраняют 10 000 и прежние geometry/resource/audit/hash/session запреты. Вывод списков ограничен 100. Regression на 10 001 LINE воспроизвёл отсутствие inventory до исправления; после исправления 22 focused tests PASS, включая независимый повтор. Полный локальный набор 731 tests: 729 PASS и 2 native-Windows-only skips.
+
+Настоящий отдельный DXF 16 034 803 байт: прочитаны 10 172 графические сущности за 4.324s; peak RSS 141108 KiB в этом Linux процессе. Исходник не изменён. Прежние 15 906 — все entitydb records, включая служебные записи; это другое число. Entity counts complete; bounded resource lists incomplete. Редактирование остаётся BLOCK: CAD_ENTITY_LIMIT, UNSUPPORTED_ENTITY_FOR_EDIT, OUT_OF_PLANE_SOURCE_FOR_EDIT, INVENTORY_TABLE_LIMIT, CUSTOM_BLOCK_FOR_EDIT, DXF_AUDIT_ERRORS_OR_REPAIRS. DWG geometry equivalence и accepted controlled edit не объявлены.
+
+OCR-проба первой страницы реального PDF: whole page: 40 blocks / 296 chars / median line confidence 56.67 / 15 low-confidence; четыре области: 22 blocks / 294 chars / median 80.35 / 7 low-confidence. Это разное разбиение строк без эталонной транскрипции; границы crop могут разделить текст. Confidence не доказывает accuracy/completeness. Это offline feasibility probe, не продуктовый OCR feature; acceptance=false, оригинал неизменён. Следующая реализация должна сохранять координаты источника, явное покрытие областей и общие page/time/output бюджеты.
+
+### 69.1. Итог: PR 93 принят, все 9 checks SUCCESS
+
+PR 93 squash merged в `integration/release-candidate-v1`: `9bf58d02659d9ff0f330b3c310046f406802f088`. Git API подтвердил точное равенство tree `2cb8e47cd4d5f199edee708cb784e4db83a7c62d` проверенному `fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc`. Все 9 check runs SUCCESS: Core PR/push, Windows PR, Security PR/push, CodeQL и 3 analyzers. Linux PR run 37903987046/job 113732903156:731 tests (729 PASS, 2 native-Windows-only skips), 4 Node, 2 HTTP/DOM, 4 Chromium PASS. Windows PR run 37903987163/job 113732903828:23 tests, actual Ollama qwen3:0.6b и 4 Chromium PASS. На этой ветке Windows workflow запускается только по PR: 9 checks вместо 10 в предыдущем проходе.
+
+Технический read-only CAD шаг завершён: большой derived DXF доступен для inventory и UNVERIFIED locator в приложении. Edit/export границы не ослаблены. Пункт 17 / критерий 4 остаётся частичным: сложная геометрия, DXF audit, native DWG equivalence и реальный accepted case не подтверждены. Общий план 8✅ / 8🟡 / 3❌ сохраняется. Следующий программный шаг — bounded region/tiled OCR с coverage/source coordinates и фиксированными page/time/output budgets, затем сверка по эталону. Физический Windows ПК и инженерная приёмка не подтверждены.
