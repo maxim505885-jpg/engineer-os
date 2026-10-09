@@ -31,3 +31,10 @@ No Critical/Important/Minor defects found in decoder or clipped-parent fix. Exha
 ## Publication and local verification
 
 PR107 OPEN,head21114ab273a5927f34af985126afb0a804f6b422,tree7898926d5b8121e655a0b16ccdaf904c7b136dee matches tested local tree. CI/merge pending.851 tests/99.990s OK,17 environment skips;38 focused,10 Node,2 HTTP/DOM,5 Chromium PASS. Architecture/compile/JS/diff PASS. Initial DOM session-switch timeout passed on rerun, root cause not established. Windows49 suite execution pending.
+
+
+### Итог §91 — включено в кандидат
+
+PR107 MERGED squash с expected_head guard21114ab273a5927f34af985126afb0a804f6b422. Кандидат6d59ea16712fafd8306d9710d3726551b183d2b6; git fetch подтвердил полное дерево7898926d5b8121e655a0b16ccdaf904c7b136dee, идентичное проверенному локальному/опубликованному head. Все final-head CI SUCCESS: Core37991762946/job114027465213 —851 tests/93.583s OK,2 Windows-only skips,10Node,2HTTP/DOM,5Chromium; Windows37991762903/job114027465278 —49 tests/14.622s OK,cold/repeat/restart,real Ollama qwen3:0.6b и5 browser workflows,включая ordinary/masked raster ordinals; Security37991762941 SUCCESS. Это Windows runner, не пользовательский ПК.
+
+120/120 bitmap sources реального DOCX доступны;29880590 RGB pixels совпали с независимым BMP decoder. Исходник не изменён. Производный isolated fixture с точным realimage465 asset прошёл Store/Worker/model/receipt/PNG при усечённом parent text;strict quote BLOCK,acceptance=false. Full original Store/model,полная EMF/Word отрисовка и visual coverage/таблицы/формулы/V4/qualified corpus не подтверждены. №13 остаётся❌,8✅/8🟡/3❌;№14/19 открыты. НаПК пользователя не установлено,инженерно не принято. Далее — source-bound rendering и сверка смешанной графики/таблиц;ЛИРА/RES отложены. Точные машиночитаемые receipts:docs/qa/2026-10-10-emf-bitfields-ci.json.

@@ -1,3 +1,5 @@
+# Текущий результат — §91 итог: PR107 merged, кандидат6d59ea1; real120 rasters/CI PASS, №13 открыт
+
 # Текущий результат — §91: PR107 masked EMF raster/120 sources PASS; CI ожидается, №13 открыт
 
 # Текущий результат — §90 итог: PR106 merged, кандидатebcafaa6; CI/real119 rasters PASS, №13 открыт
@@ -40,7 +42,7 @@
 
 # Передача состояния ENGINEER OS
 
-**Активный план:** расчёты отложены пользователем09.10.2026. Продолжаем №13: колонтитулы/сноски DOCX и различимые ссылки на источник включены в кандидат3bfba1ed (PR103), реальные native tokens и полный Linux/Windows/DOM/Chromium CI PASS (§87). Полнота графики/формул/mixed-raster таблиц/V4 ещё открыта. План8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. №13: masked EMF/source preview при TEXT_LIMIT включён в кандидат6d59ea1 (PR107);real120/120 source pixels/Core851/Windows49/Security PASS (§91 итог). Full rendering/графика/таблицы/формулы/V4/qualified corpus открыты;8✅/8🟡/3❌.
 
 
 ## 74.1. Итог — native Word grid и вертикальные объединения
@@ -310,3 +312,10 @@ PR106 MERGED squash с expected_head guard5951370b9aa11341f002ae8f48b1ab003d0ffa
 Локально851 tests/99.990s OK,17 environment skips;38 focused,10Node,2HTTP/DOM,5Chromium PASS; architecture/compile/JS/diff PASS. Первый DOM session-switch timeout повторно PASS; причина не установлена и не выдана за исправленный production defect. Windows suite теперь49tests, реальное выполнение ожидается вCI. Независимый review двух изменений: Critical/Important/Minor нет;65536 значений каждого16bit555/565 совпали с прямым mask scaling. Контролируемый browser проверил обычный и masked bitmap ordinals с явным unrendered scope/no evidence.
 
 Подэтап source-pixel extraction закрыт для120 обнаруженных bitmap источников этогоDOCX; №13 остаётся❌,8✅/8🟡/3❌. Full EMF rendering/vector graphics/Word placement,растровые и mixed tables,OCR conflicts,visual formula correspondence,полныйV4 и qualified corpus открыты. НаПК пользователя не установлено; инженерно не принято. Далее — source-bound rendering и визуальное покрытие смешанной графики/таблиц. ЛИРА/RES отложены. Подробный receipt:docs/qa/2026-10-10-emf-bitfields.md.
+
+
+### Итог §91 — включено в кандидат
+
+PR107 MERGED squash с expected_head guard21114ab273a5927f34af985126afb0a804f6b422. Кандидат6d59ea16712fafd8306d9710d3726551b183d2b6; git fetch подтвердил полное дерево7898926d5b8121e655a0b16ccdaf904c7b136dee, идентичное проверенному локальному/опубликованному head. Все final-head CI SUCCESS: Core37991762946/job114027465213 —851 tests/93.583s OK,2 Windows-only skips,10Node,2HTTP/DOM,5Chromium; Windows37991762903/job114027465278 —49 tests/14.622s OK,cold/repeat/restart,real Ollama qwen3:0.6b и5 browser workflows,включая ordinary/masked raster ordinals; Security37991762941 SUCCESS. Это Windows runner, не пользовательский ПК.
+
+120/120 bitmap sources реального DOCX доступны;29880590 RGB pixels совпали с независимым BMP decoder. Исходник не изменён. Производный isolated fixture с точным realimage465 asset прошёл Store/Worker/model/receipt/PNG при усечённом parent text;strict quote BLOCK,acceptance=false. Full original Store/model,полная EMF/Word отрисовка и visual coverage/таблицы/формулы/V4/qualified corpus не подтверждены. №13 остаётся❌,8✅/8🟡/3❌;№14/19 открыты. НаПК пользователя не установлено,инженерно не принято. Далее — source-bound rendering и сверка смешанной графики/таблиц;ЛИРА/RES отложены. Точные машиночитаемые receipts:docs/qa/2026-10-10-emf-bitfields-ci.json.
