@@ -104,10 +104,19 @@ try {
  $none=[EngineerLiraResultsReader]::Export($bad,'fixture',('a'*64),$root,[int[]]@(101),[int[]]@(205),1000,5000000)
  $empty=Get-Content (Join-Path $none 'summary.json') -Raw | ConvertFrom-Json
  if($empty.status -ne 'RESULT_ACCESS_UNAVAILABLE' -or $empty.value_rows -ne 0){throw 'No-result export misreported success'}
+ $noSubjects=New-Object ResAccess
+ $noSubjectDir=[EngineerLiraResultsReader]::Export($noSubjects,'fixture',('a'*64),$root,[int[]]@(),[int[]]@(),1000,5000000)
+ if(($noSubjects.Requested | Where-Object {$_ -ne 8 -and $_ -ne 10}).Count){throw 'Unbounded request with empty inventory'}
  $packageModule=Join-Path $PSScriptRoot 'results-package.psm1'
  if(-not(Test-Path $packageModule)){throw 'RED: result package pipeline not implemented'}
  Import-Module $packageModule -Force
  $source=Join-Path $root 'fixture.lir';[IO.File]::WriteAllText($source,'original fixture')
+ $rejected=$false
+ try {Export-LiraModel -Application (New-Object ResultModelApp) -ModelPath $source -OutputRoot $root -MaxSourceBytes 1 | Out-Null} catch {$rejected=$_.Exception.Message -match 'INPUT_SOURCE_BYTE_LIMIT'}
+ if(-not $rejected){throw 'Source byte limit ignored'}
+ $tableLimited=Export-LiraModel -Application (New-Object ResultModelApp) -ModelPath $source -OutputRoot $root -MaxTableBytes 1 -MaxTableTotalBytes 1 -MaxManifestBytes 16777216
+ $limitedManifest=Get-Content (Join-Path $tableLimited.directory 'manifest.json') -Raw | ConvertFrom-Json
+ if(($limitedManifest.tables | Where-Object {$_.bytes -gt 1}).Count){throw 'Table byte limit ignored'}
  $sourceHash=(Get-FileHash $source).Hash
  $package=Export-LiraResultsPackage -Application (New-Object ResultModelApp) -ResultsAccess (New-Object ResAccess) -ModelPath $source -OutputRoot $root -MaxValues 1000 -MaxBytes 5000000
  if((Get-FileHash $source).Hash -ne $sourceHash){throw 'Source changed in packaging'}
@@ -121,5 +130,12 @@ try {
  $noResult=New-Object ResAccess;$noResult.AllUnavailable=$true
  $diagnostic=Export-LiraResultsPackage -Application (New-Object ResultModelApp) -ResultsAccess $noResult -ModelPath $source -OutputRoot $root -MaxValues 1000 -MaxBytes 5000000
  if(-not(Get-ChildItem $diagnostic -Filter 'part_*.zip')){throw 'No-result diagnosis not packaged'}
+ $entry=Join-Path $PSScriptRoot 'RESULTS.ps1'
+ $tokens=$null;$parseErrors=$null
+ [System.Management.Automation.Language.Parser]::ParseFile($entry,[ref]$tokens,[ref]$parseErrors) | Out-Null
+ if($parseErrors.Count){throw 'Entry point syntax error'}
+ try {& $entry -ModelPath $source -OutputRoot $root -NoExplorer} catch {}
+ $entryErrors=Get-ChildItem $root -Filter RESULT_ERROR.json -Recurse
+ if(-not $entryErrors){throw 'Missing diagnostic for unavailable LIRA application'}
  Write-Output 'PASS: 10 request types, sparse IDs, LC numbers, exact arguments, scalar failures, output hashes, limits, no false completion'
 } finally {Remove-Item -LiteralPath $root -Recurse -Force}
