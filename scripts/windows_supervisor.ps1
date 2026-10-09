@@ -36,11 +36,11 @@ function Ensure-Venv{
 }
 
 function Ensure-Dependencies{
- $inputs=@('requirements-local-app.txt','requirements-pdf-review.txt')|ForEach-Object{Join-Path $RepoRoot $_}
+ $inputs=@('requirements-local-app.txt','requirements-pdf-review.txt','requirements-cad.txt')|ForEach-Object{Join-Path $RepoRoot $_}
  $fp=($inputs|ForEach-Object{(Get-FileHash -Algorithm SHA256 $_).Hash})-join ':'
  $marker=Join-Path $RuntimeDir 'requirements.sha256'
  $old=if(Test-Path $marker){(Get-Content $marker -Raw).Trim()}else{''}
- if(!$ForceDependencyCheck -and $old-eq$fp){& $VenvPython -c "import fitz" 2>$null;if($LASTEXITCODE-eq 0){Log 'Python dependencies unchanged';return}}
+ if(!$ForceDependencyCheck -and $old-eq$fp){& $VenvPython -c "import fitz,PIL,ezdxf" 2>$null;if($LASTEXITCODE-eq 0){Log 'Python dependencies unchanged';return}}
  Log 'Installing Python dependencies'
  & $VenvPython -m pip install --disable-pip-version-check -r (Join-Path $RepoRoot 'requirements-local-app.txt')
  if($LASTEXITCODE-ne 0){throw 'Dependency installation failed'}
