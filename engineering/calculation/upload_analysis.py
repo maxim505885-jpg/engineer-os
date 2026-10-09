@@ -17,6 +17,13 @@ MAX_EXPANDED = 100 * 1024 * 1024
 _HEADER = re.compile(r'\(\s*(\d+)\s*/')
 
 
+class RejectDTD(ET.TreeBuilder):
+    """Parser-level rejection also covers Expat's encoding autodetection."""
+
+    def doctype(self, name, pubid, system):
+        raise ValueError('XML DTD forbidden')
+
+
 def _base(data, kind):
     return dict(schema=1, kind=kind, source_sha256=hashlib.sha256(data).hexdigest(),
                 scope='SOURCE_OBSERVATIONS_ONLY', status='BLOCK', observations={}, reasons=[],
@@ -55,11 +62,13 @@ def analyze_upload(name, data):
         return report
     if suffix == '.ald':
         report = _base(data, 'LIRA_XML_METADATA')
+        if '\x00' in text:
+            report['reasons'] = ['XML_ENCODING_UNSUPPORTED']; return report
         # No DTD/entities, even when the standard parser would accept them.
         if re.search(r'<!\s*(DOCTYPE|ENTITY)', text, re.I):
             report['reasons'] = ['XML_DECLARATIONS_NOT_ALLOWED']; return report
         try:
-            root = ET.fromstring(text)
+            root = ET.fromstring(text, parser=ET.XMLParser(target=RejectDTD()))
             if root.tag != 'LIRA_Project': raise ValueError('Unknown root')
             report['observations'] = dict(title=root.get('Title', '')[:240],
                 rigid_metadata_records=sum(1 for _ in root.iter('Rigid')),
