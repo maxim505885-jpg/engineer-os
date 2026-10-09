@@ -54,6 +54,26 @@ public class ResAccess {
  public object PeriodsOfVibrations(object r){return Response();}
  public object SelectedReinforcement(object r){return Response();}
 }
+public class ResultModelTable {
+ public int Type {get;set;} public int InitialModelPart {get{return 0;}}
+ public void GetContents(ref object value){value=Type==2?"101\t0\t0\t0\t\n":Type==3?"205\t10\t101,101\t\n":"";}
+ public void GetParameters(ref object value){value=new object[0];}
+}
+public class ResultModelTables {
+ public int ItemCount {get{return 0;}}
+ public object CreateNewItem(int type,[System.Runtime.InteropServices.Optional]object pars,int part,string name,int pos){return new ResultModelTable{Type=type};}
+}
+public class ResultModelDocument {
+ public string PathName {get;set;} public string Title {get{return "fixture";}}
+ public string Description {get{return "fixture";}} public int SystemLabel {get{return 5;}}
+ public int LoadsValsType {get{return 0;}} public int CurrentLoadCase {get{return 1;}}
+ public ResultModelTables AllTables {get{return new ResultModelTables();}}
+ public void Close(){}
+}
+public class ResultModelApp {
+ public object MeasurementUnits {get{return new object();}}
+ public object OpenDocument(string path,int restore,int silent,ref string messages){messages="";return new ResultModelDocument{PathName=path};}
+}
 '@
 $reader=Join-Path $PSScriptRoot 'results-reader.cs'
 if(-not(Test-Path $reader)){throw 'RED: results reader not implemented'}
@@ -84,5 +104,22 @@ try {
  $none=[EngineerLiraResultsReader]::Export($bad,'fixture',('a'*64),$root,[int[]]@(101),[int[]]@(205),1000,5000000)
  $empty=Get-Content (Join-Path $none 'summary.json') -Raw | ConvertFrom-Json
  if($empty.status -ne 'RESULT_ACCESS_UNAVAILABLE' -or $empty.value_rows -ne 0){throw 'No-result export misreported success'}
+ $packageModule=Join-Path $PSScriptRoot 'results-package.psm1'
+ if(-not(Test-Path $packageModule)){throw 'RED: result package pipeline not implemented'}
+ Import-Module $packageModule -Force
+ $source=Join-Path $root 'fixture.lir';[IO.File]::WriteAllText($source,'original fixture')
+ $sourceHash=(Get-FileHash $source).Hash
+ $package=Export-LiraResultsPackage -Application (New-Object ResultModelApp) -ResultsAccess (New-Object ResAccess) -ModelPath $source -OutputRoot $root -MaxValues 1000 -MaxBytes 5000000
+ if((Get-FileHash $source).Hash -ne $sourceHash){throw 'Source changed in packaging'}
+ $zip=Get-ChildItem $package -Filter 'part_*.zip' | Select-Object -First 1
+ if(-not $zip){throw 'Result ZIP missing'}
+ $unpack=Join-Path $root 'verify-package';Expand-Archive $zip.FullName $unpack
+ $packed=Get-Content (Join-Path $unpack 'manifest.json') -Raw | ConvertFrom-Json
+ if(-not $packed.original_unchanged -or $packed.source_result_binding_verified){throw 'Wrong package provenance'}
+ if(-not(Test-Path (Join-Path $unpack 'api-contract.json'))){throw 'Missing units/API evidence'}
+ foreach($file in $packed.files){if((Get-FileHash (Join-Path $unpack $file.file)).Hash.ToLower() -ne $file.sha256){throw 'ZIP altered numerical file'}}
+ $noResult=New-Object ResAccess;$noResult.AllUnavailable=$true
+ $diagnostic=Export-LiraResultsPackage -Application (New-Object ResultModelApp) -ResultsAccess $noResult -ModelPath $source -OutputRoot $root -MaxValues 1000 -MaxBytes 5000000
+ if(-not(Get-ChildItem $diagnostic -Filter 'part_*.zip')){throw 'No-result diagnosis not packaged'}
  Write-Output 'PASS: 10 request types, sparse IDs, LC numbers, exact arguments, scalar failures, output hashes, limits, no false completion'
 } finally {Remove-Item -LiteralPath $root -Recurse -Force}
