@@ -100,7 +100,8 @@ class BitmapHTTPTests(unittest.TestCase):
         from engineering.local_app.files import preserve_file
         from engineering.local_app.worker import Worker
         fixtures.OfficeTests.setUp(self)
-        data=vector_doc(emf([bitmap_record(),bitmap_record(depth=32)]))
+        from tests.test_emf_bitfields import masked_bitmap_record
+        data=vector_doc(emf([bitmap_record(),masked_bitmap_record()]))
         f=preserve_file(self.store,self.session,'bitmap.docx',data)
         job=self.store.enqueue(self.session,'Read',[f['id']]);model=fixtures.Model();Worker(self.store,model).run_once()
         ref=self.store.analysis_receipts(self.session,job['id'])['records'][0]['refs'][0]

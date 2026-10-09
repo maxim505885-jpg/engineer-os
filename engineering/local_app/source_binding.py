@@ -7,6 +7,15 @@ from .office import read
 
 
 def office_location(store,session_id,file,source_job,logical_unit,quote):
+    return _office_location(store,session_id,file,source_job,logical_unit,quote)
+
+
+def office_image_location(store,session_id,file,source_job,logical_unit):
+    """Bind an original image asset without claiming a complete parent quote."""
+    return _office_location(store,session_id,file,source_job,logical_unit,'',image_preview=True)
+
+
+def _office_location(store,session_id,file,source_job,logical_unit,quote,*,image_preview=False):
     if file['session_id']!=session_id:raise ValueError('Source isolation failure')
     if type(logical_unit) is not int or logical_unit<1:raise ValueError('Office logical unit required')
     child=store.extraction_job(session_id,source_job)
@@ -26,9 +35,16 @@ def office_location(store,session_id,file,source_job,logical_unit,quote):
     item=units[logical_unit-1];locator=dict(item['locator'])
     if conversion:locator.update(scope='DERIVED_DOCX_LOCATION',derived_sha256=conversion['derived_sha256'])
     text='\n'.join(b['text'] for b in record['blocks'])
+    exact_text=text==item['text'] and not record.get('text_truncated')
+    clipped_image_text=(image_preview and bool(record.get('text_truncated')) and
+                        'TEXT_LIMIT' in record.get('limitations',[]) and len(text)<len(item['text']) and
+                        item['text'].startswith(text))
     if (record.get('execution')!='COMPLETED' or record.get('source_sha256')!=file['sha256'] or
-            record.get('locator')!=locator or text!=item['text'] or record.get('text_truncated')):
+            record.get('locator')!=locator or not (exact_text or clipped_image_text)):
         raise ValueError('Office source checkpoint cannot establish exact location')
+    if image_preview:
+        return dict(source_job=source_job,logical_unit=logical_unit,locator=locator,
+                    source_confirmable=False,scope='ORIGINAL_IMAGE_ASSET_UNVERIFIED')
     first=text.find(quote)
     if first<0:raise ValueError('Exact quote not found at Office location')
     unique=first==text.rfind(quote)
