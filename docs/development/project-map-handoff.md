@@ -1,4 +1,4 @@
-# Текущий результат — §82: реальный COM доступ подтверждён, 0 таблиц; V2 подготовлен, повторный запуск открыт
+# Текущий результат — §83: причина GetContents воспроизведена через native COM, V3 проверен; реальная выгрузка открыта
 
 
 
@@ -132,3 +132,18 @@ Regression сначала FAIL на Windows run37947731826: «optional VARIANT p
 Подготовлен `ENGINEER_OS_LIRA_NATIVE_EXPORT_V2.zip` (6 файлов, включая com-bridge.cs). Пользователю: распаковать в новую папку, START.cmd, выбрать тот же .lir, прислать новый export ZIP. Повторять API inventory не требуется. PR100 остаётся draft, сайт/кандидат PR99 не изменён этой утилитой; №6 🟡, план8✅/8🟡/3❌, full_information_extracted/results_exported/acceptance=false.
 
 Следующее действие: получить реальный V2 export и проверить таблицы/ошибки/хеши; затем полноту исходных данных, отдельный RES export, грунт и подключение Windows reader к сайту. Запрос всей информации пока открыт.
+
+
+## 83. V2: таблицы созданы, сбой GetContents; V3 подтверждён native COM regression — 09.10.2026
+
+Получен `ENGINEER_OS_LIRA_EXPORT_4d0b9481c2b74590bd0555d1be66b738.zip`:7075 bytes,SHA256 `ada0f97ed88aa1f4295867a15a9ef5f6f75e8ebe9d686ba10bde345c94d3fe98`, внутри только manifest76770 bytes. Тот же source LIR секция2:16 266 163 bytes,SHA25634a24bc30f744476a35da42e3e18dd015953ed27dfd40e2a2ebb5a6aef4408d8. Модель открыта, все31 CreateNewItem прошли и свойства Type/InitialModelPart проверены; все31 ошибки теперь точно на GET_CONTENTS, HRESULT0x80020005. Значит V2 устранён/обойдён сбой создания таблиц, но данных ещё0. TABLE_EXPORT_FAILED корректен; original_unchanged/owned_document_closed=true; solver/results NOT_RUN/false.
+
+Воспроизведение выполнено через настоящую unmanaged границу IDispatch: test-native-dispatch.cs создаёт native vtable и проверяет VARIANTARG реального InvokeMember. V2 реально передаёт VT_BSTR|VT_BYREF (0x4008); GetContents ожидает ref VARIANT (инвентарь описывает pData как VARIANT). Тест на Windows run37948754157 получил ожидаемый FAIL: native GetContents received VT=0x4008 и0x80020005. Прежний managed-only fixture эту ошибку не обнаруживал; недостаток тестового покрытия устранён. Ранняя ошибка компиляции теста из-за неоднозначного DISPPARAMS исправлена явным ComTypes alias перед воспроизведением.
+
+V3 минимально меняет ReadReference: VariantWrapper(initial)+ParameterModifier, результат разворачивается при необходимости. CreateNewItem/OpenDocument не менялись. VariantWrapper предназначен именно для VT_VARIANT|VT_BYREF через InvokeMember: https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.variantwrapper?view=netframework-4.8.1 . Это подтверждённая ошибка COM транспорта экспортёра; успешное чтение пользовательской ЛИРА всё равно проверяется следующим фактическим запуском.
+
+Проверенный head `2fe90734fa064bf1234827e816c63d4663075204`; Windows run37948917501/job113882318826 SUCCESS. Native GetContents принял0x400C и вернул TSV; existing optional/ref/нулевой статус/этап/HRESULT/source hash/копия/закрытие/>100k TSV регрессии PASS. Probe compilation+real stdole2.tlb PASS. Security37948917504 SUCCESS. Native fixture не содержит ЛИРА/её модель/результаты: подтверждён механизм COM marshalling, а не вся выгрузка .lir.
+
+Подготовлен `ENGINEER_OS_LIRA_NATIVE_EXPORT_V3.zip`,6 runtime файлов (START.cmd,EXPORT.ps1,module,com-bridge.cs,contract,README); тестовый native vtable код в дистрибутив не входит. Пользователю: распаковать в новую папку,START.cmd,тот же .lir,вернуть export ZIP. Переустановка ЛИРА/API inventory не нужны.
+
+№6 остаётся🟡; план8✅/8🟡/3❌. PR100 draft; кандидат PR99 и сайт без native integration. Полные нагрузки/parameter-dependent варианты/soil/RES и корреляция с расчётом ещё открыты. Следующий шаг — проверить реальный V3 TSV, его полноту/ключи/единицы/соответствие источникам; затем завершить недостающий export и подключить проверенный reader к сайту. Acceptance=false.
