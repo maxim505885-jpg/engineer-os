@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 public static class EngineerLiraComBridge {
  private static object Invoke(object target,string method,object[] args,ParameterModifier[] modifiers) {
   if(target==null) throw new ArgumentNullException("target");
@@ -13,10 +14,11 @@ public static class EngineerLiraComBridge {
   return Invoke(group,"CreateNewItem",new object[]{type,Missing.Value,0,name,-1},null);
  }
  private static object ReadReference(object table,string method,object initial) {
-  object[] args=new object[]{initial};
+  object[] args=new object[]{new VariantWrapper(initial)};
   ParameterModifier modifier=new ParameterModifier(1);modifier[0]=true;
   Invoke(table,method,args,new ParameterModifier[]{modifier});
-  return args[0];
+  VariantWrapper wrapped=args[0] as VariantWrapper;
+  return wrapped==null ? args[0] : wrapped.WrappedObject;
  }
  public static object ReadContents(object table) {return ReadReference(table,"GetContents","");}
  public static object ReadParameters(object table) {return ReadReference(table,"GetParameters",null);}
