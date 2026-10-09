@@ -1,11 +1,15 @@
 """Bounded observations of default LIRA input table exports, without acceptance."""
 import hashlib
+import io
 import json
 import math
 import re
 
 KIND = 'ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT'
 MAX_ROWS = 200000
+MAX_COLUMNS = 1024
+MAX_LINE = 65536
+MAX_PACKAGE_CELLS = 10000000
 
 
 def _object(pairs):
@@ -23,14 +27,18 @@ def _positive(value):
     return int(value)
 
 
-def _rows(data):
-    text = data.decode('utf-8-sig')
-    if '\x00' in text:
-        raise ValueError('NUL in TSV')
-    rows = text.splitlines()
-    if len(rows) > MAX_ROWS:
-        raise ValueError('Table row limit')
-    return [row.split('\t') for row in rows]
+def _rows(data, cell_budget):
+    rows = []; cells = 0
+    with io.TextIOWrapper(io.BytesIO(data), encoding='utf-8-sig') as stream:
+        while True:
+            line = stream.readline(MAX_LINE + 1)
+            if not line: break
+            columns = line.count('\t') + 1
+            if '\x00' in line or len(line)>MAX_LINE or len(rows)>=MAX_ROWS or columns>MAX_COLUMNS or cells+columns>cell_budget:
+                raise ValueError('TSV row/column/cell limit')
+            cells += columns
+            rows.append(line.rstrip('\r\n').split('\t'))
+    return rows, cells
 
 
 def _indexed(rows, minimum):
@@ -70,6 +78,7 @@ def observe_native_package(payloads):
         if not isinstance(entries, list) or not 1 <= len(entries) <= 31:
             raise ValueError('Invalid table inventory')
         tables = {}; inventory = []; failed = []; unavailable = []; seen = set(); files = set()
+        cell_budget = MAX_PACKAGE_CELLS
         for entry in entries:
             if not isinstance(entry, dict):
                 raise ValueError('Invalid table metadata')
@@ -79,7 +88,7 @@ def observe_native_package(payloads):
             seen.add(ident)
             if type(entry.get('model_part')) is not int or entry['model_part'] != 0:
                 raise ValueError('Unsupported table scope')
-            if entry.get('status') == 'FAILED':
+            if entry.get('status') in {'FAILED', 'UNAVAILABLE', 'NOT_ATTEMPTED'}:
                 failed.append(ident)
                 continue
             if entry.get('status') != 'EXPORTED':
@@ -92,7 +101,7 @@ def observe_native_package(payloads):
             digest = hashlib.sha256(data).hexdigest()
             if type(entry.get('bytes')) is not int or entry['bytes'] != len(data) or entry.get('sha256') != digest:
                 raise ValueError('Table hash/size mismatch')
-            rows = _rows(data); tables[ident] = rows
+            rows, cells = _rows(data, cell_budget); cell_budget -= cells; tables[ident] = rows
             inventory.append(dict(type_id=ident, rows=len(rows), bytes=len(data), sha256=digest,
                 nonblank_rows=sum(any(cell.strip() for cell in row) for row in rows)))
             if entry.get('parameter_status') != 'READ':
