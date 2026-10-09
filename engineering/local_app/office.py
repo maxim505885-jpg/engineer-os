@@ -18,6 +18,7 @@ MAX_PACKAGE_EXPANDED=512*1024*1024
 MAX_ENTRIES=10000
 MAX_UNITS=50000
 MAX_TABLE_GRID_COLUMNS=1024
+MAX_AUXILIARY_PARTS=128
 
 
 class OfficeError(ValueError):pass
@@ -156,16 +157,12 @@ def word_table_grid(table):
     return result
 
 
-def read_docx(p):
-    root=p.xml('word/document.xml');body=root.find(W+'body')
-    if body is None:raise OfficeError('Missing Word body')
-    out=[];paragraph=0;table=0;limits=['PHYSICAL_PAGES_UNKNOWN','LAYOUT_NOT_VERIFIED']
-    if any('/header' in n or '/footer' in n or n.endswith(('footnotes.xml','endnotes.xml')) for n in p.names):limits.append('HEADERS_FOOTNOTES_NOT_READ')
-    if any('/embeddings/' in n or 'vbaProject' in n for n in p.names):limits.append('EMBEDDED_CONTENT_NOT_READ')
+def word_container_units(body,part):
+    out=[];paragraph=0;table=0
     for child in body:
         if child.tag==W+'p':
             paragraph+=1;text=word_text(child);warnings=word_limits(child)
-            locator=dict(kind='paragraph',part='word/document.xml',paragraph=paragraph)
+            locator=dict(kind='paragraph',part=part,paragraph=paragraph)
             if text or warnings:out.append(unit(text,locator,warnings))
             out.extend(equation_units(child,locator))
         elif child.tag==W+'tbl':
@@ -176,7 +173,7 @@ def read_docx(p):
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
-                    locator=dict(kind='table_cell',part='word/document.xml',table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
+                    locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
                     properties=cell.find(W+'tcPr');merge={}
                     if properties is not None:
                         for name in ('gridSpan','vMerge','hMerge'):
@@ -189,9 +186,70 @@ def read_docx(p):
                     out.append(unit(text,locator,warnings))
                     out.extend(equation_units(cell,locator))
         elif child.tag!=W+'sectPr':
-            locator=dict(kind='unsupported_body',part='word/document.xml',body_index=list(body).index(child)+1)
+            locator=dict(kind='unsupported_body',part=part,body_index=list(body).index(child)+1)
             out.append(unit(word_text(child),locator,['BODY_STRUCTURE_UNVERIFIED']))
             out.extend(equation_units(child,locator))
+    return out
+
+
+def read_docx(p):
+    root=p.xml('word/document.xml');body=root.find(W+'body')
+    if body is None:raise OfficeError('Missing Word body')
+    out=word_container_units(body,'word/document.xml')
+    limits=['PHYSICAL_PAGES_UNKNOWN','LAYOUT_NOT_VERIFIED']
+    if any('/embeddings/' in n or 'vbaProject' in n for n in p.names):limits.append('EMBEDDED_CONTENT_NOT_READ')
+    parts={n:('header' if n.startswith('word/header') else 'footer' if n.startswith('word/footer') else 'footnote' if n=='word/footnotes.xml' else 'endnote')
+           for n in p.names if re.fullmatch(r'word/(?:header[^/]*|footer[^/]*|footnotes|endnotes)\.xml',n)}
+    relations='word/_rels/document.xml.rels'
+    if relations in p.names:
+        from urllib.parse import unquote,urlsplit
+        rel=p.xml(relations);namespace='{http://schemas.openxmlformats.org/package/2006/relationships}'
+        if rel.tag!=namespace+'Relationships':raise OfficeError('Invalid Word relationships')
+        count=0;identities=set()
+        for relation in rel:
+            kind=relation.get('Type','').rsplit('/',1)[-1]
+            if kind not in {'header','footer','footnotes','endnotes'}:continue
+            count+=1
+            if count>MAX_AUXILIARY_PARTS:raise OfficeError('Auxiliary relationship limit')
+            identity=relation.get('Id','')
+            if not identity or identity in identities:raise OfficeError('Duplicate/missing auxiliary relationship ID')
+            identities.add(identity)
+            if relation.tag!=namespace+'Relationship' or relation.get('Type')!=R[1:-1]+'/'+kind:
+                limits.append('HEADERS_FOOTNOTES_NOT_READ');continue
+            target=relation.get('Target','');mode=relation.get('TargetMode','Internal')
+            if mode=='External':limits.append('HEADERS_FOOTNOTES_NOT_READ');continue
+            if mode!='Internal' or not target or len(target)>1024:raise OfficeError('Invalid auxiliary relationship target')
+            target=unquote(target,encoding='utf-8',errors='strict');url=urlsplit(target)
+            if url.scheme or url.netloc or url.query or url.fragment or '\\' in target or '\x00' in target:
+                raise OfficeError('Invalid auxiliary relationship path')
+            path=posixpath.normpath(target.lstrip('/') if target.startswith('/') else posixpath.join('word',target))
+            if path in {'.','..'} or path.startswith('../'):raise OfficeError('Auxiliary path escapes package')
+            if path not in p.names:limits.append('HEADERS_FOOTNOTES_NOT_READ');continue
+            component={'footnotes':'footnote','endnotes':'endnote'}.get(kind,kind)
+            if path in parts and parts[path]!=component:raise OfficeError('Conflicting auxiliary component identity')
+            parts[path]=component
+    if len(parts)>MAX_AUXILIARY_PARTS or any(len(n)>1024 for n in parts):raise OfficeError('Auxiliary Word part limit')
+    if parts:limits.append('AUXILIARY_PLACEMENT_UNVERIFIED')
+    for part,component in sorted(parts.items()):
+        root=p.xml(part);expected={'header':'hdr','footer':'ftr','footnote':'footnotes','endnote':'endnotes'}[component]
+        if root.tag!=W+expected:raise OfficeError('Invalid auxiliary Word root')
+        containers=[(root,{})]
+        if component in {'footnote','endnote'}:
+            containers=[];seen=set()
+            for note in root:
+                note_id=note.get(W+'id','')
+                if note.tag!=W+component or not re.fullmatch(r'-?[0-9]{1,10}',note_id) or int(note_id) in seen:
+                    raise OfficeError('Invalid/duplicate Word note identity')
+                seen.add(int(note_id))
+                containers.append((note,dict(note_id=note_id,note_type=note.get(W+'type','normal'))))
+        for container,identity in containers or [(root,{})]:
+            items=word_container_units(container,part)
+            if not items:items=[unit('',dict(kind='auxiliary_empty',part=part),['NO_TEXT'])]
+            for item in items:
+                item['locator'].update(component=component,scope='PACKAGE_PART_PLACEMENT_UNVERIFIED',**identity)
+                item['limitations']=list(dict.fromkeys(item['limitations']+['AUXILIARY_PLACEMENT_UNVERIFIED']))
+            out.extend(items)
+            if len(out)>MAX_UNITS:raise OfficeError('Document unit limit')
     return out,limits
 
 
@@ -310,14 +368,17 @@ def execute(store,job,stop,*,progress=None):
         key=locator.get('sheet')
         if key is not None:sheets.setdefault(key,[]).append(index)
         key=locator.get('table')
-        if key is not None and locator['kind']=='table_cell':tables.setdefault(str(key),[]).append(index)
+        if key is not None and locator['kind']=='table_cell':tables.setdefault((locator['part'],locator.get('note_id'),str(key)),[]).append(index)
     manifest=dict(scope='PARSED_LOGICAL_UNITS',declared_units=len(units),processed_units=0,unprocessed_units=len(units),
                   sheets=[dict(name=k,units=len(v)) for k,v in sheets.items()],
-                  tables=[dict(table=k,cells=len(v)) for k,v in tables.items()],
+                  tables=[dict(part=k[0],note_id=k[1],table=k[2],cells=len(v)) for k,v in tables.items()],
                   physical_pages=None,limitations=limits,acceptance_granted=False)
     run['coverage_manifest']=manifest
     manifest['source_components']=dict(scope='DECLARED_STRUCTURE_NOT_COMPLETE_DOCUMENT',
         equations=sum(u['locator']['kind']=='equation' for u in units),
+        auxiliary_parts=sorted({u['locator']['part'] for u in units if u['locator'].get('component')}),
+        auxiliary_units=sum(bool(u['locator'].get('component')) for u in units),
+        auxiliary_placement_verified=False,
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
         word_grid_consistent_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='CONSISTENT_SOURCE_STRUCTURE' for u in units),
         word_grid_unresolved_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='UNRESOLVED_SOURCE_STRUCTURE' for u in units),
