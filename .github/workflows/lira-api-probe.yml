@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'tools/lira-api-probe/**'
+      - 'tools/lira-native-export/**'
       - '.github/workflows/lira-api-probe.yml'
 jobs:
   read-only-type-library:
@@ -25,3 +26,6 @@ jobs:
           if ($result.libraries[0].type_library.types.Count -lt 1) { throw 'Missing real type inventory' }
           if ($result.model_exported -or $result.results_exported -or $result.source_model_opened) { throw 'Unexpected model action' }
           Write-Output 'PASS: PowerShell parser, C# compilation, real type-library inventory, no model/solver invocation'
+      - name: Model export contract (no LIRA installed)
+        shell: powershell
+        run: tools/lira-native-export/test-export.ps1
