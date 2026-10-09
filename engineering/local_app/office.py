@@ -1,6 +1,7 @@
 """Bounded OOXML text candidates, never layout/evidence or formula evaluation."""
 import io
 import copy
+import hashlib
 import json
 import posixpath
 import re
@@ -11,8 +12,9 @@ W='{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 M='{http://schemas.openxmlformats.org/officeDocument/2006/math}'
 S='{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
 R='{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
-MAX_XML=8*1024*1024
+MAX_XML=16*1024*1024
 MAX_EXPANDED=32*1024*1024
+MAX_PACKAGE_EXPANDED=512*1024*1024
 MAX_ENTRIES=10000
 MAX_UNITS=50000
 
@@ -30,16 +32,19 @@ class Package:
         self.zip=zipfile.ZipFile(io.BytesIO(data))
         entries=self.zip.infolist();names=[i.filename for i in entries]
         if (len(entries)>MAX_ENTRIES or len(names)!=len(set(names)) or
-                sum(i.file_size for i in entries)>MAX_EXPANDED or
+                sum(i.file_size for i in entries)>MAX_PACKAGE_EXPANDED or
+                sum(i.file_size for i in entries if i.filename.endswith(('.xml','.rels')))>MAX_EXPANDED or
                 any(i.flag_bits&1 or i.filename.startswith('/') or '..' in i.filename.split('/') for i in entries)):
             self.zip.close();raise OfficeError('Invalid/bounded package')
-        self.names=set(names)
+        self.names=set(names);self.xml_bytes=0
 
     def close(self):self.zip.close()
 
     def xml(self,name):
         info=self.zip.getinfo(name)
         if info.file_size>MAX_XML:raise OfficeError('XML size limit')
+        if self.xml_bytes+info.file_size>MAX_EXPANDED:raise OfficeError('XML aggregate read limit')
+        self.xml_bytes+=info.file_size
         data=self.zip.read(name)
         if b'<!DOCTYPE' in data.upper() or b'<!ENTITY' in data.upper():raise OfficeError('XML entities unavailable')
         # UTF16 could hide declarations from the byte scan; reject it rather
@@ -209,13 +214,18 @@ def execute(store,job,stop,*,progress=None):
     file=store.get_file(job['file_ids'][0]);backend=Path(file['name']).suffix.lower()[1:]
     if file['session_id']!=job['session_id']:raise ValueError('Source isolation failure')
     verify_originals([file]);config=parser_identity(backend)
+    source_path=Path(file['path'])
+    def fingerprint():
+        stat=source_path.stat()
+        return stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns
+    source_fingerprint=fingerprint()
     prior=(job['result'] or {}).get('extraction',{})
     if prior and (prior.get('source_sha256')!=file['sha256'] or prior.get('parser_identity')!=config):raise ExtractionFailure('Идентичность Office/источника изменилась; создайте новое задание.')
     conversion=None
     try:
         data=Path(file['path']).read_bytes()
+        if hashlib.sha256(data).hexdigest()!=file['sha256'] or fingerprint()!=source_fingerprint:raise OfficeError('Original identity changed')
         if backend=='doc':
-            import hashlib
             folder=store.root/'derived';folder.mkdir(exist_ok=True);target=folder/(job['id']+'.docx')
             saved=prior.get('conversion')
             if saved:
@@ -269,11 +279,13 @@ def execute(store,job,stop,*,progress=None):
         reasons=list(item['limitations'])+(['TEXT_LIMIT'] if clipped else [])
         blocks=[dict(block_id='office:'+str(index),kind=item['locator']['kind'],text=text,locator=item['locator'],provenance=[])] if text else []
         if not blocks:reasons.append('NO_TEXT')
-        verify_originals([file])
+        if fingerprint()!=source_fingerprint:raise ExtractionFailure('Office original changed during extraction')
         store.save_extraction_page(job['id'],dict(page=index,logical_unit=index,execution='COMPLETED',status='BLOCK' if reasons else 'UNCERTAINTY',
             blocks=blocks,stored_chars=len(text),text_truncated=clipped,limitations=reasons,locator=item['locator'],source_sha256=file['sha256'],
             scope='UNVERIFIED_EXTRACTION',ocr='NOT_APPLICABLE',acceptance_granted=False))
         checkpoint()
+    verify_originals([file])
+    if fingerprint()!=source_fingerprint:raise ExtractionFailure('Office original changed during extraction')
     run['cycle_complete']=run['processed_pages']==len(units);checkpoint()
     if run['budget_exhausted']:raise ExtractionFailure('Лимит сохранённого текста достигнут; часть элементов Office не обработана.')
     return result

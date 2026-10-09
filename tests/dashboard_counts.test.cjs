@@ -4,6 +4,16 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 
+test('local upload uses 256 MiB only for OOXML extensions', () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const match=source.match(/function uploadLimitBytes\(name\)\{[^\n]+\}/);
+  assert.ok(match,'local upload size policy missing');
+  const context={};vm.createContext(context);vm.runInContext(match[0],context);
+  assert.equal(context.uploadLimitBytes('report.DOCX'),256*1024*1024);
+  assert.equal(context.uploadLimitBytes('table.xlsx'),256*1024*1024);
+  assert.equal(context.uploadLimitBytes('report.docx.exe'),100*1024*1024);
+});
+
 function app(responses) {
   const calls = [];
   const elements = new Map();

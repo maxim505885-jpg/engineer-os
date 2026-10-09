@@ -6,7 +6,7 @@ import secrets
 import threading
 import time
 from urllib.parse import urlsplit,parse_qs,quote
-from .files import preserve_file,MAX_FILE_BYTES
+from .files import preserve_file,file_limit
 from .store import ReviewConflict
 
 UI=Path(__file__).parent/'ui'
@@ -205,7 +205,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         if len(names)!=1:raise RequestProblem(400,'Filename required')
                         if self.headers.get('Content-Type')!='application/octet-stream':raise RequestProblem(415,'Binary content type required')
                         if not self.server.upload_slots.acquire(blocking=False):raise RequestProblem(429,'Another upload is busy; retry shortly')
-                        try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
+                        try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(file_limit(names[0]))))
                         finally:self.server.upload_slots.release()
                 if len(parts)>=6 and parts[:2]==['api','sessions'] and parts[3]=='jobs':
                     if len(parts)==6 and parts[5] in {'cancel','retry'} and post:

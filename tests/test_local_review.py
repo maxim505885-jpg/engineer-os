@@ -18,6 +18,23 @@ class LocalReviewTests(unittest.TestCase):
         args=dict(expected_revision=revision,decision=decision,note='Quote checked against original',actor='Local reviewer');args.update(overrides)
         return record_review(self.store,self.session,self.candidate['id'],**args)
 
+    def test_review_identity_uses_bounded_stream_reads(self):
+        from unittest.mock import patch
+        original_open=Path.open
+        class BoundedReader:
+            def __init__(self,stream):self.stream=stream
+            def __enter__(self):return self
+            def __exit__(self,*args):return self.stream.__exit__(*args)
+            def __getattr__(self,name):return getattr(self.stream,name)
+            def read(self,size=-1):
+                if size<0 or size>1024*1024:raise AssertionError('Original verification must stream bounded chunks')
+                return self.stream.read(size)
+        def bounded_open(path,*args,**kwargs):return BoundedReader(original_open(path,*args,**kwargs))
+        with patch.object(Path,'open',bounded_open):
+            result=self.review(decision='NEEDS_DATA')
+        self.assertEqual(result['decision'],'NEEDS_DATA')
+        self.assertFalse(result['acceptance_granted'])
+
     def test_append_only_decisions_survive_restart_without_acceptance(self):
         first=self.review();second=self.review(1,'REJECTED',note='Needs correction')
         r=Store(self.tmp.name).snapshot(self.session)['evidence'][0]

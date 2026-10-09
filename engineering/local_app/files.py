@@ -8,8 +8,13 @@ from .store import identifier
 from .coverage import unknown_coverage
 
 MAX_FILE_BYTES=100*1024*1024
+MAX_OFFICE_FILE_BYTES=256*1024*1024
 MAX_TEXT=100000
 SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg'}
+
+
+def file_limit(name):
+    return MAX_OFFICE_FILE_BYTES if Path(name).suffix.lower() in {'.docx','.xlsx'} else MAX_FILE_BYTES
 
 
 def validate_image(data):
@@ -120,7 +125,7 @@ def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
     if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG')
-    if not isinstance(data,bytes) or not data or len(data)>MAX_FILE_BYTES:raise ValueError('Original must contain 1 byte–100 MiB')
+    if not isinstance(data,bytes) or not data or len(data)>file_limit(name):raise ValueError('Original exceeds file limit: '+str(file_limit(name)//1024//1024)+' MiB')
     store.snapshot(session_id)
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)
     path=folder/(ident+Path(name).suffix.lower())
