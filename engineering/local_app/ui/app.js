@@ -125,7 +125,7 @@ function setUIMode(mode){
 modeToggle.onclick=()=>setUIMode(document.body.dataset.uiMode==='advanced'?'normal':'advanced');
 try{setUIMode(localStorage.getItem('engineer-os-ui-mode')||'normal');}catch(_){setUIMode('normal');}
 
-(async()=>{try{const list=await sessions();if(list.length)await switchSession(list[0].id);else await createSession();}catch(e){error(e);}controls();poll();pollStatus();})();
+(async()=>{try{const list=await sessions();if(!current&&!creating){if(list.length)await switchSession(list[0].id);else await createSession();}}catch(e){error(e);}controls();poll();pollStatus();})();
 
 // Domain forms are kept mounted: polling never replaces an unsaved input.
 let domainRevision=0,domainOptionsKey='';

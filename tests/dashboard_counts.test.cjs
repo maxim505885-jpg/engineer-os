@@ -14,6 +14,21 @@ test('local upload uses 256 MiB only for OOXML extensions', () => {
   assert.equal(context.uploadLimitBytes('report.docx.exe'),100*1024*1024);
 });
 
+test('late initial session list preserves user-created conversation', async () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const initializer=source.match(/\(async\(\)=>\{try\{const list=await sessions\(\);[^\n]+pollStatus\(\);\}\)\(\);/);
+  assert.ok(initializer,'local session initializer missing');
+  for(const state of [{current:'user-created',creating:false},{current:null,creating:true}]){
+    let release;const actions=[];
+    const context={current:null,creating:false,sessions:()=>new Promise(resolve=>{release=resolve;}),
+      switchSession:async id=>actions.push('switch:'+id),createSession:async()=>actions.push('create'),
+      controls:()=>{},poll:()=>{},pollStatus:()=>{},error:error=>{throw error;}};
+    vm.createContext(context);const initialized=vm.runInContext(initializer[0],context);
+    Object.assign(context,state);release([{id:'old-conversation'}]);await initialized;
+    assert.deepEqual(actions,[],'Late bootstrap response must preserve user action');
+  }
+});
+
 function app(responses) {
   const calls = [];
   const elements = new Map();
