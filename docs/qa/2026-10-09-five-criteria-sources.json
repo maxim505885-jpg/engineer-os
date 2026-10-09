@@ -218,5 +218,47 @@
       },
       "native_identity": null
     }
-  ]
+  ],
+  "ocr_check": {
+    "scope": "EXECUTED_UNVERIFIED",
+    "processed_pages": 43,
+    "text_chars": 66349,
+    "ocr_blocks": 2615,
+    "failed_pages": 0,
+    "blocked_pages": 43,
+    "render_diagnostics": "MuPDF emitted object-out-of-range/xref warnings; rendering completeness is not verified",
+    "sources": [
+      {
+        "source_label": "source-3",
+        "source_sha256": "6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce",
+        "pages": 22,
+        "text_chars": 13877,
+        "ocr_blocks": 853,
+        "failed_pages": 0,
+        "blocked_pages": 22,
+        "limitations": {
+          "VECTOR_CONTENT_UNVERIFIED": 22,
+          "OCR_TEXT_UNVERIFIED": 22,
+          "OCR_LOW_CONFIDENCE": 22
+        },
+        "acceptance_granted": false
+      },
+      {
+        "source_label": "source-5",
+        "source_sha256": "fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c",
+        "pages": 21,
+        "text_chars": 52472,
+        "ocr_blocks": 1762,
+        "failed_pages": 0,
+        "blocked_pages": 21,
+        "limitations": {
+          "VECTOR_CONTENT_UNVERIFIED": 21,
+          "OCR_TEXT_UNVERIFIED": 21,
+          "OCR_LOW_CONFIDENCE": 21
+        },
+        "acceptance_granted": false
+      }
+    ],
+    "acceptance_granted": false
+  }
 }

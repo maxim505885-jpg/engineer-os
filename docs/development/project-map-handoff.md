@@ -15,3 +15,5 @@ PR92/head e4eaf3509e953118e5e3ed8c979d5ea28bad121f:Windows clean start/cache rep
 DWG действительно сохранён среди исходников. Пять копий byte-identical, 1 уникальный AC1032. GNU LibreDWG0.14 создал отдельный DXF: 15 906 объектов, 287 блоков, 32 слоя. CAD_ENTITY_LIMIT и предупреждения/ошибки конвертации сохраняют BLOCK; original geometry equivalence NOT_VERIFIED. Это заменяет прежнюю формулировку «DWG отсутствует».
 
 PR92 head6032367 исправляет DOM teardown race и канонизацию путей в Windows assertion. Локальный DOM дважды PASS exit0. Последний предшествующий native Windows: 23 tests + реальный Ollama qwen3:0.6b inference PASS; полный новый CI ещё выполняется. Программный результат не закрывает физическую перезагрузку, полноту инженерных источников и положительный FINAL_AUDIT.
+
+Последнее уточнение: фактический OCR обоихPDF43/43,2615блоков,0failed,43BLOCK с low-confidence и непроверенной векторной графикой. Реальное восстановление/первый Windows browser PASS на5d776; следующий testfixture исправлен cwd:root в ff586382. Полный CI последнегоhead выполняется. Подробности:§68.6 карты.
