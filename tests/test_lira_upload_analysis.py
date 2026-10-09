@@ -1,4 +1,5 @@
 import io
+import struct
 import tempfile
 import unittest
 import zipfile
@@ -97,3 +98,43 @@ class LiraUploadAnalysisTests(unittest.TestCase):
         coverage = extract_preview('model.txt', data)[4]
         self.assertIn('CHAR_LIMIT', coverage['stop_reasons'])
         self.assertNotIn('CHAR_LIMIT', coverage['calculation_report']['reasons'])
+
+    def test_truncated_zip_header_keeps_original_uploadable(self):
+        report = self.report('broken.zip', b'PK\x05\x06')
+        self.assertIn('ARCHIVE_INVENTORY_LIMIT_OR_INVALID', report['reasons'])
+
+    def test_forged_zip_count_does_not_bypass_entry_budget(self):
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, 'w') as z:
+            for i in range(65): z.writestr(str(i)+'.txt', MODEL)
+        data = bytearray(stream.getvalue()); offset = data.rfind(b'PK\x05\x06')
+        struct.pack_into('<HH', data, offset+8, 1, 1)
+        report = self.report('forged.zip', bytes(data))
+        self.assertIn('ARCHIVE_INVENTORY_LIMIT_OR_INVALID', report['reasons'])
+        self.assertEqual(report['members'], [])
+
+    def test_empty_member_does_not_erase_model_observations(self):
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, 'w') as z:
+            z.writestr('model.txt', MODEL); z.writestr('empty.txt', b'')
+        report = self.report('model.zip', stream.getvalue())
+        self.assertEqual(report['members'][0]['report']['observations']['elements'], 1)
+        self.assertEqual(report['members'][1]['status'], 'NOT_ANALYZED')
+
+    def test_oversized_document_id_is_reported_without_losing_original(self):
+        data = MODEL+b'('+b'9'*4301+b'/)'
+        report = self.report('model.txt', data)
+        self.assertIn('INVALID_DOCUMENT_FRAMING', report['reasons'])
+
+    def test_corrupt_deflate_is_reported_without_losing_original(self):
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, 'w', zipfile.ZIP_DEFLATED) as z:
+            z.writestr('a.txt', b'A'*10000)
+        data = bytearray(stream.getvalue()); data[35:38] = b'\xff\xff\xff'
+        report = self.report('broken.zip', bytes(data))
+        self.assertIn('ARCHIVE_UNREADABLE', report['reasons'])
+
+    def test_document_inventory_is_bounded_before_dossier_storage(self):
+        data = MODEL+b''.join(('('+str(i)+'/)').encode() for i in range(100,400))
+        report = self.report('model.txt', data)
+        self.assertIn('DOCUMENT_INVENTORY_LIMIT', report['reasons'])
