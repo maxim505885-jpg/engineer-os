@@ -1,4 +1,4 @@
-# Текущий результат — §92: PR108 full-document coverage; native tail fix/V4 render PASS,real Store/CI выполняются;№13 открыт
+# Текущий результат — §92 итог: PR108 merged,e0754b2;real DOCX/V4/CI PASS,№13 открыт по qualified полноте
 
 # Текущий результат — §91 итог: PR107 merged, кандидат6d59ea1; real120 rasters/CI PASS, №13 открыт
 
@@ -44,7 +44,7 @@
 
 # Передача состояния ENGINEER OS
 
-**Активный план:** расчёты отложены. №13: PR108 native tail fix и fullV4 render/OCR gap inventory;local857 PASS;real Store resume/Word render/CI выполняются (§92). Кандидат6d59ea1;qualified полнота ещё не подтверждена;8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. §92 итог: PR108 MERGED, кандидатe0754b2;Core857/Windows55/Security SUCCESS;реальный DOCX Store послеresume14684/14684,749/749 controlled-model batches;V4 renders534/534. №13 открыт:qualified tables/graphics/formulas/OCR/Word-layout/corpus.8✅/8🟡/3❌.
 
 
 ## 74.1. Итог — native Word grid и вертикальные объединения
@@ -336,3 +336,13 @@ V4 найден через Google Drive ID1Ycw-dcevqNSHgvb_y0pVa7B1lM4uhK6g;7452
 Audit проверяет byte/page/pixel limits,исходныйSHA до/после,сохраняет полный постраничный журнал и OCR scope UNVERIFIED. Initial bounded source read и streaming final hash. Review обнаружил пропуск финального журнала при исчезновении исходника:исправлен с RED/GREEN regression,SOURCE_IDENTITY_UNAVAILABLE и render_cycle_complete=false. Независимый повторный review:blocking findings нет. Локально857 tests/65.906s OK,17 environment skips;6 targeted,10Node,2HTTP/DOM,5Chromium PASS;architecture/compile/JS/diff PASS. Windows suite добавляет6 tests,ожидается55. Первый browser запуск не выполнен из-за отсутствующего Chromium binary;после установки финальные маршруты PASS,не production defect.
 
 №13 остаётся❌ до фактического выполнения всех критериев. Полный original Store/model ещё не PASS;полная Word/EMF layout отрисовка,растровые/mixed tables/ячеечные связи,visual formula fidelity,OCR exactness/conflicts и qualified multi-document corpus не подтверждены. НаПК пользователя не установлено,инженерно не принято.8✅/8🟡/3❌;расчёты ЛИРА/RES отложены. Далее — завершить диагностируемые реальные прогоны и source-bound qualified визуальную сверку,не начинать ещё один счётчиковый подэтап. Receipt:docs/qa/2026-10-10-document-visual-coverage.md.
+
+### Итог §92 — PR108 объединён; №13 остаётся открытым
+
+PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9333ec9d35a67618f**, tree **5dd2b66194be961a73dd68a2601b48ac6c778611** точно совпадает с проверенным head70db597b178e419428588ab63aa6dec4b71af157. GitHub Core38002094577 SUCCESS:857 tests/2 Windows-only skips;Windows38002094533 SUCCESS:55 tests,live Ollama и5 Chromium маршрутов;Security38002094570 SUCCESS.
+
+Полный исходный DOCX после штатного resume завершил Store/Worker/controlled-model:SUCCEEDED,14684/14684 journal units,0 truncated,749/749 batches,summary_input_clipped=false,text_omitted=false,budget_exhausted=false. Отдельное повторное чтение SQLite подтвердило сохранённый результат;1492 сохранённых receipts(1491 COMPLETED,1 RUNNING),1496 model calls. Это расхождение требует сверки;полнота real receipt журнала НЕ подтверждена,несмотря на SUCCEEDED и749/749 в job report. Модель controlled office-test-1,не live inference пользователя. Первый запуск FAILED14505/14684;его причина не установлена,повтор не выдаётся за исправление неизвестной ошибки.7031 логический элемент сохраняет ограничения/недостаток подтверждения;это не7031 дефект конструкции. SHA оригинала неизменён. Native сохранение проверено отдельно по base:14684 units,671 refs,3394 EMF text-record refs.
+
+Финальный повтор V4 audit завершён:534/534 PNG,source SHA неизменён,40/40 страниц492–531 с OCR candidates,62189 chars,1682 low-confidence blocks. Пер-page bbox/native SHA/PNG SHA/OCR SHA сохранены. Это воспроизводимый визуальный реестр и непроверенные кандидаты;структура таблиц,точность подписей,формулы и смысл графики не сертифицированы. Полный Word-layout export LibreOffice не завершён в ограниченном локальном пробном запуске;эквивалентность Word/V4 и применение колонтитулов/сносок к страницам не подтверждены.
+
+**№13 НЕ ЗАКРЫТ.** Реальный пробел:qualified соответствие mixed/raster ячеек и графических подписей источнику,визуальная сверка41 OMML формулы,OCR exactness/conflict adjudication,полная Word/EMF layout проверка и представительный multi-document corpus. Не ослаблять критерии до счётчиков. Следующий проход должен закрывать именно эти информационные потери и эталонные сверки. №14/19 остаются открыты;план8✅/8🟡/3❌. НаПК пользователя не установлено,инженерно не принято;ЛИРА/RES/расчёты отложены. JSON receipt:`docs/qa/2026-10-10-document-visual-coverage-ci.json`.
