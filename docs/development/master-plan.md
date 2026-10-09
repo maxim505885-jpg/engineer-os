@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** расчёты отложены. №13: native EMF text в кандидате01c86061;119 embedded raster sources проверены в PR106, CI выполняется (§90). Полный rendering/unsupported bitmap/формулы/mixed tables/V4/qualified corpus открыты;8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. №13: native EMF text и embedded raster preview включены в кандидатebcafaa6 (PR106);real119 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed tables/V4/qualified corpus открыты;8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -14,11 +14,11 @@
 | 6 | Нормативная и расчётная верификация | 🟡 Частично | Расчётная часть отложена пользователем09.10.2026. Native input ZIP в кандидате PR101; R4 helper PR102 отдельно, real RES/KE57/нагрузки/полные сочетания/model→run/нормы открыты; §§85–87. |
 | 7 | Реальный инженерный case workflow | ✅ отрицательный сценарий | Три оригинала,36 кандидатов, роли и нормативный replay воспроизводимы; объект не ACCEPTED. Положительный сценарий в№14. |
 | 8 | FINAL AUDIT / acceptance boundary | ✅ программный контур | Immutable/stale/tamper/foreign source gates. Нет подтверждённого положительного инженерного объекта. |
-| 9 | Windows one-click runtime | 🟡 | Native Windows CI полностью PASS: clean start/cache repair/restart, 23 tests, live Ollama, 4 Chromium routes. Physical PC clean install/reboot остаётся. |
+| 9 | Windows one-click runtime | 🟡 | Native Windows CI PASS: cold/repeat/restart,42 tests,live Ollama и5 Chromium workflows (§90 итог). Physical PC clean install/reboot остаётся. |
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
-| 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков. Все4 browser маршрута, включая CAD/memory/mobile/session reset, прошли. Финальная приёмка интерфейса на реальном accepted объекте остаётся. |
+| 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text в кандидате01c86061; embedded rasters119/120 доступны/real exact RGB PASS в PR106, CI выполняется (§90). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text и embedded raster preview в кандидатеebcafaa6 (PR106);real119/120 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -40,11 +40,11 @@
 | 6 | 4/13 | Форматы/полнота |
 | 7 | 5/7 | ТЗ/ядро |
 | 8 | 6 нормы | Нормативы |
-| 9 | 6 расчёт | Solver, отложено |
+| 9 | Windows one-click runtime | 🟡 | Native Windows CI PASS: cold/repeat/restart,42 tests,live Ollama и5 Chromium workflows (§90 итог). Physical PC clean install/reboot остаётся. |
 | 10 | 16 | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
-| 11 | 17 | CAD |
+| 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | 14 | Принятый кейс |
-| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text в кандидате01c86061; embedded rasters119/120 доступны/real exact RGB PASS в PR106, CI выполняется (§90). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text и embedded raster preview в кандидатеebcafaa6 (PR106);real119/120 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | 11 | Финальный UI |
 | 15 | 12 | Надёжность |
 | 16 | 9 | Windows, отложено |
@@ -413,3 +413,12 @@ Authenticated существующий images endpoint принимает пол
 Локально844 Python tests/64.855s OK,17 environment skips;31 focused tests,10 Node,2 HTTP/DOM и5 Chromium workflows PASS. Последний browser маршрут теперь проверяет и исходный PNG, и native EMF text, и embedded raster PNG с честной подписью. Windows CI включает7 bitmap tests. Architecture/compile/JS/diff PASS. Independent review: Critical/Important нет; minor coverage suggestions закрыты nonzero reserved byte/source-free/unaligned/unsupported header/byte-boundary/auth+invalid ordinal HTTP сценариями, новых дефектов не установлено. Первичная RED проверка воспроизвела потерю raster metadata и отсутствие preview API.
 
 Закрыт подэтап source-bound embedded raster extraction/preview; №13 остаётся❌,план8✅/8🟡/3❌. Полный EMF playback/vector graphics, unsupported image465, full Word/PDF visual coverage, raster/mixed tables/OCR conflicts/formula visual correspondence, V4 и qualified corpus открыты. Physical PC не обновлялся, инженерное принятие отсутствует. Следующий шаг — чтение unsupported bitmap header и визуальное покрытие смешанной графики/таблиц на реальном источнике, без возвращения к расчётам. QA:docs/qa/2026-10-09-emf-embedded-raster.md.
+
+
+### Итог §90 — включено в кандидат
+
+PR106 MERGED squash с expected_head guard5951370b9aa11341f002ae8f48b1ab003d0ffa4f. Кандидатebcafaa69c1a715f3e969fbcf1aa614f2e115533; git fetch подтвердил точное полное дерево54c6d29f95636df516df7c9edb66424ef21c7378, совпавшее с проверенным локальным и опубликованным head. Все final-head CI SUCCESS: Core37986924886/job114011117658 —844 tests/91.266s OK,2 Windows-only skips,10 Node,2 HTTP/DOM и5 Chromium workflows; Windows37986925006/job114011117953 —42 tests/12.909s OK (включая7 bitmap tests),cold/repeat/restart,real Ollama qwen3:0.6b inference и5 browser workflows; Security37986925016 SUCCESS. Embedded raster UI/HTTP/source identity/bitmap ordinal/explicit unrendered scope проверены на Windows и Linux CI. Программный PASS не означает проверку пользовательского ПК.
+
+В реальном оригинале доступны119 embedded raster sources из120 обнаруженных; полные RGB arrays точно совпали с независимым BMP decoder. Неизменность исходного SHA подтверждена. В отдельном контрольном процессе real Store extraction/checkpoint/source revalidation/preview для unit168 прошёл, processed168/14684,cycle_complete=false,model NOT_RUN;792x395 PNG SHA250f5bcad4ccf091e8c1dcdf2fc7683394a2c6ac98b6633d7bc9bc8e685c56c4. Это не полный Store/model прогон и не проверка reload всего большого Store. Старые/неполные промежуточные probe snapshots не считаются полным прогоном; утверждения о persistent history основаны на контролируемых regression/CI workflows, не на этом real-file probe.
+
+№13 остаётся❌: bitmap pixel extraction/preview закрыт в указанном объёме; image465/полная EMF vector отрисовка/Word placement/full visual coverage/таблицы/OCR conflicts/формулы/V4/qualified corpus открыты.8✅/8🟡/3❌. На ПК пользователя не установлено; инженерно не принято. Следующий конкретный пробел — unsupported bitmap header и смешанная графика/таблицы; расчёты ЛИРА/RES отложены.
