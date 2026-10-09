@@ -102,3 +102,123 @@ class LocalOCRTests(unittest.TestCase):
         tsv=header+'5\t1\t1\t1\t1\t1\t10\t10\t10\t10\t90\t"\n'+'5\t1\t1\t1\t1\t2\t30\t10\t30\t10\t90\tHeight\n'
         blocks=module.TesseractOCR._blocks(tsv,1,1,100,100)
         self.assertEqual(blocks[0]['text'],'" Height');self.assertNotIn('\t',blocks[0]['text'])
+
+    def test_region_mode_preserves_whole_pass_and_cropped_rotated_coordinates(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}),fitz.open() as document:
+            page=document.new_page(width=600,height=800)
+            page.insert_text((160,220),'Height 4 metres',fontsize=30)
+            page.insert_text((320,580),'Width 8 metres',fontsize=30)
+            page.set_cropbox(fitz.Rect(100,100,550,700));page.set_rotation(90)
+            crop=list(page.cropbox);recognizer=module.TesseractOCR()
+            blocks=recognizer.page_blocks(page,1)
+            self.assertTrue({'whole','r1'}<={b.get('ocr_region') for b in blocks})
+            self.assertTrue({b.get('ocr_region') for b in blocks}<={'whole','r1','r2','r3','r4'})
+            regional=[b for b in blocks if b.get('ocr_region')!='whole' and 'Height' in b['text']]
+            self.assertTrue(regional)
+            box=regional[0]['provenance'][0]['bbox']
+            self.assertTrue(50<=box['left']<=80 and 90<=box['top']<=130,box)
+            self.assertEqual(page.rotation,90);self.assertEqual(list(page.cropbox),crop)
+            self.assertEqual(len({b['block_id'] for b in blocks}),len(blocks))
+            dossier=recognizer.last_page_dossier
+            self.assertEqual(dossier['completed_passes'],5)
+            self.assertEqual(dossier['coverage'],'WHOLE_PAGE_AND_REGIONS_EXECUTED')
+            self.assertFalse(dossier['quality_verified'])
+            self.assertFalse(dossier['acceptance_granted'])
+
+    def test_region_worker_persists_coverage_but_never_claims_acceptance(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}):
+            with fitz.open() as document:
+                document.new_page().insert_text((60,120),'Height 4 metres',fontsize=30)
+                original=document.tobytes()
+            file=preserve_file(self.store,self.session,'regions.pdf',original)
+            job=self.store.enqueue_extraction(self.session,file['id'],'ocr');Worker(self.store,None).run_once()
+            record=self.store.extraction_page(self.session,job['id'],1)
+            self.assertEqual(record['ocr_dossier']['completed_passes'],5)
+            self.assertIn('OCR_REGION_CANDIDATES_UNMERGED',record['limitations'])
+            self.assertFalse(record['acceptance_granted'])
+            self.assertEqual(Path(self.store.get_file(file['id'])['path']).read_bytes(),original)
+            with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'whole'}):
+                from engineering.local_app.analysis_identity import parser_identity
+                self.assertNotEqual(self.store.extraction_job(self.session,job['id'])['result']['extraction']['parser_identity'],parser_identity('ocr'))
+
+    def test_layout_is_part_of_parser_identity_and_invalid_layout_is_rejected(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'whole'}):whole=module.identity()
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}):regional=module.identity()
+        self.assertNotEqual(whole,regional)
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'unexpected'}):
+            with self.assertRaisesRegex(module.OCRError,'OCR_INVALID_LAYOUT'):module.TesseractOCR()
+
+    def _fake_tesseract(self,command,**kwargs):
+        from types import SimpleNamespace
+        header='level\tpage_num\tblock_num\tpar_num\tline_num\tword_num\tleft\ttop\twidth\theight\tconf\ttext\n'
+        text=header+'5\t1\t1\t1\t1\t1\t10\t10\t10\t10\t90\tHeight\n'
+        Path(command[2]).with_suffix('.tsv').write_text(text)
+        return SimpleNamespace(returncode=0)
+
+    def test_region_output_budget_is_shared_and_partial_page_is_not_success(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page();page.set_rotation(180)
+            with patch.object(module,'MAX_OUTPUT',220),patch.object(module.subprocess,'run',side_effect=self._fake_tesseract):
+                with self.assertRaisesRegex(module.OCRError,'OCR_OUTPUT_LIMIT'):recognizer.page_blocks(page,1)
+            self.assertEqual(page.rotation,180)
+            self.assertLess(recognizer.last_page_dossier['completed_passes'],5)
+            self.assertEqual(recognizer.last_page_dossier['coverage'],'INCOMPLETE')
+
+    def test_region_word_budget_is_shared(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page()
+            with patch.object(module,'MAX_WORDS',2),patch.object(module.subprocess,'run',side_effect=self._fake_tesseract):
+                with self.assertRaisesRegex(module.OCRError,'OCR_WORD_LIMIT'):recognizer.page_blocks(page,1)
+
+    def test_region_timeout_is_shared_between_passes(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page()
+            clock=[0]
+            def slow(command,**kwargs):
+                result=self._fake_tesseract(command,**kwargs);clock[0]+=31;return result
+            with patch.object(module.subprocess,'run',side_effect=slow),patch.object(module.time,'monotonic',side_effect=lambda:clock[0]):
+                with self.assertRaisesRegex(module.OCRError,'OCR_TIMEOUT'):recognizer.page_blocks(page,1)
+            self.assertEqual(recognizer.last_page_dossier['completed_passes'],1)
+
+    def test_late_final_pass_cannot_claim_complete_coverage(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'whole'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page();clock=[0]
+            def late(command,**kwargs):
+                result=self._fake_tesseract(command,**kwargs);clock[0]=61;return result
+            with patch.object(module.subprocess,'run',side_effect=late),patch.object(module.time,'monotonic',side_effect=lambda:clock[0]):
+                with self.assertRaisesRegex(module.OCRError,'OCR_TIMEOUT'):recognizer.page_blocks(page,1)
+            self.assertEqual(recognizer.last_page_dossier['coverage'],'INCOMPLETE')
+
+    def test_region_pixel_budget_is_shared(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'regions'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page(width=100,height=100)
+            with patch.object(module,'MAX_PAGE_PIXELS',70000),patch.object(module.subprocess,'run',side_effect=self._fake_tesseract):
+                with self.assertRaisesRegex(module.OCRError,'OCR_PIXEL_LIMIT'):recognizer.page_blocks(page,1)
+
+    def test_late_parsing_cannot_claim_complete_coverage(self):
+        module=importlib.import_module('engineering.local_app.ocr')
+        if not module.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        with patch.dict(os.environ,{'ENGINEER_OS_OCR_LAYOUT':'whole'}),fitz.open() as document:
+            recognizer=module.TesseractOCR();page=document.new_page();clock=[0]
+            original=recognizer._blocks
+            def late(*args,**kwargs):
+                blocks=original(*args,**kwargs);clock[0]=61;return blocks
+            with patch.object(module.subprocess,'run',side_effect=self._fake_tesseract),patch.object(module.time,'monotonic',side_effect=lambda:clock[0]),patch.object(recognizer,'_blocks',side_effect=late):
+                with self.assertRaisesRegex(module.OCRError,'OCR_TIMEOUT'):recognizer.page_blocks(page,1)
+            self.assertEqual(recognizer.last_page_dossier['coverage'],'INCOMPLETE')

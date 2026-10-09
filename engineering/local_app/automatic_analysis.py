@@ -81,7 +81,14 @@ def prepare(store,job,stop,*,model=None):
                 for reason in record['limitations']:
                     if reason not in source['limitations']:source['limitations'].append(reason)
                 if len(source['unavailable_pages'])<50:source['unavailable_pages'].append(page)
-            text='\n'.join(b['text'] for b in record['blocks'])
+            regional=(record.get('ocr_dossier') or {}).get('layout')=='regions'
+            if regional:
+                source['ocr_layout']='regions'
+                if 'OCR_REGION_CANDIDATES_UNMERGED' not in source['limitations']:
+                    source['limitations'].append('OCR_REGION_CANDIDATES_UNMERGED')
+                source['ocr_candidates']='OVERLAPPING_ALTERNATIVES_NOT_INDEPENDENT_EVIDENCE'
+                text='\n'.join(f"[OCR pass {b['ocr_region']}; page {page}; overlapping alternative, not independent evidence]\n{b['text']}" for b in record['blocks'])
+            else:text='\n'.join(b['text'] for b in record['blocks'])
             if record['text_truncated']:report['text_omitted']=True
             start=0
             while start<len(text) and remaining>0:
@@ -95,6 +102,7 @@ def prepare(store,job,stop,*,model=None):
                                             logical_unit=record.get('logical_unit'),locator=record.get('locator'),start=start,end=start+size,
                                             batch_start=batch_start,batch_end=batch_start+size,
                                             text_sha256=hashlib.sha256(segment.encode()).hexdigest()))
+                if regional:current['refs'][-1]['ocr_candidates']='OVERLAPPING_ALTERNATIVES_NOT_INDEPENDENT_EVIDENCE'
                 remaining-=size;start+=size
             if start<len(text):report['text_omitted']=True
     flush();report['batches_total']=len(batches);report['stage']='ANALYZING'

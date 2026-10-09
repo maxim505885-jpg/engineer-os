@@ -43,6 +43,25 @@ class AutomaticDocumentAnalysisTests(unittest.TestCase):
         self.assertEqual(job['result']['document_analysis']['sources'][0]['total_pages'],24)
         self.assertFalse(job['result']['acceptance_granted'])
 
+    def test_overlapping_ocr_passes_remain_labelled_in_model_payload(self):
+        from unittest.mock import patch
+        from engineering.local_app import ocr
+        if not ocr.identity()['available']:self.skipTest('Local rus+eng models unavailable')
+        import fitz
+        with fitz.open() as doc:
+            doc.new_page().insert_text((60,120),'Height 4 metres',fontsize=30)
+            file=preserve_file(self.store,self.session,'regional.pdf',doc.tobytes())
+        self.store.enqueue(self.session,'Read',[file['id']]);model,calls=self.model()
+        with patch.dict('os.environ',{'ENGINEER_OS_ATTACHMENT_PARSER':'ocr','ENGINEER_OS_OCR_LAYOUT':'regions'}):
+            Worker(self.store,model).run_once()
+        self.assertEqual(self.result()['state'],'SUCCEEDED')
+        payload=json.loads(calls[0][-1]['content'].split('\n',1)[1])
+        self.assertIn('[OCR pass whole;',payload['text'])
+        self.assertIn('[OCR pass r1;',payload['text'])
+        self.assertIn('OCR_REGION_CANDIDATES_UNMERGED',payload['sources_report'][0]['limitations'])
+        self.assertEqual(payload['refs'][0]['ocr_candidates'],'OVERLAPPING_ALTERNATIVES_NOT_INDEPENDENT_EVIDENCE')
+        self.assertFalse(self.result()['result']['acceptance_granted'])
+
     def test_large_pdf_all_text_batches_are_analyzed_and_receipts_persist(self):
         f=self.pdf([('PAGE_'+str(i)+' '+'native source '*450) for i in range(1,7)])
         self.store.enqueue(self.session,'Read all selected pages',[f['id']])
