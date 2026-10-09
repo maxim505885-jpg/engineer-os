@@ -15,7 +15,7 @@ from engineering.local_app.lock import DataLock
 class RecoveryUITests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
-        self.base=Path(self.tmp.name);self.root=self.base/'data';self.store=Store(self.root)
+        self.base=Path(self.tmp.name).resolve();self.root=self.base/'data';self.store=Store(self.root)
         self.sid=self.store.create_session('Restore project')['id']
         self.file=preserve_file(self.store,self.sid,'Original.md','Original height 4m'.encode())
         self.store.enqueue(self.sid,'Saved history',[])

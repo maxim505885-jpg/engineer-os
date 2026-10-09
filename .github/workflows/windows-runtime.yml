@@ -1,0 +1,126 @@
+name: Windows local runtime
+
+on:
+  push:
+    branches: ["feat/five-criteria-completion-20261009", "integration/release-candidate-v1"]
+  pull_request:
+    paths:
+      - ".github/workflows/windows-runtime.yml"
+      - "scripts/windows_*.ps1"
+      - "scripts/windows_poststart_smoke.py"
+      - "engineering/local_app/**"
+      - "requirements-*.txt"
+      - "e2e/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-runtime:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      ENGINEER_OS_LOCAL_MODEL: qwen3:0.6b
+      ENGINEER_OS_LIVE_MODEL: qwen3:0.6b
+      ENGINEER_OS_ATTACHMENT_PARSER: native
+      PYTHON: python
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+      - name: Install pinned standalone Ollama
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $release = 'https://github.com/ollama/ollama/releases/download/v0.40.1'
+          $archive = Join-Path $env:RUNNER_TEMP 'ollama-windows-amd64.zip'
+          Invoke-WebRequest "$release/ollama-windows-amd64.zip" -OutFile $archive
+          $expected = 'b394d14436d38032f23190e3f14eb2c6dad5ebbe4e192414f74c8fdca01703ab'
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLower() -ne $expected) { throw 'Ollama checksum mismatch' }
+          $destination = Join-Path $env:RUNNER_TEMP 'ollama-0.40.1'
+          Expand-Archive -LiteralPath $archive -DestinationPath $destination
+          $destination | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Cold start through actual Windows supervisor
+        shell: pwsh
+        run: |
+          & ./scripts/windows_supervisor.ps1 -NoBrowser -SkipOpenWebUI
+          if ($LASTEXITCODE -ne 0) { throw 'Actual Windows cold start failed' }
+          $receipt = Get-Content .engineer-os/runtime/windows/poststart-smoke.json -Raw | ConvertFrom-Json
+          if ($receipt.status -ne 'PASS' -or $receipt.platform -ne 'win32' -or $receipt.scope -ne 'STARTUP_ONLY') { throw 'Windows startup receipt invalid' }
+      - name: Repeat startup and restart
+        shell: pwsh
+        run: |
+          & ./.venv/Scripts/python.exe -m pip uninstall -y ezdxf
+          if ($LASTEXITCODE -ne 0) { throw 'Cache-repair precondition failed' }
+          & ./scripts/windows_supervisor.ps1 -NoBrowser -SkipOpenWebUI
+          if ($LASTEXITCODE -ne 0) { throw 'Repeat startup failed' }
+          & ./.venv/Scripts/python.exe -c "import ezdxf"
+          if ($LASTEXITCODE -ne 0) { throw 'Cached dependency repair failed' }
+          & ./scripts/windows_stop.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'Windows stop failed' }
+          & ./scripts/windows_supervisor.ps1 -NoBrowser -SkipOpenWebUI
+          if ($LASTEXITCODE -ne 0) { throw 'Windows restart failed' }
+          & ./scripts/windows_stop.ps1
+      - name: Check Windows backup, locks and persisted restart
+        shell: pwsh
+        run: |
+          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat -v
+          if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
+          ./.venv/Scripts/python.exe -m pip check
+          if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }
+      - name: Install locked browser dependencies
+        shell: pwsh
+        run: |
+          npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'Browser dependencies failed' }
+          npx --prefix e2e playwright install chromium
+          if ($LASTEXITCODE -ne 0) { throw 'Chromium installation failed' }
+      - name: Check real Ollama inference through Windows browser
+        shell: pwsh
+        env:
+          PYTHON: .venv/Scripts/python.exe
+        run: |
+          # Earlier readiness does not establish availability in this step.
+          # Keep and verify the actual service throughout the browser check.
+          $service = Start-Process -FilePath (Get-Command ollama).Source -ArgumentList serve -NoNewWindow -PassThru -RedirectStandardOutput .engineer-os/logs/ollama-live.out.log -RedirectStandardError .engineer-os/logs/ollama-live.err.log
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              try { $null = Invoke-RestMethod http://127.0.0.1:11434/v1/models -TimeoutSec 2; $ready = $true; break } catch { Start-Sleep -Seconds 1 }
+            }
+            if (-not $ready) { throw 'Ollama model-list service unavailable in live-check step' }
+            node e2e/local_model_live_smoke.cjs
+            if ($LASTEXITCODE -ne 0) { throw 'Windows live inference failed' }
+          } finally { Stop-Process -Id $service.Id -Force -ErrorAction SilentlyContinue }
+      - name: Check all four Windows browser workflows
+        shell: pwsh
+        env:
+          PYTHON: .venv/Scripts/python.exe
+          ENGINEER_OS_UI_SCREENSHOT_DIR: e2e/.artifacts/windows
+        run: |
+          npm run test:browser --prefix e2e
+          if ($LASTEXITCODE -ne 0) { throw 'Windows browser workflow failed' }
+      - name: Upload scoped Windows verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-runtime-${{ github.sha }}-${{ github.run_id }}
+          path: |
+            .engineer-os/runtime/windows/poststart-smoke.json
+            .engineer-os/runtime/windows/startup-state.json
+            .engineer-os/logs/
+            e2e/.artifacts/windows/
+          retention-days: 14
+          if-no-files-found: warn

@@ -5,14 +5,30 @@ const http=require('node:http');const {spawn}=require('node:child_process');cons
 async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(check())return;await new Promise(resolve=>setTimeout(resolve,40));}throw new Error('DOM condition timeout');}
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-dom-'));
- const requests=[],errors=[];let child,dom,failAt,closing=false;const browserTimers=new Set();
+ const requests=[],errors=[];let child,dom,failAt,closing=false;const lifecycles=new WeakMap();
  const model=http.createServer((req,res)=>{res.setHeader('Content-Type','application/json');if(req.method==='GET'){res.end(JSON.stringify(req.url==='/api/tags'?{models:[{name:'qwen3:8b',digest:'sha256:'+'a'.repeat(64)}]}:{data:[{id:'qwen3:8b'}]}));return;}let raw='';req.on('data',data=>raw+=data);req.on('end',()=>{const payload=JSON.parse(raw);if(req.url==='/api/show'){res.end(JSON.stringify({parameters:'num_ctx 8192',template:'stable'}));return;}requests.push(payload);if(requests.length===failAt){res.statusCode=503;res.end('{}');return;}const content=payload.messages[0].content.includes('Назначенная роль:')?JSON.stringify({status:'UNCERTAINTY',summary:'Черновик <script>window.coreInjected=true</script>',observations:[{text:"Пример непроверенного наблюдения",source_ids:[]}],limitations:['Источник не проверен']}):'СИНТЕТИЧЕСКИЙ ОТВЕТ. <script>window.injected=true</script>';res.end(JSON.stringify({choices:[{message:{content}}]}));});});
+  async function closeDom(){
+   if(!dom)return;const lifecycle=lifecycles.get(dom);lifecycle.closing=true;
+   for(const id of lifecycle.timers)dom.window.clearTimeout(id);
+   // Settle fetch bodies and their UI continuations before JSDOM destroys document.
+   while(lifecycle.pending.size){await Promise.allSettled([...lifecycle.pending]);await new Promise(resolve=>setImmediate(resolve));}
+   await new Promise(resolve=>setImmediate(resolve));dom.window.close();
+  }
  try{
   await new Promise(resolve=>model.listen(0,'127.0.0.1',resolve));
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,GOOGLE_DRIVE_CLIENT_ID:'',GOOGLE_DRIVE_CLIENT_SECRET:'',GOOGLE_DRIVE_REFRESH_TOKEN:'',ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
   const origin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Launcher timeout')),10000);child.stdout.on('data',data=>{log+=data;const f=log.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(f){clearTimeout(timer);resolve(f[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error(`Launcher exited ${code}`));});});
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
-  async function open(){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){const nativeTimeout=win.setTimeout.bind(win);win.setTimeout=(callback,delay,...args)=>{const id=nativeTimeout(()=>{browserTimers.delete(id);if(!closing)callback(...args);},delay);browserTimers.add(id);return id;};win.fetch=(input,options)=>fetch(new URL(input,origin),options);}});}
+  async function open(){
+   const lifecycle={closing:false,timers:new Set(),pending:new Set()};
+   const track=promise=>{lifecycle.pending.add(promise);promise.then(()=>lifecycle.pending.delete(promise),()=>lifecycle.pending.delete(promise));return promise;};
+   const opened=await JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){
+    const nativeTimeout=win.setTimeout.bind(win);
+    win.setTimeout=(callback,delay,...args)=>{if(lifecycle.closing||closing)return 0;const id=nativeTimeout(()=>{lifecycle.timers.delete(id);if(!lifecycle.closing&&!closing)callback(...args);},delay);lifecycle.timers.add(id);return id;};
+    win.fetch=(input,options)=>track(fetch(new URL(input,origin),options).then(response=>{for(const method of ['json','text','blob','arrayBuffer']){const original=response[method].bind(response);response[method]=(...args)=>track(original(...args));}return response;}));
+   }});
+   lifecycles.set(opened,lifecycle);return opened;
+  }
   dom=await open();let win=dom.window,doc=win.document;try{await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
   assert.equal(doc.querySelectorAll('#project-route button').length,6,'Six project stages must be reachable');
   assert.ok(doc.querySelector('#project-next').textContent.includes('документ'),'Empty project needs an actionable next step');
@@ -26,7 +42,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('.message.assistant')&&!doc.querySelector('#send').disabled);
   assert.equal(requests.length,1);assert.ok(JSON.stringify(requests[0]).includes('высота 4 м'));assert.equal(win.injected,undefined);
   assert.equal(doc.querySelector('nav .session').disabled,false,'Conversation navigation must re-enable after sending');
-  dom.window.close();dom=await open();win=dom.window;doc=win.document;await until(()=>doc.querySelector('.message.assistant'));assert.equal(doc.querySelectorAll('.file').length,1);
+  await closeDom();dom=await open();win=dom.window;doc=win.document;await until(()=>doc.querySelector('.message.assistant'));assert.equal(doc.querySelectorAll('.file').length,1);
   doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.message').length===0);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();await until(()=>doc.querySelector('.message.assistant'));
   assert.ok(doc.querySelector('#task-mode'),'Explicit engineering preparation mode must be available');
@@ -38,7 +54,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.equal(requests.length,1,'CORE preparation must not call model');
   assert.ok(doc.querySelector('.core-plan').textContent.includes('FINAL AUDIT'));
   assert.ok(doc.querySelector('.core-plan').textContent.includes('ТЗ.md'));
-  dom.window.close();dom=await open();doc=dom.window.document;
+  await closeDom();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.core-plan'));
@@ -51,7 +67,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.evidence-card').textContent.includes('UNVERIFIED'));
   assert.ok(doc.querySelector('.provenance-status').textContent.includes('неприменимы'),'TXT must not invent PDF geometry');
   assert.equal(dom.window.forged,undefined);
-  dom.window.close();dom=await open();doc=dom.window.document;
+  await closeDom();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.evidence-card'));
@@ -168,7 +184,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(JSON.stringify(requests.at(-1)).includes('NORMATIVE_EDITION_NOT_VERIFIED'),'Audit must receive deterministic domain gaps');
   assert.equal(dom.window.coreInjected,undefined);
   assert.ok(doc.querySelector('.finding-gate')?.textContent.includes('NO_CANDIDATE_REFERENCE'),'Unlinked findings must show their deterministic source BLOCK');
-  dom.window.close();dom=await open();doc=dom.window.document;
+  await closeDom();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.core-run'));
@@ -189,7 +205,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   const resumeJob=await (await fetch(origin+`/api/sessions/${id}/jobs`,{method:'POST',headers:{'X-Engineer-Token':token,'Content-Type':'application/json'},body:JSON.stringify({prompt:'Проверка продолжения',file_ids:[largeFile.id]})})).json();
   await until(()=>doc.querySelector('.analysis-resume')&&!doc.querySelector('.analysis-resume').disabled);
   const firstPayload=JSON.stringify(requests[beforeResume]);
-  dom.window.close();dom=await open();doc=dom.window.document;
+  await closeDom();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.analysis-resume')&&!doc.querySelector('.analysis-resume').disabled);
@@ -234,7 +250,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('.requirement-card').textContent.includes('UNCERTAINTY'),'Source match must not become engineering PASS');
   assert.ok(doc.querySelector('.requirement-card').textContent.includes('DOM reviewer'));
   assert.ok(doc.querySelector('#tz-status').textContent.includes('TZ_SOURCE_NOT_BOUND'));
-  dom.window.close();dom=await open();doc=dom.window.document;
+  await closeDom();dom=await open();doc=dom.window.document;
   await until(()=>doc.querySelectorAll('nav .session').length===2);
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Проверь высоту по ТЗ').click();
   await until(()=>doc.querySelector('.requirement-card')?.textContent.includes('SOURCE_LINKED'));
@@ -292,7 +308,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.equal(doc.querySelector('#history-records').children.length,0,'Archive must not leak across projects');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
  }finally{
-  closing=true;if(dom){for(const id of browserTimers)dom.window.clearTimeout(id);await new Promise(resolve=>setTimeout(resolve,150));dom.window.close();}if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
+  closing=true;await closeDom();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

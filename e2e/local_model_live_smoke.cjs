@@ -15,7 +15,8 @@ const {spawn}=require('node:child_process');const {chromium}=require('playwright
   await page.goto(origin);await page.waitForFunction(()=>!document.querySelector('#prompt').disabled);
   await page.locator('.model-panel summary').click();await page.waitForFunction(()=>modelFormLoaded);
   await page.fill('#model-setting-MODEL','engineer-os-definitely-missing-model');await page.selectOption('#model-setting-thinking','false');await page.click('#model-settings-form button');
-  await page.waitForFunction(()=>document.querySelector('#model-status').textContent.includes('модель отсутствует'));
+  try{await page.waitForFunction(()=>document.querySelector('#model-status').textContent.includes('модель отсутствует'));}
+  catch(error){console.error(JSON.stringify({stage:'missing-model-ui',diagnostic:await page.evaluate(async()=>({status:document.querySelector('#model-status').textContent,notice:document.querySelector('.model-panel p').textContent,error:document.querySelector('#error').textContent,health:await api('/api/status')})),page_errors:errors}));throw error;}
   await page.fill('#model-setting-MODEL',modelName);await page.click('#model-settings-form button');
   await page.waitForFunction(()=>document.querySelector('#model-status').textContent.includes('модель найдена'));
   await page.getByRole('button',{name:'Проверить реальный ответ',exact:true}).click();
