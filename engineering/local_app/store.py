@@ -9,6 +9,7 @@ import sqlite3
 import time
 import uuid
 from .coverage import unknown_coverage
+from .lock import managed_file,managed_database
 
 
 def identifier(value):
@@ -25,8 +26,9 @@ class ReviewConflict(ValueError):
 
 def _migration_backup(db,root):
     target=root/'history.pre-migration-v0.sqlite3'
+    managed_file(target)
     def verify(path):
-        if path.is_symlink():raise ValueError('Linked migration recovery copy')
+        managed_database(path)
         saved=sqlite3.connect(path)
         try:
             if saved.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or saved.execute('PRAGMA user_version').fetchone()[0]!=0:
@@ -61,10 +63,10 @@ class Store:
         """
         path=self.root/'engineering-verification.key'
         try:
-            if path.is_symlink():return None
+            managed_file(path)
             with path.open('rb') as stream:key=stream.read(33)
             return key if len(key)==32 else None
-        except OSError:return None
+        except (OSError,ValueError):return None
 
     def __init__(self,root):
         self.root=Path(root).resolve();self.root.mkdir(parents=True,exist_ok=True)
@@ -92,6 +94,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS requirement_assessments(id TEXT PRIMARY KEY,set_id TEXT NOT NULL REFERENCES requirement_sets(id),requirement_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(set_id,requirement_id,revision));
             CREATE TABLE IF NOT EXISTS real_case_snapshots(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),job_id TEXT NOT NULL REFERENCES jobs(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
             CREATE TABLE IF NOT EXISTS final_audits(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),case_id TEXT NOT NULL REFERENCES real_case_snapshots(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(session_id,revision));
+            CREATE TABLE IF NOT EXISTS knowledge_revisions(id TEXT NOT NULL,revision INTEGER NOT NULL,source_session_id TEXT NOT NULL REFERENCES sessions(id),record TEXT NOT NULL,PRIMARY KEY(id,revision));
+            CREATE TABLE IF NOT EXISTS knowledge_content(id TEXT NOT NULL,revision INTEGER NOT NULL,content TEXT NOT NULL,PRIMARY KEY(id,revision),FOREIGN KEY(id,revision) REFERENCES knowledge_revisions(id,revision));
             CREATE TABLE IF NOT EXISTS conclusion_drafts(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));
             CREATE UNIQUE INDEX IF NOT EXISTS one_active_job ON jobs(session_id) WHERE state IN ('QUEUED','RUNNING');
             ''')
@@ -106,6 +110,7 @@ class Store:
 
     @contextmanager
     def connection(self):
+        managed_database(self.path)
         db=sqlite3.connect(self.path,timeout=10);db.row_factory=sqlite3.Row
         db.execute('PRAGMA foreign_keys=ON')
         try:

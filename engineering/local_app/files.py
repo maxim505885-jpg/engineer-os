@@ -9,7 +9,7 @@ from .coverage import unknown_coverage
 
 MAX_FILE_BYTES=100*1024*1024
 MAX_TEXT=100000
-SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv'}
+SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg'}
 
 
 def validate_image(data):
@@ -35,6 +35,9 @@ def _atomic_write_original(path,data):
 def extract_preview(name,data):
     suffix=Path(name).suffix.lower()
     c=unknown_coverage('EXTRACTION_UNAVAILABLE')
+    if suffix in {'.dxf','.dwg'}:
+        c.update(method='CAD_ORIGINAL_ONLY',stop_reasons=['CAD_INVENTORY_REQUIRED','GEOMETRY_NOT_ENGINEERING_VERIFIED'])
+        return '', 'UNAVAILABLE','Оригинал CAD сохранён. Выполните инвентаризацию; геометрия и инженерная корректность не проверены. DWG требует отдельного конвертера.',False,c
     if suffix=='.lir':
         from engineering.calculation.native_source import inspect_lir
         metadata=inspect_lir(data)
@@ -116,7 +119,7 @@ def candidate_text(name,data):
 def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
-    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV')
+    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG')
     if not isinstance(data,bytes) or not data or len(data)>MAX_FILE_BYTES:raise ValueError('Original must contain 1 byte–100 MiB')
     store.snapshot(session_id)
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)

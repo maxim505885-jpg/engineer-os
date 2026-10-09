@@ -30,6 +30,7 @@ jobs:
         run: |
           node --check app.js
           node --check engineering/local_app/ui/app.js
+          node --check engineering/local_app/ui/cad-memory.js
       - name: Check dashboard behavior
         run: node --test tests/dashboard_counts.test.cjs
       - name: Check architecture boundaries
@@ -43,6 +44,10 @@ jobs:
           python -m pip check
       - name: Install locked development-only DOM dependencies
         run: npm ci --prefix e2e --ignore-scripts --no-audit --no-fund
+      - name: Install local OCR regression models
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core
       - name: Install locked Playwright Chromium
         run: npx --prefix e2e playwright install --with-deps chromium
       - name: Check Windows launcher PowerShell syntax

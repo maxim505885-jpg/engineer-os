@@ -9,7 +9,7 @@ import sqlite3
 import tempfile
 import zipfile
 import ctypes
-from .lock import DataLock
+from .lock import DataLock,managed_file,managed_database
 from .settings import load as load_settings,validate as validate_settings
 
 MAX_BYTES=10*1024**3
@@ -60,6 +60,7 @@ def _allowed(name):
 
 
 def _database(path):
+    managed_database(path)
     db=sqlite3.connect(path)
     try:
         if db.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise ValueError('Database integrity failed')
@@ -82,8 +83,10 @@ def _publish_directory(source,target):
 
 def create_backup(root,output):
     root=Path(root).resolve();output=Path(output).absolute()
+    output=output.parent.resolve()/output.name
+    managed_database(root/'history.sqlite3')
     if not (root/'history.sqlite3').is_file():raise ValueError('Existing application data required')
-    if output.exists() or output.is_relative_to(root):raise ValueError('Choose a new backup outside application data')
+    if output.exists() or output.is_symlink() or output.is_relative_to(root):raise ValueError('Choose a new backup outside application data')
     output.parent.mkdir(parents=True,exist_ok=True)
     with DataLock(root),tempfile.TemporaryDirectory(prefix='engineer-backup-',dir=output.parent) as temporary:
         folder=Path(temporary);snapshot=folder/'history.sqlite3'
@@ -99,6 +102,7 @@ def create_backup(root,output):
             bindings={}
             for ident,path,sha,size in db.execute('SELECT id,path,sha256,size FROM files'):
                 original=Path(path)
+                managed_file(original)
                 if original.is_symlink() or not original.resolve().is_relative_to(root/'files'):
                     raise ValueError('Original outside managed storage')
                 relative=original.relative_to(root).as_posix()
@@ -112,10 +116,12 @@ def create_backup(root,output):
             if parent.is_symlink():raise ValueError('Linked data directory is unsupported')
             if parent.exists():
                 for path in parent.iterdir():
+                    managed_file(path)
                     name=path.relative_to(root).as_posix()
                     if path.is_symlink() or not path.is_file() or not _allowed(name):raise ValueError('Unexpected managed data entry')
                     members[name]=path
         key=root/'engineering-verification.key'
+        managed_file(key)
         if key.exists() or key.is_symlink():
             if key.is_symlink() or key.stat().st_size!=32:raise ValueError('Invalid verification key')
             members[key.name]=key
@@ -195,6 +201,7 @@ def verify_backup(archive):
 
 def restore_backup(archive,target):
     target=Path(target).absolute()
+    target=target.parent.resolve()/target.name
     if target.exists() or target.is_symlink():raise ValueError('Restore requires a new, absent directory')
     target.parent.mkdir(parents=True,exist_ok=True)
     # Parent lock coordinates competing restores without creating the target.

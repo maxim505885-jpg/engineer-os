@@ -4,3 +4,6 @@
 
 # Validate uploaded images before conversion / preview / OCR.
 Pillow==12.3.0
+
+# Free local DXF inventory and controlled annotation derivatives.
+-r requirements-cad.txt

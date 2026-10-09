@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
+from .lock import managed_file,managed_database
 
 KEYS={'ENGINEER_OS_LOCAL_MODEL_URL','ENGINEER_OS_LOCAL_MODEL','ENGINEER_OS_LOCAL_PROVIDER','ENGINEER_OS_LOCAL_THINK','ENGINEER_OS_LOCAL_MODEL_TIMEOUT'}
 
@@ -19,7 +20,7 @@ def validate(value):
 
 def load(root):
     path=Path(root)/'settings.json'
-    if path.is_symlink():raise ValueError('Linked settings are unsupported')
+    managed_file(path)
     value={}
     if path.exists():
         if path.stat().st_size>16000:raise ValueError('Saved settings too large')
@@ -43,7 +44,7 @@ def configure(store,model,values):
         db.execute('BEGIN IMMEDIATE')
         if db.execute("SELECT 1 FROM jobs WHERE state IN ('QUEUED','RUNNING','ATTACHMENT') LIMIT 1").fetchone():raise ValueError('Wait for active tasks before changing model settings')
         path=store.root/'settings.json'
-        if path.is_symlink():raise ValueError('Linked settings are unsupported')
+        managed_file(path)
         fd,name=tempfile.mkstemp(prefix='model-settings-',dir=store.root)
         try:
             with os.fdopen(fd,'w',encoding='utf-8') as stream:
@@ -57,11 +58,13 @@ def configure(store,model,values):
 
 def active_directory(selection,fallback):
     selection=Path(selection)
+    managed_file(selection)
     if not selection.exists():return Path(fallback).resolve()
     if selection.is_symlink() or selection.stat().st_size>16000:raise ValueError('Invalid active directory selection')
     value=selection.read_text(encoding='utf-8').strip()
     if not value or '\n' in value or '\r' in value or '\x00' in value or not Path(value).is_absolute():raise ValueError('Active directory must be an absolute path')
     root=Path(value).resolve()
+    managed_database(root/'history.sqlite3')
     if not (root/'history.sqlite3').is_file():raise ValueError('Selected project data are unavailable; reopen recovery and select an existing project')
     return root
 
@@ -74,6 +77,8 @@ def activate(root,selection):
     root=Path(root)
     if not root.is_absolute() or not (root/'history.sqlite3').is_file():raise ValueError('Choose an existing absolute project data directory')
     root=root.resolve();selection=Path(selection)
+    managed_database(root/'history.sqlite3');managed_file(selection)
+    selection=selection.parent.resolve()/selection.name
     if selection.is_symlink() or selection.is_relative_to(root):raise ValueError('Selection must be outside project data')
     with DataLock(root):
         Store(root);load(root)

@@ -56,7 +56,7 @@ function Ensure-Ollama{
  }
  $tags=Invoke-RestMethod -Uri "$OllamaUrl/api/tags" -TimeoutSec 10
  $names=@($tags.models|ForEach-Object{$_.name})
- if($names -notcontains $Model -and @($names|Where-Object{$_ -like "$Model*"}).Count-eq 0){
+ if($names -notcontains $Model){
   $o=Get-Command ollama -ErrorAction Stop;Log "Downloading model $Model";& $o.Source pull $Model
   if($LASTEXITCODE-ne 0){throw "Ollama model pull failed: $Model"}
  }else{Log "Model ready: $Model"}

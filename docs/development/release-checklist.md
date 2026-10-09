@@ -1,10 +1,10 @@
 # Контрольный список выпуска
 
-Рабочий источник: integration/release-candidate-v1. Кандидат не означает FINAL RELEASE AUDIT.
+Рабочий инженерный источник текущего прохода: feat/master-plan-completion-20261009 поверх объединённого31ec638. Официальный кандидат integration/release-candidate-v1 пока не содержит этот проход. Кандидат не означает FINAL RELEASE AUDIT.
 
-- [x] Зафиксирован exact candidate HEAD/tree; все нужные stacked и side PR включены или явно отложены.
-- [x] Clean checkout: pinned Python dependencies/pip check, npm ci, Python/Node/compile, security и architecture guards.
-- [x] Actual HTTP/jsdom и real Chromium workflows проходят на этом же HEAD; synthetic model явно обозначена.
+- [ ] Зафиксирован свежий exact candidate HEAD/tree; общий PR91 перенесён после проверок.
+- [ ] Свежие pinned dependency/clean-checkout/CI и CodeQL результаты подтверждены для переносимого HEAD.
+- [x] Actual HTTP/jsdom и четыре real Chromium workflows текущего локального дерева проходят; synthetic model явно обозначена.
 - [x] Нет секретов/приватных исходников в diff, QA, logs, artifacts.
 - [ ] Windows cold-start/restart/reboot и local end-to-end фактически проверены.
 - [x] Backup/Restore данных приложения, crash recovery и migration проверены.
@@ -15,4 +15,4 @@
 
 Не удалять legacy compatibility paths только потому, что новый путь существует. Сначала доказать отсутствие callers и проверить поддержанные сценарии.
 
-Stage10 consolidation is complete. PR74 is the official protected release candidate. Remaining unchecked items belong to later MASTER PLAN stages and final release audit.
+Прежняя консолидация PR74 — исторический результат. Текущая консолидация PR91 ещё не перенесена; CodeQL на31ec638 показал27 предупреждений. Воспроизведённые файловые проблемы исправлены, но новый скан/разбор всех сообщений требуется отдельно. Живая карта §67 и master-plan.md содержат актуальные19 критериев.

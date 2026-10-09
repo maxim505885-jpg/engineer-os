@@ -13,14 +13,14 @@ class BoundedResponse:
     def __init__(self,response):self.response=response
     def __enter__(self):return self
     def __exit__(self,*args):self.response.close()
-    def read(self):
-        raw=self.response.read(2*1024*1024+1)
+    def read(self,size=-1):
+        raw=self.response.read(min(size,2*1024*1024+1) if size>=0 else 2*1024*1024+1)
         if len(raw)>2*1024*1024:raise ModelGatewayError('Model response exceeds 2 MiB')
         return raw
 
 
 class OllamaResponse(BoundedResponse):
-    def read(self):
+    def read(self,size=-1):
         body=json.loads(super().read())
         if (not isinstance(body,dict) or body.get('done') is not True
                 or body.get('done_reason')=='length'
@@ -28,7 +28,8 @@ class OllamaResponse(BoundedResponse):
                 or not isinstance(body['message'].get('content'),str)
                 or not body['message']['content'].strip()):
             raise ModelGatewayError('Ollama returned an incomplete or invalid response')
-        return json.dumps({'choices':[{'message':{'content':body['message']['content']}}]}).encode()
+        raw=json.dumps({'choices':[{'message':{'content':body['message']['content']}}]}).encode()
+        return raw if size<0 else raw[:size]
 
 
 def thinking_setting(value):

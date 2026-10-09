@@ -71,8 +71,8 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/styles.css','/recovery.html','/recovery.js'}:
-                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
+                if not post and route in {'/','/app.js','/cad-memory.js','/styles.css','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
                     if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
                     ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
@@ -149,7 +149,30 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     body=self.json_body(262144)
                     return self.respond(201,build(store,parts[2],expected_revision=body.get('expected_revision'),
                         author=body.get('author'),summary=body.get('summary',''),recommendations=body.get('recommendations',''),
-                        limitations=body.get('limitations',''),expected_basis_sha256=body.get('expected_basis_sha256')))
+                        limitations=body.get('limitations',''),expected_basis_sha256=body.get('expected_basis_sha256'),template_id=body.get('template_id','legacy'),illustration_requests=body.get('illustration_requests')))
+                if len(parts)>=4 and parts[:2]==['api','sessions'] and parts[3]=='knowledge':
+                    from . import knowledge
+                    sid=parts[2]
+                    if len(parts)==4:
+                        if not post:return self.respond(200,knowledge.report(store,sid))
+                        b=self.json_body()
+                        return self.respond(201,knowledge.promote(store,sid,expected_audit_id=b.get('expected_audit_id'),title=b.get('title'),evidence_ids=b.get('evidence_ids'),scope_session_ids=b.get('scope_session_ids'),knowledge_id=b.get('knowledge_id'),expected_revision=b.get('expected_revision',0),actor=b.get('actor')))
+                    if len(parts)==5 and not post and parts[4] in {'recall','export'}:
+                        if parts[4]=='export':return self.respond(200,knowledge.export(store,sid))
+                        return self.respond(200,knowledge.recall(store,sid,query=parse_qs(path.query).get('query',[''])[0]))
+                    if len(parts)==6 and post and parts[5] in {'revoke','delete'}:
+                        b=self.json_body();operation=knowledge.revoke if parts[5]=='revoke' else knowledge.delete
+                        return self.respond(201,operation(store,sid,parts[4],expected_revision=b.get('expected_revision'),actor=b.get('actor'),reason=b.get('reason')))
+                if len(parts)>=5 and parts[:2]==['api','sessions'] and parts[3]=='cad':
+                    from . import cad
+                    if len(parts)==5 and not post:return self.respond(200,cad.inventory(store,parts[2],parts[4]))
+                    if len(parts)==6 and parts[5]=='derive' and post:
+                        return self.respond(201,cad.derive(store,parts[2],parts[4],request=self.json_body().get('request')))
+                    if len(parts)==6 and parts[5]=='locator' and post:
+                        b=self.json_body();return self.respond(201,cad.register_locator(store,parts[2],parts[4],handle=b.get('handle'),statement=b.get('statement')))
+                    if len(parts)==6 and parts[5]=='export' and not post:
+                        data,mime=cad.export(store,parts[2],parts[4])
+                        return self.respond(200,data,mime,{'Content-Disposition':'attachment; filename="ENGINEER_OS_DERIVED.dxf"'})
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='conclusions' and not post:
                     from .conclusions import export
                     data,mime=export(store,parts[2],revision=int(parts[4]),format=parts[5])
