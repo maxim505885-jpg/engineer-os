@@ -76,7 +76,7 @@ jobs:
       - name: Check Windows backup, locks and persisted restart
         shell: pwsh
         run: |
-          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke -v
+          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat -v
           if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }
@@ -92,8 +92,8 @@ jobs:
         env:
           PYTHON: .venv/Scripts/python.exe
         run: |
-          # The runner ends background processes with their originating step.
-          # Keep the actual service in this step for the entire browser check.
+          # Earlier readiness does not establish availability in this step.
+          # Keep and verify the actual service throughout the browser check.
           $service = Start-Process -FilePath (Get-Command ollama).Source -ArgumentList serve -NoNewWindow -PassThru -RedirectStandardOutput .engineer-os/logs/ollama-live.out.log -RedirectStandardError .engineer-os/logs/ollama-live.err.log
           try {
             $ready = $false
