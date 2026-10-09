@@ -1721,5 +1721,2164 @@
     "receipt": "docs/qa/2026-10-09-large-office-input-ci.json",
     "physical_windows_verified": false,
     "acceptance_granted": false
+  },
+  "word_table_grid_20261009": {
+    "ci": {
+      "merge": {
+        "sha": "9a92b96ec892d8e7bdf54a95d0875afbcf4b78b5",
+        "merged": true,
+        "message": "Pull Request successfully merged"
+      },
+      "tree": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+      "head": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+      "checks": [
+        {
+          "id": 113800816414,
+          "name": "CodeQL",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113800816414"
+        },
+        {
+          "id": 113800621506,
+          "name": "windows-runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667305/job/113800621506"
+        },
+        {
+          "id": 113800621242,
+          "name": "repository-guard",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667401/job/113800621242"
+        },
+        {
+          "id": 113800621100,
+          "name": "core-tests",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667383/job/113800621100"
+        },
+        {
+          "id": 113800613938,
+          "name": "Analyze (actions)",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663352/job/113800613938"
+        },
+        {
+          "id": 113800613691,
+          "name": "Analyze (javascript-typescript)",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663352/job/113800613691"
+        },
+        {
+          "id": 113800613379,
+          "name": "Analyze (python)",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663352/job/113800613379"
+        },
+        {
+          "id": 113800608196,
+          "name": "core-tests",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663171/job/113800608196"
+        },
+        {
+          "id": 113800607302,
+          "name": "repository-guard",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663124/job/113800607302"
+        }
+      ],
+      "runs": [
+        {
+          "id": 37924667401,
+          "name": "Repository Security Guard",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1HyACQ",
+          "head_branch": "feat/word-table-grid-20261009",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": ".github/workflows/repository-security.yml",
+          "display_title": "Preserve native Word table grid and exact vertical merge anchors",
+          "run_number": 236,
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 377767883,
+          "check_suite_id": 102752636787,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7IjPcw",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667401",
+          "pull_requests": [
+            {
+              "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls/98",
+              "id": 4799851210,
+              "number": 98,
+              "head": {
+                "ref": "feat/word-table-grid-20261009",
+                "sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              },
+              "base": {
+                "ref": "integration/release-candidate-v1",
+                "sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              }
+            }
+          ],
+          "created_at": "2026-10-09T11:35:25Z",
+          "updated_at": "2026-10-09T11:35:34Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:25Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752636787",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667401/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/377767883",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        },
+        {
+          "id": 37924667383,
+          "name": "ENGINEER OS Core Tests",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1Hx_9w",
+          "head_branch": "feat/word-table-grid-20261009",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": ".github/workflows/core-tests.yml",
+          "display_title": "Preserve native Word table grid and exact vertical merge anchors",
+          "run_number": 625,
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 366467976,
+          "check_suite_id": 102752636746,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7IjPSg",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667383",
+          "pull_requests": [
+            {
+              "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls/98",
+              "id": 4799851210,
+              "number": 98,
+              "head": {
+                "ref": "feat/word-table-grid-20261009",
+                "sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              },
+              "base": {
+                "ref": "integration/release-candidate-v1",
+                "sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              }
+            }
+          ],
+          "created_at": "2026-10-09T11:35:25Z",
+          "updated_at": "2026-10-09T11:38:13Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:25Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752636746",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667383/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/366467976",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        },
+        {
+          "id": 37924667305,
+          "name": "Windows local runtime",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1Hx_qQ",
+          "head_branch": "feat/word-table-grid-20261009",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": ".github/workflows/windows-runtime.yml",
+          "display_title": "Preserve native Word table grid and exact vertical merge anchors",
+          "run_number": 41,
+          "event": "pull_request",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 379306193,
+          "check_suite_id": 102752636521,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7IjOaQ",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924667305",
+          "pull_requests": [
+            {
+              "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls/98",
+              "id": 4799851210,
+              "number": 98,
+              "head": {
+                "ref": "feat/word-table-grid-20261009",
+                "sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              },
+              "base": {
+                "ref": "integration/release-candidate-v1",
+                "sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              }
+            }
+          ],
+          "created_at": "2026-10-09T11:35:24Z",
+          "updated_at": "2026-10-09T11:38:31Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:24Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752636521",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924667305/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/379306193",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        },
+        {
+          "id": 37924663124,
+          "name": "Repository Security Guard",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1HxvVA",
+          "head_branch": "feat/word-table-grid-20261009",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": ".github/workflows/repository-security.yml",
+          "display_title": "feat: preserve bounded native Word table grid and vertical anchor links",
+          "run_number": 235,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 377767883,
+          "check_suite_id": 102752624371,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7Iie8w",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663124",
+          "pull_requests": [
+            {
+              "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls/98",
+              "id": 4799851210,
+              "number": 98,
+              "head": {
+                "ref": "feat/word-table-grid-20261009",
+                "sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              },
+              "base": {
+                "ref": "integration/release-candidate-v1",
+                "sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              }
+            }
+          ],
+          "created_at": "2026-10-09T11:35:22Z",
+          "updated_at": "2026-10-09T11:35:29Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:22Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752624371",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663124/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/377767883",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        },
+        {
+          "id": 37924663352,
+          "name": "PR #98",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1HxwOA",
+          "head_branch": "refs/pull/98/head",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": "dynamic/github-code-scanning/codeql",
+          "display_title": "PR #98",
+          "run_number": 109,
+          "event": "dynamic",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 377774105,
+          "check_suite_id": 102752624953,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7IihOQ",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663352",
+          "pull_requests": [],
+          "created_at": "2026-10-09T11:35:22Z",
+          "updated_at": "2026-10-09T11:36:32Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:22Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752624953",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663352/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/377774105",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        },
+        {
+          "id": 37924663171,
+          "name": "ENGINEER OS Core Tests",
+          "node_id": "WFR_kwLOUiM3os8AAAAI1Hxvgw",
+          "head_branch": "feat/word-table-grid-20261009",
+          "head_sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+          "path": ".github/workflows/core-tests.yml",
+          "display_title": "feat: preserve bounded native Word table grid and vertical anchor links",
+          "run_number": 624,
+          "event": "push",
+          "status": "completed",
+          "conclusion": "success",
+          "workflow_id": 366467976,
+          "check_suite_id": 102752624476,
+          "check_suite_node_id": "CS_kwDOUiM3os8AAAAX7IifXA",
+          "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171",
+          "html_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37924663171",
+          "pull_requests": [
+            {
+              "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls/98",
+              "id": 4799851210,
+              "number": 98,
+              "head": {
+                "ref": "feat/word-table-grid-20261009",
+                "sha": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              },
+              "base": {
+                "ref": "integration/release-candidate-v1",
+                "sha": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+                "repo": {
+                  "id": 1378039714,
+                  "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+                  "name": "engineer-os"
+                }
+              }
+            }
+          ],
+          "created_at": "2026-10-09T11:35:22Z",
+          "updated_at": "2026-10-09T11:38:28Z",
+          "actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "run_attempt": 1,
+          "referenced_workflows": [],
+          "run_started_at": "2026-10-09T11:35:22Z",
+          "triggering_actor": {
+            "login": "maxim505885-jpg",
+            "id": 326479633,
+            "node_id": "U_kgDOE3WvEQ",
+            "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/maxim505885-jpg",
+            "html_url": "https://github.com/maxim505885-jpg",
+            "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+            "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+            "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+            "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+            "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+            "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+            "type": "User",
+            "user_view_type": "public",
+            "site_admin": false
+          },
+          "jobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171/jobs",
+          "logs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171/logs",
+          "check_suite_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/check-suites/102752624476",
+          "artifacts_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171/artifacts",
+          "cancel_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171/cancel",
+          "rerun_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/runs/37924663171/rerun",
+          "previous_attempt_url": null,
+          "workflow_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/actions/workflows/366467976",
+          "head_commit": {
+            "id": "d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e",
+            "tree_id": "2c36ea304797f56e69562d1673f3ee018d364bbe",
+            "message": "feat: preserve bounded native Word table grid and vertical anchor links\n\nSigned-off-by: maxim505885-jpg <maxim505885@gmail.com>",
+            "timestamp": "2026-10-09T11:35:19Z",
+            "author": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            },
+            "committer": {
+              "name": "maxim505885-jpg",
+              "email": "maxim505885@gmail.com"
+            }
+          },
+          "repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          },
+          "head_repository": {
+            "id": 1378039714,
+            "node_id": "R_kgDOUiM3og",
+            "name": "engineer-os",
+            "full_name": "maxim505885-jpg/engineer-os",
+            "private": false,
+            "owner": {
+              "login": "maxim505885-jpg",
+              "id": 326479633,
+              "node_id": "U_kgDOE3WvEQ",
+              "avatar_url": "https://avatars.githubusercontent.com/u/326479633?v=4",
+              "gravatar_id": "",
+              "url": "https://api.github.com/users/maxim505885-jpg",
+              "html_url": "https://github.com/maxim505885-jpg",
+              "followers_url": "https://api.github.com/users/maxim505885-jpg/followers",
+              "following_url": "https://api.github.com/users/maxim505885-jpg/following{/other_user}",
+              "gists_url": "https://api.github.com/users/maxim505885-jpg/gists{/gist_id}",
+              "starred_url": "https://api.github.com/users/maxim505885-jpg/starred{/owner}{/repo}",
+              "subscriptions_url": "https://api.github.com/users/maxim505885-jpg/subscriptions",
+              "organizations_url": "https://api.github.com/users/maxim505885-jpg/orgs",
+              "repos_url": "https://api.github.com/users/maxim505885-jpg/repos",
+              "events_url": "https://api.github.com/users/maxim505885-jpg/events{/privacy}",
+              "received_events_url": "https://api.github.com/users/maxim505885-jpg/received_events",
+              "type": "User",
+              "user_view_type": "public",
+              "site_admin": false
+            },
+            "html_url": "https://github.com/maxim505885-jpg/engineer-os",
+            "description": "Local-first AI engineering system for building inspection, evidence, normative/calculation verification and fail-closed FINAL AUDIT.",
+            "fork": false,
+            "url": "https://api.github.com/repos/maxim505885-jpg/engineer-os",
+            "forks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/forks",
+            "keys_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/keys{/key_id}",
+            "collaborators_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/collaborators{/collaborator}",
+            "teams_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/teams",
+            "hooks_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/hooks",
+            "issue_events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/events{/number}",
+            "events_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/events",
+            "assignees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/assignees{/user}",
+            "branches_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/branches{/branch}",
+            "tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/tags",
+            "blobs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/blobs{/sha}",
+            "git_tags_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/tags{/sha}",
+            "git_refs_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/refs{/sha}",
+            "trees_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/trees{/sha}",
+            "statuses_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/statuses/{sha}",
+            "languages_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/languages",
+            "stargazers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/stargazers",
+            "contributors_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contributors",
+            "subscribers_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscribers",
+            "subscription_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/subscription",
+            "commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/commits{/sha}",
+            "git_commits_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/git/commits{/sha}",
+            "comments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/comments{/number}",
+            "issue_comment_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues/comments{/number}",
+            "contents_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/contents/{+path}",
+            "compare_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/compare/{base}...{head}",
+            "merges_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/merges",
+            "archive_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/{archive_format}{/ref}",
+            "downloads_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/downloads",
+            "issues_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/issues{/number}",
+            "pulls_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/pulls{/number}",
+            "milestones_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/milestones{/number}",
+            "notifications_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/notifications{?since,all,participating}",
+            "labels_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/labels{/name}",
+            "releases_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/releases{/id}",
+            "deployments_url": "https://api.github.com/repos/maxim505885-jpg/engineer-os/deployments"
+          }
+        }
+      ],
+      "log_receipts": [
+        {
+          "job_id": 113800621506,
+          "lines": [
+            "2026-10-09T11:37:25.5411882Z Ran 23 tests in 7.360s",
+            "2026-10-09T11:37:55.6741308Z {\"result\":\"PASS\",\"real_ollama\":true,\"synthetic_model\":false,\"model\":\"qwen3:0.6b\",\"checks\":[\"actual-model-list\",\"missing-model-ui\",\"saved-live-settings\",\"real-inference-through-ui\",\"separate-diagnostic-history\",\"persisted-answer\",\"attachment-through-real-model\",\"source-coverage\",\"no-engineering-acceptance\"],\"response_chars\":15}",
+            "2026-10-09T11:38:10.3020066Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+            "2026-10-09T11:38:12.3147349Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+            "2026-10-09T11:38:21.3388840Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+            "2026-10-09T11:38:24.2495770Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+          ]
+        },
+        {
+          "job_id": 113800621100,
+          "lines": [
+            "2026-10-09T11:35:30.6081513Z # tests 7",
+            "2026-10-09T11:35:30.6538101Z ARCHITECTURE_GUARD=PASS",
+            "2026-10-09T11:35:57.5359097Z Ran 9 tests in 0.373s",
+            "2026-10-09T11:37:17.5200939Z Ran 770 tests in 79.360s",
+            "2026-10-09T11:37:17.5201086Z OK (skipped=2)",
+            "2026-10-09T11:37:38.4121301Z {\"result\":\"PASS\",\"dom_emulation\":true,\"browser_visual_check\":false,\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"background-worker\",\"upload-action\",\"source-context\",\"chat\",\"inert-markup\",\"history-reload\",\"session-switch\",\"core-plan-no-model\",\"core-plan-reload\",\"evidence-register\",\"inert-evidence\",\"evidence-reload\",\"evidence-draft-isolation\",\"source-preview\",\"preview-isolation\",\"source-review\",\"review-draft-poll\",\"review-isolation\",\"core-run-three-roles\",\"core-run-inert-output\",\"core-run-history-reload\",\"drive-unconfigured\",\"no-fabricated-import\",\"file-extraction-coverage\",\"pdf-page-coverage\",\"automatic-pdf-analysis\",\"advanced-document-actions\",\"analysis-receipts\"],\"requests\":12}",
+            "2026-10-09T11:37:39.1323009Z {\"result\":\"PASS\",\"dom_emulation\":true,\"live_google\":false,\"oauth_verified\":false,\"browser_visual_check\":false,\"checks\":[\"configured-not-connected\",\"import-submit\",\"selected-original\",\"provenance-reload\",\"no-secret\",\"conversation-isolation\",\"draft-isolation\",\"failed-checksum-no-file\"]}",
+            "2026-10-09T11:37:56.2037994Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+            "2026-10-09T11:37:57.0896854Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+            "2026-10-09T11:38:06.3466797Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+            "2026-10-09T11:38:09.3503437Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+          ]
+        },
+        {
+          "job_id": 113800608196,
+          "lines": [
+            "2026-10-09T11:35:28.1812900Z # tests 7",
+            "2026-10-09T11:35:28.2812990Z ARCHITECTURE_GUARD=PASS",
+            "2026-10-09T11:36:10.1506961Z Ran 9 tests in 0.432s",
+            "2026-10-09T11:37:31.5540840Z Ran 770 tests in 78.604s",
+            "2026-10-09T11:37:31.5540982Z OK (skipped=2)",
+            "2026-10-09T11:37:52.3313753Z {\"result\":\"PASS\",\"dom_emulation\":true,\"browser_visual_check\":false,\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"background-worker\",\"upload-action\",\"source-context\",\"chat\",\"inert-markup\",\"history-reload\",\"session-switch\",\"core-plan-no-model\",\"core-plan-reload\",\"evidence-register\",\"inert-evidence\",\"evidence-reload\",\"evidence-draft-isolation\",\"source-preview\",\"preview-isolation\",\"source-review\",\"review-draft-poll\",\"review-isolation\",\"core-run-three-roles\",\"core-run-inert-output\",\"core-run-history-reload\",\"drive-unconfigured\",\"no-fabricated-import\",\"file-extraction-coverage\",\"pdf-page-coverage\",\"automatic-pdf-analysis\",\"advanced-document-actions\",\"analysis-receipts\"],\"requests\":12}",
+            "2026-10-09T11:37:53.1190296Z {\"result\":\"PASS\",\"dom_emulation\":true,\"live_google\":false,\"oauth_verified\":false,\"browser_visual_check\":false,\"checks\":[\"configured-not-connected\",\"import-submit\",\"selected-original\",\"provenance-reload\",\"no-secret\",\"conversation-isolation\",\"draft-isolation\",\"failed-checksum-no-file\"]}",
+            "2026-10-09T11:38:10.4585156Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+            "2026-10-09T11:38:11.4009294Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+            "2026-10-09T11:38:19.4518630Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+            "2026-10-09T11:38:23.3192333Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+          ]
+        }
+      ],
+      "physical_windows_verified": false,
+      "engineering_acceptance": false,
+      "actual_source_result": {
+        "scope": "NATIVE_WORD_GRID_SOURCE_LINKS_NOT_RENDERED_DOCUMENT_ACCEPTANCE",
+        "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+        "source_bytes": 147210288,
+        "total_units": 14678,
+        "processed_units": 14678,
+        "failed_units": 0,
+        "blocked_units": 7022,
+        "truncated_units": 0,
+        "table_cells": 12826,
+        "resolved_vertical_continuations": 5759,
+        "independent_source_xml_grid_match": true,
+        "independently_verified_cells": 12826,
+        "source_tables": 118
+      }
+    },
+    "actual": {
+      "scope": "NATIVE_WORD_GRID_SOURCE_LINKS_NOT_RENDERED_DOCUMENT_ACCEPTANCE",
+      "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+      "source_bytes": 147210288,
+      "job_id": "fb752ab5-f693-48fb-ae04-a3077aca14c7",
+      "seconds": 364.564,
+      "total_units": 14678,
+      "processed_units": 14678,
+      "failed_units": 0,
+      "blocked_units": 7022,
+      "truncated_units": 0,
+      "stored_chars": 1095842,
+      "table_cells": 12826,
+      "grid_statuses": {
+        "CONSISTENT_SOURCE_STRUCTURE": 12826
+      },
+      "grid_issues": {},
+      "resolved_vertical_continuations": 5759,
+      "anchor_chains_match_source_intervals": true,
+      "coverage_manifest": {
+        "scope": "PARSED_LOGICAL_UNITS",
+        "declared_units": 14678,
+        "processed_units": 14678,
+        "unprocessed_units": 0,
+        "sheets": [],
+        "tables": [
+          {
+            "table": "1",
+            "cells": 36
+          },
+          {
+            "table": "2",
+            "cells": 24
+          },
+          {
+            "table": "3",
+            "cells": 26
+          },
+          {
+            "table": "4",
+            "cells": 17
+          },
+          {
+            "table": "5",
+            "cells": 84
+          },
+          {
+            "table": "6",
+            "cells": 36
+          },
+          {
+            "table": "7",
+            "cells": 36
+          },
+          {
+            "table": "8",
+            "cells": 36
+          },
+          {
+            "table": "9",
+            "cells": 36
+          },
+          {
+            "table": "10",
+            "cells": 3
+          },
+          {
+            "table": "11",
+            "cells": 2
+          },
+          {
+            "table": "12",
+            "cells": 65
+          },
+          {
+            "table": "13",
+            "cells": 30
+          },
+          {
+            "table": "14",
+            "cells": 40
+          },
+          {
+            "table": "15",
+            "cells": 18
+          },
+          {
+            "table": "16",
+            "cells": 16
+          },
+          {
+            "table": "17",
+            "cells": 16
+          },
+          {
+            "table": "18",
+            "cells": 18
+          },
+          {
+            "table": "19",
+            "cells": 18
+          },
+          {
+            "table": "20",
+            "cells": 16
+          },
+          {
+            "table": "21",
+            "cells": 18
+          },
+          {
+            "table": "22",
+            "cells": 18
+          },
+          {
+            "table": "23",
+            "cells": 18
+          },
+          {
+            "table": "24",
+            "cells": 16
+          },
+          {
+            "table": "25",
+            "cells": 16
+          },
+          {
+            "table": "26",
+            "cells": 18
+          },
+          {
+            "table": "27",
+            "cells": 16
+          },
+          {
+            "table": "28",
+            "cells": 16
+          },
+          {
+            "table": "29",
+            "cells": 16
+          },
+          {
+            "table": "30",
+            "cells": 16
+          },
+          {
+            "table": "31",
+            "cells": 16
+          },
+          {
+            "table": "32",
+            "cells": 16
+          },
+          {
+            "table": "33",
+            "cells": 16
+          },
+          {
+            "table": "34",
+            "cells": 18
+          },
+          {
+            "table": "35",
+            "cells": 16
+          },
+          {
+            "table": "36",
+            "cells": 16
+          },
+          {
+            "table": "37",
+            "cells": 16
+          },
+          {
+            "table": "38",
+            "cells": 16
+          },
+          {
+            "table": "39",
+            "cells": 1
+          },
+          {
+            "table": "40",
+            "cells": 622
+          },
+          {
+            "table": "41",
+            "cells": 8890
+          },
+          {
+            "table": "42",
+            "cells": 2
+          },
+          {
+            "table": "43",
+            "cells": 125
+          },
+          {
+            "table": "44",
+            "cells": 9
+          },
+          {
+            "table": "45",
+            "cells": 181
+          },
+          {
+            "table": "46",
+            "cells": 100
+          },
+          {
+            "table": "47",
+            "cells": 9
+          },
+          {
+            "table": "48",
+            "cells": 44
+          },
+          {
+            "table": "49",
+            "cells": 44
+          },
+          {
+            "table": "50",
+            "cells": 44
+          },
+          {
+            "table": "51",
+            "cells": 32
+          },
+          {
+            "table": "52",
+            "cells": 74
+          },
+          {
+            "table": "53",
+            "cells": 74
+          },
+          {
+            "table": "54",
+            "cells": 44
+          },
+          {
+            "table": "55",
+            "cells": 2
+          },
+          {
+            "table": "56",
+            "cells": 1
+          },
+          {
+            "table": "57",
+            "cells": 1
+          },
+          {
+            "table": "58",
+            "cells": 1
+          },
+          {
+            "table": "59",
+            "cells": 24
+          },
+          {
+            "table": "60",
+            "cells": 85
+          },
+          {
+            "table": "61",
+            "cells": 9
+          },
+          {
+            "table": "62",
+            "cells": 1
+          },
+          {
+            "table": "63",
+            "cells": 1
+          },
+          {
+            "table": "64",
+            "cells": 1
+          },
+          {
+            "table": "65",
+            "cells": 1
+          },
+          {
+            "table": "66",
+            "cells": 1
+          },
+          {
+            "table": "67",
+            "cells": 1
+          },
+          {
+            "table": "68",
+            "cells": 1
+          },
+          {
+            "table": "69",
+            "cells": 1
+          },
+          {
+            "table": "70",
+            "cells": 1
+          },
+          {
+            "table": "71",
+            "cells": 1
+          },
+          {
+            "table": "72",
+            "cells": 1
+          },
+          {
+            "table": "73",
+            "cells": 1
+          },
+          {
+            "table": "74",
+            "cells": 1
+          },
+          {
+            "table": "75",
+            "cells": 1
+          },
+          {
+            "table": "76",
+            "cells": 1
+          },
+          {
+            "table": "77",
+            "cells": 1
+          },
+          {
+            "table": "78",
+            "cells": 1
+          },
+          {
+            "table": "79",
+            "cells": 1
+          },
+          {
+            "table": "80",
+            "cells": 1
+          },
+          {
+            "table": "81",
+            "cells": 1
+          },
+          {
+            "table": "82",
+            "cells": 1
+          },
+          {
+            "table": "83",
+            "cells": 1
+          },
+          {
+            "table": "84",
+            "cells": 1
+          },
+          {
+            "table": "85",
+            "cells": 1
+          },
+          {
+            "table": "86",
+            "cells": 1
+          },
+          {
+            "table": "87",
+            "cells": 562
+          },
+          {
+            "table": "88",
+            "cells": 1
+          },
+          {
+            "table": "89",
+            "cells": 1
+          },
+          {
+            "table": "90",
+            "cells": 1
+          },
+          {
+            "table": "91",
+            "cells": 1
+          },
+          {
+            "table": "92",
+            "cells": 1
+          },
+          {
+            "table": "93",
+            "cells": 1
+          },
+          {
+            "table": "94",
+            "cells": 1
+          },
+          {
+            "table": "95",
+            "cells": 1
+          },
+          {
+            "table": "96",
+            "cells": 1
+          },
+          {
+            "table": "97",
+            "cells": 1
+          },
+          {
+            "table": "98",
+            "cells": 1
+          },
+          {
+            "table": "99",
+            "cells": 1
+          },
+          {
+            "table": "100",
+            "cells": 1
+          },
+          {
+            "table": "101",
+            "cells": 1
+          },
+          {
+            "table": "102",
+            "cells": 1
+          },
+          {
+            "table": "103",
+            "cells": 1
+          },
+          {
+            "table": "104",
+            "cells": 1
+          },
+          {
+            "table": "105",
+            "cells": 1
+          },
+          {
+            "table": "106",
+            "cells": 1
+          },
+          {
+            "table": "107",
+            "cells": 1
+          },
+          {
+            "table": "108",
+            "cells": 1
+          },
+          {
+            "table": "109",
+            "cells": 1
+          },
+          {
+            "table": "110",
+            "cells": 1
+          },
+          {
+            "table": "111",
+            "cells": 1
+          },
+          {
+            "table": "112",
+            "cells": 24
+          },
+          {
+            "table": "113",
+            "cells": 605
+          },
+          {
+            "table": "114",
+            "cells": 99
+          },
+          {
+            "table": "115",
+            "cells": 60
+          },
+          {
+            "table": "116",
+            "cells": 2
+          },
+          {
+            "table": "117",
+            "cells": 1
+          },
+          {
+            "table": "118",
+            "cells": 135
+          }
+        ],
+        "physical_pages": null,
+        "limitations": [
+          "PHYSICAL_PAGES_UNKNOWN",
+          "LAYOUT_NOT_VERIFIED",
+          "HEADERS_FOOTNOTES_NOT_READ",
+          "EMBEDDED_CONTENT_NOT_READ"
+        ],
+        "acceptance_granted": false,
+        "source_components": {
+          "scope": "DECLARED_STRUCTURE_NOT_COMPLETE_DOCUMENT",
+          "equations": 41,
+          "word_cells_with_merge_declarations": 6300,
+          "word_grid_consistent_cells": 12826,
+          "word_grid_unresolved_cells": 0,
+          "word_vertical_continuations_resolved": 5759,
+          "xlsx_merged_ranges": 0,
+          "xlsx_formula_cells": 0,
+          "formulas_evaluated": false,
+          "layout_verified": false
+        }
+      },
+      "parser_identity": {
+        "schema": 1,
+        "backend": "docx",
+        "python": "3.12.14",
+        "implementation": "8e0271603e9ee9d76e1a8959bc1b691ca6afbb12f825f3ec4a5b838b6a93ff13",
+        "limits": [
+          16777216,
+          33554432,
+          10000,
+          50000,
+          20000,
+          2000000,
+          536870912,
+          1024
+        ]
+      },
+      "originals_unchanged": true,
+      "layout_verified": false,
+      "values_propagated": false,
+      "document_complete": false,
+      "acceptance_granted": false,
+      "independent_source_xml_grid_match": true,
+      "independently_verified_cells": 12826,
+      "source_tables": 118,
+      "independent_verification_scope": "Source XML declared intervals and native restart anchors; no rendered layout or semantics"
+    }
   }
 }

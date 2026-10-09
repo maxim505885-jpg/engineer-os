@@ -2,11 +2,11 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** итог §73.1. PR 97 принят в f83c4d5f, tree 2af4da64; все 9 checks SUCCESS, Linux 763/761 PASS/2 skips, Windows 23/live model/4 Chromium PASS. Полный DOCX 14 678/14 678, 7 022 BLOCK; rendered/semantic полнота не принята. План 8 ✅ / 8 🟡 / 3 ❌.
+**Активный план:** итог §74.1. PR 98 принят в кандидат `9a92b96ec892d8e7bdf54a95d0875afbcf4b78b5`; дерево `2c36ea304797f56e69562d1673f3ee018d364bbe` точно равно проверенному коду. Все 9 CI SUCCESS. Linux: 770 тестов, 768 PASS, 2 Windows-only skips; 7 Node, 2 HTTP/DOM, 4 Chromium. Windows: 23 теста, настоящий Qwen и 4 Chromium PASS. Полный DOCX: 14 678/14 678 единиц; независимо сверены 12 826 ячеек и 5 759 вертикальных связей. Документальная полнота открыта. План 8 ✅ / 8 🟡 / 3 ❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
-| 1 | Единая рабочая версия | ✅ Кандидат | PR 91–97 приняты; кандидат f83c4d5f, проверенное дерево 2af4da64. |
+| 1 | Единая рабочая версия | ✅ Кандидат | PR 91–98 приняты; кандидат 9a92b96e, проверенное дерево 2c36ea30; итог §74.1. |
 | 2 | Качество OCR и локальной модели | ✅ программный контур | Извлечение/метрики/отрицательные gates и живой Linux qwen3 проверялись. Это не полнота V4 и не Windows. |
 | 3 | Большие документы: resume/recovery | ✅ программный контур | Checkpoints, identity, budgets, retry. Полнота инженерного документа отдельно в№13. |
 | 4 | DOCX/XLSX/DOC и остальные заявленные форматы | ✅ программный контур | Оригиналы, logical locators, provenance, native/OCR маршруты; сложные таблицы отдельно. |
@@ -15,10 +15,10 @@
 | 7 | Реальный инженерный case workflow | ✅ отрицательный сценарий | Три оригинала,36 кандидатов, роли и нормативный replay воспроизводимы; объект не ACCEPTED. Положительный сценарий в№14. |
 | 8 | FINAL AUDIT / acceptance boundary | ✅ программный контур | Immutable/stale/tamper/foreign source gates. Нет подтверждённого положительного инженерного объекта. |
 | 9 | Windows one-click runtime | 🟡 | Native Windows CI полностью PASS: clean start/cache repair/restart, 23 tests, live Ollama, 4 Chromium routes. Physical PC clean install/reboot остаётся. |
-| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–97 merged; все 9 CI SUCCESS, §73.1. |
+| 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков. Все4 browser маршрута, включая CAD/memory/mobile/session reset, прошли. Финальная приёмка интерфейса на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ | ПрежниеOffice665/665; полный147MB DOCX14678/14678,0failed/truncated,7022BLOCK. Source XML41equations/6300merge declarations/655drawings/642media; rendered semantics/числовой OCR/V4/qualified ground truth открыты. |
+| 13 | Производственная полнота документов | ❌ | Полный DOCX 14 678/14 678, 0 failed/truncated, 7 022 BLOCK. Независимо сверены 12 826 ячеек/5 759 native vertical links. Rendering, формулы, графика, OCR-конфликты/V4/qualified ground truth открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -32,7 +32,7 @@
 
 | Прежний17 | Единый19 | Название |
 |---|---|---|
-| 1 | 1/10 | Единая версия |
+| 1 | 1/10 | PR 91–98 приняты; кандидат 9a92b96e, проверенное дерево 2c36ea30; итог §74.1. |
 | 2 | 8 | Границы доверия |
 | 3 | 12 | Backup/restore |
 | 4 | 11 | Кабинет |
@@ -41,10 +41,10 @@
 | 7 | 5/7 | ТЗ/ядро |
 | 8 | 6 нормы | Нормативы |
 | 9 | 6 расчёт | Solver, отложено |
-| 10 | 16 | Черновики заключений |
+| 10 | 16 | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | 17 | CAD |
 | 12 | 14 | Принятый кейс |
-| 13 | 15 | Память |
+| 13 | 15 | Полный DOCX 14 678/14 678, 0 failed/truncated, 7 022 BLOCK. Независимо сверены 12 826 ячеек/5 759 native vertical links. Rendering, формулы, графика, OCR-конфликты/V4/qualified ground truth открыты. |
 | 14 | 11 | Финальный UI |
 | 15 | 12 | Надёжность |
 | 16 | 9 | Windows, отложено |
@@ -168,3 +168,14 @@ PR 98: head d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e, tree 2c36ea304797f56e69562
 Тесты на missing locators, grid gaps, orphan/changed-width continuations, bounds, invalid/duplicate declarations, missing/width mismatch, wrappers и tracked row/cell properties воспроизведеныRED→GREEN. Независимое ревью выявило2Important: пропущенные wrapped rows и structural revisions; оба исправлены, остаточныхCritical/Important0. Frozen full770тестов/768PASS/2nativeWindows skips с реальнымrus+engOCR;7Node,architecture/compile/diff PASS.
 
 План8✅/8🟡/3❌. №13 открыт: rendered merged tables/formulas, графика и числовые конфликты, полныйV4PDF и qualifiedgroundtruth. После него нормы/8semantic roles/solver-run/actualcorrelation/FINAL AUDIT, accepted memory/report,CAD/providerreceipts,physicalWindows/release. Деталиdocs/qa/2026-10-09-word-table-grid.md.
+
+
+## 74.1. Итог — native Word grid и вертикальные объединения
+
+[PR 98](https://github.com/maxim505885-jpg/engineer-os/pull/98) объединён в `integration/release-candidate-v1`: `9a92b96ec892d8e7bdf54a95d0875afbcf4b78b5`. Дерево `2c36ea304797f56e69562d1673f3ee018d364bbe` точно совпало с проверенным head `d6bb3976d0513828a2cf3b8517cc7fbe7ac7d23e` и локальным кодом. Все девять CI завершились SUCCESS; Linux 770 тестов (768 PASS, 2 Windows-only skips), 7 Node, 2 HTTP/DOM и 4 Chromium; Windows 23 теста, clean start/cache repair/restart, реальный Ollama qwen3:0.6b и 4 Chromium PASS. Независимое ревью: оставшихся Critical/Important нет.
+
+Полный неизменённый DOCX 147 210 288 байт обработан штатным Store за 364.564 секунды: 14 678/14 678 единиц, 0 failed/truncated, 1 095 842 сохранённых символа. Во всех 118 таблицах независимый разбор XML оригинала подтвердил записанные интервалы 12 826 ячеек и 5 759 продолжений вертикальных объединений. SHA256 источника `b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5`.
+
+Native координаты сохранены отдельно от XML ordinal; значения между объединёнными ячейками не переносятся. Неопределённые структуры, скрытые wrappers и tracked changes сохраняют запреты. Это доказательство структуры источника: rendered layout, смысл формул и инженерная приёмка не подтверждены. 7 022 единицы остаются BLOCK; acceptance=false. Физический Windows NOT_VERIFIED.
+
+План: 8 готово / 8 частично / 3 открыто. №13 остаётся открыт: rendered tables/merged cells/formulas, графика и легенды, числовые OCR-конфликты, полный V4 PDF и квалифицированный эталон. Затем восемь семантических расчётных ролей, нормы/solver-run/actual correlation, положительный FINAL AUDIT и ACCEPTED→memory/report; CAD equivalence/roundtrip, live provider receipts; физический Windows и выпуск. Подробные receipts: `docs/qa/2026-10-09-word-table-grid-ci.json` и `docs/qa/2026-10-09-word-table-grid.md`.
