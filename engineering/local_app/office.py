@@ -1,5 +1,6 @@
 """Bounded OOXML text candidates, never layout/evidence or formula evaluation."""
 import io
+import copy
 import json
 import posixpath
 import re
@@ -7,6 +8,7 @@ import zipfile
 from xml.etree import ElementTree as ET
 
 W='{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+M='{http://schemas.openxmlformats.org/officeDocument/2006/math}'
 S='{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
 R='{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 MAX_XML=8*1024*1024
@@ -74,6 +76,22 @@ def word_limits(element):
     return limits
 
 
+def equation_units(element,locator):
+    """Preserve source syntax; tokens are not a linearized/rendered equation."""
+    out=[];pending=[element]
+    while pending:
+        current=pending.pop()
+        if current.tag!=M+'oMath':
+            pending.extend(reversed(list(current)));continue
+        fragment=copy.copy(current);fragment.tail=None
+        payload=dict(scope='NORMALIZED_OMML_UNINTERPRETED',literal_tokens=[e.text or '' for e in current.iter(M+'t')],
+                     normalized_omml=ET.tostring(fragment,encoding='unicode'),evaluated=False,layout_verified=False)
+        parent=dict(locator);parent.update(kind='equation',parent_kind=locator['kind'],equation=len(out)+1)
+        out.append(unit(json.dumps(payload,ensure_ascii=False),parent,word_limits(current)+['EQUATION_NOT_READ']))
+        # Do not separately serialize nested equations, which duplicates syntax.
+    return out
+
+
 def read_docx(p):
     root=p.xml('word/document.xml');body=root.find(W+'body')
     if body is None:raise OfficeError('Missing Word body')
@@ -83,7 +101,9 @@ def read_docx(p):
     for child in body:
         if child.tag==W+'p':
             paragraph+=1;text=word_text(child);warnings=word_limits(child)
-            if text or warnings:out.append(unit(text,dict(kind='paragraph',part='word/document.xml',paragraph=paragraph),warnings))
+            locator=dict(kind='paragraph',part='word/document.xml',paragraph=paragraph)
+            if text or warnings:out.append(unit(text,locator,warnings))
+            out.extend(equation_units(child,locator))
         elif child.tag==W+'tbl':
             table+=1
             for row_index,row in enumerate(child.findall(W+'tr'),1):
@@ -92,9 +112,21 @@ def read_docx(p):
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
-                    out.append(unit(text,dict(kind='table_cell',part='word/document.xml',table=table,row=row_index,column=column),warnings))
+                    locator=dict(kind='table_cell',part='word/document.xml',table=table,row=row_index,column=column)
+                    properties=cell.find(W+'tcPr');merge={}
+                    if properties is not None:
+                        for name in ('gridSpan','vMerge','hMerge'):
+                            found=properties.find(W+name)
+                            if found is not None:merge[name]=dict(found.attrib)
+                    if merge:
+                        locator['declared_merge']=merge
+                        text+='\n'+json.dumps(dict(scope='DECLARED_CELL_STRUCTURE_UNVERIFIED',column_kind='XML_CELL_ORDINAL',declared_merge=merge),ensure_ascii=False)
+                    out.append(unit(text,locator,warnings))
+                    out.extend(equation_units(cell,locator))
         elif child.tag!=W+'sectPr':
-            out.append(unit(word_text(child),dict(kind='unsupported_body',part='word/document.xml',body_index=list(body).index(child)+1),['BODY_STRUCTURE_UNVERIFIED']))
+            locator=dict(kind='unsupported_body',part='word/document.xml',body_index=list(body).index(child)+1)
+            out.append(unit(word_text(child),locator,['BODY_STRUCTURE_UNVERIFIED']))
+            out.extend(equation_units(child,locator))
     return out,limits
 
 
@@ -142,7 +174,7 @@ def read_xlsx(p):
                 elif kind=='inlineStr':stored=text_runs(inline) if inline is not None else ''
                 elif kind in {'n','b','e','str','d'}:stored=raw
                 else:raise OfficeError('Unsupported cell type')
-                field=dict(sheet=name,cell=address,stored_value=stored,value_type=kind,style=cell.get('s'),formula=formula.text if formula is not None else None,cache_present=raw is not None)
+                field=dict(sheet=name,cell=address,stored_value=stored,value_type=kind,style=cell.get('s'),formula=formula.text if formula is not None else None,formula_present=formula is not None,cache_present=raw is not None)
                 if formula is not None:
                     if raw is None:reasons.append('FORMULA_CACHE_MISSING')
                     if formula.get('t'):reasons.append('SPECIAL_FORMULA_UNVERIFIED');field['formula_metadata']=dict(formula.attrib)
@@ -150,6 +182,13 @@ def read_xlsx(p):
                 if row.get('hidden')=='1':reasons.append('HIDDEN_ROW')
                 out.append(unit(json.dumps(field,ensure_ascii=False),dict(kind='cell',part=part,sheet=name,cell=address),reasons))
         if not found:out.append(unit('',dict(kind='sheet',part=part,sheet=name),warnings+['EMPTY_SHEET']))
+        merges=root.find(S+'mergeCells')
+        if merges is not None:
+            for index,merged in enumerate(merges.findall(S+'mergeCell'),1):
+                ref=merged.get('ref')
+                if not ref or not re.fullmatch(r'[A-Z]{1,3}[1-9][0-9]{0,6}(?::[A-Z]{1,3}[1-9][0-9]{0,6})?',ref):raise OfficeError('Invalid merged range')
+                payload=dict(scope='DECLARED_MERGED_RANGE_UNVERIFIED',range=ref,values_propagated=False,layout_verified=False)
+                out.append(unit(json.dumps(payload,ensure_ascii=False),dict(kind='merged_range',part=part,sheet=name,range=ref,merge_index=index),warnings+['MERGED_CELLS_UNVERIFIED']))
     return out,limits
 
 
@@ -201,12 +240,18 @@ def execute(store,job,stop,*,progress=None):
         key=locator.get('sheet')
         if key is not None:sheets.setdefault(key,[]).append(index)
         key=locator.get('table')
-        if key is not None:tables.setdefault(str(key),[]).append(index)
+        if key is not None and locator['kind']=='table_cell':tables.setdefault(str(key),[]).append(index)
     manifest=dict(scope='PARSED_LOGICAL_UNITS',declared_units=len(units),processed_units=0,unprocessed_units=len(units),
                   sheets=[dict(name=k,units=len(v)) for k,v in sheets.items()],
                   tables=[dict(table=k,cells=len(v)) for k,v in tables.items()],
                   physical_pages=None,limitations=limits,acceptance_granted=False)
     run['coverage_manifest']=manifest
+    manifest['source_components']=dict(scope='DECLARED_STRUCTURE_NOT_COMPLETE_DOCUMENT',
+        equations=sum(u['locator']['kind']=='equation' for u in units),
+        word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
+        xlsx_merged_ranges=sum(u['locator']['kind']=='merged_range' for u in units),
+        xlsx_formula_cells=sum(u['locator']['kind']=='cell' and json.loads(u['text']).get('formula_present',False) for u in units),
+        formulas_evaluated=False,layout_verified=False)
     result=dict(text='',extraction=run)
     if conversion:run['conversion']=conversion
     def checkpoint():
