@@ -9,6 +9,7 @@ public class ExportFixtureTable {
  public int InitialModelPart {get{return 0;}}
  public ExportFixtureTable(int typ) {Type=typ;Name="fixture";}
  public void GetContents(ref object data) {
+  if(data is VariantWrapper)data=((VariantWrapper)data).WrappedObject;
   if (!(data is string)) throw new ArgumentException("Expected string in ref VARIANT");
   data=Type==2 ? "1\t1.25\t2\t3\r\n"+new string('2',110000) : "1\t2\r\n";
  }
