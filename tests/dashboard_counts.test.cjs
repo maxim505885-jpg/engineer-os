@@ -113,3 +113,19 @@ test('missing project never makes an unscoped request', async () => {
   assert.equal(Object.keys(result).length, 0);
   assert.equal(calls.length, 0);
 });
+
+
+test('Word auxiliary source buttons and table inventory show part and note identity', () => {
+ const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+ const functions=source.slice(source.indexOf('function sourceLocation('),source.indexOf('function renderFiles('));
+ const context={analysisViews:new Map(),renderAnalysisResume:()=>{},texts:[],
+   node:(tag,text)=>{if(text!==undefined)context.texts.push(text);return {append:()=>{}};}};
+ vm.createContext(context);vm.runInContext(functions,context);
+ const body=context.sourceLocation({locator:{kind:'paragraph',part:'word/document.xml',paragraph:1}});
+ const header=context.sourceLocation({locator:{kind:'paragraph',component:'header',part:'word/header1.xml',paragraph:1}});
+ const note=context.sourceLocation({locator:{kind:'paragraph',component:'footnote',note_id:'7',part:'word/notes.xml',paragraph:1}});
+ assert.notEqual(header,body);assert.notEqual(note,body);assert.match(header,/word\/header1.xml/);assert.match(note,/7/);
+ context.renderAutomaticAnalysis({append:()=>{}},{id:'j',result:{document_analysis:{stage:'COMPLETED',sources:[{name:'report',coverage_manifest:{sheets:[],tables:[{table:'1',part:'word/document.xml',cells:2},{table:'1',part:'word/header1.xml',cells:1},{table:'1',part:'word/notes.xml',note_id:'7',cells:1}]}}]}}});
+ assert.ok(context.texts.some(t=>t.includes('Таблица 1')&&t.includes('word/header1.xml')));
+ assert.ok(context.texts.some(t=>t.includes('Таблица 1')&&t.includes('7')));
+});
