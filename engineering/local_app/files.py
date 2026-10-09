@@ -10,7 +10,7 @@ from .coverage import unknown_coverage
 MAX_FILE_BYTES=100*1024*1024
 MAX_OFFICE_FILE_BYTES=256*1024*1024
 MAX_TEXT=100000
-SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg'}
+SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg','.ald','.cop','.log','.zip'}
 
 
 def file_limit(name):
@@ -40,6 +40,19 @@ def _atomic_write_original(path,data):
 def extract_preview(name,data):
     suffix=Path(name).suffix.lower()
     c=unknown_coverage('EXTRACTION_UNAVAILABLE')
+    from engineering.calculation.upload_analysis import analyze_upload, report_note
+    calculation = analyze_upload(name, data) if suffix in {'.txt','.log','.ald','.cop','.zip'} else None
+    if calculation:
+        c.update(status='RECORDED',method='LIRA_SOURCE_OBSERVATIONS',calculation_report=calculation,stop_reasons=list(calculation['reasons']))
+        if suffix=='.zip':
+            return '', 'UNAVAILABLE',report_note(calculation),False,c
+        if calculation['kind']=='UNREADABLE_VENDOR_EXPORT':
+            return '', 'UNAVAILABLE',report_note(calculation),False,c
+        text=data.decode('utf-8-sig')
+        truncated=len(text)>MAX_TEXT
+        c.update(source_chars=len(text),stored_chars=min(len(text),MAX_TEXT))
+        if truncated:c['stop_reasons'].append('CHAR_LIMIT')
+        return text[:MAX_TEXT],'UNVERIFIED',report_note(calculation),truncated,c
     if suffix in {'.dxf','.dwg'}:
         c.update(method='CAD_ORIGINAL_ONLY',stop_reasons=['CAD_INVENTORY_REQUIRED','GEOMETRY_NOT_ENGINEERING_VERIFIED'])
         return '', 'UNAVAILABLE','Оригинал CAD сохранён. Выполните инвентаризацию; геометрия и инженерная корректность не проверены. DWG требует отдельного конвертера.',False,c
@@ -124,7 +137,7 @@ def candidate_text(name,data):
 def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
-    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG')
+    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG, ALD, COP, LOG, ZIP')
     if not isinstance(data,bytes) or not data or len(data)>file_limit(name):raise ValueError('Original exceeds file limit: '+str(file_limit(name)//1024//1024)+' MiB')
     store.snapshot(session_id)
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)
