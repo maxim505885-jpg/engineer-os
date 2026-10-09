@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** расчёты отложены. №13: native EMF text и embedded raster preview включены в кандидатebcafaa6 (PR106);real119 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed tables/V4/qualified corpus открыты;8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. №13: PR107 masked EMF/source preview при TEXT_LIMIT реализован и локально проверен; real120/120 source pixels PASS; CI/merge ожидаются (§91). Кандидатebcafaa6; полное rendering/таблицы/формулы/V4/qualified corpus открыты;8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text и embedded raster preview в кандидатеebcafaa6 (PR106);real119/120 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | PR107: masked EMF/source preview при TEXT_LIMIT;real120/120 source pixels и локальные851tests PASS;CI/merge ожидаются (§91). Full rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -44,7 +44,7 @@
 | 10 | 16 | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | 14 | Принятый кейс |
-| 13 | Производственная полнота документов | ❌ Открыто | Native EMF text и embedded raster preview в кандидатеebcafaa6 (PR106);real119/120 pixel arrays/Core844/Windows42/Security PASS (§90 итог). Full rendering/unsupported bitmap/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | PR107: masked EMF/source preview при TEXT_LIMIT;real120/120 source pixels и локальные851tests PASS;CI/merge ожидаются (§91). Full rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | 11 | Финальный UI |
 | 15 | 12 | Надёжность |
 | 16 | 9 | Windows, отложено |
@@ -422,3 +422,18 @@ PR106 MERGED squash с expected_head guard5951370b9aa11341f002ae8f48b1ab003d0ffa
 В реальном оригинале доступны119 embedded raster sources из120 обнаруженных; полные RGB arrays точно совпали с независимым BMP decoder. Неизменность исходного SHA подтверждена. В отдельном контрольном процессе real Store extraction/checkpoint/source revalidation/preview для unit168 прошёл, processed168/14684,cycle_complete=false,model NOT_RUN;792x395 PNG SHA250f5bcad4ccf091e8c1dcdf2fc7683394a2c6ac98b6633d7bc9bc8e685c56c4. Это не полный Store/model прогон и не проверка reload всего большого Store. Старые/неполные промежуточные probe snapshots не считаются полным прогоном; утверждения о persistent history основаны на контролируемых regression/CI workflows, не на этом real-file probe.
 
 №13 остаётся❌: bitmap pixel extraction/preview закрыт в указанном объёме; image465/полная EMF vector отрисовка/Word placement/full visual coverage/таблицы/OCR conflicts/формулы/V4/qualified corpus открыты.8✅/8🟡/3❌. На ПК пользователя не установлено; инженерно не принято. Следующий конкретный пробел — unsupported bitmap header и смешанная графика/таблицы; расчёты ЛИРА/RES отложены.
+
+
+## 91. №13: маскированный исходный растр EMF и просмотр при усечённом тексте — 09–10.10.2026
+
+До шага кандидатebcafaa69c1a715f3e969fbcf1aa614f2e115533. Расчёты отложены. PR107 https://github.com/maxim505885-jpg/engineer-os/pull/107, ветка feat/emf-bitfields-coverage-20261010, head21114ab273a5927f34af985126afb0a804f6b422; полное дерево7898926d5b8121e655a0b16ccdaf904c7b136dee совпало с проверенным локальным кодом. На момент этой записи PR OPEN, CI ожидается; merge не заявляется.
+
+Реальный пропуск word/media/image465.emf: record76 offset54676 содержит BITMAPINFOHEADER40+3DWORD маски (52bytes),compression3 BI_BITFIELDS32bit,17x19. Reader теперь читает явно заданныеRGB555/RGB565/RGB888 профили16/32bit; zero/overlap/noncontiguous/out-of-depth маски отвергаются, неподдержанные профили явно UNAVAILABLE. Маски включены в payloadSHA и exact descriptor revalidation. Прежние byte/pixel/package limits не увеличены. Alpha/ROP/transform/crop/compositing/vector playback/Word placement не интерпретируются.
+
+Родительский элемент оригинала12572 содержит54282 символа, больше Store20000. RED regression воспроизвела блокировку preview. Новый image-only binder принимает отмеченный TEXT_LIMIT точный source prefix после повторной проверки session/child/originalSHA/parser/full locator; возвращает source_confirmable=false. Quote binder и candidate acceptance продолжают отвергать усечённый текст. Подмена text/locator/truncation state блокируется; asset и selected bitmap payloadSHA повторно проверяются перед PNG. Это доступ к исходному изображению, не подтверждение неполной цитаты.
+
+Реальный неизменённыйDOCX SHA b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5:120/120 bitmap sources в138EMF доступны; все29880590 RGB pixels точно совпали с независимым BMP-wrapper/Pillow BMP decoder.14684 logical units/671 image refs сохранены. image465 RGBSHA4aeb840401b2942dd782b70db5c08b363237e8ed4750ff9be54f56a58d9a9969. Контролируемый производныйDOCX с точным оригинальнымimage465 asset прошёл Store/Worker/model/receipt/PNG17x19,stored20000/text_truncated=true,strict quote BLOCK,acceptance=false. Это isolated source asset fixture, не полный original Store/model прогон и не подтверждение original logical parent/physical page.
+
+Локально851 tests/99.990s OK,17 environment skips;38 focused,10Node,2HTTP/DOM,5Chromium PASS; architecture/compile/JS/diff PASS. Первый DOM session-switch timeout повторно PASS; причина не установлена и не выдана за исправленный production defect. Windows suite теперь49tests, реальное выполнение ожидается вCI. Независимый review двух изменений: Critical/Important/Minor нет;65536 значений каждого16bit555/565 совпали с прямым mask scaling. Контролируемый browser проверил обычный и masked bitmap ordinals с явным unrendered scope/no evidence.
+
+Подэтап source-pixel extraction закрыт для120 обнаруженных bitmap источников этогоDOCX; №13 остаётся❌,8✅/8🟡/3❌. Full EMF rendering/vector graphics/Word placement,растровые и mixed tables,OCR conflicts,visual formula correspondence,полныйV4 и qualified corpus открыты. НаПК пользователя не установлено; инженерно не принято. Далее — source-bound rendering и визуальное покрытие смешанной графики/таблиц. ЛИРА/RES отложены. Подробный receipt:docs/qa/2026-10-10-emf-bitfields.md.
