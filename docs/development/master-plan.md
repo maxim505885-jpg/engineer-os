@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** кандидат PR99 — §79; native LIR/API — §81, инвентарь ЛИРА2024 получен, подготовлен частичный экспортёр таблиц (draft PR100). Реальная выгрузка/полнота/RES/сайт ещё не проверены. План 8 ✅ / 8 🟡 / 3 ❌.
+**Активный план:** кандидат PR99 — §79; native LIR/API — §82: реальная модель открылась,0 таблиц из-за type mismatch; V2 исправление COM-параметров прошло Windows regression, нужен повторный реальный export. Полнота/RES/сайт открыты. План8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -258,3 +258,18 @@ PR100 остаётся draft: https://github.com/maxim505885-jpg/engineer-os/pul
 Ограничения: только whole-model таблицы с параметрами по умолчанию; варианты параметров РСН/таблиц не перечислены исчерпывающе; сохранённые таблицы не копируются отдельно; полные записи нагрузок, .sld и другие бинарные разделы не декодированы. RES export и связь результатов с hash модели ещё не реализованы. full_information_extracted/results_exported/acceptance_granted=false, solver=NOT_RUN. Реальная выгрузка пользовательского LIR и её полнота ещё не проверены. №6 остаётся 🟡; план 8 ✅ / 8 🟡 / 3 ❌.
 
 Дальше: проверить первый реальный export; исправить COM/параметры при необходимости; сверить таблицы/единицы/ключи с исходными TXT и данными модели; реализовать отсутствующие варианты и отдельный RES export; после фактической проверки подключить общий Windows-обработчик к upload pipeline сайта. Запрос «вся информация файла» пока не закрыт.
+
+
+## 82. Первый реальный COM запуск: модель открыта, 0 таблиц; исправление V2 — 09.10.2026
+
+Получен `ENGINEER_OS_LIRA_EXPORT_f42ba4e4bbdc41a7a0ca27c64f19495b.zip` (6840 bytes, только manifest.json68996 bytes). Исходник пользователя `секция 2 прогибы.lir`,16 266 163 bytes,SHA256 `34a24bc30f744476a35da42e3e18dd015953ed27dfd40e2a2ebb5a6aef4408d8`. COM activation и OpenDocument на реальной ЛИРА2024 прошли: title=секция2прогибы, system_label=5,current_load_case=1; прочитаны коды единиц приложения, existing_table_count=0. По manifest original_unchanged=true, owned_document_closed=true, solver=NOT_RUN.
+
+Все31 таблицы получили «Несовпадение типов»; выгружено0 TSV. Статус V1 PARTIAL_MODEL_TABLE_EXPORT был некорректен для нулевого результата. Точный этап ошибки V1 не записывался, поэтому нельзя объявлять точную причину установленной или модель повреждённой.
+
+Обоснованная гипотеза: передача Pars как null вместо пропущенного optional COM VARIANT и/или PowerShell by-reference marshalling. V2 добавляет `com-bridge.cs`: Reflection.InvokeMember с Missing.Value (VT_ERROR/DISP_E_PARAMNOTFOUND), явный ParameterModifier для GetContents/GetParameters. Прежний успешный OpenDocument не менялся. Записываются error_stage и HRESULT каждой ошибки. При0 таблиц теперь TABLE_EXPORT_FAILED, а не partial success. Никаких SetContents/Apply/Save/solver/result вызовов; source-copy guard и hash сохраняются.
+
+Regression сначала FAIL на Windows run37947731826: «optional VARIANT produced no tables» (fixture воспроизводит отличие null и Missing; это не доказательство внутренней причины реальной ЛИРА). После исправления head `43d4c5b70f15b955876565676683852914d9caee`, Windows run37947898558/job113878839083 SUCCESS. Проверены Missing/ref object, большой TSV,0-table failure,stage/HRESULT,hash/copy/close и реальное представление Missing в native VARIANT: VT_ERROR+DISP_E_PARAMNOTFOUND. Security37947898569 SUCCESS. Реальный LIRA runtime повторно не запускался; устранение ошибки на пользовательском файле ещё НЕ подтверждено.
+
+Подготовлен `ENGINEER_OS_LIRA_NATIVE_EXPORT_V2.zip` (6 файлов, включая com-bridge.cs). Пользователю: распаковать в новую папку, START.cmd, выбрать тот же .lir, прислать новый export ZIP. Повторять API inventory не требуется. PR100 остаётся draft, сайт/кандидат PR99 не изменён этой утилитой; №6 🟡, план8✅/8🟡/3❌, full_information_extracted/results_exported/acceptance=false.
+
+Следующее действие: получить реальный V2 export и проверить таблицы/ошибки/хеши; затем полноту исходных данных, отдельный RES export, грунт и подключение Windows reader к сайту. Запрос всей информации пока открыт.
