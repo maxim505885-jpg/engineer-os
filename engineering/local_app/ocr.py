@@ -61,7 +61,7 @@ class TesseractOCR:
     def __init__(self):
         self.binary,self.data=_paths();self.layout=_layout();self.last_page_dossier=None
 
-    def page_blocks(self,page,page_no):
+    def page_blocks(self,page,page_no,*,bbox=None):
         import fitz
         rotation=page.rotation
         self.last_page_dossier=None
@@ -70,13 +70,19 @@ class TesseractOCR:
             width,height=page.rect.width,page.rect.height
             if not all(math.isfinite(n) and n>0 for n in (width,height)):raise OCRError('OCR_INVALID_PAGE_GEOMETRY')
             regions=[('whole',fitz.Rect(0,0,width,height))]
-            if self.layout=='regions':
+            if bbox is not None:
+                if not isinstance(bbox,(list,tuple)) or len(bbox)!=4 or any(isinstance(n,bool) or not isinstance(n,(int,float)) or not math.isfinite(n) for n in bbox):
+                    raise OCRError('OCR_INVALID_REGION')
+                left,top,right,bottom=bbox
+                if not (0<=left<right<=width and 0<=top<bottom<=height):raise OCRError('OCR_INVALID_REGION')
+                regions=[('selected',fitz.Rect(bbox))]
+            elif self.layout=='regions':
                 overlap=min(REGION_OVERLAP,width/10,height/10)
                 for y in range(2):
                     for x in range(2):
                         regions.append((f'r{y*2+x+1}',fitz.Rect(max(0,x*width/2-overlap),max(0,y*height/2-overlap),
                             min(width,(x+1)*width/2+overlap),min(height,(y+1)*height/2+overlap))))
-            dossier=dict(layout=self.layout,page_no=page_no,scope='UNVERIFIED_OCR_CANDIDATES',coverage='INCOMPLETE',
+            dossier=dict(layout='selected_region' if bbox is not None else self.layout,page_no=page_no,scope='UNVERIFIED_OCR_CANDIDATES',coverage='INCOMPLETE',
                 page_bbox=dict(left=0,top=0,right=width,bottom=height),coordinate_space='UNROTATED_CROP_RELATIVE',
                 planned_passes=len(regions),completed_passes=0,pixels=0,output_bytes=0,words=0,
                 regions=[],quality_verified=False,acceptance_granted=False,
@@ -86,14 +92,15 @@ class TesseractOCR:
             for region_id,clip in regions:
                 remaining=deadline-time.monotonic()
                 if remaining<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
-                scale=min(2.5,3000/max(clip.width,clip.height))
+                scale=min(6.0 if bbox is not None else 2.5,3000/max(clip.width,clip.height))
                 pixels=page.get_pixmap(matrix=fitz.Matrix(scale,scale),clip=clip,colorspace=fitz.csRGB,alpha=False)
                 count=pixels.width*pixels.height
                 if count>MAX_PIXELS or dossier['pixels']+count>MAX_PAGE_PIXELS:raise OCRError('OCR_PIXEL_LIMIT')
                 dossier['pixels']+=count
                 remaining=deadline-time.monotonic()
                 if remaining<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
-                raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'])
+                if bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=6)
+                else:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'])
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 dossier['output_bytes']+=len(raw)
                 try:
@@ -115,19 +122,20 @@ class TesseractOCR:
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 blocks.extend(found)
                 dossier['regions'].append(dict(id=region_id,bbox=dict(zip(('left','top','right','bottom'),clip)),
-                    execution='COMPLETED',blocks=len(found),characters=sum(len(b['text']) for b in found)))
+                    execution='COMPLETED',render_scale=scale,psm=6 if bbox is not None else 3,
+                    blocks=len(found),characters=sum(len(b['text']) for b in found)))
                 dossier['completed_passes']+=1
-            dossier['coverage']='WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED'
+            dossier['coverage']='SELECTED_REGION_EXECUTED' if bbox is not None else ('WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED')
             return blocks
         finally:page.set_rotation(rotation)
 
-    def _recognize(self,pixels,deadline,output_budget):
+    def _recognize(self,pixels,deadline,output_budget,*,psm=3):
         with tempfile.TemporaryDirectory(prefix='engineer-ocr-') as folder:
             root=Path(folder);source=root/'page.png';output=root/'result'
             pixels.save(source)
             timeout=deadline-time.monotonic()
             if timeout<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
-            command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l','rus+eng','--psm','3','-c','tessedit_create_tsv=1']
+            command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l','rus+eng','--psm',str(psm),'-c','tessedit_create_tsv=1']
             environment={key:value for key,value in os.environ.items() if key in {'SYSTEMROOT','WINDIR','TEMP','TMP'}}
             environment.update(PATH=os.defpath,LANG='C.UTF-8',OMP_THREAD_LIMIT='2')
             try:result=subprocess.run(command,shell=False,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
