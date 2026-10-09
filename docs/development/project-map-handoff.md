@@ -9,3 +9,9 @@ PR91 merged вintegration/release-candidate-v1,head22ad4c153646a9a2a2c5c17cc3a58
 PR92/head e4eaf3509e953118e5e3ed8c979d5ea28bad121f:Windows clean start/cache repair/restart прошли первый запуск;Windows backup tests нашли byte-lock read иtest SQLite handles. Причины исправлены,18local testsPASS;повтор полногоWindows CI выполняется. Не считать физическийПК/перезагрузку подтверждёнными.
 
 726Python,4Node,2HTTP/DOM,4Chromium былиPASS на исходном frozen tree;послеWindows исправления идёт новый full Python pass. Последний фактический результат проверять поCI иразделу68.
+
+## Уточнение §68.5
+
+DWG действительно сохранён среди исходников. Пять копий byte-identical, 1 уникальный AC1032. GNU LibreDWG0.14 создал отдельный DXF: 15 906 объектов, 287 блоков, 32 слоя. CAD_ENTITY_LIMIT и предупреждения/ошибки конвертации сохраняют BLOCK; original geometry equivalence NOT_VERIFIED. Это заменяет прежнюю формулировку «DWG отсутствует».
+
+PR92 head6032367 исправляет DOM teardown race и канонизацию путей в Windows assertion. Локальный DOM дважды PASS exit0. Последний предшествующий native Windows: 23 tests + реальный Ollama qwen3:0.6b inference PASS; полный новый CI ещё выполняется. Программный результат не закрывает физическую перезагрузку, полноту инженерных источников и положительный FINAL_AUDIT.

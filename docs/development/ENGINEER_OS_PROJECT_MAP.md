@@ -2729,10 +2729,20 @@ Triage:docs/qa/2026-10-09-codeql-triage.md на канонической docs в
 
 Два PDF:43/43 страницы;DOCX:487/487 логических единиц;два XLSX:125/125 и48/48;ошибок извлечения0.Все7 оригиналов сохранены без изменения байтов.Два LIR распознаны как native контейнеры,но семантика модели не декодирована.Расчётный intake BLOCK:не представлены GEOMETRY,MATERIALS_SECTIONS,LOADS_COMBINATIONS,SUPPORTS_RELEASES,UNITS,SOLVER_LOG,RESULTS,ACTUAL_STRUCTURE_REFERENCE.Реальный solver не запускался;accepted case отсутствует.
 
-Визуально просмотрены первые страницы обоих PDF:геодезическая цветовая схема и планы повреждений;это ограниченный visual sample,не полная проверка43 страниц.40/43 PDF страниц не имеют native текста;43/43 vector content unverified.У DOCX остаются31 drawing,2 equation,14 merged-cell limitations;XLSX formulas/styles/charts не проверены.Досье NOT_CHECKED;acceptance_granted=false.Оригинала DXF/DWG нет.
+Визуально просмотрены первые страницы обоих PDF:геодезическая цветовая схема и планы повреждений;это ограниченный visual sample,не полная проверка43 страниц.40/43 PDF страниц не имеют native текста;43/43 vector content unverified.У DOCX остаются31 drawing,2 equation,14 merged-cell limitations;XLSX formulas/styles/charts не проверены.Досье NOT_CHECKED;acceptance_granted=false.Первый workspace-поиск не обнаружилCAD;последующий поиск исходников нашёлDWG,см.§68.4.
 
 Evidence:docs/qa/2026-10-09-five-criteria-sources.json опубликован в канонической docs ветке.Критерии2–4 частично выполнены;полное инженерное принятие не заявляется.
 
 ### 68.3 Windows runtime — В ПРОЦЕССЕ
 
 PR92:Windows supervisor clean install,cache repair after removing ezdxf,and restart реально PASS на windows-latest.Следующий этап21 tests failed(3failures,7errors):Windows byte-lock read denied до обработчика;raw sqlite test handles not closed;short-vs-canonical path mismatch.Установлены причины;исправления опубликованы head e4eaf3509e953118e5e3ed8c979d5ea28bad121f.Локальный повтор18 recovery/backup tests PASS.Полный Windows повтор выполняется;браузер/live inference ещё не проверены.Физическая перезагрузка пользовательского ПК иfinal release остаются открыты.
+
+### 68.4 Реальный DWG найден — исправление полноты поиска
+
+Найдены5 ранее загруженныхDWG копий;они совпадают побайтно(SHA256 один),размер1138808bytes,headerAC1032.Всеоригиналы сохранены.ОтсутствиеCAD input больше не считается препятствием;препятствие — native DWG decoder/conversion иполная проверка геометрии/resources.ПодготовленпроверенныйофициальныйLibreDWG0.14 source archive,идётсборкаread-only converter.ИзменениеDWG/acceptedCAD ещёне выполнено.
+
+### 68.5. Реальный DWG и повторная проверка Windows/DOM
+
+Найдены пять сохранённых DWG: один уникальный оригинал AC1032, 1 138 808 байт. Оригиналы сохранены без изменений. GNU LibreDWG 0.14 (официальный архив с проверенным SHA256) создал отдельный DXF 16 034 803 байт. Независимый inventory: 15 906 объектов базы, 4 189 modelspace, 10 172 объектов блоков, 287 блоков, 32 слоя, 3 layouts. Журнал содержит 1 304 строки предупреждений и 210 строки ошибок: успешный exitcode конвертера не доказывает эквивалентность геометрии. Приложение корректно блокирует полный inventory по CAD_ENTITY_LIMIT=10000. Controlled edit, DWG roundtrip и инженерная приёмка остаются открыты. Прежняя формулировка «DWG не предоставлен» заменена фактическим ограничением обработки и проверки.
+
+Windows CI подтвердил 23 теста backup/startup/native metadata и реальную работу Ollama qwen3:0.6b. Исправлены блокировка занятого файла, проверка metadata SQLite при совместном доступе и сравнение канонических путей Windows. DOM-тест теперь останавливает таймеры каждой страницы и дожидается запросов/чтения ответов до уничтожения document. Два независимых локальных прогона завершились PASS, exitcode 0. Новый проверяемый head PR92: 6032367ef05fc5c25139ff23cd98fb27b6f8b142; полный CI ещё выполняется. Это не заменяет установку и перезагрузку на физическом ПК, FINAL_AUDIT или финальный релиз.

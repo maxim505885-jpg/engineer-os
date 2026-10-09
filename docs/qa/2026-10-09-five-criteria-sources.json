@@ -18,8 +18,49 @@
     ]
   },
   "cad": {
-    "status": "NOT_RUN",
-    "reason": "No original DXF/DWG provided"
+    "status": "DERIVED_DXF_INVENTORIED_UNVERIFIED",
+    "copies": 5,
+    "unique_sources": 1,
+    "acceptance_granted": false,
+    "converter": "GNU LibreDWG 0.14",
+    "originals_unchanged": true,
+    "derived_bytes": 16034803,
+    "derived_sha256": "dddb5edf86015cf7603f9e95d485d18ee03c4916c30c46e8e88cca4fd9ed18d0",
+    "inventory": {
+      "scope": "OFFLINE_UNVERIFIED_DERIVED_INVENTORY",
+      "source_sha256": "dddb5edf86015cf7603f9e95d485d18ee03c4916c30c46e8e88cca4fd9ed18d0",
+      "version": "AC1032",
+      "units": 4,
+      "entitydb_count": 15906,
+      "modelspace_count": 4189,
+      "modelspace_types": {
+        "HATCH": 57,
+        "LWPOLYLINE": 3074,
+        "CIRCLE": 137,
+        "MTEXT": 112,
+        "DIMENSION": 128,
+        "INSERT": 152,
+        "LINE": 275,
+        "MULTILEADER": 196,
+        "SPLINE": 54,
+        "OLE2FRAME": 1,
+        "TEXT": 3
+      },
+      "block_entities_count": 10172,
+      "layouts": 3,
+      "blocks": 287,
+      "layers": 32,
+      "conversion_warning_lines": 1304,
+      "conversion_error_lines": 210,
+      "accepted": false,
+      "controlled_edit": "NOT_RUN",
+      "original_geometry_equivalence": "NOT_VERIFIED"
+    },
+    "application_inventory": {
+      "status": "BLOCK",
+      "reason": "CAD_ENTITY_LIMIT",
+      "limit": 10000
+    }
   },
   "sources": [
     {
