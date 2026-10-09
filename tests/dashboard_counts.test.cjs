@@ -29,6 +29,20 @@ test('late initial session list preserves user-created conversation', async () =
   }
 });
 
+test('browser fixture waits for child closure after forced shutdown', async () => {
+  const {EventEmitter}=require('node:events');
+  const source=fs.readFileSync(path.join(__dirname,'../e2e/local_document_intake_ui_smoke.cjs'),'utf8');
+  const cleanup=source.match(/\}finally\{([^\n]+)\}\n\}\)\(\)/);
+  assert.ok(cleanup,'intake fixture cleanup missing');
+  const child=new EventEmitter();child.exitCode=null;child.signalCode=null;let closed=false,removed=false;
+  child.kill=signal=>{if(signal==='SIGKILL')setTimeout(()=>{closed=true;child.signalCode='SIGKILL';child.emit('exit');child.emit('close');},20);return true;};
+  const helper=path.join(__dirname,'../e2e/stop_child.cjs');
+  const context={browser:null,child,temp:'fixture',stopChild:fs.existsSync(helper)?child=>require(helper).stopChild(child,{graceMs:2,killWaitMs:200}):undefined,
+    setTimeout:(fn,ms)=>setTimeout(fn,Math.min(ms,2)),clearTimeout,
+    fs:{rmSync:()=>{assert.ok(closed,'Cleanup must wait for process closure after SIGKILL');removed=true;}}};
+  vm.createContext(context);await vm.runInContext('(async()=>{'+cleanup[1]+'})()',context);assert.ok(removed);
+});
+
 function app(responses) {
   const calls = [];
   const elements = new Map();

@@ -1,3 +1,4 @@
+const {stopChild}=require('./stop_child.cjs');
 /* Synthetic model protocol, actual launcher/worker, Chromium UI and persistence. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');const os=require('node:os');const path=require('node:path');
@@ -7,7 +8,7 @@ const {chromium}=require('playwright');
   const root=path.resolve(__dirname,'..');const temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-ui-'));
   const recoveryTemp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-os-recovery-ui-'));
   let child,recoveryChild,browser;const requests=[];
-  async function stop(process){if(!process||process.exitCode!==null)return;process.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{process.kill('SIGKILL');resolve();},2500);process.once('exit',()=>{clearTimeout(timer);resolve();});});}
+  const stop=child=>stopChild(child,{graceMs:2500});
   const model=http.createServer((req,res)=>{
     res.setHeader('Content-Type','application/json');
     if(req.method==='GET'){res.end(JSON.stringify({data:[{id:'qwen3:8b'}]}));return;}
@@ -113,6 +114,6 @@ const {chromium}=require('playwright');
     console.log(JSON.stringify({result:'PASS',synthetic_model:true,real_ollama:false,checks:['launcher','worker','upload','source-context','chat','inert-model-markup','history-reload','session-switch','mobile-layout','model-settings-ui','isolated-diagnostic-ui','running-cancel-ui','late-answer-refusal','retry-new-task-ui','archive-navigation','recovery-browser','busy-owner-refusal','backup-verify-restore','no-replace','original-bytes','activate-directory','restored-launch-history'],requests:requests.length}));
   }finally{
     if(browser)await browser.close();await stop(child);await stop(recoveryChild);
-    await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});fs.rmSync(recoveryTemp,{recursive:true,force:true});
+    await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});fs.rmSync(recoveryTemp,{recursive:true,force:true,maxRetries:5,retryDelay:100});
   }
 })().catch(e=>{console.error(e);process.exitCode=1;});

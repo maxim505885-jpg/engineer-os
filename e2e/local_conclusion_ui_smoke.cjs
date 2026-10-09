@@ -1,3 +1,4 @@
+const {stopChild}=require('./stop_child.cjs');
 /* Real Chromium: generate/edit/version/reload/download a blocked draft. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawn,spawnSync}=require('node:child_process');const {chromium}=require('playwright');
@@ -31,5 +32,5 @@ s=Store(sys.argv[1]);sid=s.create_session('Тест черновика')['id'];f
   for(const format of ['docx','pdf']){const download=page.waitForEvent('download');await page.locator('#conclusion-export-'+format).click();const d=await download;assert.equal(await d.failure(),null);assert.ok(d.suggestedFilename().endsWith('.'+format));const file=await d.path();assert.ok(fs.statSync(file).size>100);}
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({result:'PASS',real_chromium:true,checks:['blocked-draft','edit-preserved-during-refresh','version-history','reload','draft-template','source-bound-illustration','docx-pdf-download','no-acceptance']}));
- }finally{if(browser)await browser.close();if(child&&child.exitCode===null){child.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(timer);resolve();});});}fs.rmSync(temp,{recursive:true,force:true});}
+ }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(e=>{console.error(e);process.exitCode=1;});

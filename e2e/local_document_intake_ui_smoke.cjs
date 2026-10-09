@@ -1,3 +1,4 @@
+const {stopChild}=require('./stop_child.cjs');
 /* Real Chromium, original preview and explicit model decoder boundary. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawn,spawnSync}=require('node:child_process');const {chromium}=require('playwright');
@@ -16,5 +17,5 @@ const {spawn,spawnSync}=require('node:child_process');const {chromium}=require('
   await page.setInputFiles('#upload',{name:'model.lir',mimeType:'application/octet-stream',buffer:Buffer.from('ULIRA-SAPR synthetic container')});await page.waitForFunction(()=>document.querySelectorAll('.file').length===2);assert.ok((await page.locator('#files').textContent()).includes('Декодер не подключён'));
   await page.reload();await page.waitForFunction(()=>document.querySelectorAll('.file').length===2);assert.ok((await page.locator('#files').textContent()).includes('MODEL_DECODER_UNAVAILABLE'));assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({result:'PASS',real_chromium:true,checks:['original-page-preview-without-candidate','visible-viewer','local-ocr-action','lir-intake-no-decoder-claim','reload-originals'],engineering_acceptance:false}));
- }finally{if(browser)await browser.close();if(child&&child.exitCode===null){child.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(timer);resolve();});});}fs.rmSync(temp,{recursive:true,force:true});}
+ }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});

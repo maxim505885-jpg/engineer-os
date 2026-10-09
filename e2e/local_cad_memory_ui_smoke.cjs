@@ -1,3 +1,4 @@
+const {stopChild}=require('./stop_child.cjs');
 /* Real Chromium: source-bound CAD and fail-closed confirmed knowledge. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawn,spawnSync}=require('node:child_process'),{chromium}=require('playwright');
@@ -23,5 +24,5 @@ s=Store(sys.argv[1]);sid=s.create_session('CAD fixture')['id'];d=ezdxf.new('R201
   await page.locator('#new-chat').click();await page.waitForFunction(()=>!document.querySelector('#cad-panel').open);assert.equal(await page.locator('#cad-result').textContent(),'');assert.equal(await page.locator('#knowledge-promote').isDisabled(),true);
 
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',real_chromium:true,checks:['cad-inventory','annotation-only-download','project-switch-isolation','source-preserved','knowledge-without-acceptance-disabled','mandatory-reverification']}));
- }finally{if(browser)await browser.close();if(child&&child.exitCode===null){child.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(timer);resolve();});});}fs.rmSync(temp,{recursive:true,force:true});}
+ }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(e=>{console.error(e);process.exitCode=1;});
