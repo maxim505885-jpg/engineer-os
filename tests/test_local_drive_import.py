@@ -23,6 +23,13 @@ class Token:
 
 
 class LocalDriveImportTests(unittest.TestCase):
+    def test_large_office_metadata_is_allowed_but_pdf_retains_existing_limit(self):
+        self.meta.update(name='full-report.docx',size=str(147210288))
+        try:self.module.validate_metadata(self.client.metadata('drive_original_123'),'drive_original_123')
+        except self.module.DriveImportError as e:self.fail('Bounded Office metadata rejected: '+str(e))
+        self.meta['name']='report.pdf'
+        with self.assertRaises(self.module.DriveImportError):self.module.validate_metadata(self.client.metadata('drive_original_123'),'drive_original_123')
+
     def setUp(self):
         try:self.module=importlib.import_module('engineering.local_app.drive_import')
         except ModuleNotFoundError:self.fail('Local Drive import missing')

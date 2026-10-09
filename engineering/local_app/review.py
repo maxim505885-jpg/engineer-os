@@ -1,5 +1,4 @@
 """Append-only source review decisions, never engineering acceptance."""
-import hashlib
 from pathlib import Path
 import time
 import uuid
@@ -11,8 +10,9 @@ def record_review(store,session_id,candidate_id,*,expected_revision,decision,not
     for name,value,limit in [('note',note,2000),('actor',actor,120)]:
         if not isinstance(value,str) or not value.strip() or len(value)>limit:raise ValueError(name+' is required and exceeds limit')
     r=store.get_evidence(session_id,candidate_id);f=store.get_file(r['file_id'])
-    with Path(f['path']).open('rb') as stream:data=stream.read(100*1024*1024+1)
-    if f['session_id']!=session_id or len(data)!=f['size'] or hashlib.sha256(data).hexdigest()!=f['sha256'] or f['sha256']!=r['source_sha256']:raise ValueError('Original identity check failed')
+    if f['session_id']!=session_id or f['sha256']!=r['source_sha256']:raise ValueError('Original identity check failed')
+    from .core_plan import verify_originals
+    verify_originals([f])
     if decision=='SOURCE_CONFIRMED':
         from .source_binding import validate_candidate
         validate_candidate(store,session_id,r)

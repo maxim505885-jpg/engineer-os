@@ -1,3 +1,4 @@
+const {stopChild}=require('./stop_child.cjs');
 /* Opt-in real inference. Requires an installed Ollama and a locally stored model. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');const os=require('node:os');const path=require('node:path');
@@ -5,7 +6,7 @@ const {spawn}=require('node:child_process');const {chromium}=require('playwright
 (async()=>{
  const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-live-model-'));
  const modelName=process.env.ENGINEER_OS_LIVE_MODEL||'qwen3:0.6b';let app,browser;
- async function stop(child){if(!child||child.exitCode!==null)return;child.kill('SIGINT');await new Promise(resolve=>{const timer=setTimeout(()=>{child.kill('SIGKILL');resolve();},3000);child.once('exit',()=>{clearTimeout(timer);resolve();});});}
+ const stop=child=>stopChild(child,{graceMs:3000});
  try{
   const env={...process.env,ENGINEER_OS_LOCAL_MODEL_URL:process.env.ENGINEER_OS_LIVE_ORIGIN||'http://127.0.0.1:11434',ENGINEER_OS_LOCAL_MODEL_KEY:''};
   delete env.ENGINEER_OS_LOCAL_MODEL;delete env.ENGINEER_OS_LOCAL_THINK;delete env.ENGINEER_OS_LOCAL_MODEL_TIMEOUT;
@@ -34,5 +35,5 @@ const {spawn}=require('node:child_process');const {chromium}=require('playwright
   assert.equal(attachmentSnap.jobs[0].result.source_coverage[0].id,attachmentSnap.files[0].id);
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({result:'PASS',real_ollama:true,synthetic_model:false,model:modelName,checks:['actual-model-list','missing-model-ui','saved-live-settings','real-inference-through-ui','separate-diagnostic-history','persisted-answer','attachment-through-real-model','source-coverage','no-engineering-acceptance'],response_chars:text.length}));
- }finally{if(browser)await browser.close();await stop(app);fs.rmSync(temp,{recursive:true,force:true});}
+ }finally{if(browser)await browser.close();await stop(app);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});

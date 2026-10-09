@@ -9,7 +9,7 @@ from urllib.parse import parse_qs, urlsplit
 from urllib.request import build_opener, HTTPRedirectHandler, ProxyHandler
 
 from engineering.storage.google_drive import GoogleDriveClient, GoogleDriveOAuth, GoogleDriveTokenProvider
-from .files import MAX_FILE_BYTES, preserve_file,SUPPORTED_SUFFIXES
+from .files import file_limit, preserve_file,SUPPORTED_SUFFIXES
 
 
 class DriveImportError(RuntimeError):
@@ -80,8 +80,8 @@ def validate_metadata(meta, requested_id):
     suffix=Path(meta.name).suffix.lower()
     if suffix not in SUPPORTED_SUFFIXES or not isinstance(meta.mime_type,str) or meta.mime_type.startswith('application/vnd.google-apps.'):
         raise DriveImportError('Импортируются оригиналы PDF/TXT/MD/DOCX/XLSX/DOC/PNG/JPG/LIR/JSON/CSV; экспорт Google Docs и папки пока не поддерживаются')
-    if type(meta.size) is not int or not 0<meta.size<=MAX_FILE_BYTES:
-        raise DriveImportError('Оригинал должен содержать 1 байт–100 МБ')
+    if type(meta.size) is not int or not 0<meta.size<=file_limit(meta.name):
+        raise DriveImportError('Оригинал превышает лимит '+str(file_limit(meta.name)//1024//1024)+' МБ')
     if not isinstance(meta.md5_checksum,str) or not re.fullmatch('[0-9a-fA-F]{32}',meta.md5_checksum):
         raise DriveImportError('Контрольная сумма оригинала Drive недоступна; используйте ручную загрузку')
     return (meta.file_id,meta.name,meta.mime_type,meta.size,meta.md5_checksum.lower(),meta.modified_time)
@@ -100,7 +100,7 @@ def import_original(store, session_id, client, source, *, expected_sha256=None):
         before=validate_metadata(client.metadata(ident),ident)
         with tempfile.TemporaryDirectory(prefix='drive-import-',dir=store.root) as folder:
             target=Path(folder)/'original'
-            downloaded=client.download(ident,str(target),max_bytes=MAX_FILE_BYTES)
+            downloaded=client.download(ident,str(target),max_bytes=file_limit(before[1]))
             during=validate_metadata(downloaded.metadata,ident)
             after=validate_metadata(client.metadata(ident),ident)
             if before!=during or before!=after:raise DriveImportError('Файл Drive изменился во время загрузки; повторите импорт')

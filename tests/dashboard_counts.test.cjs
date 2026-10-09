@@ -4,6 +4,45 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 
+test('local upload uses 256 MiB only for OOXML extensions', () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const match=source.match(/function uploadLimitBytes\(name\)\{[^\n]+\}/);
+  assert.ok(match,'local upload size policy missing');
+  const context={};vm.createContext(context);vm.runInContext(match[0],context);
+  assert.equal(context.uploadLimitBytes('report.DOCX'),256*1024*1024);
+  assert.equal(context.uploadLimitBytes('table.xlsx'),256*1024*1024);
+  assert.equal(context.uploadLimitBytes('report.docx.exe'),100*1024*1024);
+});
+
+test('late initial session list preserves user-created conversation', async () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const initializer=source.match(/\(async\(\)=>\{try\{const list=await sessions\(\);[^\n]+pollStatus\(\);\}\)\(\);/);
+  assert.ok(initializer,'local session initializer missing');
+  for(const state of [{current:'user-created',creating:false},{current:null,creating:true}]){
+    let release;const actions=[];
+    const context={current:null,creating:false,sessions:()=>new Promise(resolve=>{release=resolve;}),
+      switchSession:async id=>actions.push('switch:'+id),createSession:async()=>actions.push('create'),
+      controls:()=>{},poll:()=>{},pollStatus:()=>{},error:error=>{throw error;}};
+    vm.createContext(context);const initialized=vm.runInContext(initializer[0],context);
+    Object.assign(context,state);release([{id:'old-conversation'}]);await initialized;
+    assert.deepEqual(actions,[],'Late bootstrap response must preserve user action');
+  }
+});
+
+test('browser fixture waits for child closure after forced shutdown', async () => {
+  const {EventEmitter}=require('node:events');
+  const source=fs.readFileSync(path.join(__dirname,'../e2e/local_document_intake_ui_smoke.cjs'),'utf8');
+  const cleanup=source.match(/\}finally\{([^\n]+)\}\n\}\)\(\)/);
+  assert.ok(cleanup,'intake fixture cleanup missing');
+  const child=new EventEmitter();child.exitCode=null;child.signalCode=null;let closed=false,removed=false;
+  child.kill=signal=>{if(signal==='SIGKILL')setTimeout(()=>{closed=true;child.signalCode='SIGKILL';child.emit('exit');child.emit('close');},20);return true;};
+  const helper=path.join(__dirname,'../e2e/stop_child.cjs');
+  const context={browser:null,child,temp:'fixture',stopChild:fs.existsSync(helper)?child=>require(helper).stopChild(child,{graceMs:2,killWaitMs:200}):undefined,
+    setTimeout:(fn,ms)=>setTimeout(fn,Math.min(ms,2)),clearTimeout,
+    fs:{rmSync:()=>{assert.ok(closed,'Cleanup must wait for process closure after SIGKILL');removed=true;}}};
+  vm.createContext(context);await vm.runInContext('(async()=>{'+cleanup[1]+'})()',context);assert.ok(removed);
+});
+
 function app(responses) {
   const calls = [];
   const elements = new Map();

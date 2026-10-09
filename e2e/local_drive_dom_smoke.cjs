@@ -21,12 +21,19 @@ print('http://127.0.0.1:'+str(server.server_port),flush=True)
 server.serve_forever()
 `;
 (async()=>{
- const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-drive-dom-'));let child,dom;const errors=[];
+ const root=path.resolve(__dirname,'..'),temp=fs.mkdtempSync(path.join(os.tmpdir(),'engineer-drive-dom-'));let child,dom;const errors=[];let sessionReads=0,delayedList=false,staleDelivered=false,releaseList;
  try{
   child=spawn(process.env.PYTHON||'python3',['-u','-c',fixture,temp],{cwd:root});
   const origin=await new Promise((resolve,reject)=>{let raw='';const timer=setTimeout(()=>reject(Error('Server timeout')),10000);child.stderr.on('data',d=>process.stderr.write(d));child.stdout.on('data',d=>{raw+=d;const m=raw.match(/http:\/\/127\.0\.0\.1:\d+/);if(m){clearTimeout(timer);resolve(m[0]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error('Server exited '+code));});});
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
-  async function open(){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){win.fetch=(url,options)=>fetch(new URL(url,origin),options);}});}
+  async function open(delaySessionList=false){return JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){win.fetch=(url,options)=>{
+   const target=new URL(url,origin),ordinal=delaySessionList&&target.pathname==='/api/sessions'&&!options?.method?++sessionReads:0;
+   return fetch(target,options).then(async response=>{
+    // Hold the bootstrap list until a newer post-create list has rendered.
+    if(ordinal===2){delayedList=true;await new Promise(resolve=>{releaseList=resolve;});staleDelivered=true;}
+    return response;
+   });
+  };}});}
   dom=await open();let doc=dom.window.document;await until(()=>!doc.querySelector('#drive-import').disabled);
   assert.ok(doc.querySelector('#drive-status').textContent.includes('доступ проверяется при импорте'));
   doc.querySelector('#drive-source').value='https://drive.google.com/file/d/drive_original_123/view';
@@ -37,10 +44,12 @@ server.serve_forever()
   assert.ok(doc.querySelector('.file input').checked,'Imported original must be selected');
   assert.equal(doc.querySelector('#drive-source').value,'');assert.equal(doc.querySelector('#drive-sha').value,'');
   assert.equal(doc.body.textContent.includes('PRIVATE_SYNTHETIC_TOKEN'),false);
-  dom.window.close();dom=await open();doc=dom.window.document;await until(()=>doc.querySelector('.file'));
+  dom.window.close();dom=await open(true);doc=dom.window.document;await until(()=>doc.querySelector('.file'));
   assert.ok(doc.querySelector('.file').textContent.includes('drive_original_123'),'Import provenance must survive reload');
   doc.querySelector('#drive-source').value='unsaved_original';doc.querySelector('#drive-sha').value='0'.repeat(64);
-  doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.file').length===0);
+  await until(()=>delayedList);doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.file').length===0);
+  releaseList();await until(()=>staleDelivered&&!doc.querySelector('#drive-import').disabled);
+  assert.equal(doc.querySelectorAll('nav .session').length,2,'Older bootstrap list must not overwrite the created conversation');
   assert.equal(doc.querySelector('#drive-source').value,'');assert.equal(doc.querySelector('#drive-sha').value,'');
   doc.querySelector('#drive-source').value='drive_original_123';doc.querySelector('#drive-sha').value='0'.repeat(64);
   doc.querySelector('#drive-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
