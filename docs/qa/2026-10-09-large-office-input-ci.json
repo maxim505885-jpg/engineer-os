@@ -1,0 +1,78 @@
+{
+  "schema": "ENGINEER_OS_LARGE_OFFICE_CI_RECEIPT_V1",
+  "pull_request": 97,
+  "head_sha": "2be525c674037aa87e498fd2abf25dd8ad0709f4",
+  "tree_sha": "554b44515fe801ac20b92b31f373df21f0a29c9e",
+  "local_commit": "b1d724c8da4cfbd7a3f03fa386bd85b724a0bb86",
+  "local_validation": {
+    "python_total": 763,
+    "python_passed": 761,
+    "skipped": 2,
+    "skip_reason": "native Windows-only",
+    "ocr": "actual local rus+eng",
+    "node_total": 6,
+    "node_passed": 6,
+    "focused_python": 47,
+    "architecture_guard": "PASS",
+    "compile": "PASS",
+    "javascript_syntax": "PASS",
+    "diff_check": "PASS",
+    "http_dom_passed": 2
+  },
+  "review": {
+    "remaining_critical": 0,
+    "remaining_important": 0,
+    "remaining_minor": 0,
+    "fixed": [
+      "100MiB capped source-review read",
+      "stale UI size wording"
+    ],
+    "independent_final_tests": 13
+  },
+  "source_run": {
+    "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+    "source_bytes": 147210288,
+    "total_units": 14678,
+    "processed_units": 14678,
+    "failed_units": 0,
+    "blocked_units": 7022,
+    "truncated_units": 0,
+    "originals_unchanged": true,
+    "document_complete": false,
+    "acceptance_granted": false,
+    "parser_identity": {
+      "schema": 1,
+      "backend": "docx",
+      "python": "3.12.14",
+      "implementation": "c82ba26f84a1ca2c905463af9139b609a5922ae22ea79ab3424b5247e52bd6fe",
+      "limits": [
+        16777216,
+        33554432,
+        10000,
+        50000,
+        20000,
+        2000000,
+        536870912
+      ]
+    }
+  },
+  "candidate_before": "f2a58399384dacaff600714cc79e7b85ad3e03a9",
+  "candidate_after": null,
+  "ci_status": "PENDING",
+  "initial_head_sha": "fd6f08ca51313bbf3db5415e6ba8191355da0a69",
+  "initial_tree_sha": "b05f085fa7110dc49feb3cd4822a2643c0432b98",
+  "initial_ci_failure": {
+    "job": 113789564020,
+    "scope": "Linux PR DriveDOM",
+    "failure": "stale bootstrap session list overwrote newly created conversation",
+    "python_total": 763,
+    "python_passed": 761,
+    "skipped": 2,
+    "fixed": true,
+    "deterministic_regressions": [
+      "out-of-order session list",
+      "late first-list bootstrap consumer"
+    ],
+    "rerun_without_fix": false
+  }
+}

@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план:** итог §72.1. PR 96 принят в кандидат f2a58399, дерево 2ab64d8c равно проверенному 1230aa3a и локальному 10d58f3. Все 9 CI checks SUCCESS: Linux 755 тестов (753 PASS, 2 Windows skips), Windows 23 теста, реальная модель и браузерные сценарии PASS. Office 665/665 logical units; сохранены 2 Word equations, 14 Word merge declarations, 3 XLSX ranges и 4 formula cells. Это структура источника, не подтверждение layout/полноты. План 8✅ / 8🟡 / 3❌.
+**Активный план:** §73. PR97 head2be525c/tree554b4451, локальныйb1d724c; полный147MB DOCX14678/14678,0failed/truncated,7022BLOCK. Найденные stale-session races исправлены,6Node/2HTTP-DOM PASS. CI выполняется заново; кандидатf2a58399 пока прежний. План8✅/8🟡/3❌.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -26,7 +26,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91/92/93/94/95/96 merged; точные CI/SHA и ограничения — §72.1. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | 4 Chromium routes PASS на Linux и Windows; мобильный экран/session reset, источник/ТЗ/черновик/CAD/память проверены. Приёмка маршрута на реальном ACCEPTED объекте остаётся. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite/keys/CAD/память/settings; symlink/hardlink gates и Windows shared metadata/locks проверены. CodeQL 29 individually reviewed FP,0open на PR91; все свежие security/CodeQL checks PASS. Physical Windows и owner-controlled residual limits отдельно. |
-| 13 | Производственная полнота документов | ❌ Открыто | Native/OCR 43/43; Office 665/665 logical units, 2 Word equations/14 merge declarations/3 XLSX ranges/4 formula cells сохранены. OCR-кандидаты, rendered layout/formula interpretation/графика, полный V4 и qualified ground truth не приняты. |
+| 13 | Производственная полнота документов | ❌ Открыто | Native/OCR43/43; прежниеOffice665/665; новый полный147MB DOCX14678/14678,0failed/truncated,7022BLOCK,41equations/6300merge declarations/655drawings/642media. OCR-кандидаты, rendered layout/formula interpretation/графика, полный V4 и qualified ground truth не приняты. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
@@ -2842,3 +2842,19 @@ TDD: четыре missing-structure asserts RED; formula count и shared-followe
 Три реальных Office-оригинала обработаны полностью в пределах объявленных logical units: 665/665; native source structure и literal tokens сверены, но page/layout/document completeness не подтверждены. Приёмка не выдана. Точный XLSX merged-range count — 3; прежние 48 — unit warnings, не число объединений.
 
 План 8✅ / 8🟡 / 3❌. По пяти критериям: CodeQL/единый программный кандидат закрыт; документальная полнота, нормы/расчёты/реальный FINAL AUDIT, принятая память/отчёт/CAD/providers и physical Windows/release частичны. Далее №13: rendered tables/formulas/31 Word drawings/7 XLSX media members, числовые OCR-конфликты и полный V4 по qualified ground truth. После этого актуальные нормативные основания и 8 semantic calculation roles с реальным solver-run/actual correlation, ACCEPTED-кейс и оставшиеся product gates. Новый результат не снимает BLOCK автоматически.
+
+## 73. Полный доступный DOCX: крупный Office-исходник — 09.10.2026
+
+PR 97: `fd6f08ca51313bbf3db5415e6ba8191355da0a69`, tree `b05f085fa7110dc49feb3cd4822a2643c0432b98` равно локальному `dbceac93a4bbf3778d640d87507a39d7bb31be5e`. До завершения CI кандидат остаётся f2a58399. Полный доступный DOCX от15.09.2026 найден и обработан, исходник147210288байт, SHA256 b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5. Это не подмена отсутствующего qualified V4 PDF ground truth.
+
+Сняты реальные входные блокировки: DOCX/XLSX256MiB во всех UI/HTTP/preservation/Drive путях; остальные форматы100MiB. ZIP declared expansion512MiB, XML aggregate32MiB/per-part16MiB; изображения не распаковываются. Parsed-byte SHA, per-unit stat и final SHA сохраняют immutable-source gates; повторное хеширование147MB на каждой единице устранено. Source review переведён на streaming SHA; устаревшая UI-подпись исправлена.
+
+Фактически14678/14678 logical units за244.411секунды, failed0, truncated0,1095842 textchars. 7022units остаются BLOCK. Source XML:41 OMML equations/tokens совпали,6300 merge declarations,655 Word drawing elements,642media members. Не смешивать элементы/файлы и warnings: DRAWING_NOT_READ509, FIELD_NOT_EVALUATED68, NO_TEXT438, MERGED_CELL_UNVERIFIED6300, BODY_STRUCTURE_UNVERIFIED11, EQUATION_NOT_READ70. Warnings могут пересекаться. Physicalpages unknown; rendering/layout/formula semantics/graphics/document completeness UNVERIFIED. Исходник неизменён, acceptance=false.
+
+На реальном147MBоригинале quote/logicalunit7 зарегистрирован через штатный provenance gate. Все3решения SOURCE_CONFIRMED/REJECTED/NEEDS_DATA прошли streaming identity check, каждое SOURCE_REVIEW_ONLY/actor_verified=false/acceptance=false. Это регрессия пути проверки цитаты, не квалифицированная приёмка.
+
+Независимое ревью: Important100MBreviewcap и MinorUIwording воспроизведены/исправлены, остаточных Critical/Important/Minor0. Focused47Python и5Node PASS, architecture/compile/JS/diff PASS. Итоговый frozen full763теста/761PASS/2nativeWindows skips с реальным rus+eng OCR. Первичный запуск без OCR дал17skips и не использован как полный результат. RemoteCI будет добавлен после завершения. Parseridentity фактического full run точно совпал с frozenOfficeкодом.
+
+План8✅/8🟡/3❌. №13 остаётся открыт: rendered tables/merged cells/formulas,655 drawing elements/642media нового полного DOCX, прежняя Office/OCRграфика и числовые конфликты, полный V4 и qualified ground truth. Далее нормы/8semanticroles/solver-run/actualcorrelation/FINAL AUDIT, реальный ACCEPTED→memory/report,CADroundtrip,liveproviderreceipts,physicalWindows/release. Детали docs/qa/2026-10-09-large-office-input.md.
+
+Дополнительная проверка PR97: первый headfd6f08c получил763PythonPASS/761PASS/2skips, но LinuxPR DriveDOM упал на new-chat. PushLinux и Windows прошли. Детерминированно воспроизведены две stale bootstrap races: поздний список скрывал созданный чат и initial list мог переключить пользователя назад. Исправлены latest-request render guard и initial-consumer current/creating guard. Controlled-delay HTTP/DOM RED→GREEN, VMinitial-response RED→GREEN. Итог6Node/2localHTTP-DOM PASS, независимое ревью0остаточныхImportant. Новый head `2be525c674037aa87e498fd2abf25dd8ad0709f4`, tree `554b44515fe801ac20b92b31f373df21f0a29c9e` равно локальному `b1d724c8da4cfbd7a3f03fa386bd85b724a0bb86`; CI выполняется заново. Первое падение сохранено в receipts, не скрыто rerun.
