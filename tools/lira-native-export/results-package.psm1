@@ -9,16 +9,19 @@ function Export-LiraResultsPackage {
  $ErrorActionPreference='Stop'
  $source=Get-Item -LiteralPath $ModelPath
  if($source.PSIsContainer -or $source.Extension -ine '.lir'){throw 'Select a .lir file'}
+ if($source.Length -gt 536870912){throw 'INPUT_SOURCE_BYTE_LIMIT: maximum 512 MiB'}
  $app=$Application;$access=$ResultsAccess;$ownedAccess=$false
 $batch=Join-Path $OutputRoot ('ENGINEER_OS_LIRA_RESULT_PACKAGE_'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $batch | Out-Null
+$drive=New-Object IO.DriveInfo([IO.Path]::GetPathRoot([IO.Path]::GetFullPath($batch)))
+if($drive.IsReady -and $drive.AvailableFreeSpace -lt 6442450944){throw 'PACKAGE_FREE_SPACE: reserve 6 GiB'}
 $before=(Get-FileHash -LiteralPath $source.FullName -Algorithm SHA256).Hash.ToLower()
-$app=$null;$access=$null;$directory=$null
+$directory=$null
 try {
  $contract=Get-Content (Join-Path $PSScriptRoot 'api-contract.json') -Raw -Encoding UTF8 | ConvertFrom-Json
  Import-Module (Join-Path $PSScriptRoot 'model-export.psm1') -Force
  Write-Host 'Reading input tables from a private copy. No solver execution.'
- $model=Export-LiraModel -Application $app -ModelPath $source.FullName -OutputRoot $batch
+ $model=Export-LiraModel -Application $app -ModelPath $source.FullName -OutputRoot $batch -MaxSourceBytes 536870912 -MaxTableBytes 134217728 -MaxTableTotalBytes 536870912 -MaxManifestBytes 16777216
  $inputManifest=Get-Content (Join-Path $model.directory 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
  if(-not $inputManifest.original_unchanged){throw 'Source hash changed; result export stopped'}
  $nodeTable=$inputManifest.tables | Where-Object { $_.type_id -eq 2 -and $_.status -eq 'EXPORTED' }
