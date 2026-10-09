@@ -168,7 +168,16 @@ def word_container_units(body,part,package=None):
             from .word_images import bind_images
             images=bind_images(package,element,locator)
             if images:
-                text+='\n'+json.dumps(dict(scope='PACKAGE_IMAGE_REFERENCES_UNVERIFIED',images=images),ensure_ascii=False)
+                # Full descriptors belong to the source locator. Repeating record
+                # geometry here can exhaust Store's text budget before the tail.
+                compact=[]
+                for image in images:
+                    compact.append({k:image[k] for k in ('image','status','part','sha256','reason') if k in image})
+                    for record in image.get('native_emf',{}).get('text_records',[]):
+                        if record.get('text') is not None:
+                            text+='\n[EMF '+str(image['image'])+'@'+str(record['record_offset'])+'] '+record['text']
+                text+='\n'+json.dumps(dict(scope='PACKAGE_IMAGE_REFERENCES_UNVERIFIED',images=compact,
+                                           details='SOURCE_LOCATOR',layout_verified=False,content_verified=False),ensure_ascii=False)
                 warnings=list(warnings)+['IMAGE_CONTENT_NOT_VERIFIED','IMAGE_TRANSFORMS_NOT_APPLIED']
                 if any(i['status']=='UNAVAILABLE' for i in images):warnings.append('IMAGE_REFERENCE_UNAVAILABLE')
                 if any('native_emf' in i for i in images):
