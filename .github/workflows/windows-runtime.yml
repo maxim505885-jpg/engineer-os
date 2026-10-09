@@ -76,7 +76,7 @@ jobs:
       - name: Check Windows backup, locks and persisted restart
         shell: pwsh
         run: |
-          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat -v
+          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat tests.test_emf_native_text -v
           if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }

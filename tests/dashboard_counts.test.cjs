@@ -18,6 +18,18 @@ test('Office image actions preserve source job, unit and image ordinal', () => {
   assert.ok(nodes.some(n=>n.text.includes('IMAGE_PART_MISSING')));
 });
 
+test('native EMF text shows source offset without table or glyph interpretation', () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const match=source.match(/function renderOfficeImages\(box,ref\)\{[\s\S]*?\n\}/);
+  const nodes=[];const context={node:(tag,text)=>{const n={tag,text,append:(...items)=>nodes.push(...items)};return n;},showPreview:()=>{},sourceLocation:()=> 'абзац 3'};
+  vm.createContext(context);vm.runInContext(match[0],context);
+  context.renderOfficeImages({append:n=>nodes.push(n)},{locator:{images:[{image:1,status:'BOUND_PACKAGE_IMAGE',part:'word/media/a.emf',native_emf:{status:'PARSED_SOURCE_RECORDS',text_records:[{record:2,record_offset:88,text:'Толщина 200 мм'},{record:3,record_offset:164,text:null}],limitations:['EMF_GRAPHICS_NOT_RENDERED']}}]}});
+  assert.ok(nodes.some(n=>n.text==='Толщина 200 мм'));
+  assert.ok(nodes.some(n=>n.text.includes('смещение 88 байт')));
+  assert.ok(nodes.some(n=>n.text.includes('Unicode не подтверждён')));
+  assert.ok(nodes.some(n=>n.text.includes('таблица и формулы не восстановлены')));
+});
+
 test('local upload uses 256 MiB only for OOXML extensions', () => {
   const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
   const match=source.match(/function uploadLimitBytes\(name\)\{[^\n]+\}/);

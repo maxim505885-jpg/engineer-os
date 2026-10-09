@@ -1,5 +1,6 @@
 """Source-linked package image bytes, not rendered Word pages or visual meaning."""
 import hashlib
+import json
 import posixpath
 import re
 from urllib.parse import unquote, urlsplit
@@ -70,6 +71,17 @@ def image_descriptor(package,part,identity,linked=False):
             raise OfficeError('Image byte limit')
         data=package.zip.read(path);package.image_bytes+=len(data)
         cache[path]=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
+        if path.lower().endswith('.emf'):
+            from . import emf_text
+            try:cache[path]['native_emf']=emf_text.read(data)
+            except emf_text.EMFLimitError as exc:raise OfficeError(str(exc)) from exc
+            except emf_text.EMFError as exc:
+                cache[path]['native_emf']=dict(status='UNAVAILABLE',reason=str(exc),content_verified=False,layout_verified=False)
+    if 'native_emf' in cache[path]:
+        from . import emf_text
+        used=getattr(package,'emf_reference_bytes',0)+len(json.dumps(cache[path]['native_emf'],ensure_ascii=False).encode('utf-8'))
+        if used>emf_text.MAX_REFERENCE_JSON_BYTES:raise OfficeError('EMF reference text limit')
+        package.emf_reference_bytes=used
     result.update(cache[path],status='BOUND_PACKAGE_IMAGE')
     return result
 
