@@ -131,3 +131,25 @@ class NativeTableTests(unittest.TestCase):
         report = analyze_upload('failed.zip', stream.getvalue())
         self.assertFalse(report['observations']['table_hashes_verified'])
         self.assertIn('TABLE_EXPORT_INCOMPLETE', report['reasons'])
+
+    def test_real_exporter_unavailable_and_not_attempted_statuses_preserve_read_tables(self):
+        for status in ['UNAVAILABLE', 'NOT_ATTEMPTED']:
+            with self.subTest(status=status):
+                def change(m):
+                    m['tables'].append(dict(type_id=7, status=status, model_part=0,
+                        file=None, bytes=0, sha256=None))
+                report = analyze_upload('partial.zip', package(change=change))
+                self.assertEqual(report['observations'].get('nodes'), 2)
+                self.assertIn(7, report['observations']['failed_table_types'])
+
+    def test_invalid_native_package_cannot_publish_generic_child_counts(self):
+        content = '(0/ )(1/10 1 1/)(3/1 100/)(4/0 0 0/)'
+        report = analyze_upload('bad.zip', package(tamper={'table_02.tsv':content}))
+        self.assertIn('NATIVE_PACKAGE_INVALID', report['reasons'])
+        self.assertTrue(all(member['report'] is None for member in report['members']))
+
+    def test_tsv_delimiter_and_line_bombs_are_rejected_before_observations(self):
+        for content in ['\t'*2000+'\n', 'a'*70000+'\n']:
+            with self.subTest(length=len(content)):
+                report = analyze_upload('oversized-row.zip', package(tables={8:content}))
+                self.assertIn('NATIVE_PACKAGE_INVALID', report['reasons'])
