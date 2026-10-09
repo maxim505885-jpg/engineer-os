@@ -1,11 +1,11 @@
-# Передача состояния ENGINEER OS
+# ENGINEER OS — актуальная передача проекта
 
-Актуальная сводка — живая карта ENGINEER_OS_PROJECT_MAP.md, раздел1 (таблица всех19 пунктов) и раздел66. Проверенное объединение описано в разделе65. Канонический docs/development/master-plan.md содержит19 пунктов; соответствие прежним17 сохранено там и в двух history файлах.
+Текущая карта: ENGINEER_OS_PROJECT_MAP.md,§67,09.10.2026. Канонический план: docs/development/master-plan.md,19 пунктов.
 
-В integration/engineering-streams-20261009 объединены официальный кандидат fce4367 и инженерный поток99ca7db. Проверенный head31ec638bbb7359a373cb92b786bc9b7f2a706bdc:641 Python,4 Node,DOM и три настоящих Chromium сценария PASS. Свежий независимый обзор не нашёл Critical/Important. Core push37862217022/PR37862221509 иSecurity push37862217039/PR37862221520 SUCCESS. QA: docs/qa/2026-10-09-engineering-stream-integration.md.
+Код: PR91 https://github.com/maxim505885-jpg/engineer-os/pull/91,head90263af601e8c491352f46d0a02b7196eeaf2bc1,tree26706230f42110ae5dc32749b6929083f6e41eeb. Ready/open,неmerged;main/официальный кандидат не перенесены.
 
-PR91 ready/open,не merged. Main и официальный кандидат ещё не перенесены. Статусы:6 выполнены в указанном программном объёме,8 частично готовы,5 открыты. Генератор№16 — черновик/история/DOCX/PDF; принятый выпуск не подтверждён. Полнота№13,принятый кейс№14,память№15,CAD№17,финальный выпуск№19 открыты. Solver№6 и физический Windows№9 отложены пользователем.
+726 Python без пропусков,4 Node,2 DOM и4 Chromium PASS; повторное независимое ревью без оставшихся подтверждённых Critical/Important в рассмотренном объёме. Core/Security push/PR SUCCESS. Итоговый CodeQL check113609776255 FAILURE,29 high,неснятые предупреждения; успешный scanner workflow не означает clean security.
 
-Следующее действие интеграции — объединение PR91 с официальным кандидатом; следующий программный этап — №13. Не переносить старые статусы по номеру; программные проверки и отрицательный сценарий не означают ACCEPTED объекта.
+Итог19:6 программных критериев выполнены,10 частично,3 открыты(13,14,19). Память/3 шаблона/иллюстрации/DXF inventory+locator+аннотация готовы программно. Реальной полноты V4,положительного ACCEPTED объекта,qualified solver/correlation,physical Windows,DWG roundtrip иrelease нет.
 
-[Карта на GitHub](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/ENGINEER_OS_PROJECT_MAP.md)
+Первый остаток: документированный triage29 CodeQL и PR→кандидат. Остальные критерии и точные доказательства — в плане и docs/qa/2026-10-09-master-plan-pass.md. Не повторять выполненные тесты без изменения кода и не снимать BLOCK по числу тестов.
