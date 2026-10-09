@@ -17,6 +17,7 @@ MAX_EXPANDED=32*1024*1024
 MAX_PACKAGE_EXPANDED=512*1024*1024
 MAX_ENTRIES=10000
 MAX_UNITS=50000
+MAX_TABLE_GRID_COLUMNS=1024
 
 
 class OfficeError(ValueError):pass
@@ -97,6 +98,64 @@ def equation_units(element,locator):
     return out
 
 
+def word_table_grid(table):
+    """Resolve declared source-column intervals only; never infer rendered cells."""
+    grids=table.findall(W+'tblGrid');base=[]
+    count=len(grids[0].findall(W+'gridCol')) if len(grids)==1 else 0
+    if len(grids)!=1 or not count:base.append('TABLE_GRID_MISSING_OR_DUPLICATE')
+    if count>MAX_TABLE_GRID_COLUMNS:base.append('TABLE_GRID_LIMIT')
+    if grids and grids[0].find(W+'tblGridChange') is not None:base.append('TABLE_GRID_REVISION_UNVERIFIED')
+    if any(child.tag not in {W+'tblPr',W+'tblGrid',W+'tr',W+'bookmarkStart',W+'bookmarkEnd'} for child in table):base.append('TABLE_STRUCTURE_UNVERIFIED')
+    result={};active={}
+    def number(parent,name,default,minimum,issues):
+        found=parent.findall(W+name) if parent is not None else []
+        if not found:return default
+        raw=found[0].get(W+'val','')
+        if len(found)!=1 or not re.fullmatch(r'\+?[0-9]{1,6}',raw) or not minimum<=int(raw)<=MAX_TABLE_GRID_COLUMNS:
+            issues.append('INVALID_'+name.upper());return None
+        return int(raw)
+    for row_index,row in enumerate(table.findall(W+'tr'),1):
+        row_issues=list(base);props=row.findall(W+'trPr')
+        if len(props)>1:row_issues.append('DUPLICATE_ROW_PROPERTIES')
+        props=props[0] if props else None
+        if props is not None and any(e.tag in {W+'trPrChange',W+'ins',W+'del'} for e in props.iter()):row_issues.append('ROW_GRID_REVISION_UNVERIFIED')
+        if any(child.tag not in {W+'trPr',W+'tc',W+'bookmarkStart',W+'bookmarkEnd'} for child in row):row_issues.append('ROW_STRUCTURE_UNVERIFIED')
+        before=number(props,'gridBefore',0,0,row_issues);after=number(props,'gridAfter',0,0,row_issues)
+        start=before+1 if before is not None else None;records=[]
+        for column,cell in enumerate(row.findall(W+'tc'),1):
+            issues=[];properties=cell.findall(W+'tcPr')
+            if len(properties)>1:issues.append('DUPLICATE_CELL_PROPERTIES')
+            properties=properties[0] if properties else None
+            if properties is not None and any(e.tag in {W+'tcPrChange',W+'cellMerge',W+'cellIns',W+'cellDel'} for e in properties.iter()):issues.append('CELL_GRID_REVISION_UNVERIFIED')
+            span=number(properties,'gridSpan',1,1,issues)
+            interval=(start,start+span-1) if start is not None and span is not None else None
+            if interval and interval[1]>MAX_TABLE_GRID_COLUMNS:issues.append('TABLE_GRID_LIMIT')
+            merge=properties.findall(W+'vMerge') if properties is not None else []
+            mode=merge[0].get(W+'val','continue') if merge else None
+            if len(merge)>1 or mode not in {None,'restart','continue'}:issues.append('INVALID_VERTICAL_MERGE')
+            if properties is not None and properties.find(W+'hMerge') is not None:issues.append('LEGACY_HORIZONTAL_MERGE_UNRESOLVED')
+            anchor=None
+            if mode=='restart':anchor=dict(row=row_index,column=column)
+            elif mode=='continue':
+                anchor=active.get(interval) if interval else None
+                if anchor is None:issues.append('ORPHAN_VERTICAL_CONTINUE')
+            records.append((column,interval,mode,anchor,issues))
+            start=interval[1]+1 if interval else None
+        width=start-1+after if start is not None and after is not None else None
+        if width!=count:row_issues.append('ROW_GRID_WIDTH_MISMATCH')
+        next_active={}
+        for column,interval,mode,anchor,issues in records:
+            combined=list(dict.fromkeys(row_issues+issues));valid=not combined
+            grid=dict(scope='DECLARED_WORD_TABLE_GRID',status='CONSISTENT_SOURCE_STRUCTURE' if valid else 'UNRESOLVED_SOURCE_STRUCTURE',
+                      declared_columns=count,row_grid_columns=width,grid_columns=list(interval) if interval else None,
+                      vertical_merge=mode,vertical_anchor=anchor if valid else None,issues=combined,
+                      values_propagated=False,layout_verified=False)
+            result[(row_index,column)]=grid
+            if valid and mode in {'restart','continue'}:next_active[interval]=anchor
+        active=next_active
+    return result
+
+
 def read_docx(p):
     root=p.xml('word/document.xml');body=root.find(W+'body')
     if body is None:raise OfficeError('Missing Word body')
@@ -110,19 +169,20 @@ def read_docx(p):
             if text or warnings:out.append(unit(text,locator,warnings))
             out.extend(equation_units(child,locator))
         elif child.tag==W+'tbl':
-            table+=1
+            table+=1;grid=word_table_grid(child)
             for row_index,row in enumerate(child.findall(W+'tr'),1):
                 for column,cell in enumerate(row.findall(W+'tc'),1):
                     warnings=word_limits(cell)
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
-                    locator=dict(kind='table_cell',part='word/document.xml',table=table,row=row_index,column=column)
+                    locator=dict(kind='table_cell',part='word/document.xml',table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
                     properties=cell.find(W+'tcPr');merge={}
                     if properties is not None:
                         for name in ('gridSpan','vMerge','hMerge'):
                             found=properties.find(W+name)
                             if found is not None:merge[name]=dict(found.attrib)
+                    if locator['source_grid']['issues'] and (merge or child.find(W+'tblGrid') is not None):warnings.append('TABLE_GRID_UNRESOLVED')
                     if merge:
                         locator['declared_merge']=merge
                         text+='\n'+json.dumps(dict(scope='DECLARED_CELL_STRUCTURE_UNVERIFIED',column_kind='XML_CELL_ORDINAL',declared_merge=merge),ensure_ascii=False)
@@ -259,6 +319,9 @@ def execute(store,job,stop,*,progress=None):
     manifest['source_components']=dict(scope='DECLARED_STRUCTURE_NOT_COMPLETE_DOCUMENT',
         equations=sum(u['locator']['kind']=='equation' for u in units),
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
+        word_grid_consistent_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='CONSISTENT_SOURCE_STRUCTURE' for u in units),
+        word_grid_unresolved_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='UNRESOLVED_SOURCE_STRUCTURE' for u in units),
+        word_vertical_continuations_resolved=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['vertical_merge']=='continue' and u['locator']['source_grid']['vertical_anchor'] is not None for u in units),
         xlsx_merged_ranges=sum(u['locator']['kind']=='merged_range' for u in units),
         xlsx_formula_cells=sum(u['locator']['kind']=='cell' and json.loads(u['text']).get('formula_present',False) for u in units),
         formulas_evaluated=False,layout_verified=False)

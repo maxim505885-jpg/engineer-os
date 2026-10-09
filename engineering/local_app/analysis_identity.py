@@ -16,7 +16,7 @@ def parser_identity(backend):
         import sys
         from . import office
         value=dict(schema=1,backend=backend,python=sys.version.split()[0],implementation=hashlib.sha256(Path(office.__file__).read_bytes()).hexdigest(),
-                    limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT,office.MAX_PACKAGE_EXPANDED])
+                    limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT,office.MAX_PACKAGE_EXPANDED,office.MAX_TABLE_GRID_COLUMNS])
         if backend=='doc':
             from .doc_conversion import converter_identity
             value['converter']=converter_identity()
