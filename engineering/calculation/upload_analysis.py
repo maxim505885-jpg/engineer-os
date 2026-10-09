@@ -171,15 +171,31 @@ def _archive(data):
                 names.add(name); total += info.file_size
                 if info.flag_bits & 1 or total>MAX_EXPANDED or info.file_size>MAX_BYTES:
                     report['reasons'] = ['ARCHIVE_EXPANSION_LIMIT_OR_ENCRYPTED']; return report
+            payloads = {}
             for info in entries:
                 if info.is_dir(): continue
                 with archive.open(info) as stream: member = stream.read(info.file_size+1)
                 if len(member)!=info.file_size: raise ValueError('Member size mismatch')
+                payloads[info.filename] = member
                 if not member or Path(info.filename).suffix.lower()=='.zip':
                     analysis = None  # Never recurse into packages.
                 else: analysis = analyze_upload(info.filename, member)
                 report['members'].append(dict(name=info.filename,source_sha256=hashlib.sha256(member).hexdigest(),
                     bytes=len(member),report=analysis, status='OBSERVATIONS_RECORDED' if analysis else 'NOT_ANALYZED'))
+            from .native_tables import observe_native_package
+            native = observe_native_package(payloads)
+            if native is not None:
+                report.update(kind='LIRA_NATIVE_TABLE_PACKAGE', full_information_extracted=False,
+                    results_exported=False, **native)
+                report['observations'].update(member_count=len(report['members']), expanded_bytes=total)
+                verified = {f"table_{t['type_id']:02}.tsv": t for t in native['observations'].get('tables', [])}
+                for item in report['members']:
+                    if item['name'] in verified:
+                        table = _base(payloads[item['name']], 'LIRA_NATIVE_INPUT_TABLE')
+                        table['observations'] = verified[item['name']]
+                        table['reasons'] = ['DEFAULT_TABLE_COVERAGE_ONLY', 'ENGINEERING_ACCEPTANCE_NOT_GRANTED']
+                        item.update(report=table, status='OBSERVATIONS_RECORDED')
+                return report
         report['observations'] = dict(member_count=len(report['members']), expanded_bytes=total)
         report['reasons'] = ['PACKAGE_LINKAGE_NOT_VERIFIED', 'ENGINEERING_ACCEPTANCE_NOT_GRANTED']
     except (zipfile.BadZipFile, RuntimeError, ValueError, NotImplementedError, OSError, zlib.error, EOFError):
@@ -193,6 +209,14 @@ def report_note(report):
         message = f"ЛИРА: разобран полный текстовый источник. Узлов: {obs.get('nodes', 'не определено')}; КЭ: {obs.get('elements', 'не определено')}. Ссылок вне диапазона: {obs.get('invalid_node_references', 'не определено')}."
     elif kind == 'LIRA_SOLVER_LOG':
         message = 'ЛИРА: журнал прочитан. '+('Расчёт прерван пользователем.' if report['solver_execution']=='INTERRUPTED_BY_USER' else 'Завершение полного расчёта не подтверждено.')
+    elif kind == 'LIRA_NATIVE_TABLE_PACKAGE':
+        if 'NATIVE_PACKAGE_INVALID' in report['reasons']:
+            message = 'ЛИРА: native ZIP не прошёл проверку manifest/хешей/таблиц.'
+        else:
+            message = f"ЛИРА: проверено таблиц {obs['exported_table_count']}. Узлов: {obs.get('nodes', 'не определено')}; КЭ: {obs.get('elements', 'не определено')}; загружений: {obs.get('load_cases', 'не определено')}."
+            if obs.get('ke57_auxiliary_stiffness_not_extracted'):
+                message += f" Жёсткости КЭ57 не извлечены: {obs['ke57_auxiliary_stiffness_not_extracted']}; это ограничение выгрузки."
+            message += ' Полные нагрузки, сочетания и результаты расчёта не подтверждены.'
     elif kind == 'LIRA_EXPORT_PACKAGE':
         message = f"Комплект ЛИРА: просмотрено файлов {len(report['members'])}; распознано {sum(m['report'] is not None for m in report['members'])}."
     else: message = 'ЛИРА: записаны наблюдения источника '+kind+'.'
