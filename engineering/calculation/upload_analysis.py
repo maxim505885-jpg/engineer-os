@@ -177,11 +177,8 @@ def _archive(data):
                 with archive.open(info) as stream: member = stream.read(info.file_size+1)
                 if len(member)!=info.file_size: raise ValueError('Member size mismatch')
                 payloads[info.filename] = member
-                if not member or Path(info.filename).suffix.lower()=='.zip':
-                    analysis = None  # Never recurse into packages.
-                else: analysis = analyze_upload(info.filename, member)
                 report['members'].append(dict(name=info.filename,source_sha256=hashlib.sha256(member).hexdigest(),
-                    bytes=len(member),report=analysis, status='OBSERVATIONS_RECORDED' if analysis else 'NOT_ANALYZED'))
+                    bytes=len(member),report=None, status='NOT_ANALYZED'))
             from .native_tables import observe_native_package
             native = observe_native_package(payloads)
             if native is not None:
@@ -196,6 +193,11 @@ def _archive(data):
                         table['reasons'] = ['DEFAULT_TABLE_COVERAGE_ONLY', 'ENGINEERING_ACCEPTANCE_NOT_GRANTED']
                         item.update(report=table, status='OBSERVATIONS_RECORDED')
                 return report
+            for item in report['members']:
+                member = payloads[item['name']]
+                # Generic sniffing must follow native validation; never recurse.
+                analysis = analyze_upload(item['name'], member) if member and Path(item['name']).suffix.lower()!='.zip' else None
+                item.update(report=analysis, status='OBSERVATIONS_RECORDED' if analysis else 'NOT_ANALYZED')
         report['observations'] = dict(member_count=len(report['members']), expanded_bytes=total)
         report['reasons'] = ['PACKAGE_LINKAGE_NOT_VERIFIED', 'ENGINEERING_ACCEPTANCE_NOT_GRANTED']
     except (zipfile.BadZipFile, RuntimeError, ValueError, NotImplementedError, OSError, zlib.error, EOFError):
