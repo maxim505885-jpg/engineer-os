@@ -17,3 +17,5 @@ DWG действительно сохранён среди исходников.
 PR92 head6032367 исправляет DOM teardown race и канонизацию путей в Windows assertion. Локальный DOM дважды PASS exit0. Последний предшествующий native Windows: 23 tests + реальный Ollama qwen3:0.6b inference PASS; полный новый CI ещё выполняется. Программный результат не закрывает физическую перезагрузку, полноту инженерных источников и положительный FINAL_AUDIT.
 
 Последнее уточнение: фактический OCR обоихPDF43/43,2615блоков,0failed,43BLOCK с low-confidence и непроверенной векторной графикой. Реальное восстановление/первый Windows browser PASS на5d776; следующий testfixture исправлен cwd:root в ff586382. Полный CI последнегоhead выполняется. Подробности:§68.6 карты.
+
+§68.7: nativeWindows PR/push SUCCESS,23tests+liveOllama+4Chromium;fullLinuxpushSUCCESS,728tests(2nativeWindows-only skips)+4Node+2HTTP/DOM+4Chromium. RequiredPRLinuxCIещёвыполняется;mergePR92необъявлен. Headff586382/tree f5f78d4.
