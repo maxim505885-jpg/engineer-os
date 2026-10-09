@@ -20,7 +20,7 @@ function Export-LiraModel {
  Copy-Item -LiteralPath $source -Destination $copy
  if((Get-FileHash -LiteralPath $copy).Hash.ToLower() -ne $originalHash) { throw 'Source changed during copy' }
  $manifest=[ordered]@{
-  schema=2; exporter_version='2'; kind='ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT'; created_utc=[DateTime]::UtcNow.ToString('o');
+  schema=2; exporter_version='3'; kind='ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT'; created_utc=[DateTime]::UtcNow.ToString('o');
   source_name=[IO.Path]::GetFileName($source); source_bytes=(Get-Item -LiteralPath $source).Length;
   source_sha256=$originalHash; inventory_sha256=$contract.inventory_sha256;
   status='NOT_OPENED'; open_messages=''; document=$null; units=[ordered]@{};
@@ -64,7 +64,7 @@ function Export-LiraModel {
     if($null -eq $table) { throw 'CreateNewItem returned no table' }
     $stage='TABLE_PROPERTIES'
     if([int]$table.Type -ne [int]$spec.id -or [int]$table.InitialModelPart -ne 0) { throw 'Unexpected table type or model subset' }
-    $stage='GET_CONTENTS'
+    $stage='GET_CONTENTS' # V3: explicit VT_VARIANT|VT_BYREF via VariantWrapper
     $data=[EngineerLiraComBridge]::ReadContents($table)
     if($null -eq $data) { throw 'GetContents returned null, not an empty table' }
     if($data -isnot [string]) { throw 'Expected API tab-separated string; unsupported return shape' }
