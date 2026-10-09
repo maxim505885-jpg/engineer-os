@@ -46,7 +46,7 @@ def extract_preview(name,data):
         c.update(status='RECORDED',method='LIRA_SOURCE_OBSERVATIONS',calculation_report=calculation,stop_reasons=list(calculation['reasons']))
         if suffix=='.zip':
             return '', 'UNAVAILABLE',report_note(calculation),False,c
-        if calculation['kind']=='UNREADABLE_VENDOR_EXPORT':
+        if calculation['kind']=='UNREADABLE_VENDOR_EXPORT' or 'XML_ENCODING_UNSUPPORTED' in calculation['reasons']:
             return '', 'UNAVAILABLE',report_note(calculation),False,c
         text=data.decode('utf-8-sig')
         truncated=len(text)>MAX_TEXT
