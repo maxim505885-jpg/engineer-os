@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** кандидат PR99 — §79; native LIR/API — §84: реальная V3 выгрузка31 default таблиц и сверка геометрии PASS. KE57 auxiliary stiffness, полные нагрузки/сочетания, RES и интеграция сайта открыты. План8✅/8🟡/3❌.
+**Активный план:** native LIR/API — §85: реальная V3 выгрузка31 таблиц проверена; reader ZIP реализован и опубликован в PR101, CI/integration ожидаются. Полнота KE57/нагрузки/сочетания/RES открыта. План8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -302,3 +302,15 @@ Manifest заявляет original_unchanged/owned_document_closed=true; это 
 CI head2fe90734fa064bf1234827e816c63d4663075204: Core37948917618,Security37948917504,LIRA API37948917501 — completed/success. PR100 остаётся draft; кандидат PR99 без изменений. №6 🟡, общий план8✅/8🟡/3❌. Закрыт подэтап «реальная выгрузка31 default таблиц и сверка геометрии», а не весь native LIR/расчётный критерий.
 
 Следующие действия: (1) подключить проверку manifest/hash/TSV и наблюдения к сайту; (2) извлечь auxiliary KE57, полные нагрузки и parameter-dependent сочетания; (3) отдельный RES export с привязкой к исходной модели и завершённому расчёту; (4) инженерная/нормативная проверка полноты. Повторная V3 выгрузка секции2 не требуется.
+
+## 85. Native TSV ZIP подключён к загрузчику приложения — 09.10.2026
+
+Ветка feat/lira-native-upload-reader-20261009, PR101 https://github.com/maxim505885-jpg/engineer-os/pull/101, head06c01cb6d5738a25151f93dea4045948d1f94bfa. Три файла: engineering/calculation/native_tables.py, upload_analysis.py, tests/test_lira_native_tables.py. Опубликованные файлы прочитаны обратно, точное совпадение PASS. Ветка создана от кандидата8009b937; helper PR100 не включён.
+
+Существующий analyze_upload/extract_preview/preserve_file теперь распознаёт schema2 ENGINEER_OS_LIRA_MODEL_TABLE_EXPORT ZIP, проверяет inventory/type/scope/file/bytes/SHA256/UTF-8/unique IDs/finite coordinates, сохраняет отчёт таблиц и русскую заметку. Обычные ZIP сохраняют прежнее поведение и path/encryption/expansion/recursion limits. Некорректный native пакет не получает числовую сводку. Отдельно отражены empty/failed/parameter-unavailable таблицы; нулевой экспорт не выдаёт успешную проверку хешей. Source LIR hash остаётся claim: оригинал отдельно не сверялся. Никакие флаги manifest не дают full_information/results/engineering/acceptance=true. KE57 omission назван ограничением извлечения, не дефектом.
+
+Реальный архив §84 прошёл именно через путь вложения приложения:31 таблица,37 083 узла,44 086 КЭ,16 загружений,3315 KE57 auxiliary stiffness не извлечены; все хеши PASS. Пример результата пользователю: «ЛИРА: проверено таблиц31. Узлов:37083; КЭ:44086; загружений:16. Жёсткости КЭ57 не извлечены:3315; это ограничение выгрузки. Полные нагрузки, сочетания и результаты расчёта не подтверждены».
+
+RED: существующий reader не распознавал native package; затем persistence и zero-table/hash tests воспроизвели отдельные FAIL. GREEN:32 focused tests PASS (10 новых+22 прежних). Полная финальная локальная регрессия802 tests/66.946с OK,17 skipped из-за условий окружения; это не Windows live run. Architecture guard, compilation,diff checks PASS;7 Node dashboard tests PASS. Локальный DOM smoke не запущен: jsdom не установлен, повтор с runtime NODE_PATH также подтвердил отсутствие зависимости; DOM/HTTP/Chromium проверяются в CI с lockfile dependencies.
+
+CI Security37951210098 SUCCESS; Core37951210119 ещё in_progress на момент записи. PR101 опубликован, интеграция в candidate ожидает успешный CI. Пользовательский установленный экземпляр Windows не обновлялся. №6 остаётся🟡;8✅/8🟡/3❌. Закрыт подэтап реализации приёма native TSV ZIP; полные нагрузки/сочетания, auxiliary KE57/soil, RES и инженерная верификация всё ещё открыты.
