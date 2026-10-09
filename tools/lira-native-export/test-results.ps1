@@ -111,6 +111,7 @@ try {
  if(-not(Test-Path $packageModule)){throw 'RED: result package pipeline not implemented'}
  Import-Module $packageModule -Force
  $source=Join-Path $root 'fixture.lir';[IO.File]::WriteAllText($source,'original fixture')
+ Import-Module (Join-Path $PSScriptRoot 'model-export.psm1') -Force
  $rejected=$false
  try {Export-LiraModel -Application (New-Object ResultModelApp) -ModelPath $source -OutputRoot $root -MaxSourceBytes 1 | Out-Null} catch {$rejected=$_.Exception.Message -match 'INPUT_SOURCE_BYTE_LIMIT'}
  if(-not $rejected){throw 'Source byte limit ignored'}
