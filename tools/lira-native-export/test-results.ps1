@@ -57,7 +57,7 @@ public class ResAccess {
 '@
 $reader=Join-Path $PSScriptRoot 'results-reader.cs'
 if(-not(Test-Path $reader)){throw 'RED: results reader not implemented'}
-Add-Type -Path $reader -ReferencedAssemblies System.Web.Extensions
+Add-Type -Path $reader -ReferencedAssemblies System.Web.Extensions,System.Core
 $root=Join-Path $env:TEMP ('engineer-results-test-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory $root | Out-Null
 try {
