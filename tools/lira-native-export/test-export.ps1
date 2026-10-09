@@ -27,7 +27,8 @@ public class ExportFixtureDocument {
  public string PathName {get;set;} public string Title {get{return "fixture";}}
  public string Description {get{return "test";}} public int SystemLabel {get{return 5;}}
  public int LoadsValsType {get{return 0;}} public int CurrentLoadCase {get{return 1;}}
- public ExportFixtureGroup AllTables {get;set;} = new ExportFixtureGroup();
+ public ExportFixtureGroup AllTables {get;set;}
+ public ExportFixtureDocument(){AllTables=new ExportFixtureGroup();}
  public bool Closed; public void Close(){Closed=true;}
 }
 public class ExportFixtureUnits {public int Geometry {get{return 1;}} public int Loads1 {get{return 2;}}}
