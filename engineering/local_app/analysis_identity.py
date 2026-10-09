@@ -15,9 +15,11 @@ def parser_identity(backend):
     if backend in {'docx','xlsx','doc'}:
         import sys
         from . import office
-        from . import word_images
+        from . import word_images,emf_text
         value=dict(schema=1,backend=backend,python=sys.version.split()[0],implementation=hashlib.sha256(Path(office.__file__).read_bytes()).hexdigest(),
                     image_implementation=hashlib.sha256(Path(word_images.__file__).read_bytes()).hexdigest(),
+                    emf_implementation=hashlib.sha256(Path(emf_text.__file__).read_bytes()).hexdigest(),
+                    emf_limits=[emf_text.MAX_RECORDS,emf_text.MAX_TEXT_RECORDS,emf_text.MAX_TEXT_CODE_UNITS,emf_text.MAX_REFERENCE_JSON_BYTES],
                     limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT,office.MAX_PACKAGE_EXPANDED,office.MAX_TABLE_GRID_COLUMNS,office.MAX_AUXILIARY_PARTS,office.MAX_IMAGE_BYTES,office.MAX_IMAGE_TOTAL_BYTES,office.MAX_IMAGE_REFERENCES])
         if backend=='doc':
             from .doc_conversion import converter_identity

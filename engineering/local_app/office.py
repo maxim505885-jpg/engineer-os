@@ -171,6 +171,9 @@ def word_container_units(body,part,package=None):
                 text+='\n'+json.dumps(dict(scope='PACKAGE_IMAGE_REFERENCES_UNVERIFIED',images=images),ensure_ascii=False)
                 warnings=list(warnings)+['IMAGE_CONTENT_NOT_VERIFIED','IMAGE_TRANSFORMS_NOT_APPLIED']
                 if any(i['status']=='UNAVAILABLE' for i in images):warnings.append('IMAGE_REFERENCE_UNAVAILABLE')
+                if any('native_emf' in i for i in images):
+                    warnings+=['EMF_TEXT_PLACEMENT_UNVERIFIED','EMF_GRAPHICS_NOT_RENDERED']
+                    if any(i.get('native_emf',{}).get('status')=='UNAVAILABLE' for i in images):warnings.append('EMF_NATIVE_TEXT_UNAVAILABLE')
         out.append(unit(text,locator,warnings))
     for child in body:
         if child.tag==W+'p':
@@ -395,6 +398,8 @@ def execute(store,job,stop,*,progress=None):
         image_references=sum(len(u['locator'].get('images',[])) for u in units),
         bound_image_references=sum(i['status']=='BOUND_PACKAGE_IMAGE' for u in units for i in u['locator'].get('images',[])),
         unavailable_image_references=sum(i['status']=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
+        emf_text_records=sum(len(i.get('native_emf',{}).get('text_records',[])) for u in units for i in u['locator'].get('images',[])),
+        unavailable_emf_text_references=sum(i.get('native_emf',{}).get('status')=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
         image_content_verified=False,image_transforms_applied=False,
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
         word_grid_consistent_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='CONSISTENT_SOURCE_STRUCTURE' for u in units),

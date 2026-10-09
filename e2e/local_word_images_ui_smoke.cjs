@@ -11,8 +11,8 @@ from engineering.local_app.files import preserve_file
 from engineering.local_app.worker import Worker
 from engineering.local_app.server import make_server
 from tests.test_office_documents import Model
-from tests.test_word_images import image_doc
-s=Store(sys.argv[1]);sid=s.create_session()['id'];f=preserve_file(s,sid,'images.docx',image_doc());m=Model()
+from tests.test_emf_native_text import mixed_doc
+s=Store(sys.argv[1]);sid=s.create_session()['id'];f=preserve_file(s,sid,'images.docx',mixed_doc());m=Model()
 s.enqueue(sid,'Read source images',[f['id']]);Worker(s,m).run_once()
 server=make_server(s,m,drive_client=None);print('ORIGIN http://127.0.0.1:'+str(server.server_port),flush=True);server.serve_forever()`;
   child=spawn(process.env.PYTHON||'python3',['-u','-c',fixture,temp],{cwd:root});
@@ -27,7 +27,12 @@ server=make_server(s,m,drive_client=None);print('ORIGIN http://127.0.0.1:'+str(s
   assert.equal(await page.locator('#evidence-list').textContent(),'');
   await page.getByRole('button',{name:'Закрыть просмотр',exact:true}).click();
   assert.equal(await page.locator('#source-viewer').isVisible(),false);
+  await page.locator('.emf-native-text summary').click();
+  assert.ok((await page.locator('.emf-native-text').textContent()).includes('Толщина 200 мм'));
+  assert.ok((await page.locator('.emf-native-text').textContent()).includes('смещение 88 байт'));
+  assert.ok((await page.locator('.emf-native-text').textContent()).includes('таблица и формулы не восстановлены'));
+  assert.equal(await page.locator('#evidence-list').textContent(),'');
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({result:'PASS',checks:['docx-source-image-control','authenticated-real-png','untransformed-scope','no-created-evidence','viewer-close'],engineering_acceptance:false}));
+  console.log(JSON.stringify({result:'PASS',checks:['docx-source-image-control','authenticated-real-png','untransformed-scope','no-created-evidence','viewer-close','native-emf-text-and-byte-offset','no-table-inference'],engineering_acceptance:false}));
  }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});
