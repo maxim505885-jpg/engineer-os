@@ -37,10 +37,10 @@ class DataLock:
             self.stream=os.fdopen(fd,'r+b');fd=None
         finally:
             if fd is not None:os.close(fd)
-        self.stream.seek(0)
-        if self.stream.read(1)==b'':self.stream.write(b'0');self.stream.flush()
-        self.stream.seek(0)
         try:
+            self.stream.seek(0)
+            if self.stream.read(1)==b'':self.stream.write(b'0');self.stream.flush()
+            self.stream.seek(0)
             if os.name=='nt':
                 import msvcrt
                 msvcrt.locking(self.stream.fileno(),msvcrt.LK_NBLCK,1)

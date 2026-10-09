@@ -1,3 +1,4 @@
+import contextlib
 import hashlib
 import json
 from pathlib import Path
@@ -73,7 +74,7 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
         snap=restored_store.snapshot(session["id"])
         self.assertEqual(len(snap["files"]),1)
         private=restored_store.get_file(original["id"])
-        self.assertEqual(Path(private["path"]).parent,target/"files")
+        self.assertEqual(Path(private["path"]).parent,(target/"files").resolve())
         self.assertEqual(Path(private["path"]).read_bytes(),b"height 4m")
         with restored_store.connection() as db:
             audit=json.loads(db.execute("SELECT record FROM final_audits").fetchone()[0])
@@ -135,7 +136,7 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
     def test_legacy_schema_gets_pre_migration_snapshot(self):
         legacy=Path(self.tmp.name)/"legacy";legacy.mkdir()
         db_path=legacy/"history.sqlite3"
-        with sqlite3.connect(db_path) as db:
+        with contextlib.closing(sqlite3.connect(db_path)) as db, db:
             db.executescript("""
             CREATE TABLE sessions(id TEXT PRIMARY KEY,title TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE messages(seq INTEGER PRIMARY KEY AUTOINCREMENT,session_id TEXT NOT NULL,role TEXT NOT NULL,content TEXT NOT NULL,created REAL NOT NULL);
@@ -147,13 +148,13 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
         # DDL, rather than a second snapshot after CREATE TABLE statements.
         snapshots=list(legacy.glob("history.pre-migration-v0.sqlite3"))
         self.assertEqual(len(snapshots),1)
-        with sqlite3.connect(snapshots[0]) as db:
+        with contextlib.closing(sqlite3.connect(snapshots[0])) as db, db:
             names={r[1] for r in db.execute("PRAGMA table_info(jobs)")}
             self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
             self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0], 0)
             self.assertIsNone(db.execute("SELECT name FROM sqlite_master WHERE name='conclusion_drafts'").fetchone())
         self.assertNotIn("mode",names)
-        with sqlite3.connect(db_path) as db:
+        with contextlib.closing(sqlite3.connect(db_path)) as db, db:
             names={r[1] for r in db.execute("PRAGMA table_info(jobs)")}
         self.assertIn("mode",names)
 

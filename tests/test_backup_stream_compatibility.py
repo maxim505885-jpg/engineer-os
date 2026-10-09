@@ -1,3 +1,4 @@
+import contextlib
 import hashlib
 import json
 from pathlib import Path
@@ -22,7 +23,7 @@ class BackupStreamCompatibilityTests(unittest.TestCase):
 
     def legacy_archive(self, *, bad_counts=False, traversal=False):
         snapshot = self.base/'snapshot.sqlite3'
-        with sqlite3.connect(self.store.path) as src, sqlite3.connect(snapshot) as dst:
+        with contextlib.closing(sqlite3.connect(self.store.path)) as src, contextlib.closing(sqlite3.connect(snapshot)) as dst, src, dst:
             src.backup(dst)
             names = [r[0] for r in dst.execute("SELECT name FROM sqlite_master WHERE type='table'")]
             counts = {name: dst.execute('SELECT count(*) FROM "'+name+'"').fetchone()[0] for name in names}
