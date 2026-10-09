@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** расчёты отложены. №13: source-linked изображения DOCX и raster preview реализованы/локально проверены, PR104 OPEN, remote CI ещё выполняется (§88). Кандидат3bfba1ed не изменён. Полнота графики/EMF/формул/mixed-raster таблиц/V4 открыта;8✅/8🟡/3❌.
+**Активный план:** расчёты отложены. №13: source-linked изображения DOCX и raster preview включены в кандидат82745871 (PR104); Core/Windows/Security CI и реальные source refs PASS (§88). EMF/rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты;8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков. Все4 browser маршрута, включая CAD/memory/mobile/session reset, прошли. Финальная приёмка интерфейса на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ | Body14678 units и Word grid проверены. В кандидате3bfba1ed/PR103 добавлены колонтитулы/сноски:2 headers/96 native tokens,6 auxiliary units (§87). Rendering/графика/mixed-raster таблицы/формулы/V4/qualified corpus открыты. |
+| 13 | Производственная полнота документов | ❌ Открыто | DOCX body/grid/auxiliary parts и source-linked images/raster preview в кандидате82745871 (PR104), real refs и Core/Windows/Security PASS (§88). EMF/rendering/формулы/mixed-raster таблицы/V4/qualified corpus открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -366,3 +366,11 @@ Reader связывает DrawingML blip и VML r:id/o:relid с содержащ
 RED→GREEN воспроизвёл прежнюю потерю refs/HTTP404/отсутствие UI; review findings malformed IDs/URI,legacy VML,equation sibling association и alpha loss устранены отдельными воспроизведениями. Independent review: Critical/Important нет; minor Unicode-ID исправлен explicit supported subset. Финальный локальный suite825 tests/64.290s OK,17 environment skips;12 новых focused,9 Node,2 HTTP/DOM и5 Chromium routes PASS;architecture/compile/JS/diff PASS. Публичное дерево получено обратно git fetch и совпало по полному tree SHA. Это не обновление приложения на ПК пользователя.
 
 №13 остаётся❌; общий план8✅/8🟡/3❌. Следующий конкретный шаг — source-bound чтение/отрисовка EMF и проверка визуального соответствия графики/формул, затем raster/mixed tables/OCR-conflicts, V4 и qualified corpus. Расчёты сейчас не требуются. QA:docs/qa/2026-10-09-docx-image-sources.md.
+
+### Итог §88 — включено в кандидат
+
+PR104 MERGED squash с expected_head guard; кандидат8274587137754a4df56dd537fd148d90ade8f40f. Полное дерево d279258eff146113934f2dd538ce266b139cd381 совпало с проверенным локальным и опубликованным head6fc1e34d. Все три final-head CI SUCCESS: Core37968999520/job113950507929 —825 tests/94.369s OK,2 Windows-only skips,9 Node,2 HTTP/DOM и5 Chromium маршрутов; Windows37968999638/job113950508285 —23 tests/8.002s OK,cold/repeat/restart,real Ollama qwen3:0.6b и5 browser маршрутов,включая DOCX source image; Security37968999726 SUCCESS. Программный CI не заменяет physical PC/qualified engineering review.
+
+Финальная ограниченная Store/checkpoint/preview проверка первых2 элементов реального DOCX повторена именно финальным parser:2/14684,cycle_complete=false,model NOT_RUN;SHA оригинала неизменён. PNG1:658216 bytes/SHAea20aba0fb422ae21f68d36637d19716e0cfeb9fa004c1d493cbd8fcd0ae283a;PNG2:6823 bytes/SHA44b5bc8048dfea1843f6a9abcf7771bb9665d39ee1481c408ae6d4062a5b4a17. Alpha сохранён. Новый полный Store/model run большого отчёта не заявляется. Физические страницы/crops/transforms/содержание/EMF/V4/полный корпус не подтверждены.
+
+Закрыт только подэтап source association+raster preview; №13 остаётся❌,план8✅/8🟡/3❌. На ПК пользователя версия не обновлялась. Следующий шаг — проверенное чтение/отрисовка EMF и визуальная сверка формул/графики, без возвращения к расчётам.
