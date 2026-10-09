@@ -6,10 +6,14 @@ function Export-LiraModel {
  [CmdletBinding()]
  param([Parameter(Mandatory=$true)]$Application,
        [Parameter(Mandatory=$true)][string]$ModelPath,
-       [Parameter(Mandatory=$true)][string]$OutputRoot)
+       [Parameter(Mandatory=$true)][string]$OutputRoot,
+       [long]$MaxSourceBytes=[long]::MaxValue,[long]$MaxTableBytes=[long]::MaxValue,
+       [long]$MaxTableTotalBytes=[long]::MaxValue,[long]$MaxManifestBytes=[long]::MaxValue)
  $ErrorActionPreference='Stop'
  $source=(Get-Item -LiteralPath $ModelPath).FullName
  if([IO.Path]::GetExtension($source) -ine '.lir') { throw 'Expected a .lir model' }
+ if((Get-Item -LiteralPath $source).Length -gt $MaxSourceBytes){throw 'INPUT_SOURCE_BYTE_LIMIT'}
+ $writtenTableBytes=0L
  $contract=Get-Content (Join-Path $PSScriptRoot 'api-contract.json') -Raw -Encoding UTF8 | ConvertFrom-Json
  $originalHash=(Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.ToLower()
  $id=[guid]::NewGuid().ToString('N')
@@ -69,6 +73,9 @@ function Export-LiraModel {
     if($null -eq $data) { throw 'GetContents returned null, not an empty table' }
     if($data -isnot [string]) { throw 'Expected API tab-separated string; unsupported return shape' }
     $stage='WRITE_FILE'
+    $dataBytes=[Text.Encoding]::UTF8.GetByteCount($data)
+    if($dataBytes -gt $MaxTableBytes -or $dataBytes -gt ($MaxTableTotalBytes-$writtenTableBytes)){throw 'INPUT_TABLE_BYTE_LIMIT'}
+    $writtenTableBytes+=$dataBytes
     $filename=('table_{0:D2}.tsv' -f [int]$spec.id)
     $file=Join-Path $directory $filename
     [IO.File]::WriteAllText($file,$data,(New-Object Text.UTF8Encoding($false)))
@@ -96,7 +103,9 @@ function Export-LiraModel {
   $manifest.original_unchanged=((Get-FileHash -LiteralPath $source).Hash.ToLower() -eq $originalHash)
   if(-not $manifest.original_unchanged) { $manifest.status='SOURCE_CHANGED'; $manifest.errors+='Original hash changed during export' }
  }
- $manifest | ConvertTo-Json -Depth 16 | Set-Content -LiteralPath (Join-Path $directory 'manifest.json') -Encoding UTF8
+ $manifestJson=$manifest | ConvertTo-Json -Depth 16
+ if([Text.Encoding]::UTF8.GetByteCount($manifestJson) -gt $MaxManifestBytes){throw 'INPUT_MANIFEST_BYTE_LIMIT'}
+ $manifestJson | Set-Content -LiteralPath (Join-Path $directory 'manifest.json') -Encoding UTF8
  $zip=$directory+'.zip'
  Compress-Archive -Path (Join-Path $directory '*') -DestinationPath $zip
  # Leave the private model copy on disk; never remove a file still open in LIRA.
