@@ -21,7 +21,7 @@ function Export-LiraModel {
   source_name=[IO.Path]::GetFileName($source); source_bytes=(Get-Item -LiteralPath $source).Length;
   source_sha256=$originalHash; inventory_sha256=$contract.inventory_sha256;
   status='NOT_OPENED'; open_messages=''; document=$null; units=[ordered]@{};
-  tables=@(); existing_table_count=$null; errors=@(); original_unchanged=$false;
+  tables=@(); api_enumerations=$contract.enums; existing_table_count=$null; errors=@(); original_unchanged=$false;
   owned_document_closed=$false; full_information_extracted=$false; results_exported=$false;
   solver_execution='NOT_RUN'; acceptance_granted=$false;
   limitations=@('Only default-parameter whole-model input tables are attempted.',
