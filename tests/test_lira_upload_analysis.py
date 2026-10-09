@@ -138,3 +138,22 @@ class LiraUploadAnalysisTests(unittest.TestCase):
         data = MODEL+b''.join(('('+str(i)+'/)').encode() for i in range(100,400))
         report = self.report('model.txt', data)
         self.assertIn('DOCUMENT_INVENTORY_LIMIT', report['reasons'])
+
+    def test_bomless_utf16_cannot_expand_xml_entities(self):
+        xml = '<!DOCTYPE LIRA_Project [<!ENTITY x "expanded">]><LIRA_Project Title="&x;"/>'
+        for encoding in ('utf-16le','utf-16be','utf-32le','utf-32be'):
+            with self.subTest(encoding=encoding):
+                preview = extract_preview('model.ald', xml.encode(encoding))
+                self.assertEqual(preview[0], '')
+                self.assertEqual(preview[1], 'UNAVAILABLE')
+                self.assertEqual(preview[4]['calculation_report']['observations'], {})
+                self.assertIn('XML_ENCODING_UNSUPPORTED', preview[4]['calculation_report']['reasons'])
+
+    def test_parser_itself_rejects_dtd_even_if_early_filter_changes(self):
+        from xml.etree import ElementTree as ET
+        from engineering.calculation import upload_analysis
+        xml = '<!DOCTYPE LIRA_Project [<!ENTITY x "expanded">]><LIRA_Project Title="&x;"/>'
+        self.assertTrue(hasattr(upload_analysis,'RejectDTD'))
+        for encoding in ('utf-8','utf-16le','utf-16be'):
+            with self.subTest(encoding=encoding), self.assertRaises(ValueError):
+                ET.fromstring(xml.encode(encoding), parser=ET.XMLParser(target=upload_analysis.RejectDTD()))
