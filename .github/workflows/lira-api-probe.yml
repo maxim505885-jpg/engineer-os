@@ -29,3 +29,6 @@ jobs:
       - name: Model export contract (no LIRA installed)
         shell: powershell
         run: tools/lira-native-export/test-export.ps1
+      - name: Result export contract (no LIRA installed)
+        shell: powershell
+        run: tools/lira-native-export/test-results.ps1
