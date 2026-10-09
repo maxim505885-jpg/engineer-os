@@ -73,3 +73,12 @@ try {
  } finally { [Runtime.InteropServices.Marshal]::FreeCoTaskMem($pointer) }
  Write-Output 'PASS: optional VARIANT, ref object return, zero-table failure, stage/HRESULT, native Missing encoding, copy integrity, large tables'
 } finally { Remove-Item $root -Recurse -Force }
+Add-Type -Path (Join-Path $PSScriptRoot 'test-native-dispatch.cs')
+$dispatch=New-Object NativeVariantDispatch
+try {
+ if(-not [Runtime.InteropServices.Marshal]::IsComObject($dispatch.Object)) { throw 'Native fixture is not a COM object' }
+ try { $value=[EngineerLiraComBridge]::ReadContents($dispatch.Object) }
+ catch { throw ('FAIL: real COM GetContents received VT=0x{0:X4}, not BYREF VARIANT: {1}' -f $dispatch.ReceivedVt,$_.Exception.GetBaseException().Message) }
+ if($dispatch.ReceivedVt -ne 0x400c -or $value -ne "1`t1.25`t2`t3`r`n") { throw 'Native ref VARIANT roundtrip failed' }
+ Write-Output 'PASS: actual native IDispatch GetContents received VT_BYREF|VT_VARIANT and returned TSV'
+} finally { $dispatch.Dispose() }
