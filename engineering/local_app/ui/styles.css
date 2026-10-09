@@ -164,3 +164,13 @@ footer{color:var(--muted-2);font-size:10px;padding-top:16px}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+#project-overview{border:1px solid #d9e2d5;border-radius:12px;padding:16px;margin-bottom:22px;background:white}#project-route{display:flex;flex-wrap:wrap;gap:8px}#project-route button{background:#eaf0e9;color:#294e3d;border-radius:8px;padding:9px 12px}#project-state{font-weight:600}#case-source-roles{border:1px solid #d9e2d5;border-radius:8px;margin:12px 0;padding:10px}#case-source-roles label{display:block;padding:5px;overflow-wrap:anywhere}.technical-details{margin:12px 0}.technical-details>summary{color:#657366}details[open]{scroll-margin-top:20px}
+
+.recovery-workspace{max-width:1000px;margin:auto}.recovery-card{background:white;border:1px solid #d9e2d5;border-radius:12px;padding:20px;margin:18px 0}.recovery-card input{display:block;width:100%;padding:10px;margin:8px 0 16px;border:1px solid #9bbdac;border-radius:6px}.recovery-card button{padding:10px 16px;margin:8px 8px 0 0;border-radius:8px}.recovery-card small{display:block}#recovery-error{padding:16px;background:#f8e7dd;color:#814a32;border-radius:8px}#recovery-result{overflow-wrap:anywhere;font-weight:600}
+
+#conclusion-results { overflow-wrap: anywhere; }
+
+#conclusion-results table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: .75rem 0; }
+
+#conclusion-results th, #conclusion-results td { border: 1px solid #d9d9d9; padding: .4rem; vertical-align: middle; overflow-wrap: anywhere; font-size: .8rem; }

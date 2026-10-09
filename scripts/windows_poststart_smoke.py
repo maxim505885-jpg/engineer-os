@@ -38,7 +38,7 @@ def main(argv=None) -> int:
     try:
         tags=json.loads(get_text(args.ollama_url.rstrip("/")+"/api/tags"))
         names=[str(x.get("name","")) for x in tags.get("models",[]) if isinstance(x,dict)]
-        ok=args.model in names or any(x.startswith(args.model) for x in names)
+        ok=args.model in names
         checks.append(dict(name="ollama_model",status="PASS" if ok else "BLOCK",models=names))
         if not ok:failures.append("OLLAMA_MODEL_MISSING")
     except Exception as exc:
@@ -59,6 +59,10 @@ def main(argv=None) -> int:
 
     result=dict(
         schema="ENGINEER_OS_WINDOWS_POSTSTART_V1",
+        scope="STARTUP_ONLY",
+        inference_verified=False,
+        physical_windows_verified=False,
+        platform=sys.platform,
         python=sys.version.split()[0],
         app_url=args.app_url,
         ollama_url=args.ollama_url,

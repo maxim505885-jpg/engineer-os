@@ -7,6 +7,7 @@
   <title>ENGINEER OS — локальный кабинет</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
+  <script src="/cad-memory.js" defer></script>
 </head>
 <body data-ui-mode="normal">
   <aside>
@@ -74,7 +75,7 @@
 
     <div id="error" role="alert" hidden></div>
 
-    <div class="workspace">
+    <section id="project-overview" aria-label="Маршрут проекта"><p>Один диалог — один проект: документы, ТЗ, проверки и история хранятся вместе.</p><nav id="project-route" aria-label="Этапы проекта"><button type="button" data-stage="project">Проект и чат</button><button type="button" data-stage="documents">ТЗ и документы</button><button type="button" data-stage="review">Проверка источников</button><button type="button" data-stage="calculations">Нормы и расчёты</button><button type="button" data-stage="conclusion">Итог и ограничения</button><button type="button" data-stage="history">История</button></nav><p id="project-state" role="status"></p><button id="project-next" type="button" class="text-button"></button></section><div class="workspace">
       <section class="conversation" aria-label="Диалог ENGINEER OS">
         <div id="messages" aria-live="polite">
           <div class="empty">
@@ -104,10 +105,10 @@
               </select>
             </label>
             <label class="upload" for="upload">+ Прикрепить файл</label>
-            <input id="upload" type="file" accept=".txt,.md,.pdf,.docx,.xlsx,.doc" hidden>
+            <input id="upload" type="file" accept=".txt,.md,.pdf,.docx,.xlsx,.doc,.png,.jpg,.jpeg,.lir,.json,.csv,.dxf,.dwg" hidden>
             <button id="send" class="primary" type="submit">Отправить ↗</button>
           </div>
-          <small>TXT, Markdown, PDF, DOCX, XLSX, DOC · оригинал сохраняется · до 100 МБ</small>
+          <small>TXT, MD, PDF, DOCX, XLSX, DOC, PNG/JPG, LIR, JSON/CSV, DXF/DWG · оригинал сохраняется · до 100 МБ</small>
         </form>
       </section>
 
@@ -191,11 +192,52 @@
           <form id="tz-form">
             <label for="tz-text">Перечень требований</label>
             <textarea id="tz-text" maxlength="50000" rows="4" required></textarea>
+            <label for="tz-sources">Исходные цитаты ТЗ (выбор не подтверждает полноту)</label>
+            <select id="tz-sources" multiple aria-label="Исходные цитаты ТЗ"></select>
             <button id="tz-save" type="submit" class="primary">Сохранить новую версию ТЗ</button>
           </form>
           <p id="tz-status"></p>
           <div id="tz-list"></div>
           <small>Связь с цитатой не подтверждает инженерный вывод. Нормы, расчёты и FINAL AUDIT проверяются отдельно.</small>
+        </details>
+
+        <details id="cad-panel" class="cad-panel">
+          <summary>CAD: оригинал и отдельная аннотация</summary>
+          <p>DXF: инвентаризация и проверка сохранения геометрии. DWG сохраняется; чтение требует конвертера. Инженерная корректность отдельно.</p>
+          <label for="cad-file">Оригинал чертежа</label><select id="cad-file"></select>
+          <div id="cad-inventory" role="status"></div>
+          <form id="cad-locator-form">
+            <label for="cad-handle">Элемент оригинала</label><select id="cad-handle"></select>
+            <label for="cad-locator-note">Запись для проверки этого элемента</label><input id="cad-locator-note" maxlength="1000" required>
+            <button type="submit">Сохранить непроверенный кандидат</button>
+          </form>
+          <form id="cad-derive-form">
+            <label for="cad-text">Текст отдельной аннотации</label><input id="cad-text" maxlength="500" required>
+            <label for="cad-x">X в единицах чертежа</label><input id="cad-x" type="number" step="any" value="0" required>
+            <label for="cad-y">Y в единицах чертежа</label><input id="cad-y" type="number" step="any" value="0" required>
+            <label for="cad-height">Высота текста в единицах чертежа</label><input id="cad-height" type="number" step="any" min="0.000001" value="1" required>
+            <label for="cad-reason">Основание аннотации</label><input id="cad-reason" maxlength="1000" required>
+            <label for="cad-evidence">Кандидаты этого оригинала</label><select id="cad-evidence" multiple required></select>
+            <label><input id="cad-units" type="checkbox" required> Подтверждаю объявленные единицы чертежа</label>
+            <button id="cad-derive" type="submit" disabled>Создать отдельный DXF</button>
+          </form>
+          <div id="cad-result"></div>
+        </details>
+
+        <details id="knowledge-panel" class="knowledge-panel">
+          <summary>Подтверждённая инженерная память</summary>
+          <p id="knowledge-status" role="status"></p>
+          <form id="knowledge-form">
+            <label for="knowledge-title">Название записи</label><input id="knowledge-title" maxlength="200" required>
+            <label for="knowledge-evidence">Проверенные основания текущего принятого кейса</label><select id="knowledge-evidence" multiple required></select>
+            <label for="knowledge-actor">Автор записи</label><input id="knowledge-actor" maxlength="200" value="Локальный пользователь" required>
+            <button id="knowledge-promote" type="submit" disabled>Сохранить из ACCEPTED</button>
+          </form>
+          <label for="knowledge-query">Поиск для повторной проверки</label><input id="knowledge-query" maxlength="1000">
+          <button id="knowledge-recall" type="button">Найти в разрешённой памяти проекта</button>
+          <button id="knowledge-export" type="button">Экспортировать историю JSON</button>
+          <label for="knowledge-reason">Причина отзыва / удаления</label><input id="knowledge-reason" maxlength="2000">
+          <div id="knowledge-records"></div><div id="knowledge-references"></div>
         </details>
 
         <div class="label task-label">ФОНОВЫЕ ЗАДАЧИ</div>

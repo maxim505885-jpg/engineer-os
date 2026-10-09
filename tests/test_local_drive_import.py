@@ -87,11 +87,21 @@ class LocalDriveImportTests(unittest.TestCase):
                         {'capabilities':{'canDownload':'false'}},
                         {'capabilities':{'canDownload':1}},
                         {'mimeType':'application/vnd.google-apps.document'},
-                        {'name':'model.lir'},{'size':'104857601'},{'md5Checksum':None}):
+                        {'name':'model.exe'},{'size':'104857601'},{'md5Checksum':None}):
             self.meta=dict(original,**changes);self.calls=[]
             with self.subTest(changes=changes),self.assertRaises(self.module.DriveImportError):self.run_import()
             self.assertFalse(any('alt=media' in c for c in self.calls))
         self.assertEqual(self.store.snapshot(self.session)['files'],[])
+
+    def test_dwg_import_preserves_original_but_never_claims_parsing(self):
+        from engineering.local_app.cad import inventory
+        self.data=b'AC1032\x00controlled header'
+        self.meta.update(name='drawing.dwg',mimeType='application/octet-stream',size=str(len(self.data)),md5Checksum=hashlib.md5(self.data).hexdigest())
+        original=self.store.get_file(self.run_import()['id'])
+        self.assertEqual(Path(original['path']).read_bytes(),self.data)
+        self.assertEqual(original['extraction_status'],'UNAVAILABLE')
+        self.assertFalse(original['acceptance_granted'])
+        self.assertEqual(inventory(self.store,self.session,original['id'])['status'],'BLOCK')
 
     def test_url_parser_rejects_arbitrary_hosts_paths_and_bad_ids(self):
         self.assertEqual(self.module.drive_file_id('https://drive.google.com/file/d/drive_original_123/view?usp=sharing'),'drive_original_123')

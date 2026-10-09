@@ -44,7 +44,7 @@ server.serve_forever()
   assert.equal(doc.querySelector('#drive-source').value,'');assert.equal(doc.querySelector('#drive-sha').value,'');
   doc.querySelector('#drive-source').value='drive_original_123';doc.querySelector('#drive-sha').value='0'.repeat(64);
   doc.querySelector('#drive-form').dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
-  await until(()=>doc.querySelector('#error').textContent.includes('SHA256'));
+  try{await until(()=>doc.querySelector('#error').textContent.includes('SHA256'));}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
   assert.equal(doc.querySelectorAll('.file').length,0,'Failed checksum must not create a file');
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({result:'PASS',dom_emulation:true,live_google:false,oauth_verified:false,browser_visual_check:false,checks:['configured-not-connected','import-submit','selected-original','provenance-reload','no-secret','conversation-isolation','draft-isolation','failed-checksum-no-file']}));

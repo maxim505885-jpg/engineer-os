@@ -24,7 +24,7 @@ class PartialAnalysisFailure(RuntimeError):
 
 def prepare(store,job,stop,*,model=None):
     files=[store.get_file(fid) for fid in job['file_ids']]
-    pdfs=[f for f in files if Path(f['name']).suffix.lower() in {'.pdf','.docx','.xlsx','.doc'}]
+    pdfs=[f for f in files if Path(f['name']).suffix.lower() in {'.pdf','.docx','.xlsx','.doc','.png','.jpg','.jpeg'}]
     if not pdfs:return None
     from .analysis_identity import identity
     config,fingerprint,supported=identity(store,job,model)
@@ -37,7 +37,7 @@ def prepare(store,job,stop,*,model=None):
                 resume_supported=supported,resume_count=prior.get('resume_count',0),calls_reused=0,
                 summary_input_clipped=False,summary_omitted_chars=0,budget_exhausted=False)
     backend=os.environ.get('ENGINEER_OS_ATTACHMENT_PARSER','native')
-    if backend not in {'native','docling'}:raise ExtractionFailure('Неизвестный режим обработки прикреплённых PDF.')
+    if backend not in {'native','docling','ocr'}:raise ExtractionFailure('Неизвестный режим обработки прикреплённых PDF.')
     store.analysis_progress(job['id'],report)
     batches=[];current=dict(text='',refs=[]);remaining=MAX_SOURCE_CHARS
     def flush():
@@ -46,14 +46,14 @@ def prepare(store,job,stop,*,model=None):
         current=dict(text='',refs=[])
     for file in pdfs:
         if stop.is_set():raise ExtractionFailure('Обработка документа остановлена; результаты сохранены.')
-        suffix=Path(file['name']).suffix.lower();selected_backend=backend if suffix=='.pdf' else suffix[1:]
+        suffix=Path(file['name']).suffix.lower();selected_backend=backend if suffix=='.pdf' else 'ocr' if suffix in {'.png','.jpg','.jpeg'} else suffix[1:]
         child,created=store.automatic_extraction(job,file['id'],selected_backend,config['parser'] if suffix=='.pdf' else config['parsers'][file['id']])
         source=dict(file_id=file['id'],name=file['name'],extraction_job=child['id'],source_sha256=file['sha256'],backend=selected_backend)
         report['sources'].append(source)
         def progress(run):
             source.update({k:run[k] for k in ('total_pages','processed_pages','blocked_pages','failed_pages','ocr')})
             source['budget_exhausted']=bool(run.get('budget_exhausted'))
-            for key in ('total_units','processed_units','unit_label','physical_pages','conversion'):
+            for key in ('total_units','processed_units','unit_label','physical_pages','conversion','coverage_manifest'):
                 if key in run:source[key]=run[key]
             report['budget_exhausted']=report['budget_exhausted'] or source['budget_exhausted']
             store.analysis_progress(job['id'],report)
@@ -91,7 +91,7 @@ def prepare(store,job,stop,*,model=None):
                 size=min(PART_CHARS-len(current['text']),len(text)-start,remaining)
                 segment=text[start:start+size]
                 current['text']+=segment
-                current['refs'].append(dict(file_id=file['id'],source_job=child['id'],page=page if suffix=='.pdf' else None,
+                current['refs'].append(dict(file_id=file['id'],source_job=child['id'],page=page if suffix in {'.pdf','.png','.jpg','.jpeg'} else None,
                                             logical_unit=record.get('logical_unit'),locator=record.get('locator'),start=start,end=start+size,
                                             batch_start=batch_start,batch_end=batch_start+size,
                                             text_sha256=hashlib.sha256(segment.encode()).hexdigest()))
@@ -138,10 +138,34 @@ class DocumentModel:
         if role=='CHAT':base=self.store.analysis_context(self.job['id'],role,base)
         allowed=set(self.job['file_ids'])|{r['id'] for r in self.store.snapshot(self.job['session_id'])['evidence'] if r['file_id'] in self.job['file_ids']}
         task=SimpleNamespace(task_id=self.job['id'],agent=role)
+        from .requirements import context_requirement_ids
+        requirement_ids=context_requirement_ids(data['sources']['requirements']) if role!='CHAT' else set()
         block_seen=bool(self.report['roles'].get(role,{}).get('block_seen'))
-        self.report['roles'][role]=dict(status='RUNNING',total=len(self.prepared['batches']),completed=0,block_seen=block_seen)
+        self.report['roles'][role]=dict(status='RUNNING',total=len(self.prepared['batches']),completed=0,block_seen=block_seen,intermediate_gates=[],intermediate_gates_omitted=0)
         self.report.update(stage='ANALYZING',current_role=role,batches_completed=0,all_batches_completed=False)
         self.store.analysis_progress(self.job['id'],self.report)
+        def retain_gates(raw,rid,kind):
+            # Summaries are lossy. Recompute gates from every verified receipt,
+            # including cached receipts, independently of the final model answer.
+            if role=='CHAT':return
+            from .requirements import finding_gates
+            from .analysis_identity import digest
+            parsed,_=parse_draft(task,raw,allowed,allowed_requirement_ids=requirement_ids)
+            gates=finding_gates(self.store,self.job['session_id'],list(parsed.findings),self.job['file_ids'])
+            state=self.report['roles'][role]
+            for index,(finding,gate) in enumerate(zip(parsed.findings,gates)):
+                reasons=[]
+                if not finding.get('requirement_ids'):reasons.append('OBSERVATION_NOT_TZ_BOUND')
+                if finding.get('relation','UNKNOWN')=='CONTRADICTS':reasons.append('ROLE_DECLARED_CONTRADICTION')
+                if finding.get('relation','UNKNOWN')=='UNKNOWN':reasons.append('ROLE_RELATION_UNKNOWN')
+                if gate['status']=='BLOCK':reasons.extend(gate['reasons'])
+                if not reasons:continue
+                if len(state['intermediate_gates'])>=200:
+                    state['intermediate_gates_omitted']+=1
+                    continue
+                state['intermediate_gates'].append(dict(receipt_id=rid,kind=kind,finding=index,
+                    response_sha256=digest(raw),requirement_ids=finding.get('requirement_ids',[]),
+                    source_ids=finding['source_ids'],relation=finding.get('relation','UNKNOWN'),reasons=list(dict.fromkeys(reasons))))
         def call(payload,kind):
             nonlocal block_seen
             from .analysis_identity import digest
@@ -159,10 +183,11 @@ class DocumentModel:
             if cached:
                 if digest(cached['text'])!=cached.get('response_sha256'):raise PartialAnalysisFailure(block_seen)
                 if role!='CHAT':
-                    parsed,_=parse_draft(task,cached['text'],allowed)
+                    parsed,_=parse_draft(task,cached['text'],allowed,allowed_requirement_ids=requirement_ids)
                     block_seen=block_seen or parsed.status.value=='BLOCK'
                 self.report['calls_reused']+=1
                 self.report['roles'][role]['block_seen']=block_seen
+                retain_gates(cached['text'],cached['receipt_id'],kind)
                 return cached['text'],cached['receipt_id']
             if self.attempts>=MAX_MODEL_CALLS or self.elapsed>=MAX_MODEL_SECONDS:
                 self.report.update(stage='PARTIAL',all_batches_completed=False,budget_exhausted=True)
@@ -185,7 +210,7 @@ class DocumentModel:
                 raw=self.model.chat(prompts)
                 if not isinstance(raw,str) or not raw.strip() or len(raw)>20000:raise ValueError('Invalid part response')
                 if role!='CHAT':
-                    parsed,_=parse_draft(task,raw,allowed)
+                    parsed,_=parse_draft(task,raw,allowed,allowed_requirement_ids=requirement_ids)
                     block_seen=block_seen or parsed.status.value=='BLOCK'
                 verify_originals(self.prepared['files'])
                 guard_context()
@@ -202,6 +227,7 @@ class DocumentModel:
             record=dict(metadata,elapsed_seconds=timing(),role=role,kind=kind,status='COMPLETED',refs=payload.get('refs',[]),text=raw,response_sha256=digest(raw))
             rid=self.store.save_analysis_receipt(self.job['id'],record,update_seq=active_seq)
             self.receipts.append(dict(record,receipt_id=rid))
+            retain_gates(raw,rid,kind)
             self.store.analysis_progress(self.job['id'],self.report)
             return raw,rid
         drafts=[]

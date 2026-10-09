@@ -17,7 +17,8 @@ SYSTEM = '''Ты профильный помощник ENGINEER OS. Отвеча
 что они использовались. Роль final-audit-agent выполняет только предварительную сверку
 черновиков; формальный FINAL AUDIT остаётся NOT_RUN. Не создавай замечания ради замечаний.
 Верни только JSON с четырьмя полями: status (UNCERTAINTY или BLOCK), summary (строка),
-observations (массив объектов с text и source_ids), limitations (массив строк).
+observations (массив объектов с text, source_ids, requirement_ids и relation), limitations (массив строк).
+requirement_ids — ID требований из sources.requirements.requirement_index (полный индекс) или requirements (ограниченные подробности). Индекс может содержать сокращённый текст: text_truncated и context_truncated не означают полную проверку. relation — SUPPORTS, CONTRADICTS или UNKNOWN. Не угадывай связь; при отсутствии основания укажи UNKNOWN.
 source_ids — только ID предоставленных оригиналов или кандидатов. Такая ссылка не
 доказывает истинность наблюдения. Не добавляй acceptance, proof IDs или другие поля.'''
 
@@ -84,7 +85,7 @@ def unique_object(pairs):
     return result
 
 
-def parse_draft(task, raw, allowed_ids):
+def parse_draft(task, raw, allowed_ids, *, allowed_requirement_ids=()):
     if not isinstance(raw, str) or len(raw) > 20000:
         raise ValueError('Invalid draft size')
     body = json.loads(raw, object_pairs_hook=unique_object)
@@ -98,10 +99,14 @@ def parse_draft(task, raw, allowed_ids):
     if not isinstance(observations, list) or len(observations) > 12:
         raise ValueError('Invalid observations')
     for item in observations:
-        if not isinstance(item, dict) or set(item) != {'text', 'source_ids'}:
+        if not isinstance(item, dict) or set(item) not in ({'text','source_ids'},{'text','source_ids','requirement_ids','relation'}):
             raise ValueError('Invalid observation fields')
         if not isinstance(item['text'], str) or not item['text'].strip() or len(item['text']) > 1500:
             raise ValueError('Invalid observation text')
+        if 'requirement_ids' in item:
+            ids=item['requirement_ids']
+            if (not isinstance(ids,list) or len(ids)>50 or any(not isinstance(r,str) or r not in allowed_requirement_ids for r in ids) or len(set(ids))!=len(ids)
+                    or not isinstance(item['relation'],str) or item['relation'] not in {'SUPPORTS','CONTRADICTS','UNKNOWN'}):raise ValueError('Invalid requirement reference or relation')
         refs = item['source_ids']
         if (not isinstance(refs, list) or len(refs) > 20
                 or any(not isinstance(ref, str) or ref not in allowed_ids for ref in refs)):
@@ -144,6 +149,9 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         if result['specialist_checks']['status']=='BLOCK' and run['status']!='ERROR':run['status']='BLOCK'
         if any(r.status==AgentStatus.BLOCK for r in state.results):run['status']='BLOCK'
         if any(r.get('block_seen') for r in getattr(model,'report',{}).get('roles',{}).values()):run['status']='BLOCK'
+        from .engineering_review import report as engineering_report
+        review=engineering_report(result['requirements_report'],records);run['engineering_review']=review
+        if review['status']=='BLOCK' and run['status']!='ERROR':run['status']='BLOCK'
         lines = ['Предварительный профильный анализ ENGINEER CORE. Не является инженерным принятием.']
         for row in records:
             lines.append(row['label'] + ' · ' + row['execution'] + ' · ' + row['status'])
@@ -151,6 +159,9 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
                 lines.append(row['summary'])
             lines.extend('Наблюдение (не проверено): ' + f['text'] for f in row['findings'])
             lines.extend('Ограничение: ' + limit for limit in row['limitations'])
+        lines.append('Сверка требований и ролей: '+review['status']+'; требований '+str(review['requirements_total']))
+        for requirement in review['requirements']:
+            lines.append(requirement['text']+' · '+requirement['status']+' · '+', '.join(requirement['reasons']))
         lines.append('Исходники непроверены. FINAL AUDIT NOT_RUN; acceptance=false.')
         for check in result['specialist_checks']['checks']:
             lines.append(check['label']+' · предметная проверка BLOCK: '+check['note'])
@@ -186,7 +197,8 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
                         dict(role='user', content='UNTRUSTED TASK DATA:\n' + json.dumps(data, ensure_ascii=False))]
             raw = model.chat(messages)
             guard_context()
-            parsed, limitations = parse_draft(task, raw, allowed_ids)
+            from .requirements import context_requirement_ids
+            parsed, limitations = parse_draft(task, raw, allowed_ids, allowed_requirement_ids=context_requirement_ids(context['requirements']))
             execution = 'COMPLETED'
         except Exception as exc:
             saved_block=getattr(exc,'document_block_seen',False) or getattr(model,'report',{}).get('roles',{}).get(task.agent,{}).get('block_seen',False)
@@ -215,6 +227,9 @@ def execute(store, job, model, stop_event, *, automatic_sources=None):
         row.update(execution=execution, status=parsed.status.value, summary=parsed.message,
                    findings=list(parsed.findings), limitations=limitations,
                    finding_gates=finding_gates(store,job['session_id'],list(parsed.findings),job['file_ids']))
+        part_state=getattr(model,'report',{}).get('roles',{}).get(task.agent,{})
+        row['intermediate_gates']=part_state.get('intermediate_gates',[])
+        row['intermediate_gates_omitted']=part_state.get('intermediate_gates_omitted',0)
         row['domain_gate']=next((check for check in result['specialist_checks']['checks'] if check['agent']==task.agent),None)
         run['current_agent'] = None
         save_progress()

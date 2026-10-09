@@ -22,7 +22,7 @@ class LocalServer(ThreadingHTTPServer):
     daemon_threads=True
 
 
-def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT):
+def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT,recovery_only=False,selection_path=None):
     if host!='127.0.0.1':raise ValueError('Application must bind to 127.0.0.1 only')
     from .drive_import import DriveImportError,configured_client,import_original
     if drive_client is _DRIVE_DEFAULT:drive_client=configured_client()
@@ -55,9 +55,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
             if len(data)!=size:raise RequestProblem(400,'Incomplete body')
             return data
 
-        def json_body(self):
+        def json_body(self,maximum=65536):
             if self.headers.get('Content-Type','').split(';')[0]!='application/json':raise RequestProblem(415,'JSON content type required')
-            try:value=json.loads(self.body(65536))
+            try:value=json.loads(self.body(maximum))
             except (UnicodeDecodeError,json.JSONDecodeError):raise RequestProblem(400,'Invalid JSON') from None
             if not isinstance(value,dict):raise RequestProblem(400,'JSON object required')
             return value
@@ -71,12 +71,40 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/styles.css'}:
-                    name={'/':'index.html','/app.js':'app.js','/styles.css':'styles.css'}[route]
+                if not post and route in {'/','/app.js','/cad-memory.js','/styles.css','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
-                    if route=='/':data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
-                    ctype={'/':'text/html; charset=utf-8','/app.js':'application/javascript; charset=utf-8','/styles.css':'text/css; charset=utf-8'}[route]
+                    if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
+                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
                     return self.respond(200,data,ctype)
+                if route=='/api/data/status' and not post:
+                    return self.respond(200,dict(root=str(self.server.data_root),recovery_only=recovery_only))
+                if parts[:2]==['api','data'] and len(parts)==3 and post:
+                    if not recovery_only:raise RequestProblem(409,'Остановите основное приложение и откройте Recover_ENGINEER_OS.cmd — операции доступны в режиме обслуживания.')
+                    if not self.server.data_slots.acquire(blocking=False):raise RequestProblem(409,'Другая операция с данными ещё выполняется.')
+                    try:
+                        from .backup import create_backup,verify_backup,restore_backup
+                        from .settings import activate
+                        body=self.json_body()
+                        def absolute(key):
+                            value=body.get(key)
+                            if not isinstance(value,str) or not value.strip() or '\x00' in value or not Path(value).is_absolute():raise ValueError('Укажите полный абсолютный путь: '+key)
+                            return Path(value)
+                        action=parts[2]
+                        if action=='backup':result=create_backup(self.server.data_root,absolute('archive'))
+                        elif action=='verify':result=verify_backup(absolute('archive'))
+                        elif action=='restore':
+                            result=restore_backup(absolute('archive'),absolute('target'))
+                            self.server.data_root=Path(result['path'])
+                        elif action=='activate':
+                            root=activate(absolute('target'),self.server.selection_path)
+                            self.server.data_root=root;result=dict(status='SELECTED',path=str(root))
+                        else:raise RequestProblem(404,'Unknown data action')
+                        return self.respond(200,result)
+                    except RuntimeError as exc:raise RequestProblem(409,str(exc)) from None
+                    except OSError as exc:raise RequestProblem(400,str(exc)) from None
+                    finally:self.server.data_slots.release()
+                if recovery_only:raise RequestProblem(409,'Режим обслуживания: чат и модель не запускаются.')
                 if route=='/api/status' and not post:
                     with self.server.health_lock:
                         if time.monotonic()-self.server.health_at>15:
@@ -86,9 +114,17 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if route=='/api/drive/status' and not post:
                     configured=self.server.drive_client is not None
                     return self.respond(200,dict(configured=configured,connection_verified=False,note='Настройки Drive есть; доступ проверяется при импорте.' if configured else 'Drive не настроен на локальном сервере. Можно загрузить файл вручную.'))
+                if route=='/api/model/settings' and post:
+                    from .settings import configure
+                    with self.server.health_lock:
+                        result=configure(store,model,self.json_body());self.server.health_at=0
+                    return self.respond(200,result)
                 if route=='/api/sessions':
                     return self.respond(201,store.create_session(self.json_body().get('title','Новый диалог'))) if post else self.respond(200,store.sessions())
                 if len(parts)==3 and parts[:2]==['api','sessions'] and not post:return self.respond(200,store.snapshot(parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='history' and not post:
+                    query=parse_qs(path.query)
+                    return self.respond(200,store.history(parts[2],kind=query.get('kind',['messages'])[0],before=int(query['before'][0]) if 'before' in query else None,limit=int(query.get('limit',['50'])[0])))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
                     from .requirements import report
                     return self.respond(200,report(store,parts[2]))
@@ -107,14 +143,49 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if not post:return self.respond(200,report(store,parts[2]))
                     body=self.json_body()
                     return self.respond(201,build(store,parts[2],case_id=body.get('case_id'),expected_revision=body.get('expected_revision')))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='conclusions':
+                    from .conclusions import build,report
+                    if not post:return self.respond(200,report(store,parts[2]))
+                    body=self.json_body(262144)
+                    return self.respond(201,build(store,parts[2],expected_revision=body.get('expected_revision'),
+                        author=body.get('author'),summary=body.get('summary',''),recommendations=body.get('recommendations',''),
+                        limitations=body.get('limitations',''),expected_basis_sha256=body.get('expected_basis_sha256'),template_id=body.get('template_id','legacy'),illustration_requests=body.get('illustration_requests')))
+                if len(parts)>=4 and parts[:2]==['api','sessions'] and parts[3]=='knowledge':
+                    from . import knowledge
+                    sid=parts[2]
+                    if len(parts)==4:
+                        if not post:return self.respond(200,knowledge.report(store,sid))
+                        b=self.json_body()
+                        return self.respond(201,knowledge.promote(store,sid,expected_audit_id=b.get('expected_audit_id'),title=b.get('title'),evidence_ids=b.get('evidence_ids'),scope_session_ids=b.get('scope_session_ids'),knowledge_id=b.get('knowledge_id'),expected_revision=b.get('expected_revision',0),actor=b.get('actor')))
+                    if len(parts)==5 and not post and parts[4] in {'recall','export'}:
+                        if parts[4]=='export':return self.respond(200,knowledge.export(store,sid))
+                        return self.respond(200,knowledge.recall(store,sid,query=parse_qs(path.query).get('query',[''])[0]))
+                    if len(parts)==6 and post and parts[5] in {'revoke','delete'}:
+                        b=self.json_body();operation=knowledge.revoke if parts[5]=='revoke' else knowledge.delete
+                        return self.respond(201,operation(store,sid,parts[4],expected_revision=b.get('expected_revision'),actor=b.get('actor'),reason=b.get('reason')))
+                if len(parts)>=5 and parts[:2]==['api','sessions'] and parts[3]=='cad':
+                    from . import cad
+                    if len(parts)==5 and not post:return self.respond(200,cad.inventory(store,parts[2],parts[4]))
+                    if len(parts)==6 and parts[5]=='derive' and post:
+                        return self.respond(201,cad.derive(store,parts[2],parts[4],request=self.json_body().get('request')))
+                    if len(parts)==6 and parts[5]=='locator' and post:
+                        b=self.json_body();return self.respond(201,cad.register_locator(store,parts[2],parts[4],handle=b.get('handle'),statement=b.get('statement')))
+                    if len(parts)==6 and parts[5]=='export' and not post:
+                        data,mime=cad.export(store,parts[2],parts[4])
+                        return self.respond(200,data,mime,{'Content-Disposition':'attachment; filename="ENGINEER_OS_DERIVED.dxf"'})
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='conclusions' and not post:
+                    from .conclusions import export
+                    data,mime=export(store,parts[2],revision=int(parts[4]),format=parts[5])
+                    return self.respond(200,data,mime,extra={'Content-Disposition':'attachment; filename="ENGINEER_OS_draft_v'+str(int(parts[4]))+'.'+parts[5]+'"'})
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and parts[5]=='assessments' and post:
                     from .requirements import assess
                     body=self.json_body()
-                    return self.respond(201,assess(store,parts[2],set_id=body.get('set_id'),requirement_id=parts[4],expected_revision=body.get('expected_revision'),conclusion=body.get('conclusion'),evidence_ids=body.get('evidence_ids',[]),relation=body.get('relation')))
+                    return self.respond(201,assess(store,parts[2],set_id=body.get('set_id'),requirement_id=parts[4],expected_revision=body.get('expected_revision'),conclusion=body.get('conclusion'),evidence_ids=body.get('evidence_ids',[]),relation=body.get('relation'),actor=body.get('actor')))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and post:
                     if parts[3]=='requirements':
                         from .requirements import create_set
-                        return self.respond(201,create_set(store,parts[2],text=self.json_body().get('text')))
+                        body=self.json_body()
+                        return self.respond(201,create_set(store,parts[2],text=body.get('text'),source_evidence_ids=body.get('source_evidence_ids')))
                     if parts[3]=='extraction':
                         body=self.json_body()
                         return self.respond(202,store.enqueue_extraction(parts[2],body.get('file_id'),body.get('backend','native')))
@@ -137,6 +208,10 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         try:return self.respond(201,preserve_file(store,parts[2],names[0],self.body(MAX_FILE_BYTES)))
                         finally:self.server.upload_slots.release()
                 if len(parts)>=6 and parts[:2]==['api','sessions'] and parts[3]=='jobs':
+                    if len(parts)==6 and parts[5] in {'cancel','retry'} and post:
+                        self.json_body()
+                        operation=store.cancel if parts[5]=='cancel' else store.retry
+                        return self.respond(202,operation(parts[2],parts[4]))
                     if len(parts)==6 and parts[5]=='analysis' and not post:
                         query=parse_qs(path.query)
                         return self.respond(200,store.analysis_receipts(parts[2],parts[4],offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0])))
@@ -155,6 +230,12 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .review import record_review
                     body=self.json_body()
                     return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='preview' and not post:
+                    from .preview import render_original
+                    query=parse_qs(path.query)
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                    try:return self.respond(200,render_original(store,parts[2],parts[4],int(query.get('page',['1'])[0])),'image/png')
+                    finally:self.server.preview_slots.release()
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
                     from .preview import render_preview
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
@@ -178,5 +259,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
     server=LocalServer((host,port),Handler)
     server.token=secrets.token_urlsafe(32);server.origin=f'http://127.0.0.1:{server.server_port}'
     server.drive_client=drive_client
+    server.data_root=Path(store.root).resolve();server.data_slots=threading.BoundedSemaphore(1)
+    server.selection_path=Path(selection_path) if selection_path is not None else Path(__file__).resolve().parents[2]/'.engineer-os/active-data-dir.txt'
     server.health_cache=None;server.health_at=float('-inf');server.health_lock=threading.Lock();server.upload_slots=threading.BoundedSemaphore(2);server.preview_slots=threading.BoundedSemaphore(2)
     return server
