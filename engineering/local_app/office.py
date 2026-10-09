@@ -19,6 +19,9 @@ MAX_ENTRIES=10000
 MAX_UNITS=50000
 MAX_TABLE_GRID_COLUMNS=1024
 MAX_AUXILIARY_PARTS=128
+MAX_IMAGE_BYTES=32*1024*1024
+MAX_IMAGE_TOTAL_BYTES=256*1024*1024
+MAX_IMAGE_REFERENCES=4096
 
 
 class OfficeError(ValueError):pass
@@ -94,6 +97,7 @@ def equation_units(element,locator):
         payload=dict(scope='NORMALIZED_OMML_UNINTERPRETED',literal_tokens=[e.text or '' for e in current.iter(M+'t')],
                      normalized_omml=ET.tostring(fragment,encoding='unicode'),evaluated=False,layout_verified=False)
         parent=dict(locator);parent.update(kind='equation',parent_kind=locator['kind'],equation=len(out)+1)
+        parent.pop('images',None);parent.pop('declared_drawing_labels',None)
         out.append(unit(json.dumps(payload,ensure_ascii=False),parent,word_limits(current)+['EQUATION_NOT_READ']))
         # Do not separately serialize nested equations, which duplicates syntax.
     return out
@@ -157,13 +161,22 @@ def word_table_grid(table):
     return result
 
 
-def word_container_units(body,part):
+def word_container_units(body,part,package=None):
     out=[];paragraph=0;table=0
+    def append(text,locator,warnings,element):
+        if package is not None:
+            from .word_images import bind_images
+            images=bind_images(package,element,locator)
+            if images:
+                text+='\n'+json.dumps(dict(scope='PACKAGE_IMAGE_REFERENCES_UNVERIFIED',images=images),ensure_ascii=False)
+                warnings=list(warnings)+['IMAGE_CONTENT_NOT_VERIFIED','IMAGE_TRANSFORMS_NOT_APPLIED']
+                if any(i['status']=='UNAVAILABLE' for i in images):warnings.append('IMAGE_REFERENCE_UNAVAILABLE')
+        out.append(unit(text,locator,warnings))
     for child in body:
         if child.tag==W+'p':
             paragraph+=1;text=word_text(child);warnings=word_limits(child)
             locator=dict(kind='paragraph',part=part,paragraph=paragraph)
-            if text or warnings:out.append(unit(text,locator,warnings))
+            if text or warnings:append(text,locator,warnings,child)
             out.extend(equation_units(child,locator))
         elif child.tag==W+'tbl':
             table+=1;grid=word_table_grid(child)
@@ -183,11 +196,11 @@ def word_container_units(body,part):
                     if merge:
                         locator['declared_merge']=merge
                         text+='\n'+json.dumps(dict(scope='DECLARED_CELL_STRUCTURE_UNVERIFIED',column_kind='XML_CELL_ORDINAL',declared_merge=merge),ensure_ascii=False)
-                    out.append(unit(text,locator,warnings))
+                    append(text,locator,warnings,cell)
                     out.extend(equation_units(cell,locator))
         elif child.tag!=W+'sectPr':
             locator=dict(kind='unsupported_body',part=part,body_index=list(body).index(child)+1)
-            out.append(unit(word_text(child),locator,['BODY_STRUCTURE_UNVERIFIED']))
+            append(word_text(child),locator,['BODY_STRUCTURE_UNVERIFIED'],child)
             out.extend(equation_units(child,locator))
     return out
 
@@ -195,7 +208,7 @@ def word_container_units(body,part):
 def read_docx(p):
     root=p.xml('word/document.xml');body=root.find(W+'body')
     if body is None:raise OfficeError('Missing Word body')
-    out=word_container_units(body,'word/document.xml')
+    out=word_container_units(body,'word/document.xml',p)
     limits=['PHYSICAL_PAGES_UNKNOWN','LAYOUT_NOT_VERIFIED']
     if any('/embeddings/' in n or 'vbaProject' in n for n in p.names):limits.append('EMBEDDED_CONTENT_NOT_READ')
     parts={n:('header' if n.startswith('word/header') else 'footer' if n.startswith('word/footer') else 'footnote' if n=='word/footnotes.xml' else 'endnote')
@@ -243,7 +256,7 @@ def read_docx(p):
                 seen.add(int(note_id))
                 containers.append((note,dict(note_id=note_id,note_type=note.get(W+'type','normal'))))
         for container,identity in containers or [(root,{})]:
-            items=word_container_units(container,part)
+            items=word_container_units(container,part,p)
             if not items:items=[unit('',dict(kind='auxiliary_empty',part=part),['NO_TEXT'])]
             for item in items:
                 item['locator'].update(component=component,scope='PACKAGE_PART_PLACEMENT_UNVERIFIED',**identity)
@@ -379,6 +392,10 @@ def execute(store,job,stop,*,progress=None):
         auxiliary_parts=sorted({u['locator']['part'] for u in units if u['locator'].get('component')}),
         auxiliary_units=sum(bool(u['locator'].get('component')) for u in units),
         auxiliary_placement_verified=False,
+        image_references=sum(len(u['locator'].get('images',[])) for u in units),
+        bound_image_references=sum(i['status']=='BOUND_PACKAGE_IMAGE' for u in units for i in u['locator'].get('images',[])),
+        unavailable_image_references=sum(i['status']=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
+        image_content_verified=False,image_transforms_applied=False,
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
         word_grid_consistent_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='CONSISTENT_SOURCE_STRUCTURE' for u in units),
         word_grid_unresolved_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='UNRESOLVED_SOURCE_STRUCTURE' for u in units),

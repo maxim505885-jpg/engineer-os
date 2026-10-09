@@ -4,6 +4,20 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 
+test('Office image actions preserve source job, unit and image ordinal', () => {
+  const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
+  const match=source.match(/function renderOfficeImages\(box,ref\)\{[\s\S]*?\n\}/);
+  assert.ok(match,'Source-linked image controls missing');
+  const calls=[],nodes=[];
+  const context={node:(tag,text)=>({tag,text}),showPreview:value=>calls.push(value),sourceLocation:()=> 'абзац 3'};
+  vm.createContext(context);vm.runInContext(match[0],context);
+  context.renderOfficeImages({append:n=>nodes.push(n)},{source_job:'source-job',logical_unit:3,locator:{images:[{image:1,status:'BOUND_PACKAGE_IMAGE',part:'word/media/a.png'},{image:2,status:'UNAVAILABLE',reason:'IMAGE_PART_MISSING'}]}});
+  const button=nodes.find(n=>n.tag==='button');assert.ok(button);button.onclick();
+  assert.equal(calls[0].office_job,'source-job');assert.equal(calls[0].logical_unit,3);assert.equal(calls[0].image,1);
+  assert.equal(nodes.filter(n=>n.tag==='button').length,1);
+  assert.ok(nodes.some(n=>n.text.includes('IMAGE_PART_MISSING')));
+});
+
 test('local upload uses 256 MiB only for OOXML extensions', () => {
   const source=fs.readFileSync(path.join(__dirname,'../engineering/local_app/ui/app.js'),'utf8');
   const match=source.match(/function uploadLimitBytes\(name\)\{[^\n]+\}/);

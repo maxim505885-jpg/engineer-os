@@ -4,6 +4,45 @@ import math
 from pathlib import Path
 
 
+def render_office_image(store,session_id,source_job,logical_unit,image):
+    """Decode only a revalidated referenced raster; never apply Word transforms."""
+    import io
+    from PIL import Image
+    from .office import Package,MAX_IMAGE_BYTES
+    from .source_binding import office_location
+    child=store.extraction_job(session_id,source_job)
+    if len(child['file_ids'])!=1:raise ValueError('Single Office source required')
+    file=store.get_file(child['file_ids'][0])
+    if Path(file['name']).suffix.lower()!='.docx':raise ValueError('Native DOCX image preview required')
+    if type(image) is not int or image<1:raise ValueError('Image ordinal required')
+    binding=office_location(store,session_id,file,source_job,logical_unit,'')
+    images=binding['locator'].get('images',[])
+    if image>len(images):raise ValueError('Image outside source element')
+    descriptor=images[image-1]
+    if descriptor['status']!='BOUND_PACKAGE_IMAGE':raise ValueError('Image bytes unavailable')
+    with Path(file['path']).open('rb') as stream:data=stream.read(256*1024*1024+1)
+    if len(data)!=file['size'] or hashlib.sha256(data).hexdigest()!=file['sha256']:raise ValueError('Office original identity changed')
+    package=Package(data)
+    try:
+        info=package.zip.getinfo(descriptor['part'])
+        if info.file_size>MAX_IMAGE_BYTES:raise ValueError('Image byte limit')
+        asset=package.zip.read(descriptor['part'])
+    finally:package.close()
+    if len(asset)!=descriptor['bytes'] or hashlib.sha256(asset).hexdigest()!=descriptor['sha256']:raise ValueError('Image identity changed')
+    try:
+        from .files import validate_image
+        validate_image(asset)
+        with Image.open(io.BytesIO(asset)) as original:
+            if original.format not in {'PNG','JPEG','BMP','GIF','TIFF','WEBP'}:raise ValueError('Raster required')
+            original.seek(0)
+            pixels=original.convert('RGBA' if 'A' in original.getbands() or 'transparency' in original.info else 'RGB')
+            pixels.thumbnail((1600,1600))
+            output=io.BytesIO();pixels.save(output,format='PNG');png=output.getvalue()
+            if len(png)>10*1024*1024:raise ValueError('Preview byte limit')
+            return png
+    except Exception:raise ValueError('Image preview unavailable; vector/invalid/oversized content needs separate review') from None
+
+
 def render_preview(store,session_id,candidate_id):
     r=store.get_evidence(session_id,candidate_id);f=store.get_file(r['file_id'])
     if f['session_id']!=session_id or Path(f['name']).suffix.lower()!='.pdf':raise ValueError('PDF original in this conversation required')
