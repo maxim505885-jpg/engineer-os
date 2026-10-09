@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
+using DISPPARAMS = System.Runtime.InteropServices.ComTypes.DISPPARAMS;
 public sealed class NativeVariantDispatch : IDisposable {
  [UnmanagedFunctionPointer(CallingConvention.StdCall)] private delegate int Query(IntPtr self,ref Guid iid,out IntPtr obj);
  [UnmanagedFunctionPointer(CallingConvention.StdCall)] private delegate uint Ref(IntPtr self);
