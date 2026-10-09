@@ -311,95 +311,113 @@
     "acceptance_granted": false
   },
   "software_verification": {
-    "source_head": "fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc",
-    "source_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
-    "candidate_head": "9bf58d02659d9ff0f330b3c310046f406802f088",
-    "candidate_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+    "schema": "ENGINEER_OS_REGIONAL_OCR_VERIFICATION_V1",
+    "source_head": "6db015bb9ad5c38a5143f747f2508eabc5fe97eb",
+    "source_tree": "2ae639262b28d21707d3f8f628d49fd2370c9e91",
+    "local_source_head": "2114726136e2f43db5a6eff767bec84b057e5ecf",
+    "candidate_head": "cca057f6fdd2e1f3751485727543d15b33e1879a",
+    "candidate_tree": "2ae639262b28d21707d3f8f628d49fd2370c9e91",
     "exact_tree_match": true,
-    "pr": 93,
+    "pr": 94,
     "all_9_checks_success": true,
     "checks": [
       {
         "name": "CodeQL",
-        "id": 113733105670,
+        "id": 113742998345,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113733105670"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113742998345"
+      },
+      {
+        "name": "repository-guard",
+        "id": 113742866204,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033532/job/113742866204"
       },
       {
         "name": "windows-runtime",
-        "id": 113732903828,
+        "id": 113742866127,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987163/job/113732903828"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033565/job/113742866127"
       },
       {
         "name": "core-tests",
-        "id": 113732903156,
+        "id": 113742866105,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987046/job/113732903156"
-      },
-      {
-        "name": "repository-guard",
-        "id": 113732902972,
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987066/job/113732902972"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033468/job/113742866105"
       },
       {
         "name": "Analyze (javascript-typescript)",
-        "id": 113732900007,
+        "id": 113742861454,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732900007"
-      },
-      {
-        "name": "Analyze (actions)",
-        "id": 113732899979,
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899979"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861454"
       },
       {
         "name": "Analyze (python)",
-        "id": 113732899705,
+        "id": 113742861448,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899705"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861448"
+      },
+      {
+        "name": "Analyze (actions)",
+        "id": 113742861066,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861066"
       },
       {
         "name": "core-tests",
-        "id": 113732891658,
+        "id": 113742853374,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983600/job/113732891658"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907029758/job/113742853374"
       },
       {
         "name": "repository-guard",
-        "id": 113732891163,
+        "id": 113742853263,
         "status": "completed",
         "conclusion": "success",
-        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983584/job/113732891163"
+        "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907029687/job/113742853263"
       }
     ],
-    "linux": {
-      "pr_run": 37903987046,
-      "push_run": 37903983600,
-      "tests_total": 731,
-      "passed": 729,
+    "local": {
+      "focused_tests": 35,
+      "tests_total": 741,
+      "passed": 739,
       "skipped_native_windows": 2,
+      "seconds": 67.918,
+      "node_tests": 4,
+      "dom_browser": "DEPENDENCIES_UNAVAILABLE_REMOTE_CI_VERIFIED"
+    },
+    "linux": {
+      "pr_run": 37907033468,
+      "push_run": 37907029758,
+      "tests_total": 741,
+      "passed": 739,
+      "skipped_native_windows": 2,
+      "pr_seconds": 82.275,
       "node_tests": 4,
       "http_dom_workflows": 2,
       "chromium_workflows": 4
     },
     "windows": {
-      "pr_run": 37903987163,
+      "pr_run": 37907033565,
       "tests_passed": 23,
       "real_ollama": true,
       "model": "qwen3:0.6b",
       "chromium_workflows": 4,
       "physical_pc_verified": false
+    },
+    "review": {
+      "critical": 0,
+      "important": 2,
+      "important_fixed_red_green": 2,
+      "deferred_minor": "Interrupted pass lacks separate failed descriptor; planned/completed counts and INCOMPLETE coverage remain visible"
     },
     "engineering_acceptance_granted": false
   },
@@ -429,95 +447,363 @@
     ],
     "acceptance_granted": false
   },
-  "previous_software_verification": {
-    "source_head": "ff586382874774838d584339bfbfa136c26dd351",
-    "source_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
-    "candidate_head": "8beb55924a8e5a82029636b235c3cac64c565488",
-    "candidate_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
-    "exact_tree_match": true,
-    "pr": 92,
-    "all_10_checks_success": true,
-    "checks": [
+  "software_verification_history": [
+    {
+      "source_head": "ff586382874774838d584339bfbfa136c26dd351",
+      "source_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
+      "candidate_head": "8beb55924a8e5a82029636b235c3cac64c565488",
+      "candidate_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
+      "exact_tree_match": true,
+      "pr": 92,
+      "all_10_checks_success": true,
+      "checks": [
+        {
+          "name": "CodeQL",
+          "id": 113698559586,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "core-tests",
+          "id": 113698517587,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "core-tests",
+          "id": 113698497029,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "windows-runtime",
+          "id": 113698441038,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113698440554,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Analyze (actions)",
+          "id": 113698432520,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "id": 113698432389,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Analyze (python)",
+          "id": 113698432229,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "windows-runtime",
+          "id": 113698420801,
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113698419415,
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "linux": {
+        "pr_run": 37893170818,
+        "push_run": 37893164515,
+        "tests_total": 728,
+        "passed": 726,
+        "skipped_native_windows": 2,
+        "node_tests": 4,
+        "http_dom_workflows": 2,
+        "chromium_workflows": 4
+      },
+      "windows": {
+        "pr_run": 37893170912,
+        "push_run": 37893164417,
+        "tests_passed": 23,
+        "real_ollama": true,
+        "model": "qwen3:0.6b",
+        "chromium_workflows": 4,
+        "physical_pc_verified": false
+      },
+      "engineering_acceptance_granted": false
+    },
+    {
+      "source_head": "fd4e8da9b933dd2ab3c8065a6c1aafcb816122dc",
+      "source_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+      "candidate_head": "9bf58d02659d9ff0f330b3c310046f406802f088",
+      "candidate_tree": "2cb8e47cd4d5f199edee708cb784e4db83a7c62d",
+      "exact_tree_match": true,
+      "pr": 93,
+      "all_9_checks_success": true,
+      "checks": [
+        {
+          "name": "CodeQL",
+          "id": 113733105670,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113733105670"
+        },
+        {
+          "name": "windows-runtime",
+          "id": 113732903828,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987163/job/113732903828"
+        },
+        {
+          "name": "core-tests",
+          "id": 113732903156,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987046/job/113732903156"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113732902972,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903987066/job/113732902972"
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "id": 113732900007,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732900007"
+        },
+        {
+          "name": "Analyze (actions)",
+          "id": 113732899979,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899979"
+        },
+        {
+          "name": "Analyze (python)",
+          "id": 113732899705,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903984530/job/113732899705"
+        },
+        {
+          "name": "core-tests",
+          "id": 113732891658,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983600/job/113732891658"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113732891163,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37903983584/job/113732891163"
+        }
+      ],
+      "linux": {
+        "pr_run": 37903987046,
+        "push_run": 37903983600,
+        "tests_total": 731,
+        "passed": 729,
+        "skipped_native_windows": 2,
+        "node_tests": 4,
+        "http_dom_workflows": 2,
+        "chromium_workflows": 4
+      },
+      "windows": {
+        "pr_run": 37903987163,
+        "tests_passed": 23,
+        "real_ollama": true,
+        "model": "qwen3:0.6b",
+        "chromium_workflows": 4,
+        "physical_pc_verified": false
+      },
+      "engineering_acceptance_granted": false
+    }
+  ],
+  "regional_ocr": {
+    "scope": "REAL_PDF_REGIONAL_OCR_EXECUTED_UNVERIFIED",
+    "sources": [
       {
-        "name": "CodeQL",
-        "id": 113698559586,
-        "status": "completed",
-        "conclusion": "success"
+        "source_sha256": "6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce",
+        "pages": 22,
+        "processed_pages": 22,
+        "failed_pages": 0,
+        "blocked_pages": 22,
+        "seconds": 109.297,
+        "original_unchanged": true,
+        "passes": 110,
+        "retained_text_truncations": 0,
+        "max_page_pixels": 20083430,
+        "max_page_tsv_bytes": 95341,
+        "max_page_words": 1457,
+        "parser_implementation": {
+          "extraction.py": "6efdfc41ad928db858b8b016fa68bcbbf3dc08a9314acafc6aacdc61a61f9f3d",
+          "ocr.py": "c727c3033b519a102fdc8a7ff38635db4d9a4940194fd1890a3a602bda9c9cdc",
+          "files.py": "e211fbebc3bc6f90aec10d442ff80ce7b48688a480d9b837e586faa5d4fb6fbd"
+        },
+        "quality_verified": false,
+        "acceptance_granted": false
       },
       {
-        "name": "core-tests",
-        "id": 113698517587,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "core-tests",
-        "id": 113698497029,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "windows-runtime",
-        "id": 113698441038,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "repository-guard",
-        "id": 113698440554,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "Analyze (actions)",
-        "id": 113698432520,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "Analyze (javascript-typescript)",
-        "id": 113698432389,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "Analyze (python)",
-        "id": 113698432229,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "windows-runtime",
-        "id": 113698420801,
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "name": "repository-guard",
-        "id": 113698419415,
-        "status": "completed",
-        "conclusion": "success"
+        "source_sha256": "fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c",
+        "pages": 21,
+        "processed_pages": 21,
+        "failed_pages": 0,
+        "blocked_pages": 21,
+        "seconds": 244.32,
+        "original_unchanged": true,
+        "passes": 105,
+        "retained_text_truncations": 0,
+        "max_page_pixels": 32080286,
+        "max_page_tsv_bytes": 326472,
+        "max_page_words": 2432,
+        "parser_implementation": {
+          "extraction.py": "6efdfc41ad928db858b8b016fa68bcbbf3dc08a9314acafc6aacdc61a61f9f3d",
+          "ocr.py": "c727c3033b519a102fdc8a7ff38635db4d9a4940194fd1890a3a602bda9c9cdc",
+          "files.py": "e211fbebc3bc6f90aec10d442ff80ce7b48688a480d9b837e586faa5d4fb6fbd"
+        },
+        "quality_verified": false,
+        "acceptance_granted": false
       }
     ],
-    "linux": {
-      "pr_run": 37893170818,
-      "push_run": 37893164515,
-      "tests_total": 728,
-      "passed": 726,
-      "skipped_native_windows": 2,
-      "node_tests": 4,
-      "http_dom_workflows": 2,
-      "chromium_workflows": 4
+    "ground_truth_available": false,
+    "visual_spot_check": {
+      "scope": "ASSISTANT_VISUAL_SPOT_CHECK_NOT_COMPLETE_OR_QUALIFIED_GROUND_TRUTH",
+      "selected_numbers": 3,
+      "matched": 2,
+      "mismatched": 1,
+      "quality_verified": false,
+      "acceptance_granted": false
     },
-    "windows": {
-      "pr_run": 37893170912,
-      "push_run": 37893164417,
-      "tests_passed": 23,
-      "real_ollama": true,
-      "model": "qwen3:0.6b",
-      "chromium_workflows": 4,
-      "physical_pc_verified": false
-    },
-    "engineering_acceptance_granted": false
+    "limitations": [
+      "SOURCE_XREF_OBJECT_WARNINGS",
+      "REGIONAL_ALTERNATIVES_UNMERGED",
+      "NO_COMPLETE_TRANSCRIPTION_OR_TABLE_GRAPHIC_GROUND_TRUTH"
+    ],
+    "acceptance_granted": false,
+    "software_verification": {
+      "schema": "ENGINEER_OS_REGIONAL_OCR_VERIFICATION_V1",
+      "source_head": "6db015bb9ad5c38a5143f747f2508eabc5fe97eb",
+      "source_tree": "2ae639262b28d21707d3f8f628d49fd2370c9e91",
+      "local_source_head": "2114726136e2f43db5a6eff767bec84b057e5ecf",
+      "candidate_head": "cca057f6fdd2e1f3751485727543d15b33e1879a",
+      "candidate_tree": "2ae639262b28d21707d3f8f628d49fd2370c9e91",
+      "exact_tree_match": true,
+      "pr": 94,
+      "all_9_checks_success": true,
+      "checks": [
+        {
+          "name": "CodeQL",
+          "id": 113742998345,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113742998345"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113742866204,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033532/job/113742866204"
+        },
+        {
+          "name": "windows-runtime",
+          "id": 113742866127,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033565/job/113742866127"
+        },
+        {
+          "name": "core-tests",
+          "id": 113742866105,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907033468/job/113742866105"
+        },
+        {
+          "name": "Analyze (javascript-typescript)",
+          "id": 113742861454,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861454"
+        },
+        {
+          "name": "Analyze (python)",
+          "id": 113742861448,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861448"
+        },
+        {
+          "name": "Analyze (actions)",
+          "id": 113742861066,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907031014/job/113742861066"
+        },
+        {
+          "name": "core-tests",
+          "id": 113742853374,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907029758/job/113742853374"
+        },
+        {
+          "name": "repository-guard",
+          "id": 113742853263,
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37907029687/job/113742853263"
+        }
+      ],
+      "local": {
+        "focused_tests": 35,
+        "tests_total": 741,
+        "passed": 739,
+        "skipped_native_windows": 2,
+        "seconds": 67.918,
+        "node_tests": 4,
+        "dom_browser": "DEPENDENCIES_UNAVAILABLE_REMOTE_CI_VERIFIED"
+      },
+      "linux": {
+        "pr_run": 37907033468,
+        "push_run": 37907029758,
+        "tests_total": 741,
+        "passed": 739,
+        "skipped_native_windows": 2,
+        "pr_seconds": 82.275,
+        "node_tests": 4,
+        "http_dom_workflows": 2,
+        "chromium_workflows": 4
+      },
+      "windows": {
+        "pr_run": 37907033565,
+        "tests_passed": 23,
+        "real_ollama": true,
+        "model": "qwen3:0.6b",
+        "chromium_workflows": 4,
+        "physical_pc_verified": false
+      },
+      "review": {
+        "critical": 0,
+        "important": 2,
+        "important_fixed_red_green": 2,
+        "deferred_minor": "Interrupted pass lacks separate failed descriptor; planned/completed counts and INCOMPLETE coverage remain visible"
+      },
+      "engineering_acceptance_granted": false
+    }
   }
 }
