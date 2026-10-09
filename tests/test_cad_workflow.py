@@ -104,3 +104,44 @@ class CadWorkflowTests(unittest.TestCase):
             result=verify_export(self.source,output,manifest)
             self.assertEqual(result['status'],'BLOCK',name)
             self.assertIn('Annotation',result['reasons'][0],name)
+
+    def test_large_inventory_is_readable_but_edit_stays_blocked(self):
+        doc=ezdxf.new('R2010',units=4)
+        for i in range(10001):doc.modelspace().add_line((i,0),(i,1))
+        doc.saveas(self.source)
+        report=inventory_dxf(self.source)
+        self.assertEqual(report.get('entity_counts'),{'LINE':10001})
+        self.assertEqual(report.get('entity_total'),10001)
+        self.assertTrue(report.get('inventory_read_complete'))
+        self.assertEqual(report['status'],'BLOCK')
+        self.assertIn('CAD_ENTITY_LIMIT',report['reasons'])
+        self.request['source_sha256']=hashlib.sha256(self.source.read_bytes()).hexdigest()
+        with self.assertRaisesRegex(ValueError,'CAD_ENTITY_LIMIT'):
+            derive_annotation(self.source,self.output,self.request)
+        self.assertFalse(self.output.exists())
+
+    def test_large_inventory_reaches_session_route(self):
+        from engineering.local_app.store import Store
+        from engineering.local_app.files import preserve_file
+        from engineering.local_app.cad import inventory,register_locator
+        doc=ezdxf.new('R2010',units=4)
+        for i in range(10001):doc.modelspace().add_line((i,0),(i,1))
+        doc.saveas(self.source)
+        store=Store(self.source.parent/'app');session=store.create_session('Large CAD')
+        source=preserve_file(store,session['id'],'large.dxf',self.source.read_bytes())
+        report=inventory(store,session['id'],source['id'])
+        self.assertEqual(report['entity_total'],10001)
+        self.assertEqual(len(report['entities']),100)
+        self.assertTrue(report['entities_truncated'])
+        self.assertEqual(report['status'],'BLOCK')
+        evidence=register_locator(store,session['id'],source['id'],handle=report['entities'][0]['handle'],statement='Needs review')
+        self.assertFalse(evidence['acceptance_granted'])
+        self.assertEqual(evidence['status'],'UNVERIFIED')
+
+    def test_inventory_budget_remains_bounded(self):
+        from unittest.mock import patch
+        with patch('engineering.cad.dxf_workflow.MAX_INVENTORY_ENTITIES',2):
+            report=inventory_dxf(self.source)
+        self.assertEqual(report['status'],'BLOCK')
+        self.assertEqual(report['reasons'],['CAD_INVENTORY_ENTITY_LIMIT'])
+        self.assertNotIn('entity_counts',report)

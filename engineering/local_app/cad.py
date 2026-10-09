@@ -27,8 +27,9 @@ def inventory(store,session_id,file_id):
     source,path=_source(store,session_id,file_id)
     report=dict(inventory_dxf(path,source['sha256']),file_id=file_id)
     if report.get('format')=='DXF' and 'entity_counts' in report:
-        doc,_=_load(path,source['sha256'])
-        report['entities']=[dict(handle=e.dxf.handle,type=e.dxftype(),layer=e.dxf.layer[:250]) for e in doc.modelspace()][:100]
+        doc,_=_load(path,source['sha256'],inventory=True)
+        from itertools import islice
+        report['entities']=[dict(handle=e.dxf.handle,type=e.dxftype(),layer=e.dxf.layer[:250]) for e in islice(doc.modelspace(),100)]
         report['entities_truncated']=len(doc.modelspace())>100
     return report
 
@@ -73,7 +74,7 @@ def register_locator(store,session_id,file_id,*,handle,statement):
     source,path=_source(store,session_id,file_id)
     if not isinstance(handle,str) or not 1<=len(handle)<=16 or any(c not in '0123456789ABCDEF' for c in handle):raise ValueError('Invalid DXF handle')
     if not isinstance(statement,str) or not statement.strip() or len(statement)>1000:raise ValueError('CAD statement must contain 1–1000 characters')
-    doc,_=_load(path,source['sha256'])
+    doc,_=_load(path,source['sha256'],inventory=True)
     entity=next((e for e in doc.modelspace() if e.dxf.handle==handle),None)
     if entity is None:raise ValueError('Entity handle not found in source modelspace')
     locator=dict(format='DXF',source_sha256=source['sha256'],layout='Model',handle=handle,entity_type=entity.dxftype(),layer=entity.dxf.layer[:250])

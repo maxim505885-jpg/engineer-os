@@ -8,17 +8,20 @@ from .intake import inspect_cad
 SUPPORTED={'LINE','CIRCLE','ARC','LWPOLYLINE','TEXT'}
 LAYER='ENGINEER_OS_DERIVED'
 MAX_ENTITIES=10000
+MAX_INVENTORY_ENTITIES=50000
 
 def _reader():
     try:import ezdxf
     except ImportError:raise ValueError('CAD_DEPENDENCY_UNAVAILABLE: install requirements-cad.txt') from None
     return ezdxf
 
-def _load(path,sha=None):
+def _load(path,sha=None,*,inventory=False):
     identity=inspect_cad(path,sha)
     if identity['status']=='BLOCK':raise ValueError(','.join(identity['reasons']))
     doc=_reader().readfile(path)
-    if sum(len(block) for block in doc.blocks)>MAX_ENTITIES:raise ValueError('CAD_ENTITY_LIMIT')
+    limit=MAX_INVENTORY_ENTITIES if inventory else MAX_ENTITIES
+    if sum(len(block) for block in doc.blocks)>limit:
+        raise ValueError('CAD_INVENTORY_ENTITY_LIMIT' if inventory else 'CAD_ENTITY_LIMIT')
     return doc,identity
 
 def _tags(entity):
@@ -50,11 +53,12 @@ def _resources(doc):
 def inventory_dxf(path,expected_sha256=None):
     identity=inspect_cad(path,expected_sha256)
     if identity['status']=='BLOCK':return identity
-    try:doc,identity=_load(path,expected_sha256)
+    try:doc,identity=_load(path,expected_sha256,inventory=True)
     except (ValueError,ImportError) as exc:return dict(identity,status='BLOCK',reasons=[str(exc)])
     except Exception:return dict(identity,status='BLOCK',reasons=['DXF_PARSE_FAILED'])
     entities=[e for block in doc.blocks for e in block]
     reasons=[]
+    if len(entities)>MAX_ENTITIES:reasons.append('CAD_ENTITY_LIMIT')
     if doc.units==0 or not 1<=doc.units<=24:reasons.append('DECLARED_UNITS_REQUIRED')
     if any(e.dxftype() not in SUPPORTED for e in entities):reasons.append('UNSUPPORTED_ENTITY_FOR_EDIT')
     from ezdxf.lldxf.tagwriter import TagCollector
@@ -77,7 +81,7 @@ def inventory_dxf(path,expected_sha256=None):
     if audit.has_errors or audit.has_fixes:reasons.append('DXF_AUDIT_ERRORS_OR_REPAIRS')
     if LAYER in doc.layers:reasons.append('DERIVED_LAYER_ALREADY_EXISTS')
     from ezdxf.units import unit_name
-    return dict(identity,status='BLOCK' if reasons else 'REVIEW_REQUIRED',version=doc.dxfversion,units=doc.units,unit_name=unit_name(doc.units),entity_counts=dict(Counter(e.dxftype() for e in entities)),layers=[e.dxf.name[:250] for e in doc.layers][:100],blocks=[b.name[:250] for b in doc.blocks][:100],layouts=[l.name[:250] for l in doc.layouts][:100],texts=[dict(handle=e.dxf.handle,text=e.dxf.text[:2000],layer=e.dxf.layer) for e in entities if e.dxftype()=='TEXT'][:100],reasons=list(dict.fromkeys(reasons)),inventory_complete=tables_complete,texts_truncated=sum(e.dxftype()=='TEXT' for e in entities)>100 or any(len(e.dxf.text)>2000 for e in entities if e.dxftype()=='TEXT'),human_review='REQUIRED',engineering_acceptance='NOT_VERIFIED')
+    return dict(identity,status='BLOCK' if reasons else 'REVIEW_REQUIRED',version=doc.dxfversion,units=doc.units,unit_name=unit_name(doc.units),entity_total=len(entities),inventory_read_complete=True,inventory_read_limit=MAX_INVENTORY_ENTITIES,edit_entity_limit=MAX_ENTITIES,entity_counts=dict(Counter(e.dxftype() for e in entities)),layers=[e.dxf.name[:250] for e in doc.layers][:100],blocks=[b.name[:250] for b in doc.blocks][:100],layouts=[l.name[:250] for l in doc.layouts][:100],texts=[dict(handle=e.dxf.handle,text=e.dxf.text[:2000],layer=e.dxf.layer) for e in entities if e.dxftype()=='TEXT'][:100],reasons=list(dict.fromkeys(reasons)),inventory_complete=tables_complete,texts_truncated=sum(e.dxftype()=='TEXT' for e in entities)>100 or any(len(e.dxf.text)>2000 for e in entities if e.dxftype()=='TEXT'),human_review='REQUIRED',engineering_acceptance='NOT_VERIFIED')
 
 def _request(request):
     fields={'source_sha256','text','insert','height','reason','evidence_ids','units_acknowledged'}
