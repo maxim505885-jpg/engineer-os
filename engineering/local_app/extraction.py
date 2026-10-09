@@ -136,8 +136,10 @@ def execute(store,job,stop_event,*,progress=None):
                 if parser is None:blocks=native_page(pdf,page)
                 elif backend=='ocr':
                     blocks=parser.page_blocks(pdf[page-1],page)
+                    record['ocr_dossier']=parser.last_page_dossier
                     record['ocr']=run['ocr']='EXECUTED_UNVERIFIED'
                     record['limitations'].append('OCR_TEXT_UNVERIFIED')
+                    if parser.layout=='regions':record['limitations'].append('OCR_REGION_CANDIDATES_UNMERGED')
                     if any(b['ocr_confidence']<50 for b in blocks):
                         record['limitations'].append('OCR_LOW_CONFIDENCE');record['status']='BLOCK'
                 else:
@@ -155,6 +157,7 @@ def execute(store,job,stop_event,*,progress=None):
             except Exception as exc:
                 record.update(execution='FAILED',status='BLOCK',blocks=[],stored_chars=0,
                               limitations=[parse_failure_message(exc)])
+                if backend=='ocr':record['ocr_dossier']=parser.last_page_dossier
             verify_originals([file])
             if backend=='ocr' and parser_identity(backend)!=config:raise ExtractionFailure('Идентичность OCR изменилась; результат страницы не сохранён.')
             store.save_extraction_page(job['id'],record);checkpoint()
