@@ -2,22 +2,22 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** §68 — выполнение пяти оставшихся направлений. Критерий1 завершён:29 CodeQL alerts reviewed/dismissed FP,0open на refs/pull/91/head,check113609776255SUCCESS; PR91 merged. Официальный candidate22ad4c153646a9a2a2c5c17cc3a582afdd1e4130/tree2670623 равен проверенному90263af. Проверены7 реальных оригиналов:43/43 PDF страницы и660/660 Office units без ошибок;графика/формулы/табличная семантика остаются непроверенными. Расчётный intake BLOCK,8 roles отсутствуют;Положительный accepted case не подтверждён. Реальный DWG найден и отдельно преобразован; геометрия не принята. PR92 проверяетWindows clean startup/cache repair/restart/backup/browser/liveOllama;physicalWindows иинженерная приёмка не подтверждены. Исторические §§65–67 сохраняют состояние до triage/merge.
+**Активный план:** итог §68.8. PR 91/92 приняты в `integration/release-candidate-v1`, HEAD `8beb55924a8e5a82029636b235c3cac64c565488`; дерево точно равно проверенному `ff586382874774838d584339bfbfa136c26dd351`. Все 10 CI checks SUCCESS. Критерий 1 закрыт, критерии 2–5 частично готовы: реальные OCR/DWG проверки выполнены с сохранением инженерных BLOCK. Main и финальный выпуск не публиковались.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
-| 1 | Единая рабочая версия | ✅ Кандидат | PR91 перенесён в официальный кандидат22ad4c1; tree2670623 совпадает с проверенным90263af. Финальный main/release отдельно. |
+| 1 | Единая рабочая версия | ✅ Кандидат | PR 91/92 приняты; кандидат 8beb559/tree f5f78d4 равен проверенному ff586382. Main/release отдельно. |
 | 2 | Качество OCR и локальной модели | ✅ программный контур | Извлечение/метрики/отрицательные gates и живой Linux qwen3 проверялись. Это не полнота V4 и не Windows. |
 | 3 | Большие документы: resume/recovery | ✅ программный контур | Checkpoints, identity, budgets, retry. Полнота инженерного документа отдельно в№13. |
 | 4 | DOCX/XLSX/DOC и остальные заявленные форматы | ✅ программный контур | Оригиналы, logical locators, provenance, native/OCR маршруты; сложные таблицы отдельно. |
 | 5 | ТЗ → источник → требование → вывод | ✅ программный контур | Полный индекс47 требований,42 исходные позиции, версионные оценки и глобальные gates. |
-| 6 | Нормативная и расчётная верификация | 🟡 | 12 документальных нормативных решений BLOCK; native LIR identity/receipt integrity готовы. Семантический vendor export/run, полномочия и actual correlation открыты; расчёт отложен пользователем. |
+| 6 | Нормативная и расчётная верификация | 🟡 | 12 документальных нормативных решений BLOCK; native LIR identity/receipt integrity готовы. Семантический vendor export/run, полномочия и actual correlation открыты; реальный solver-run не выполнен без подтверждённого semantic export/run. |
 | 7 | Реальный инженерный case workflow | ✅ отрицательный сценарий | Три оригинала,36 кандидатов, роли и нормативный replay воспроизводимы; объект не ACCEPTED. Положительный сценарий в№14. |
 | 8 | FINAL AUDIT / acceptance boundary | ✅ программный контур | Immutable/stale/tamper/foreign source gates. Нет подтверждённого положительного инженерного объекта. |
-| 9 | Windows one-click runtime | 🟡 | Native Windows CI: cold start/cache repair/restart,23 regression tests и live Ollama inference PASS. Полный browser CI повторяется; physical PC clean install/reboot открыт. |
-| 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
+| 9 | Windows one-click runtime | 🟡 | Native Windows CI полностью PASS: clean start/cache repair/restart, 23 tests, live Ollama, 4 Chromium routes. Physical PC clean install/reboot остаётся. |
+| 10 | Consolidation / единый source of truth | ✅ Интеграция | PR 91/92 merged после всех 10 SUCCESS checks. Официальный проверенный кандидат 8beb559; актуальная карта §68.8. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков. Все4 browser маршрута, включая CAD/memory/mobile/session reset, прошли. Финальная приёмка интерфейса на реальном accepted объекте остаётся. |
-| 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
+| 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
 | 13 | Production completeness документов | ❌ полностью не закрыто | Автоматические native/OCR/Office routes есть; на реальной копии V4 обработаны534/534 native-страницы с явными ограничениями (все BLOCK). Сложные mixed/raster tables/графика, полный проверенный V4 и представительный completeness corpus открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
@@ -55,9 +55,9 @@
 1. №1/10 выполнены:triage29 и PR91→candidate завершены. №12:Windows ACL иконкурентная подмена вне owner-controlled contract не подтверждены.
 2. №13: independently verified полнота сложных mixed/raster таблиц/графики полного V4 и представительный корпус.534/534 обработанных страниц V4 остаются BLOCK.
 3. №6/14: применимые свежие нормы,qualified actual evidence и vendor export/run/correlation, затем реальный положительный FINAL AUDIT. Расчёт ранее отложен пользователем.
-4. №15/16/17: реальный ACCEPTED→knowledge маршрут,принятый документ,реальный CAD и DWG converter/roundtrip. Программные память/шаблоны/иллюстрации/DXF-аннотации уже реализованы и проверены.
+4. №15/16/17: реальный ACCEPTED→knowledge маршрут,принятый документ,проверка эквивалентности реального DWG, controlled edit/roundtrip и безопасное снятие CAD_ENTITY_LIMIT. Программные память/шаблоны/иллюстрации/DXF-аннотации уже реализованы и проверены.
 5. №18: optional-provider live/receipt contract. Бесплатные локальные провайдеры не требуют облачного API.
-6. №9/19: physical Windows cold-start/restart/reboot/end-to-end и clean install последними; затем FINAL RELEASE AUDIT,main/tag. Физический Windows ранее отложен.
+6. №9/19: physical Windows cold-start/restart/reboot/end-to-end и clean install последними; затем FINAL RELEASE AUDIT,main/tag.
 
 Не снимать реальный BLOCK ради номера пункта. Финальный релиз не объявлять по числу тестов. Карту обновлять после каждого существенного результата с branch/PR/head/CI и ограничениями.
 
@@ -65,7 +65,7 @@
 
 8 выполнены в указанном программном объёме,8 частично готовы,3 открыты (№13,14,19). Наличие программного маршрута №15/17 не закрывает реальный положительный сценарий. План исполнения: `master-pass-20261009.md`.
 
-## Уточнение реальных источников и CI — §68.5
+## История промежуточных проверок — §68.5
 
 DWG предоставлен: пять одинаковых копий, один уникальный исходник AC1032. Отдельный DXF прочитан: 15 906 объектов; 1 304 строки предупреждений, 210 строки ошибок конвертера. Приложение BLOCK CAD_ENTITY_LIMIT=10000. Оригиналы не изменены; эквивалентность, controlled edit и приёмка не подтверждены.
 
@@ -73,4 +73,8 @@ Windows: 23 native tests и живой Ollama/browser inference PASS на b37646
 
 Реальный OCR завершён:43/43 страницы,66 349 символов,2 615 блоков,0 failed;43BLOCK из-за OCR_LOW_CONFIDENCE/непроверенной графики. Native Windows recovery/browser PASS; fixture subprocess cwd исправлен в ff586382, полный свежий CI выполняется. Актуальное состояние и доказательства: последний §68 живой карты.
 
-Native Windows PR/push и полный Linux push на ff586382 SUCCESS:23nativeWindows tests,liveOllama,4browser routes;728Linux tests(2Windows-only skips),4Node,2HTTP/DOM,4Chromium. Дублирующий required PR Linux CI ещё выполняется; merge PR92 pending. Physical PC и accepted engineering gates открыты.
+Native Windows PR/push и полный Linux push на ff586382 SUCCESS:23nativeWindows tests,liveOllama,4browser routes;728Linux tests(2Windows-only skips),4Node,2HTTP/DOM,4 Chromium. Дублирующий required PR Linux CI ещё выполняется; merge PR92 pending. Physical PC и accepted engineering gates открыты.
+
+## Итог §68.8
+
+Все 10 проверок SUCCESS на ff586382; PR 92 принят в кандидат 8beb559, exact tree match f5f78d4 подтверждён Git API. Linux PR/push: 728 tests (726 PASS, 2 native-Windows-only skips), 4 Node, 2 HTTP/DOM, 4 Chromium. Windows PR/push: 23 tests, реальный Ollama qwen3:0.6b, 4 Chromium и supervisor/cache/restart PASS. Инженерные критерии 2–5 остаются частичными; physical PC, accepted case, графика/формулы/сложные таблицы, vendor exports/run и native CAD geometry/roundtrip не приняты. Следующие gates и полный отчёт: `docs/qa/2026-10-09-five-criteria-verification.md`. Актуальная живая карта: docs/development/ENGINEER_OS_PROJECT_MAP.md в docs/project-map-handoff-20261005.
