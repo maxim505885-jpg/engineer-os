@@ -9,13 +9,13 @@ def render_office_image(store,session_id,source_job,logical_unit,image,*,bitmap=
     import io
     from PIL import Image
     from .office import Package,MAX_IMAGE_BYTES
-    from .source_binding import office_location
+    from .source_binding import office_image_location
     child=store.extraction_job(session_id,source_job)
     if len(child['file_ids'])!=1:raise ValueError('Single Office source required')
     file=store.get_file(child['file_ids'][0])
     if Path(file['name']).suffix.lower()!='.docx':raise ValueError('Native DOCX image preview required')
     if type(image) is not int or image<1:raise ValueError('Image ordinal required')
-    binding=office_location(store,session_id,file,source_job,logical_unit,'')
+    binding=office_image_location(store,session_id,file,source_job,logical_unit)
     images=binding['locator'].get('images',[])
     if image>len(images):raise ValueError('Image outside source element')
     descriptor=images[image-1]

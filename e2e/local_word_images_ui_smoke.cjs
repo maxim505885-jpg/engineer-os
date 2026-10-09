@@ -13,7 +13,8 @@ from engineering.local_app.server import make_server
 from tests.test_office_documents import Model
 from tests.test_emf_native_text import mixed_doc,emf,text_record
 from tests.test_emf_bitmap import bitmap_record
-s=Store(sys.argv[1]);sid=s.create_session()['id'];f=preserve_file(s,sid,'images.docx',mixed_doc(vector=emf([text_record(),bitmap_record()]))) ;m=Model()
+from tests.test_emf_bitfields import masked_bitmap_record
+s=Store(sys.argv[1]);sid=s.create_session()['id'];f=preserve_file(s,sid,'images.docx',mixed_doc(vector=emf([text_record(),bitmap_record(),masked_bitmap_record()]))) ;m=Model()
 s.enqueue(sid,'Read source images',[f['id']]);Worker(s,m).run_once()
 server=make_server(s,m,drive_client=None);print('ORIGIN http://127.0.0.1:'+str(server.server_port),flush=True);server.serve_forever()`;
   child=spawn(process.env.PYTHON||'python3',['-u','-c',fixture,temp],{cwd:root});
@@ -33,12 +34,17 @@ server=make_server(s,m,drive_client=None);print('ORIGIN http://127.0.0.1:'+str(s
   assert.ok((await page.locator('.emf-native-text').textContent()).includes('смещение 88 байт'));
   assert.ok((await page.locator('.emf-native-text').textContent()).includes('таблица и формулы не восстановлены'));
   assert.equal(await page.locator('#evidence-list').textContent(),'');
-  await page.locator('.emf-bitmap').click();
+  await page.locator('.emf-bitmap').first().click();
   await page.waitForFunction(()=>document.querySelector('#source-image').naturalWidth===2);
   assert.ok((await page.locator('#source-caption').textContent()).includes('полный EMF не отрисован'));
   assert.ok((await page.locator('#source-caption').textContent()).includes('встроенный растр EMF 1'));
+  await page.getByRole('button',{name:'Закрыть просмотр',exact:true}).click();
+  await page.locator('.emf-bitmap').nth(1).click();
+  await page.waitForFunction(()=>document.querySelector('#source-image').naturalWidth===2);
+  assert.ok((await page.locator('#source-caption').textContent()).includes('встроенный растр EMF 2'));
+  assert.ok((await page.locator('#source-caption').textContent()).includes('полный EMF не отрисован'));
   assert.equal(await page.locator('#evidence-list').textContent(),'');
   assert.deepEqual(errors,[]);
-  console.log(JSON.stringify({result:'PASS',checks:['docx-source-image-control','authenticated-real-png','untransformed-scope','no-created-evidence','viewer-close','native-emf-text-and-byte-offset','no-table-inference','source-emf-raster-png','no-full-emf-rendering-claim'],engineering_acceptance:false}));
+  console.log(JSON.stringify({result:'PASS',checks:['docx-source-image-control','authenticated-real-png','untransformed-scope','no-created-evidence','viewer-close','native-emf-text-and-byte-offset','no-table-inference','source-emf-raster-png','no-full-emf-rendering-claim','source-bitfields-raster-png'],engineering_acceptance:false}));
  }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});
