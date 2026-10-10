@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from types import SimpleNamespace
 
 from scripts.vector_pdf_ocr_review import collect
 
@@ -16,8 +17,10 @@ class VectorOCRReviewTests(unittest.TestCase):
             page.insert_text((25,30),'Ordinary text')
             pdf.save(source)
             pdf.close()
-            with self.assertRaisesRegex(ValueError,'Expected vector-only'):
-                collect(source,[1])
+            fake_ocr=SimpleNamespace(Output=SimpleNamespace(DICT=dict))
+            with patch.dict('sys.modules',{'pytesseract':fake_ocr}):
+                with self.assertRaisesRegex(ValueError,'Expected vector-only'):
+                    collect(source,[1])
 
     def test_vector_candidate_is_never_accepted_as_verified(self):
         import fitz
@@ -33,7 +36,8 @@ class VectorOCRReviewTests(unittest.TestCase):
             pdf.close()
             fake=dict(text=['Label','noise'],conf=['72','-1'],
                       left=[10,20],top=[15,18],width=[50,20],height=[12,12])
-            with patch('pytesseract.image_to_data',return_value=fake):
+            fake_ocr=SimpleNamespace(Output=SimpleNamespace(DICT=dict),image_to_data=lambda *args,**kwargs:fake)
+            with patch.dict('sys.modules',{'pytesseract':fake_ocr}):
                 result=collect(source,[1])
             self.assertEqual(result['quality_status'],'VISUAL_REVIEW_REQUIRED')
             self.assertEqual(len(result['records'][0]['candidates']),1)
