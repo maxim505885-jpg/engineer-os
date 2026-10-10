@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+from engineering.document_intelligence.vector_ocr_review_routing import route_candidates
 
 
 def collect(source, pages, dpi=90, min_confidence=35, languages='Cyrillic+eng'):
@@ -70,9 +71,10 @@ def collect(source, pages, dpi=90, min_confidence=35, languages='Cyrillic+eng'):
                               round(clip.x0+(x+w)*72/dpi,2),round(clip.y0+(y+h)*72/dpi,2)]
                     items.append(dict(text=value,confidence=confidence,tile=tile_index,
                                       bbox_pdf=bbox_pdf,status='OCR_CANDIDATE_UNVERIFIED'))
+            items,review_counts=route_candidates(items)
             records.append(dict(page=number,vector_paths=paths,
                                 rendered_tile_pixels=rendered,ocr_failures=failures,
-                                candidates=items,visual_verified=False,
+                                candidates=items,review_route_counts=review_counts,visual_verified=False,
                                 native_text_available=False))
         with source.open('rb') as stream:
             if hashlib.file_digest(stream,'sha256').hexdigest()!=digest:
