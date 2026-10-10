@@ -1,0 +1,31 @@
+name: LIRA API probe verification
+on:
+  pull_request:
+    paths:
+      - 'tools/lira-api-probe/**'
+      - 'tools/lira-native-export/**'
+      - '.github/workflows/lira-api-probe.yml'
+jobs:
+  read-only-type-library:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and read a real Windows type library
+        shell: powershell
+        run: |
+          $root=Join-Path $env:RUNNER_TEMP 'lira-probe-fixture'
+          New-Item -ItemType Directory -Path $root | Out-Null
+          Copy-Item "$env:SystemRoot\System32\stdole2.tlb" (Join-Path $root 'LiraFixture.tlb')
+          $tokens=$null; $errors=$null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path tools/lira-api-probe/engineer_os_lira_api_probe.ps1),[ref]$tokens,[ref]$errors) | Out-Null
+          if ($errors.Count) { throw ($errors | Out-String) }
+          & tools/lira-api-probe/engineer_os_lira_api_probe.ps1 -InstallDir $root -OutputRoot $env:RUNNER_TEMP -NoExplorer
+          $report=Get-ChildItem $env:RUNNER_TEMP -Directory -Filter ENGINEER_OS_LIRA_API_* | Select-Object -First 1
+          $result=Get-Content (Join-Path $report.FullName 'lira-api-inventory.json') -Raw | ConvertFrom-Json
+          if ($result.status -ne 'API_INVENTORY_RECORDED') { throw ($result | ConvertTo-Json -Depth 18) }
+          if ($result.libraries[0].type_library.types.Count -lt 1) { throw 'Missing real type inventory' }
+          if ($result.model_exported -or $result.results_exported -or $result.source_model_opened) { throw 'Unexpected model action' }
+          Write-Output 'PASS: PowerShell parser, C# compilation, real type-library inventory, no model/solver invocation'
+      - name: Model export contract (no LIRA installed)
+        shell: powershell
+        run: tools/lira-native-export/test-export.ps1
