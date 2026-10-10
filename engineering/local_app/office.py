@@ -205,7 +205,7 @@ def word_container_units(body,part,package=None):
                     # native text as unverified content, without inventing inner cells.
                     nested=cell.findall('.//'+W+'tbl')
                     if nested:
-                        nested_text='\n'.join(word_text(p) for tbl in nested for p in tbl.findall('.//'+W+'p'))
+                        nested_text='\n'.join(word_text(p) for p in cell.iter(W+'p') if p not in cell.findall(W+'p'))
                         if nested_text:
                             text+='\n[NESTED_TABLE_TEXT_UNVERIFIED]\n'+nested_text
                     locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
