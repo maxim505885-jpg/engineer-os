@@ -188,7 +188,10 @@ def word_container_units(body,part,package=None):
         if child.tag==W+'p':
             paragraph+=1;text=word_text(child);warnings=word_limits(child)
             locator=dict(kind='paragraph',part=part,paragraph=paragraph)
-            if text or warnings:append(text,locator,warnings,child)
+            # Image-only Word paragraphs have no w:t, but still carry source evidence.
+            # Keep their logical unit so bind_images can preserve exact media refs.
+            has_graphic=any(e.tag in {W+'drawing',W+'pict',W+'object'} for e in child.iter())
+            if text or warnings or has_graphic:append(text,locator,warnings,child)
             out.extend(equation_units(child,locator))
         elif child.tag==W+'tbl':
             table+=1;grid=word_table_grid(child)
