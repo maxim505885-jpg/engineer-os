@@ -30,26 +30,48 @@ def collect(source, pages, dpi=90, min_confidence=35, languages='Cyrillic+eng'):
             paths=len(page.get_cdrawings())
             if paths==0:
                 raise ValueError('No PDF vector paths found')
-            pix=page.get_pixmap(matrix=fitz.Matrix(dpi/72,dpi/72),alpha=False)
-            if pix.width*pix.height>12000000:
-                raise ValueError('Rendered page exceeds OCR pixel budget')
-            image=Image.open(io.BytesIO(pix.tobytes('png')))
-            data=pytesseract.image_to_data(image,lang=languages,config='--psm 11',
-                                           output_type=pytesseract.Output.DICT,timeout=45)
+            # Use bounded tiles: large engineering sheets make full-page PSM11 stall.
+            bounds=page.rect
+            tiles=[]
+            for row in range(2):
+                for col in range(2):
+                    tiles.append(fitz.Rect(bounds.x0+col*bounds.width/2,
+                                           bounds.y0+row*bounds.height/2,
+                                           bounds.x0+(col+1)*bounds.width/2,
+                                           bounds.y0+(row+1)*bounds.height/2))
             items=[]
-            for idx,raw in enumerate(data['text']):
-                value=(raw or '').strip()
+            failures=[]
+            rendered=[]
+            for tile_index,clip in enumerate(tiles):
+                pix=page.get_pixmap(matrix=fitz.Matrix(dpi/72,dpi/72),clip=clip,alpha=False)
+                if pix.width*pix.height>4000000:
+                    failures.append(dict(tile=tile_index,reason='OCR_PIXEL_BUDGET'))
+                    continue
+                rendered.append([pix.width,pix.height])
+                image=Image.open(io.BytesIO(pix.tobytes('png')))
                 try:
-                    confidence=float(data['conf'][idx])
-                except (ValueError,TypeError):
+                    data=pytesseract.image_to_data(image,lang=languages,config='--psm 11',
+                                                   output_type=pytesseract.Output.DICT,timeout=12)
+                except RuntimeError:
+                    failures.append(dict(tile=tile_index,reason='OCR_TIMEOUT_OR_ENGINE_ERROR'))
                     continue
-                if not value or confidence<min_confidence:
-                    continue
-                items.append(dict(text=value,confidence=confidence,
-                                  bbox_pixels=[int(data[k][idx]) for k in ('left','top','width','height')],
-                                  status='OCR_CANDIDATE_UNVERIFIED'))
+                for idx,raw in enumerate(data['text']):
+                    value=(raw or '').strip()
+                    try:
+                        confidence=float(data['conf'][idx])
+                    except (ValueError,TypeError):
+                        continue
+                    if not value or confidence<min_confidence:
+                        continue
+                    x=int(data['left'][idx]); y=int(data['top'][idx])
+                    w=int(data['width'][idx]); h=int(data['height'][idx])
+                    # Absolute PDF coordinates survive tile-based processing.
+                    bbox_pdf=[round(clip.x0+x*72/dpi,2),round(clip.y0+y*72/dpi,2),
+                              round(clip.x0+(x+w)*72/dpi,2),round(clip.y0+(y+h)*72/dpi,2)]
+                    items.append(dict(text=value,confidence=confidence,tile=tile_index,
+                                      bbox_pdf=bbox_pdf,status='OCR_CANDIDATE_UNVERIFIED'))
             records.append(dict(page=number,vector_paths=paths,
-                                rendered_pixels=[pix.width,pix.height],
+                                rendered_tile_pixels=rendered,ocr_failures=failures,
                                 candidates=items,visual_verified=False,
                                 native_text_available=False))
         with source.open('rb') as stream:
