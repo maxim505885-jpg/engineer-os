@@ -53,5 +53,29 @@ class ReceiptRecoveryTests(unittest.TestCase):
         self.assertEqual(report['model_elapsed_seconds'],183)
 
 
+    def test_finish_rejects_unfinished_receipt(self):
+        db=sqlite3.connect(':memory:')
+        db.row_factory=sqlite3.Row
+        db.execute("CREATE TABLE jobs(id TEXT PRIMARY KEY,state TEXT,error TEXT,result TEXT,session_id TEXT,updated REAL)")
+        db.execute("CREATE TABLE analysis_receipts(seq INTEGER PRIMARY KEY,job_id TEXT,record TEXT)")
+        db.execute("CREATE TABLE messages(session_id TEXT,role TEXT,content TEXT,created REAL)")
+        db.execute("INSERT INTO jobs(id,state,result,session_id) VALUES('j','RUNNING',?,'s')",
+                   (json.dumps({'document_analysis':{'stage':'COMPLETED'}}),))
+        db.execute("INSERT INTO analysis_receipts VALUES(1,'j',?)",
+                   (json.dumps({'status':'RUNNING','attempted':True}),))
+        db.commit()
+        store=Store.__new__(Store)
+        store.connection=lambda: db
+        with self.assertRaisesRegex(ValueError,'Incomplete model receipt'):
+            store.finish('j',{'text':'draft'})
+        db.rollback()
+        self.assertEqual(db.execute("SELECT state FROM jobs WHERE id='j'").fetchone()[0],'RUNNING')
+        db.execute("UPDATE analysis_receipts SET record=? WHERE seq=1",(json.dumps({'status':'INTERRUPTED'}),))
+        db.commit()
+        store.finish('j',{'text':'draft'})
+        self.assertEqual(db.execute("SELECT state FROM jobs WHERE id='j'").fetchone()[0],'SUCCEEDED')
+        db.close()
+
+
 if __name__=='__main__':
     unittest.main()
