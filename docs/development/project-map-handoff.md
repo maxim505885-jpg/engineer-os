@@ -1,3 +1,4 @@
+# Текущий план исполнения — docs/development/implementation-plan-20261010.md (P0→P4), 10.10.2026
 # Текущий результат — §92 итог: PR108 merged,e0754b2;real DOCX/V4/CI PASS,№13 открыт по qualified полноте
 
 # Текущий результат — §91 итог: PR107 merged, кандидат6d59ea1; real120 rasters/CI PASS, №13 открыт
