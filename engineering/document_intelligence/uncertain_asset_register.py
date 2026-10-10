@@ -33,6 +33,9 @@ class UncertainAssetRegisterWriter:
     """Uses injected existing evidence transport; insertion is not validation."""
 
     def __init__(self, insert_row):
+        from .supabase_evidence_transport import SupabaseEvidenceTransport
+        if isinstance(insert_row, SupabaseEvidenceTransport):
+            raise ValueError('CANDIDATE_ASSETS_CANNOT_USE_VALIDATED_EVIDENCE_RPC')
         self._insert_row = insert_row
 
     def persist(self, candidate, payload, source_sha256, context):
