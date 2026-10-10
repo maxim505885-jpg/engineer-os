@@ -3045,3 +3045,12 @@ PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9
 ### Итог §93 — PR109 объединён в кандидат, 10.10.2026
 
 PR109 MERGED (squash, exact expected head d6218444acd799579c93530d5ce0cda2390b040d). Новый candidate integration/release-candidate-v1: **de370df9f769410eeab4174aab951811c251147f**. На проверенном PR head GitHub Actions Core38042327350, Windows38042327346, Security38042327401 — все **SUCCESS**. В составе: явная маркировка предыдущих незавершённых model receipts как INTERRUPTED на resume, сохранение попыток, запрет Store.finish при оставшемся RUNNING receipt, регрессионные тесты и исполнимый план docs/development/implementation-plan-20261010.md. CI проверяет программный код, не физический ПК и не новый полный реальный DOCX прогон. Точная причина прежнего расхождения 1496 calls/1492 receipts и первого FAILED14505/14684 не определена. №13 по qualified graphics/raster tables/formulas/OCR/corpus остаётся ОТКРЫТ; №14 и №19 открыты; ЛИРА отложена.
+
+
+## 94. №13/P0 — сверка попыток модели с журналом, 10.10.2026
+
+PR109 MERGED в candidate `de370df9f769410eeab4174aab951811c251147f`, final head `d6218444acd799579c93530d5ce0cda2390b040d` CI SUCCESS: Core38042327350, Windows38042327346, Security38042327401.
+
+Отдельный PR110 https://github.com/maxim505885-jpg/engineer-os/pull/110, ветка `fix/analysis-receipt-count-gate-20261010`, head `6eb6f1fc8c5341b2969a93adb134b660129ca6e4`: Store.finish сверяет `model_calls` с количеством persisted `attempted=true` receipts, если поле присутствует. Неравенство отклоняет SUCCEEDED; RUNNING gate остаётся. Добавлен регрессионный тест mismatch и валидного INTERRUPTED+COMPLETED ledger. CI/merge PR110 пока не подтверждены. Исторический DOCX discrepancy 1496/1492 будет заблокирован данным gate, однако первопричина НЕ установлена; реальный полный повтор не выполнялся.
+
+№13 ОТКРЫТ: квалифицированная сверка Word/EMF графики, raster/mixed tables, 41 OMML, OCR conflicts, V4 и корпуса не завершена. Статусы 8✅/8🟡/3❌. Расчёты ЛИРА/RES отложены.
