@@ -581,7 +581,12 @@ class Store:
             if 'document_analysis' in prior:
                 if db.execute("SELECT 1 FROM analysis_receipts WHERE job_id=? AND json_extract(record,'$.status')='RUNNING' LIMIT 1",(job_id,)).fetchone():
                     raise ValueError('Incomplete model receipt; cannot finish analysis')
-                result['document_analysis']=prior['document_analysis']
+                analysis=prior['document_analysis']
+                if 'model_calls' in analysis:
+                    attempted=db.execute("SELECT count(*) FROM analysis_receipts WHERE job_id=? AND json_extract(record,'$.attempted')=1",(job_id,)).fetchone()[0]
+                    if type(analysis['model_calls']) is not int or analysis['model_calls']!=attempted:
+                        raise ValueError('Model attempt ledger mismatch; cannot finish analysis')
+                result['document_analysis']=analysis
             now=time.time();db.execute("UPDATE jobs SET state='SUCCEEDED',result=?,updated=? WHERE id=?",(json.dumps(result,ensure_ascii=False),now,job_id))
             db.execute('INSERT INTO messages(session_id,role,content,created) VALUES(?,?,?,?)',(r['session_id'],'assistant',result['text'],now))
 
