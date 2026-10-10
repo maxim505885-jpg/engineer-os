@@ -31,6 +31,7 @@ class ReceiptRecoveryTests(unittest.TestCase):
         self.assertFalse(values[0]['acceptance_granted'])
         self.assertEqual(values[1]['text'],'verified')
         db.execute("UPDATE jobs SET state='FAILED' WHERE id='j'")
+        db.commit()
         with self.assertRaises(ValueError):
             store.reconcile_interrupted_analysis_receipts('j')
         db.close()
