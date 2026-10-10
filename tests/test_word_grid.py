@@ -13,6 +13,16 @@ class WordGridTests(unittest.TestCase):
     def cells(self,xml):
         return [u for u in read(docx(extra=xml),'docx')[0] if u['locator'].get('table')==2 and u['locator']['kind']=='table_cell']
 
+    def test_nested_table_native_text_not_lost_without_claiming_layout(self):
+        inner=table('<w:tr>'+cell('Inner value')+'</w:tr>',1)
+        outer='<w:tbl><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:tc><w:p><w:r><w:t>Outer</w:t></w:r></w:p>'+inner+'</w:tc></w:tr></w:tbl>'
+        units=self.cells(outer)
+        self.assertEqual(len(units),1)
+        self.assertIn('Outer',units[0]['text'])
+        self.assertIn('[NESTED_TABLE_TEXT_UNVERIFIED]',units[0]['text'])
+        self.assertIn('Inner value',units[0]['text'])
+        self.assertIn('NESTED_TABLE_UNVERIFIED',units[0]['limitations'])
+
     def test_vertical_continuations_keep_original_text_and_exact_anchor(self):
         span='<w:gridSpan w:val="2"/>'
         rows='<w:tr>'+cell('A',span+'<w:vMerge w:val="restart"/>')+cell('B')+'</w:tr>'
