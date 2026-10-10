@@ -1,0 +1,248 @@
+{
+  "schema": "ENGINEER_OS_LARGE_OFFICE_CI_RECEIPT_V1",
+  "pull_request": 97,
+  "head_sha": "187b6d88448806f31781df7cf68f6bd6bf826b22",
+  "tree_sha": "2af4da649a69d4f60c7c51ffd7331af1ea6ccb80",
+  "local_commit": "9aa29f7724905137bb6c816a59101ef060a4cc57",
+  "local_validation": {
+    "python_total": 763,
+    "python_passed": 761,
+    "skipped": 2,
+    "skip_reason": "native Windows-only",
+    "ocr": "actual local rus+eng",
+    "node_total": 7,
+    "node_passed": 7,
+    "focused_python": 47,
+    "architecture_guard": "PASS",
+    "compile": "PASS",
+    "javascript_syntax": "PASS",
+    "diff_check": "PASS",
+    "http_dom_passed": 2,
+    "local_chromium": "NOT_RUN_BROWSER_BINARY_UNAVAILABLE"
+  },
+  "review": {
+    "remaining_critical": 0,
+    "remaining_important": 0,
+    "remaining_minor": 0,
+    "fixed": [
+      "100MiB capped source-review read",
+      "stale UI size wording"
+    ],
+    "independent_final_tests": 13,
+    "independent_node_tests": 7
+  },
+  "source_run": {
+    "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+    "source_bytes": 147210288,
+    "total_units": 14678,
+    "processed_units": 14678,
+    "failed_units": 0,
+    "blocked_units": 7022,
+    "truncated_units": 0,
+    "originals_unchanged": true,
+    "document_complete": false,
+    "acceptance_granted": false,
+    "parser_identity": {
+      "schema": 1,
+      "backend": "docx",
+      "python": "3.12.14",
+      "implementation": "c82ba26f84a1ca2c905463af9139b609a5922ae22ea79ab3424b5247e52bd6fe",
+      "limits": [
+        16777216,
+        33554432,
+        10000,
+        50000,
+        20000,
+        2000000,
+        536870912
+      ]
+    }
+  },
+  "candidate_before": "f2a58399384dacaff600714cc79e7b85ad3e03a9",
+  "candidate_after": "f83c4d5fbaac8e602757ca6fac1646b86589cdff",
+  "ci_status": "SUCCESS",
+  "initial_head_sha": "fd6f08ca51313bbf3db5415e6ba8191355da0a69",
+  "initial_tree_sha": "b05f085fa7110dc49feb3cd4822a2643c0432b98",
+  "initial_ci_failure": {
+    "job": 113789564020,
+    "scope": "Linux PR DriveDOM",
+    "failure": "stale bootstrap session list overwrote newly created conversation",
+    "python_total": 763,
+    "python_passed": 761,
+    "skipped": 2,
+    "fixed": true,
+    "deterministic_regressions": [
+      "out-of-order session list",
+      "late first-list bootstrap consumer"
+    ],
+    "rerun_without_fix": false
+  },
+  "previous_head_sha": "2be525c674037aa87e498fd2abf25dd8ad0709f4",
+  "windows_cleanup_failure": {
+    "head_sha": "2be525c674037aa87e498fd2abf25dd8ad0709f4",
+    "job": 113792014879,
+    "python_tests_passed": 23,
+    "real_qwen_inference": "PASS",
+    "chromium_routes_passed_before_cleanup": 2,
+    "failure": "EBUSY unlink app.lock in intake-fixture finally",
+    "identified_race": "Cleanup awaited exit rather than close; independently reproduced forced-shutdown branch resolved before close",
+    "fixed": "shared fixture stop waits for close, bounded deadline and bounded rm retries",
+    "deterministic_regression": "RED before child close, GREEN after close",
+    "real_windows_reverification": "PASS_ON_FINAL_HEAD",
+    "causal_limit": "Windows log does not establish the forced branch; EBUSY occurred shortly after PASS. Forced-branch premature cleanup separately reproduced in deterministic regression."
+  },
+  "candidate_tree": "2af4da649a69d4f60c7c51ffd7331af1ea6ccb80",
+  "merged_tree_matches_frozen": true,
+  "checks": [
+    {
+      "id": 113794550757,
+      "name": "CodeQL",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/runs/113794550757"
+    },
+    {
+      "id": 113794350700,
+      "name": "windows-runtime",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746826/job/113794350700"
+    },
+    {
+      "id": 113794350174,
+      "name": "core-tests",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746642/job/113794350174"
+    },
+    {
+      "id": 113794349862,
+      "name": "repository-guard",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746695/job/113794349862"
+    },
+    {
+      "id": 113794345346,
+      "name": "Analyze (python)",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922743436/job/113794345346"
+    },
+    {
+      "id": 113794345312,
+      "name": "Analyze (actions)",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922743436/job/113794345312"
+    },
+    {
+      "id": 113794345106,
+      "name": "Analyze (javascript-typescript)",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922743436/job/113794345106"
+    },
+    {
+      "id": 113794337023,
+      "name": "core-tests",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922742648/job/113794337023"
+    },
+    {
+      "id": 113794336960,
+      "name": "repository-guard",
+      "status": "completed",
+      "conclusion": "success",
+      "details_url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922742663/job/113794336960"
+    }
+  ],
+  "runs": [
+    {
+      "id": 37922746695,
+      "name": "Repository Security Guard",
+      "event": "pull_request",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746695"
+    },
+    {
+      "id": 37922746826,
+      "name": "Windows local runtime",
+      "event": "pull_request",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746826"
+    },
+    {
+      "id": 37922746642,
+      "name": "ENGINEER OS Core Tests",
+      "event": "pull_request",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922746642"
+    },
+    {
+      "id": 37922742648,
+      "name": "ENGINEER OS Core Tests",
+      "event": "push",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922742648"
+    },
+    {
+      "id": 37922743436,
+      "name": "PR #97",
+      "event": "dynamic",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922743436"
+    },
+    {
+      "id": 37922742663,
+      "name": "Repository Security Guard",
+      "event": "push",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37922742663"
+    }
+  ],
+  "log_receipts": [
+    {
+      "job_id": 113794350700,
+      "lines": [
+        "2026-10-09T11:17:54.4919705Z \u001b[36;1mif ($LASTEXITCODE -ne 0) { throw 'Cache-repair precondition failed' }\u001b[0m",
+        "2026-10-09T11:18:20.0765582Z \u001b[36;1mif ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }\u001b[0m",
+        "2026-10-09T11:18:27.3151899Z Ran 23 tests in 6.721s",
+        "2026-10-09T11:18:57.5530175Z {\"result\":\"PASS\",\"real_ollama\":true,\"synthetic_model\":false,\"model\":\"qwen3:0.6b\",\"checks\":[\"actual-model-list\",\"missing-model-ui\",\"saved-live-settings\",\"real-inference-through-ui\",\"separate-diagnostic-history\",\"persisted-answer\",\"attachment-through-real-model\",\"source-coverage\",\"no-engineering-acceptance\"],\"response_chars\":15}",
+        "2026-10-09T11:19:11.1309718Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+        "2026-10-09T11:19:12.5718693Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+        "2026-10-09T11:19:20.2224053Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+        "2026-10-09T11:19:22.0832806Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+      ]
+    },
+    {
+      "job_id": 113794350174,
+      "lines": [
+        "2026-10-09T11:16:57.7884116Z # tests 7",
+        "2026-10-09T11:16:57.8572936Z ARCHITECTURE_GUARD=PASS",
+        "2026-10-09T11:17:37.9045039Z Ran 9 tests in 0.606s",
+        "2026-10-09T11:19:11.3409643Z Ran 763 tests in 91.928s",
+        "2026-10-09T11:19:11.3409888Z OK (skipped=2)",
+        "2026-10-09T11:19:33.2579010Z {\"result\":\"PASS\",\"dom_emulation\":true,\"browser_visual_check\":false,\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"background-worker\",\"upload-action\",\"source-context\",\"chat\",\"inert-markup\",\"history-reload\",\"session-switch\",\"core-plan-no-model\",\"core-plan-reload\",\"evidence-register\",\"inert-evidence\",\"evidence-reload\",\"evidence-draft-isolation\",\"source-preview\",\"preview-isolation\",\"source-review\",\"review-draft-poll\",\"review-isolation\",\"core-run-three-roles\",\"core-run-inert-output\",\"core-run-history-reload\",\"drive-unconfigured\",\"no-fabricated-import\",\"file-extraction-coverage\",\"pdf-page-coverage\",\"automatic-pdf-analysis\",\"advanced-document-actions\",\"analysis-receipts\"],\"requests\":12}",
+        "2026-10-09T11:19:34.4217046Z {\"result\":\"PASS\",\"dom_emulation\":true,\"live_google\":false,\"oauth_verified\":false,\"browser_visual_check\":false,\"checks\":[\"configured-not-connected\",\"import-submit\",\"selected-original\",\"provenance-reload\",\"no-secret\",\"conversation-isolation\",\"draft-isolation\",\"failed-checksum-no-file\"]}",
+        "2026-10-09T11:19:52.2071833Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+        "2026-10-09T11:19:53.6105337Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+        "2026-10-09T11:20:04.7860360Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+        "2026-10-09T11:20:08.4343404Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+      ]
+    },
+    {
+      "job_id": 113794337023,
+      "lines": [
+        "2026-10-09T11:16:53.7769688Z # tests 7",
+        "2026-10-09T11:16:53.8453025Z ARCHITECTURE_GUARD=PASS",
+        "2026-10-09T11:17:33.1323444Z Ran 9 tests in 0.678s",
+        "2026-10-09T11:19:04.1422658Z Ran 763 tests in 89.857s",
+        "2026-10-09T11:19:04.1432802Z OK (skipped=2)",
+        "2026-10-09T11:19:25.8251071Z {\"result\":\"PASS\",\"dom_emulation\":true,\"browser_visual_check\":false,\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"background-worker\",\"upload-action\",\"source-context\",\"chat\",\"inert-markup\",\"history-reload\",\"session-switch\",\"core-plan-no-model\",\"core-plan-reload\",\"evidence-register\",\"inert-evidence\",\"evidence-reload\",\"evidence-draft-isolation\",\"source-preview\",\"preview-isolation\",\"source-review\",\"review-draft-poll\",\"review-isolation\",\"core-run-three-roles\",\"core-run-inert-output\",\"core-run-history-reload\",\"drive-unconfigured\",\"no-fabricated-import\",\"file-extraction-coverage\",\"pdf-page-coverage\",\"automatic-pdf-analysis\",\"advanced-document-actions\",\"analysis-receipts\"],\"requests\":12}",
+        "2026-10-09T11:19:26.9816315Z {\"result\":\"PASS\",\"dom_emulation\":true,\"live_google\":false,\"oauth_verified\":false,\"browser_visual_check\":false,\"checks\":[\"configured-not-connected\",\"import-submit\",\"selected-original\",\"provenance-reload\",\"no-secret\",\"conversation-isolation\",\"draft-isolation\",\"failed-checksum-no-file\"]}",
+        "2026-10-09T11:19:44.6797967Z {\"result\":\"PASS\",\"synthetic_model\":true,\"real_ollama\":false,\"checks\":[\"launcher\",\"worker\",\"upload\",\"source-context\",\"chat\",\"inert-model-markup\",\"history-reload\",\"session-switch\",\"mobile-layout\",\"model-settings-ui\",\"isolated-diagnostic-ui\",\"running-cancel-ui\",\"late-answer-refusal\",\"retry-new-task-ui\",\"archive-navigation\",\"recovery-browser\",\"busy-owner-refusal\",\"backup-verify-restore\",\"no-replace\",\"original-bytes\",\"activate-directory\",\"restored-launch-history\"],\"requests\":7}",
+        "2026-10-09T11:19:45.9898544Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"original-page-preview-without-candidate\",\"visible-viewer\",\"local-ocr-action\",\"lir-intake-no-decoder-claim\",\"reload-originals\"],\"engineering_acceptance\":false}",
+        "2026-10-09T11:19:55.3909459Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"blocked-draft\",\"edit-preserved-during-refresh\",\"version-history\",\"reload\",\"draft-template\",\"source-bound-illustration\",\"docx-pdf-download\",\"no-acceptance\"]}",
+        "2026-10-09T11:19:58.9450139Z {\"result\":\"PASS\",\"real_chromium\":true,\"checks\":[\"cad-inventory\",\"annotation-only-download\",\"project-switch-isolation\",\"source-preserved\",\"knowledge-without-acceptance-disabled\",\"mandatory-reverification\"]}"
+      ]
+    }
+  ],
+  "physical_windows_verified": false,
+  "acceptance_granted": false
+}

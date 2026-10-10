@@ -1,0 +1,696 @@
+{
+  "scope": "Literal XML/INI/log cross-check; no qualified result acceptance",
+  "ald_models": [
+    {
+      "file": "Секция 3  грунт (1).ald",
+      "bytes": 4353738,
+      "sha256": "de72c6b26291a5ca29d6dd25baa12156950d3d61711c5509d4fb26348dca3bd8",
+      "txt_sha256": "9681a38303d5bc7f0a78904d5aeed80f41810168c67b2d4ac1bd5b9e57c7d926",
+      "root_attributes": {
+        "Title": "Секция 3  грунт (1)",
+        "Code": "Секция 3  грунт (1)",
+        "Description": ""
+      },
+      "tag_counts": {
+        "LIRA_Project": 1,
+        "RigidArray": 1,
+        "Rigid": 19,
+        "CoordAxesArray": 1,
+        "CoordAxis": 14,
+        "CoordLevelsArray": 1,
+        "CoordLevel": 6,
+        "RsuCodeData": 1,
+        "ElemBlockArray": 1,
+        "ElemBlock": 94750,
+        "DynTableArray": 1,
+        "DynTableLine": 3
+      },
+      "axis_names": [
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "Б",
+        "Б/1",
+        "В",
+        "Г",
+        "Д",
+        "Е",
+        "Ж",
+        "И"
+      ],
+      "element_block_ids_unique": true,
+      "element_block_ids_out_of_txt_range": [],
+      "element_ordinals_without_block_count": 25,
+      "dynamic_params_equal_txt_doc15_numeric": true,
+      "rigid_comments": [
+        {
+          "Num": "1",
+          "Ro": "2.5",
+          "Colour": "14703673",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "2",
+          "Ro": "2.5",
+          "Colour": "2569057",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "3",
+          "Ro": "2.5",
+          "Colour": "6392901",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "4",
+          "Ro": "2.5",
+          "Colour": "7117651",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "5",
+          "Ro": "2.5",
+          "Colour": "6120919",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "6",
+          "Ro": "2.5",
+          "Colour": "12575993",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "7",
+          "Ro": "2.5",
+          "Colour": "4525870",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "8",
+          "Ro": "2.5",
+          "Colour": "2874256",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "9",
+          "Ro": "2.5",
+          "Colour": "2947032",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "10",
+          "Ro": "2.5",
+          "Colour": "10805165",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "11",
+          "Ro": "2.5",
+          "Colour": "4842826",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "12",
+          "Ro": "2.5",
+          "Colour": "10566215",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "13",
+          "Ro": "2.5",
+          "Colour": "5549145",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "14",
+          "Ro": "2.5",
+          "Colour": "8672553",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "15",
+          "Ro": "2.5",
+          "Colour": "3129881",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "16",
+          "Ro": "2.5",
+          "Colour": "8362675",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "17",
+          "Ro": "2.5",
+          "Colour": "9674029",
+          "Comment": "Железобетон ф плит"
+        },
+        {
+          "Num": "18",
+          "Ro": "2.5",
+          "Colour": "16777214",
+          "Comment": "Свая"
+        },
+        {
+          "Num": "19",
+          "Ro": "2.5",
+          "Colour": "9649380",
+          "Comment": "Железобетон плит"
+        }
+      ],
+      "cop": {
+        "file": "Секция 3  грунт (1).cop",
+        "sha256": "2cf34a4d2621b03e6a788ff82b95f97e4be01d8a14a8b986551d95e333df73e5",
+        "declared_identity": "topmost FE57 ordinal for one pile; capacity tf, per literal file comment",
+        "sections": [
+          {
+            "name": "Capacity of piles",
+            "count": 61,
+            "min": 196.245,
+            "max": 252.838,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles in uplift",
+            "count": 61,
+            "min": 59.5723,
+            "max": 73.3644,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles no seismic",
+            "count": 61,
+            "min": 262.399,
+            "max": 324.76,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles in uplift no seismic",
+            "count": 61,
+            "min": 80.0212,
+            "max": 98.0077,
+            "finite_positive": true
+          }
+        ],
+        "same_pile_ids_all_sections": true,
+        "all_ids_target_txt_type57": true,
+        "cop_ids_equal_all_zero57_elements": false,
+        "pile_head_record_examples": [
+          {
+            "element": 88798,
+            "stiffness_id": 20,
+            "tokens": [
+              "0.000E+000",
+              "0.000E+000",
+              "7.084E+002",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000"
+            ]
+          },
+          {
+            "element": 88895,
+            "stiffness_id": 69,
+            "tokens": [
+              "0.000E+000",
+              "0.000E+000",
+              "1.461E+003",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "file": "секция 1 сейсм 16 08 2026 (1).ald",
+      "bytes": 5838585,
+      "sha256": "7ec1102a6446d3bbed3f75eb504fa3505bd1f75b895eb04286108e60289d9e9e",
+      "txt_sha256": "05c6f440f2ae240f29bba7eecc04c70044cf905ce9b11a0edba6ddd36396c38e",
+      "root_attributes": {
+        "Title": "секция 1 сейсм 16 08 2026 (1)",
+        "Code": "секция 1 сейсм 16 08 2026 (1)",
+        "Description": ""
+      },
+      "tag_counts": {
+        "LIRA_Project": 1,
+        "RigidArray": 1,
+        "Rigid": 17,
+        "CoordAxesArray": 1,
+        "CoordAxis": 14,
+        "CoordLevelsArray": 1,
+        "CoordLevel": 15,
+        "RsuCodeData": 1,
+        "ElemBlockArray": 1,
+        "ElemBlock": 127201,
+        "DynTableArray": 1,
+        "DynTableLine": 4
+      },
+      "axis_names": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "А/1",
+        "А",
+        "Б",
+        "Б/1",
+        "В",
+        "Г",
+        "Д",
+        "Е",
+        "Ж"
+      ],
+      "element_block_ids_unique": true,
+      "element_block_ids_out_of_txt_range": [],
+      "element_ordinals_without_block_count": 575,
+      "dynamic_params_equal_txt_doc15_numeric": true,
+      "rigid_comments": [
+        {
+          "Num": "1",
+          "Ro": "2.5",
+          "Colour": "13316760",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "2",
+          "Ro": "2.5",
+          "Colour": "12227674",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "3",
+          "Ro": "2.5",
+          "Colour": "8223428",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "4",
+          "Ro": "2.5",
+          "Colour": "2765843",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "5",
+          "Ro": "2.5",
+          "Colour": "10579103",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "6",
+          "Ro": "2.5",
+          "Colour": "16545725",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "7",
+          "Ro": "2.5",
+          "Colour": "14113534",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "8",
+          "Ro": "2.5",
+          "Colour": "8041463",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "9",
+          "Ro": "2.5",
+          "Colour": "1818108",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "10",
+          "Ro": "2.5",
+          "Colour": "4875157",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "11",
+          "Ro": "2.5",
+          "Colour": "2924856",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "12",
+          "Ro": "2.5",
+          "Colour": "14410400",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "13",
+          "Ro": "2.5",
+          "Colour": "7817304",
+          "Comment": "Железобетон лестниц"
+        },
+        {
+          "Num": "14",
+          "Ro": "2.5",
+          "Colour": "15339542",
+          "Comment": "Железобетон ростверк"
+        },
+        {
+          "Num": "15",
+          "Ro": "2.5",
+          "Colour": "16777214",
+          "Comment": "Свая"
+        },
+        {
+          "Num": "16",
+          "Ro": "2.5",
+          "Colour": "10541336",
+          "Comment": "Железобетон колонн"
+        },
+        {
+          "Num": "17",
+          "Ro": "2.5",
+          "Colour": "5106995",
+          "Comment": "Железобетон колонн В20"
+        }
+      ]
+    },
+    {
+      "file": "секция 2 прогибы.ald",
+      "bytes": 1994638,
+      "sha256": "f6b70421df7feb89a8f484a89b89a1eeb9ef736d9e8722bbc7d14cb82576613f",
+      "txt_sha256": "880410cbb166561fa2867f626084b62a7b926cb3daba561180d9338465307c34",
+      "root_attributes": {
+        "Title": "секция 2 прогибы",
+        "Code": "секция 2 прогибы",
+        "Description": ""
+      },
+      "tag_counts": {
+        "LIRA_Project": 1,
+        "RigidArray": 1,
+        "Rigid": 22,
+        "CoordAxesArray": 1,
+        "CoordAxis": 15,
+        "CoordLevelsArray": 1,
+        "CoordLevel": 20,
+        "RsuCodeData": 1,
+        "ElemBlockArray": 1,
+        "ElemBlock": 44086,
+        "DynTableArray": 1,
+        "DynTableLine": 2
+      },
+      "axis_names": [
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "А/1",
+        "А",
+        "Б",
+        "Б/1",
+        "В",
+        "Г",
+        "Д",
+        "Е",
+        "Ж"
+      ],
+      "element_block_ids_unique": true,
+      "element_block_ids_out_of_txt_range": [],
+      "element_ordinals_without_block_count": 0,
+      "dynamic_params_equal_txt_doc15_numeric": true,
+      "rigid_comments": [
+        {
+          "Num": "1",
+          "Ro": "2.5",
+          "Colour": "16515065",
+          "Comment": "Железобетон ф плит"
+        },
+        {
+          "Num": "2",
+          "Ro": "2.5",
+          "Colour": "15056467",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "3",
+          "Ro": "2.5",
+          "Colour": "9266830",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "4",
+          "Ro": "2.5",
+          "Colour": "16726008",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "5",
+          "Ro": "2.5",
+          "Colour": "9180644",
+          "Comment": "h=3.8м Железобетон колонн"
+        },
+        {
+          "Num": "6",
+          "Ro": "2.5",
+          "Colour": "6411948",
+          "Comment": "h=2.95м парковка Железобетон колонн"
+        },
+        {
+          "Num": "7",
+          "Ro": "2.5",
+          "Colour": "3667817",
+          "Comment": "h=3.8м Железобетон колонн"
+        },
+        {
+          "Num": "8",
+          "Ro": "2.5",
+          "Colour": "2402778",
+          "Comment": "h=2.95м парковка Железобетон колонн"
+        },
+        {
+          "Num": "9",
+          "Ro": "2.5",
+          "Colour": "1689113",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "10",
+          "Ro": "2.5",
+          "Colour": "15480274",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "11",
+          "Ro": "2.5",
+          "Colour": "8291432",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "12",
+          "Ro": "2.5",
+          "Colour": "11153888",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "13",
+          "Ro": "2.5",
+          "Colour": "8548901",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "14",
+          "Ro": "2.5",
+          "Colour": "11912328",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "15",
+          "Ro": "2.5",
+          "Colour": "13547889",
+          "Comment": "Железобетон балок"
+        },
+        {
+          "Num": "16",
+          "Ro": "2.5",
+          "Colour": "9808054",
+          "Comment": "h=5.2м 1эт Железобетон колонн"
+        },
+        {
+          "Num": "17",
+          "Ro": "2.5",
+          "Colour": "15321687",
+          "Comment": "h=5.2м 1эт Железобетон колонн"
+        },
+        {
+          "Num": "18",
+          "Ro": "2.5",
+          "Colour": "9902494",
+          "Comment": "Железобетон стен"
+        },
+        {
+          "Num": "19",
+          "Ro": "2.5",
+          "Colour": "1855794",
+          "Comment": "Железобетон плит"
+        },
+        {
+          "Num": "20",
+          "Ro": "2.5",
+          "Colour": "12162610",
+          "Comment": "h=4м типовой Железобетон колонн"
+        },
+        {
+          "Num": "21",
+          "Ro": "2.5",
+          "Colour": "3634147",
+          "Comment": "h=4м типовой Железобетон колонн"
+        },
+        {
+          "Num": "22",
+          "Ro": "2.5",
+          "Colour": "16777214",
+          "Comment": "Свая"
+        }
+      ],
+      "cop": {
+        "file": "секция 2 прогибы.cop",
+        "sha256": "cf7dac7459a62b08e426d0c5f49670dcb0aa784d136d0fa55bef40426dc02e9d",
+        "declared_identity": "topmost FE57 ordinal for one pile; capacity tf, per literal file comment",
+        "sections": [
+          {
+            "name": "Capacity of piles",
+            "count": 65,
+            "min": 212.221,
+            "max": 255.051,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles in uplift",
+            "count": 65,
+            "min": 65.944,
+            "max": 81.8159,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles no seismic",
+            "count": 65,
+            "min": 397.015,
+            "max": 975.541,
+            "finite_positive": true
+          },
+          {
+            "name": "Capacity of piles in uplift no seismic",
+            "count": 65,
+            "min": 78.018,
+            "max": 96.8678,
+            "finite_positive": true
+          }
+        ],
+        "same_pile_ids_all_sections": true,
+        "all_ids_target_txt_type57": true,
+        "cop_ids_equal_all_zero57_elements": true,
+        "pile_head_record_examples": [
+          {
+            "element": 37497,
+            "stiffness_id": 23,
+            "tokens": [
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000"
+            ]
+          },
+          {
+            "element": 37598,
+            "stiffness_id": 74,
+            "tokens": [
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000",
+              "0.000E+000"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "solver_logs": [
+    {
+      "file": "секция 1 сейсм 16 08 2026 (1)_01.секция 1 сейсм 16 08 2026 (1)",
+      "bytes": 4264,
+      "sha256": "0b583256e7f62b05977ee91ef65627aaf22803720be313e50c962d91867ae45d",
+      "date": "09.10.2026",
+      "solver_version": "2024.2.3.0",
+      "node_count": 119779,
+      "element_count": 127776,
+      "status": "INTERRUPTED_BY_USER",
+      "last_nonempty_line": "Расчет прерван пользователем",
+      "interruption_line": 39,
+      "input_path": "C:\\Users\\Public\\Documents\\LIRA SAPR\\LIRA SAPR 2024\\Data\\секция 1 сейсм 16 08 2026 (1).txt",
+      "input_sha_in_log": false
+    },
+    {
+      "file": "секция 1 сейсм 16 08 2026 (1)_01c.секция 1 сейсм 16 08 2026 (1)",
+      "bytes": 4264,
+      "sha256": "0b583256e7f62b05977ee91ef65627aaf22803720be313e50c962d91867ae45d",
+      "date": "09.10.2026",
+      "solver_version": "2024.2.3.0",
+      "node_count": 119779,
+      "element_count": 127776,
+      "status": "INTERRUPTED_BY_USER",
+      "last_nonempty_line": "Расчет прерван пользователем",
+      "interruption_line": 39,
+      "input_path": "C:\\Users\\Public\\Documents\\LIRA SAPR\\LIRA SAPR 2024\\Data\\секция 1 сейсм 16 08 2026 (1).txt",
+      "input_sha_in_log": false
+    }
+  ],
+  "duplicate_logs_by_sha": true,
+  "agent_solver_execution": "NOT_RUN",
+  "user_solver_attempt": "INTERRUPTED_BY_USER",
+  "successful_solver_run": "NOT_CONFIRMED",
+  "acceptance": false,
+  "file_inventory": [
+    {
+      "filename": "Секция 3  грунт (1).ald",
+      "bytes": 4353738,
+      "sha256": "de72c6b26291a5ca29d6dd25baa12156950d3d61711c5509d4fb26348dca3bd8"
+    },
+    {
+      "filename": "Секция 3  грунт (1).cop",
+      "bytes": 4088,
+      "sha256": "2cf34a4d2621b03e6a788ff82b95f97e4be01d8a14a8b986551d95e333df73e5"
+    },
+    {
+      "filename": "секция 1 сейсм 16 08 2026 (1).ald",
+      "bytes": 5838585,
+      "sha256": "7ec1102a6446d3bbed3f75eb504fa3505bd1f75b895eb04286108e60289d9e9e"
+    },
+    {
+      "filename": "секция 1 сейсм 16 08 2026 (1)_01.секция 1 сейсм 16 08 2026 (1)",
+      "bytes": 4264,
+      "sha256": "0b583256e7f62b05977ee91ef65627aaf22803720be313e50c962d91867ae45d"
+    },
+    {
+      "filename": "секция 1 сейсм 16 08 2026 (1)_01c.секция 1 сейсм 16 08 2026 (1)",
+      "bytes": 4264,
+      "sha256": "0b583256e7f62b05977ee91ef65627aaf22803720be313e50c962d91867ae45d"
+    },
+    {
+      "filename": "секция 2 прогибы.ald",
+      "bytes": 1994638,
+      "sha256": "f6b70421df7feb89a8f484a89b89a1eeb9ef736d9e8722bbc7d14cb82576613f"
+    },
+    {
+      "filename": "секция 2 прогибы.cop",
+      "bytes": 4335,
+      "sha256": "cf7dac7459a62b08e426d0c5f49670dcb0aa784d136d0fa55bef40426dc02e9d"
+    }
+  ]
+}
+
