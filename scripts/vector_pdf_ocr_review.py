@@ -35,7 +35,7 @@ def collect(source, pages, dpi=90, min_confidence=35, languages='Cyrillic+eng'):
                 raise ValueError('Rendered page exceeds OCR pixel budget')
             image=Image.open(io.BytesIO(pix.tobytes('png')))
             data=pytesseract.image_to_data(image,lang=languages,config='--psm 11',
-                                           output_type=pytesseract.Output.DICT)
+                                           output_type=pytesseract.Output.DICT,timeout=45)
             items=[]
             for idx,raw in enumerate(data['text']):
                 value=(raw or '').strip()
