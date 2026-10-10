@@ -209,6 +209,21 @@ def word_container_units(body,part,package=None):
                         if nested_text:
                             text+='\n[NESTED_TABLE_TEXT_UNVERIFIED]\n'+nested_text
                     locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
+                    if nested:
+                        # Record exact XML cell ordinals and content identity; do not
+                        # equate those ordinals with rendered grid positions.
+                        inventory=[]
+                        for nested_index,nested_table in enumerate(nested,1):
+                            for nested_row_index,nested_row in enumerate(nested_table.findall(W+'tr'),1):
+                                for nested_column_index,nested_cell in enumerate(nested_row.findall(W+'tc'),1):
+                                    if len(inventory)>=256:
+                                        warnings.append('NESTED_CELL_INVENTORY_TRUNCATED')
+                                        break
+                                    native='\n'.join(word_text(p) for p in nested_cell.findall(W+'p'))
+                                    inventory.append(dict(table_ordinal=nested_index,row=nested_row_index,column=nested_column_index,
+                                                          text_sha256=hashlib.sha256(native.encode()).hexdigest(),text_chars=len(native),
+                                                          scope='XML_CELL_ORDINAL_ONLY',layout_verified=False))
+                        locator['nested_cell_inventory']=inventory
                     properties=cell.find(W+'tcPr');merge={}
                     if properties is not None:
                         for name in ('gridSpan','vMerge','hMerge'):
