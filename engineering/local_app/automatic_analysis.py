@@ -136,16 +136,19 @@ class DocumentModel:
     def __init__(self,store,job,model,stop,prepared):
         self.store=store;self.job=job;self.model=model;self.stop=stop;self.prepared=prepared
         self.pdf_ids=prepared['pdf_ids'];self.report=prepared['report']
+        # This job owns the only running worker slot. Old RUNNING receipts are
+        # interrupted attempts, never valid cached responses on resume.
+        store.reconcile_interrupted_analysis_receipts(job['id'])
         self.receipts=[];offset=0
         while True:
             window=store.analysis_receipts(job['session_id'],job['id'],offset=offset)
             self.receipts.extend(window['records']);offset+=len(window['records'])
             if not window['has_more']:break
         self.attempts=sum(r.get('attempted',False) for r in self.receipts)
-        self.elapsed=sum(180 if r['status']=='RUNNING' else r.get('elapsed_seconds',0) for r in self.receipts)
+        self.elapsed=sum(180 if r['status'] in {'RUNNING','INTERRUPTED'} else r.get('elapsed_seconds',0) for r in self.receipts)
         self.report.update(model_calls=self.attempts,model_elapsed_seconds=self.elapsed,
-                           interrupted_calls=sum(r['status']=='RUNNING' for r in self.receipts),
-                           model_elapsed_estimated=any(r['status']=='RUNNING' for r in self.receipts))
+                           interrupted_calls=sum(r['status'] in {'RUNNING','INTERRUPTED'} for r in self.receipts),
+                           model_elapsed_estimated=any(r['status'] in {'RUNNING','INTERRUPTED'} for r in self.receipts))
 
     def chat(self,messages):
         from .core_run import parse_draft
