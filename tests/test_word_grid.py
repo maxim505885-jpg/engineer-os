@@ -32,6 +32,20 @@ class WordGridTests(unittest.TestCase):
         self.assertEqual(units[0]['text'].count('Unique deep text'),1)
         self.assertIn('NESTED_TABLE_UNVERIFIED',units[0]['limitations'])
 
+    def test_nested_cell_inventory_keeps_exact_xml_ordinals_and_hashes(self):
+        import hashlib
+        inner=table('<w:tr>'+cell('First')+cell('Second')+'</w:tr>',2)
+        outer='<w:tbl><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:tc>'+inner+'</w:tc></w:tr></w:tbl>'
+        units=self.cells(outer)
+        self.assertEqual(len(units),1)
+        inventory=units[0]['locator']['nested_cell_inventory']
+        self.assertEqual([(x['table_ordinal'],x['row'],x['column']) for x in inventory],
+                         [(1,1,1),(1,1,2)])
+        self.assertEqual(inventory[1]['text_sha256'],hashlib.sha256(b'Second').hexdigest())
+        self.assertEqual(inventory[0]['scope'],'XML_CELL_ORDINAL_ONLY')
+        self.assertFalse(inventory[0]['layout_verified'])
+        self.assertIn('NESTED_TABLE_UNVERIFIED',units[0]['limitations'])
+
     def test_vertical_continuations_keep_original_text_and_exact_anchor(self):
         span='<w:gridSpan w:val="2"/>'
         rows='<w:tr>'+cell('A',span+'<w:vMerge w:val="restart"/>')+cell('B')+'</w:tr>'
