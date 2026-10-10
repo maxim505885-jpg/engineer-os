@@ -1,0 +1,228 @@
+{
+  "date": "2026-10-06",
+  "scope": "LIMITED_RUNTIME_QA_NOT_ENGINEERING_ACCEPTANCE",
+  "source_parent_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "versions": {
+    "python": "3.12.14",
+    "docling": "2.134.0",
+    "rapidocr": "3.9.2",
+    "onnxruntime": "1.30.0",
+    "torch": "2.14.1+cpu",
+    "ollama": "0.35.1"
+  },
+  "model_weights": {
+    "repository": "Qwen/Qwen3-8B-GGUF",
+    "revision": "7c41481f57cb95916b40956ab2f0b139b296d974",
+    "file": "Qwen3-8B-Q4_K_M.gguf",
+    "sha256": "d98cdcbd03e17ce47681435b5150e34c1417f50b5c0019dd560e4882c5745785"
+  },
+  "model_profile": {
+    "alias": "engineer-qwen3-8b-q4km:stage2",
+    "num_ctx": 8192,
+    "num_predict": 1024,
+    "num_thread": 4,
+    "temperature": 0
+  },
+  "ocr": [
+    {
+      "name": "controlled-native.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 25.05,
+      "source_sha256": "b926411882b01571408f9041f390138e42ec1eeb055a7e1fb805f3d17a0e244a",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 3,
+      "text_chars": 106,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "controlled-scan.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 11.18,
+      "source_sha256": "630646230a2e0abf261e69583fcdb8deb36f4765fb993e7011b603dbcc7746a2",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 4,
+      "text_chars": 100,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "controlled-table-native.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 7.62,
+      "source_sha256": "1a1624a119d5bdf993484d30057ea31bf6a9bd393fd069d3be2e981e449d93ce",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 4,
+      "text_chars": 147,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "controlled-table-scan.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 10.92,
+      "source_sha256": "02819cb6e10186bbc89864ea6ef029fafd64d4e89d4afa5bc130400bc27fb238",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 4,
+      "text_chars": 147,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "v4-page-0001.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 20.3,
+      "source_sha256": "be1f289d8330c3c0192c0b3447965e5a045a4f21652335e2d3a5178b011e8c37",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 18,
+      "text_chars": 888,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "v4-page-0001-raster.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 25.91,
+      "source_sha256": "b09200b2383e4c478ea65c679d953a128f6f19d8047ff06cce41ce2a8e2ae0c2",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 8,
+      "text_chars": 813,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "v4-page-0015.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 14.51,
+      "source_sha256": "32eac4d53b5da9cca6a13918f252efb9f6f71ff09d1b49527193fdfbfd49a1db",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "UNCERTAINTY",
+      "limitations": [],
+      "block_count": 25,
+      "text_chars": 1512,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    },
+    {
+      "name": "v4-page-0500.pdf",
+      "state": "SUCCEEDED",
+      "seconds": 116.26,
+      "source_sha256": "4910ff4819f215edad3100f163a645e95dc9936dbc61b4a553cd7f1508ca71e5",
+      "error": null,
+      "acceptance_granted": false,
+      "status": "BLOCK",
+      "limitations": [
+        "PARSE_FAILED: извлечение страницы недоступно; проверьте parser/OCR/таблицы."
+      ],
+      "block_count": 0,
+      "text_chars": 0,
+      "ocr": "REQUESTED_NOT_VERIFIED"
+    }
+  ],
+  "model": [
+    {
+      "name": "controlled-native.pdf",
+      "backend": "native",
+      "mode": "CHAT",
+      "seconds": 132.18,
+      "queue_state": "SUCCEEDED",
+      "error": null,
+      "core_status": null,
+      "roles": [],
+      "analysis_stage": "COMPLETED",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN"
+    },
+    {
+      "name": "controlled-native.pdf",
+      "backend": "native",
+      "mode": "CORE_RUN",
+      "seconds": 360.34,
+      "queue_state": "SUCCEEDED",
+      "error": null,
+      "core_status": "ERROR",
+      "roles": [
+        {
+          "agent": "report-audit-agent",
+          "execution": "FAILED",
+          "status": "ERROR"
+        },
+        {
+          "agent": "final-audit-agent",
+          "execution": "FAILED",
+          "status": "ERROR"
+        }
+      ],
+      "analysis_stage": "PARTIAL",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN"
+    },
+    {
+      "name": "controlled-table-native.pdf",
+      "backend": "native",
+      "mode": "CHAT",
+      "seconds": 119.82,
+      "queue_state": "SUCCEEDED",
+      "error": null,
+      "core_status": null,
+      "roles": [],
+      "analysis_stage": "COMPLETED",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN"
+    },
+    {
+      "name": "controlled-scan.pdf",
+      "backend": "docling",
+      "mode": "CHAT",
+      "seconds": 152.44,
+      "queue_state": "SUCCEEDED",
+      "error": null,
+      "core_status": null,
+      "roles": [],
+      "analysis_stage": "COMPLETED",
+      "acceptance_granted": false,
+      "final_audit": "NOT_RUN"
+    },
+    {
+      "name": "controlled-table-scan.pdf",
+      "backend": "docling",
+      "mode": "CHAT",
+      "seconds": 190.58,
+      "queue_state": "FAILED",
+      "error": "Local task failed. Check model availability and attachment extraction; submit again to retry.",
+      "core_status": null,
+      "roles": [],
+      "analysis_stage": "PARTIAL",
+      "acceptance_granted": false,
+      "final_audit": null
+    },
+    {
+      "name": "v4-page-0015.pdf",
+      "backend": "docling",
+      "mode": "CHAT",
+      "seconds": 198.45,
+      "queue_state": "FAILED",
+      "error": "Local task failed. Check model availability and attachment extraction; submit again to retry.",
+      "core_status": null,
+      "roles": [],
+      "analysis_stage": "PARTIAL",
+      "acceptance_granted": false,
+      "final_audit": null
+    }
+  ],
+  "full_document_verified": false,
+  "acceptance_granted": false,
+  "windows": "NOT_RUN"
+}

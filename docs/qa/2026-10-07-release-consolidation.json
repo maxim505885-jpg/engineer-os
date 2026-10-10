@@ -1,0 +1,241 @@
+{
+  "stage9_head": "87fccbafbf6a944443e2f503acddf48f33e3b17e",
+  "main_included": "a2a7b2d974b9ba1b186ef6bd4a97cd2a9d61a077",
+  "pull_requests": [
+    {
+      "number": 68,
+      "sha": "b5a2ed9af02ea087aaf45214666ae96c2c9f45c4",
+      "branch": "chore/repository-hardening-20261007",
+      "equivalent_stage9_tree": "3b46cdedcbd40477cfd12d43a268f288da4c2dc2",
+      "local_candidate_ancestor": false
+    },
+    {
+      "number": 67,
+      "sha": "87fccbafbf6a944443e2f503acddf48f33e3b17e",
+      "branch": "feat/windows-one-click-stage9-20261007",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 66,
+      "sha": "ea8f8cb03fccd8f612a242e6ce5e9d944a7ea52a",
+      "branch": "feat/final-audit-stage8-20261007",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 65,
+      "sha": "73725b5026975018df84a18b46b20621a59061c9",
+      "branch": "feat/real-engineering-case-stage7-20261007",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 64,
+      "sha": "2b098f1ab56d9afa5d0416e9d090393a1ac00571",
+      "branch": "feat/point6-completion-gates-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 63,
+      "sha": "e8ebeb750169dea16b23dd8ce95cf4e4764d5fe1",
+      "branch": "feat/lira-scad-bridge-stage6e-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 62,
+      "sha": "eaf4e830f6fbe3a167515773f075284c649bd275",
+      "branch": "feat/solver-input-route-stage6d-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 61,
+      "sha": "d6c79fcb851d40c1d8028a905cce9d32a0df2851",
+      "branch": "feat/domain-semantics-stage6c-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 60,
+      "sha": "01c4f321596a92f05078ead08e4d3774c841fd7e",
+      "branch": "chore/ui-qa-playwright-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 59,
+      "sha": "19a31cfb7d1a032b1bf922cfa1b4c1245281c950",
+      "branch": "feat/domain-packets-stage6b-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 58,
+      "sha": "f006d1efea7072eaa1ffc60a716edd4c49378869",
+      "branch": "feat/specialist-checks-stage6-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 57,
+      "sha": "386cde2e49a8104e2bd3d96a204e680e2a8649c5",
+      "branch": "feat/evidence-tz-stage5-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 56,
+      "sha": "ec52dd3f553a1f6e7c31d340eb80469ec27bf0b7",
+      "branch": "feat/office-documents-stage4-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 55,
+      "sha": "1bab99e7e624901e1b64e685c4a478849825d158",
+      "branch": "fix/document-resume-stage3-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 54,
+      "sha": "d49430f5ae82195911bb61746456ae283fabc2e1",
+      "branch": "fix/document-quality-stage2-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 53,
+      "sha": "1fe8ce024021e784519b7599a196fe77f1edcf70",
+      "branch": "fix/core-cpu-profile-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 52,
+      "sha": "901582da1c9617a1a91063767ba324a1b6f5be14",
+      "branch": "fix/live-document-runtime-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 51,
+      "sha": "6de0af404dfe0b691a32fefc3a25ee74f46d1e06",
+      "branch": "integration/local-release-candidate-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 50,
+      "sha": "6de0af404dfe0b691a32fefc3a25ee74f46d1e06",
+      "branch": "fix/local-release-readiness-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 49,
+      "sha": "22641c3d3dead8f6619fbda2bff2f758705e46bd",
+      "branch": "feat/automatic-document-analysis-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 48,
+      "sha": "7a32219808124a2a0d8c64671052bebaf09c9b34",
+      "branch": "feat/local-document-extraction-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 47,
+      "sha": "f2d89996c7f73cfe1e0f899c1580d485e041f69d",
+      "branch": "feat/local-extraction-coverage-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 46,
+      "sha": "e582ffc2767655e59c750a086a2c25aeccf6b183",
+      "branch": "feat/local-drive-import-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 45,
+      "sha": "69af54d5e233471b2cbc5d3ac25fd2ef0ee22e54",
+      "branch": "feat/local-core-run-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 44,
+      "sha": "3f5ca603ac978f05b4bd6c6bf50bc34124187d87",
+      "branch": "fix/core-contract-integrity-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 43,
+      "sha": "dd3cb938c6175b7ad368139c9db103801eed1249",
+      "branch": "feat/local-source-review-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 42,
+      "sha": "47ede465869f80b01099e9cbb25ed9b256961811",
+      "branch": "feat/local-source-preview-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 41,
+      "sha": "e7ce9b225372c6a6faa7d7069158bfb33ec11324",
+      "branch": "feat/local-evidence-provenance-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 40,
+      "sha": "87bee311bacb88033df618308960f595663e7786",
+      "branch": "feat/local-evidence-register-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 39,
+      "sha": "a70ec31f77aa652f52c6b9a8d906ae010e37b4c1",
+      "branch": "feat/local-core-plan-20261006",
+      "local_candidate_ancestor": true
+    },
+    {
+      "number": 38,
+      "sha": "98398cda2194fe66582ef6eb8d8516d4879a39de",
+      "branch": "feat/local-app-mvp-20261005",
+      "local_candidate_ancestor": true
+    }
+  ],
+  "checks": {
+    "python": 480,
+    "node": 4,
+    "http_dom": "PASS",
+    "chromium": "PASS",
+    "real_model": false,
+    "windows": "NOT_RUN"
+  },
+  "stage10_complete": true,
+  "main_merged": false,
+  "engineering_accepted": false,
+  "clean_checkout": {
+    "head": "576059c",
+    "python_tests": 480,
+    "python_seconds": 39.715,
+    "pip_check": "PASS",
+    "npm_ci": "PASS",
+    "http_dom": "PASS",
+    "chromium": "PASS",
+    "later_changes": "DOCUMENTATION_ONLY"
+  },
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "documentation_notes_fixed": 3,
+    "deferred_minors": []
+  },
+  "publication": {
+    "method": "GitHub API tree commit with additional ordered parents",
+    "stage9_parent": "87fccbafbf6a944443e2f503acddf48f33e3b17e",
+    "main_parent": "a2a7b2d974b9ba1b186ef6bd4a97cd2a9d61a077",
+    "ui_qa_parent": "01c4f321596a92f05078ead08e4d3774c841fd7e",
+    "history": "Published merge preserves Stage9, current main and PR60 ancestry; exact final tree equals local tree"
+  },
+  "official_release_candidate": {
+    "branch": "integration/release-candidate-v1",
+    "pr": 74,
+    "protected": true,
+    "required_checks": [
+      "core-tests",
+      "repository-guard"
+    ],
+    "force_pushes": false,
+    "deletions": false
+  },
+  "stacked_prs_superseded": "PR38-67 by PR74",
+  "next_active_stage": 11,
+  "next_active_title": "Product Design / UI/UX"
+}

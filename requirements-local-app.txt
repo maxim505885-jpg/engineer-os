@@ -1,0 +1,9 @@
+# Minimal local cabinet with native PDF and bounded image support; no cloud API or agent framework.
+# OCR/Docling belongs in a separate optional environment (see local-environment.md).
+-r requirements-pdf-review.txt
+
+# Validate uploaded images before conversion / preview / OCR.
+Pillow==12.3.0
+
+# Free local DXF inventory and controlled annotation derivatives.
+-r requirements-cad.txt

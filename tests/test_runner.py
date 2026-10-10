@@ -7,7 +7,7 @@ from engineering.core import (
     EngineerTask,
     MaterialRef,
 )
-from engineering.core.engineer_core import AgentRuntimeAdapter
+from engineering.core.engineer_core import AgentRuntimeAdapter, EngineerCore
 
 
 class EngineerRunnerTests(unittest.TestCase):
@@ -20,13 +20,27 @@ class EngineerRunnerTests(unittest.TestCase):
         )
 
         def accepted(specialist):
-            return AgentResult(specialist.task_id, specialist.agent, AgentStatus.ACCEPTED)
+            checked = ("report-audit-agent",) if specialist.agent == "final-audit-agent" else ()
+            basis = (
+                {"report_quality": ("report-validation-1",)}
+                if specialist.agent == "report-audit-agent"
+                else {}
+            )
+            return AgentResult(
+                specialist.task_id,
+                specialist.agent,
+                AgentStatus.ACCEPTED,
+                evidence_ids=("m1",),
+                checked_agents=checked,
+                acceptance_basis=basis,
+            )
 
         runtime = AgentRuntimeAdapter({
             "report-audit-agent": accepted,
             "final-audit-agent": accepted,
         })
-        summary = EngineerRunner().run(task, runtime)
+        core = EngineerCore(acceptance_gate=lambda _: True)
+        summary = EngineerRunner(core).run(task, runtime)
 
         self.assertEqual(summary.task_id, "run-001")
         self.assertEqual(summary.status, AgentStatus.ACCEPTED)

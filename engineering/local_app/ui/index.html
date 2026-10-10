@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="app-token" content="__APP_TOKEN__">
+  <title>ENGINEER OS — локальный кабинет</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+  <script src="/cad-memory.js" defer></script>
+</head>
+<body data-ui-mode="normal">
+  <aside>
+    <div class="brand">
+      <span class="mark" aria-hidden="true">E</span>
+      <div>ENGINEER OS<small>Инженерный кабинет</small></div>
+    </div>
+
+    <button id="new-chat" class="primary">+ Новый диалог</button>
+
+    <div class="label sidebar-section-title">ИНЖЕНЕРНЫЙ ПУТЬ</div>
+    <nav class="workflow-nav" aria-label="Этапы инженерной проверки">
+      <a href="#files">1 · Источники</a>
+      <a href="#tz-panel">2 · ТЗ</a>
+      <a href="#evidence-panel">3 · Evidence</a>
+      <a href="#domain-panel">4 · Нормы / расчёты</a>
+      <a href="#real-case-panel">5 · Кейс</a>
+      <a href="#final-audit-panel">6 · FINAL AUDIT</a>
+    </nav>
+
+    <div class="label sidebar-section-title">ИСТОРИЯ</div>
+    <nav id="sessions" aria-label="Диалоги"></nav>
+
+    <div class="sidebar-note">
+      Оригиналы, история и результаты сохраняются локально. Память и ответы модели не заменяют доказательства.
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div>
+        <div class="label">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+        <h1 id="title">Новый диалог</h1>
+      </div>
+      <div class="header-tools">
+        <button id="ui-mode-toggle" class="mode-toggle" type="button" aria-pressed="false">Обычный режим</button>
+        <div id="model-status" class="connection" role="status">Проверяем модель…</div>
+      </div>
+    </header>
+
+    <section class="notice safety-notice">
+      <strong>VALIDATION FIRST.</strong>
+      Ответ модели — предварительный анализ. Источники, нормативы, расчёты и FINAL AUDIT проверяются отдельно.
+    </section>
+
+    <nav class="workflow-bar" aria-label="Быстрый переход по этапам">
+      <a href="#files"><span>01</span>Источники</a>
+      <a href="#tz-panel"><span>02</span>ТЗ</a>
+      <a href="#evidence-panel"><span>03</span>Evidence</a>
+      <a href="#domain-panel"><span>04</span>Проверки</a>
+      <a href="#real-case-panel"><span>05</span>Кейс</a>
+      <a href="#final-audit-panel"><span>06</span>Audit</a>
+    </nav>
+
+    <details class="status-legend">
+      <summary>Как читать статусы</summary>
+      <div class="legend-grid">
+        <span class="status-pill tone-pass">PASS / ACCEPTED</span>
+        <span class="status-pill tone-warning">WARNING</span>
+        <span class="status-pill tone-uncertainty">UNCERTAINTY</span>
+        <span class="status-pill tone-block">BLOCK / ERROR</span>
+      </div>
+      <p>Цвет помогает ориентироваться, но решение всегда определяется текстом статуса, reason codes и FINAL AUDIT.</p>
+    </details>
+
+    <div id="error" role="alert" hidden></div>
+
+    <section id="project-overview" aria-label="Маршрут проекта"><p>Один диалог — один проект: документы, ТЗ, проверки и история хранятся вместе.</p><nav id="project-route" aria-label="Этапы проекта"><button type="button" data-stage="project">Проект и чат</button><button type="button" data-stage="documents">ТЗ и документы</button><button type="button" data-stage="review">Проверка источников</button><button type="button" data-stage="calculations">Нормы и расчёты</button><button type="button" data-stage="conclusion">Итог и ограничения</button><button type="button" data-stage="history">История</button></nav><p id="project-state" role="status"></p><button id="project-next" type="button" class="text-button"></button></section><div class="workspace">
+      <section class="conversation" aria-label="Диалог ENGINEER OS">
+        <div id="messages" aria-live="polite">
+          <div class="empty">
+            <span class="empty-symbol" aria-hidden="true">E</span>
+            <h2>Начните с инженерной задачи</h2>
+            <p>Прикрепите ТЗ, отчёт или расчёт. Система сохранит исходник и покажет, что подтверждено, а что остаётся BLOCK/UNCERTAINTY.</p>
+          </div>
+        </div>
+
+        <form id="composer">
+          <label for="prompt" class="sr-only">Вопрос или задание</label>
+          <textarea id="prompt" rows="3" maxlength="8000" placeholder="Например: проверь отчёт по ТЗ и покажи неподтверждённые выводы" required></textarea>
+          <details id="core-checks" hidden>
+            <summary>Профильные проверки</summary>
+            <label><input type="checkbox" value="inspection"> Обследование</label>
+            <label><input type="checkbox" value="report" checked> Отчёт</label>
+            <label><input type="checkbox" value="normative" checked> Нормы</label>
+            <label><input type="checkbox" value="calculation"> Расчёты</label>
+            <small>Сверка результатов добавляется автоматически. Все ответы требуют проверки.</small>
+          </details>
+          <div class="composer-footer">
+            <label for="task-mode">Режим
+              <select id="task-mode">
+                <option value="CHAT">Чат с моделью</option>
+                <option value="CORE_PLAN">План проверки по ТЗ</option>
+                <option value="CORE_RUN">Профильный анализ по ТЗ</option>
+              </select>
+            </label>
+            <label class="upload" for="upload">+ Прикрепить файл</label>
+            <input id="upload" type="file" accept=".txt,.md,.pdf,.docx,.xlsx,.doc,.png,.jpg,.jpeg,.lir,.json,.csv,.dxf,.dwg,.ald,.cop,.log,.zip" hidden>
+            <button id="send" class="primary" type="submit">Отправить ↗</button>
+          </div>
+          <small>TXT, MD, PDF, DOCX, XLSX, DOC, PNG/JPG, LIR, JSON/CSV, DXF/DWG, ALD, COP, LOG, ZIP · оригинал сохраняется · DOCX/XLSX — до 256 МБ; остальные — до 100 МБ</small>
+        </form>
+      </section>
+
+      <section class="details" aria-label="Проверка источников и инженерные этапы">
+        <div class="details-heading">
+          <div class="label">МАТЕРИАЛЫ И ПРОВЕРКИ</div>
+          <p>Работайте сверху вниз. Расширенный JSON и ручные low-level действия скрыты в обычном режиме.</p>
+        </div>
+
+        <section id="files" class="files">
+          <h2 class="panel-title">Исходные файлы</h2>
+          <p class="muted">Пока нет файлов</p>
+        </section>
+
+        <details id="drive-panel" class="drive-panel">
+          <summary>Импорт из Google Drive</summary>
+          <p id="drive-status" class="muted">Проверяем настройки Drive…</p>
+          <form id="drive-form">
+            <label for="drive-source">Ссылка или ID оригинала</label>
+            <input id="drive-source" required maxlength="2048" placeholder="https://drive.google.com/file/d/…">
+            <label for="drive-sha">Ожидаемый SHA256 (если известен)</label>
+            <input id="drive-sha" maxlength="64" pattern="[0-9a-fA-F]{64}">
+            <button id="drive-import" type="submit" class="primary" disabled>Импортировать оригинал</button>
+            <small>Импорт сохраняет оригинал, но не подтверждает его содержание.</small>
+          </form>
+        </details>
+
+        <details id="evidence-panel" class="evidence-panel">
+          <summary>Evidence · кандидаты и проверка источника</summary>
+          <p class="muted">Цитата из оригинала и ваша запись. Совпадение текста не подтверждает инженерный вывод.</p>
+          <form id="evidence-form">
+            <label for="evidence-file">Оригинал</label>
+            <select id="evidence-file" required></select>
+            <label for="evidence-page">Страница PDF (для TXT/MD оставить пустой)</label>
+            <input id="evidence-page" type="number" min="1" step="1">
+            <input id="evidence-source-job" type="hidden">
+            <input id="evidence-unit" type="hidden">
+            <p id="evidence-location-label">Для Office выберите место в результатах по частям.</p>
+            <label for="evidence-class">Тип данных (заявлен, не проверен)</label>
+            <select id="evidence-class">
+              <option value="U">U — неизвестно</option><option value="P">P — проект</option>
+              <option value="F">F — фактическое</option><option value="M">M — измерено</option>
+              <option value="T">T — испытано</option><option value="C">C — рассчитано</option>
+              <option value="A">A — предположение</option><option value="I">I — интерпретация</option>
+            </select>
+            <label for="evidence-quote">Точная цитата</label>
+            <textarea id="evidence-quote" maxlength="4000" required></textarea>
+            <label for="evidence-statement">Факт или интерпретация — пока непроверено</label>
+            <textarea id="evidence-statement" maxlength="4000" required></textarea>
+            <button id="evidence-save" type="submit" class="primary">Сохранить кандидата</button>
+          </form>
+          <div id="evidence-list"></div>
+          <section id="review-panel" hidden>
+            <button id="close-review" type="button" class="text-button">Закрыть проверку</button>
+            <p id="review-caption"></p>
+            <form id="review-form">
+              <label for="review-decision">Результат проверки источника</label>
+              <select id="review-decision">
+                <option value="NEEDS_DATA">Нужны данные</option>
+                <option value="SOURCE_CONFIRMED">Цитата и место сверены</option>
+                <option value="REJECTED">Не соответствует источнику</option>
+              </select>
+              <label for="review-note">Замечание или основание решения</label>
+              <textarea id="review-note" required maxlength="2000"></textarea>
+              <label for="review-actor">Автор записи (подпись пользователя)</label>
+              <input id="review-actor" required maxlength="120" value="Локальный пользователь">
+              <button id="review-save" type="submit" class="primary">Записать решение</button>
+            </form>
+            <small>Запись не подтверждает инженерный вывод. Предыдущие решения сохраняются.</small>
+          </section>
+          <section id="source-viewer" hidden>
+            <button id="close-preview" class="text-button" type="button">Закрыть просмотр</button>
+            <p id="source-caption"></p>
+            <img id="source-image" alt="Страница оригинала с областями цитаты">
+          </section>
+        </details>
+
+        <details id="tz-panel" class="tz-panel">
+          <summary>Требования ТЗ и основания выводов</summary>
+          <p>Одна строка — одно требование. Исходное ТЗ и полноту перечня необходимо сверить.</p>
+          <form id="tz-form">
+            <label for="tz-text">Перечень требований</label>
+            <textarea id="tz-text" maxlength="50000" rows="4" required></textarea>
+            <label for="tz-sources">Исходные цитаты ТЗ (выбор не подтверждает полноту)</label>
+            <select id="tz-sources" multiple aria-label="Исходные цитаты ТЗ"></select>
+            <button id="tz-save" type="submit" class="primary">Сохранить новую версию ТЗ</button>
+          </form>
+          <p id="tz-status"></p>
+          <div id="tz-list"></div>
+          <small>Связь с цитатой не подтверждает инженерный вывод. Нормы, расчёты и FINAL AUDIT проверяются отдельно.</small>
+        </details>
+
+        <details id="cad-panel" class="cad-panel">
+          <summary>CAD: оригинал и отдельная аннотация</summary>
+          <p>DXF: инвентаризация и проверка сохранения геометрии. DWG сохраняется; чтение требует конвертера. Инженерная корректность отдельно.</p>
+          <label for="cad-file">Оригинал чертежа</label><select id="cad-file"></select>
+          <div id="cad-inventory" role="status"></div>
+          <form id="cad-locator-form">
+            <label for="cad-handle">Элемент оригинала</label><select id="cad-handle"></select>
+            <label for="cad-locator-note">Запись для проверки этого элемента</label><input id="cad-locator-note" maxlength="1000" required>
+            <button type="submit">Сохранить непроверенный кандидат</button>
+          </form>
+          <form id="cad-derive-form">
+            <label for="cad-text">Текст отдельной аннотации</label><input id="cad-text" maxlength="500" required>
+            <label for="cad-x">X в единицах чертежа</label><input id="cad-x" type="number" step="any" value="0" required>
+            <label for="cad-y">Y в единицах чертежа</label><input id="cad-y" type="number" step="any" value="0" required>
+            <label for="cad-height">Высота текста в единицах чертежа</label><input id="cad-height" type="number" step="any" min="0.000001" value="1" required>
+            <label for="cad-reason">Основание аннотации</label><input id="cad-reason" maxlength="1000" required>
+            <label for="cad-evidence">Кандидаты этого оригинала</label><select id="cad-evidence" multiple required></select>
+            <label><input id="cad-units" type="checkbox" required> Подтверждаю объявленные единицы чертежа</label>
+            <button id="cad-derive" type="submit" disabled>Создать отдельный DXF</button>
+          </form>
+          <div id="cad-result"></div>
+        </details>
+
+        <details id="knowledge-panel" class="knowledge-panel">
+          <summary>Подтверждённая инженерная память</summary>
+          <p id="knowledge-status" role="status"></p>
+          <form id="knowledge-form">
+            <label for="knowledge-title">Название записи</label><input id="knowledge-title" maxlength="200" required>
+            <label for="knowledge-evidence">Проверенные основания текущего принятого кейса</label><select id="knowledge-evidence" multiple required></select>
+            <label for="knowledge-actor">Автор записи</label><input id="knowledge-actor" maxlength="200" value="Локальный пользователь" required>
+            <button id="knowledge-promote" type="submit" disabled>Сохранить из ACCEPTED</button>
+          </form>
+          <label for="knowledge-query">Поиск для повторной проверки</label><input id="knowledge-query" maxlength="1000">
+          <button id="knowledge-recall" type="button">Найти в разрешённой памяти проекта</button>
+          <button id="knowledge-export" type="button">Экспортировать историю JSON</button>
+          <label for="knowledge-reason">Причина отзыва / удаления</label><input id="knowledge-reason" maxlength="2000">
+          <div id="knowledge-records"></div><div id="knowledge-references"></div>
+        </details>
+
+        <div class="label task-label">ФОНОВЫЕ ЗАДАЧИ</div>
+        <div id="jobs"><p class="muted">Задачи появятся после отправки сообщения</p></div>
+      </section>
+    </div>
+
+    <footer>Локальная модель · история на диске · без обязательного облачного API</footer>
+  </main>
+</body>
+</html>

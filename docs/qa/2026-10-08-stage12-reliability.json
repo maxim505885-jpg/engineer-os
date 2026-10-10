@@ -1,0 +1,57 @@
+{
+  "stage": 12,
+  "title": "Reliability / Backup / Restore / Browser Gate",
+  "status": "COMPLETE",
+  "implementation_pr": 88,
+  "implementation_head": "704b433c90e1652fca890ae22a6da4837d9583be",
+  "merged_head": "72dc4e303892131f5b39052da932aac19237f5f4",
+  "source_of_truth_branch": "integration/release-candidate-v1",
+  "scope": [
+    "validated local data backup",
+    "validated restore into empty data directory",
+    "SQLite backup API snapshot",
+    "SHA256 manifest for database and originals",
+    "absolute original-path rebinding on restore",
+    "non-secret runtime config only",
+    "atomic original-file writes",
+    "automatic pre-migration SQLite snapshot",
+    "crash/restart recovery",
+    "stale data-lock recovery",
+    "real Chromium release gate"
+  ],
+  "checks": {
+    "stage12_reliability": "PASS",
+    "repository_guard": "PASS",
+    "python_regression": "PASS",
+    "compile": "PASS",
+    "http_jsdom": "PASS",
+    "chromium": "PASS",
+    "screenshot_artifact_upload": "PASS",
+    "corrupted_backup_blocked": "PASS",
+    "active_data_dir_backup_blocked": "PASS",
+    "occupied_restore_target_blocked": "PASS",
+    "interrupted_job_fail_closed": "PASS",
+    "stale_lock_recoverable": "PASS",
+    "atomic_original_write": "PASS",
+    "pre_migration_snapshot": "PASS",
+    "codeql_sensitive_output_finding": "FIXED"
+  },
+  "runs": {
+    "pr_core_tests": 37841181056,
+    "pr_repository_guard": 37841181027
+  },
+  "security_review": {
+    "codeql_thread": "PRRT_kwDOUiM3os6qizUM",
+    "finding": "Clear-text logging of sensitive information",
+    "fixed_in": "704b433c90e1652fca890ae22a6da4837d9583be",
+    "resolved": true
+  },
+  "constraints": [
+    "Restore never overwrites a nonempty target automatically",
+    "Backup requires exclusive data-directory ownership",
+    "Backup/restore do not create or upgrade engineering acceptance",
+    "Physical Windows verification remains deferred under Stage9"
+  ],
+  "next_active_stage": 13,
+  "next_active_title": "Document Intelligence production completeness"
+}
