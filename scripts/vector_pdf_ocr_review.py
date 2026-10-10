@@ -54,7 +54,50 @@ def collect(source, pages, dpi=90, min_confidence=35, languages='Cyrillic+eng'):
                     data=pytesseract.image_to_data(image,lang=languages,config='--psm 11',
                                                    output_type=pytesseract.Output.DICT,timeout=12)
                 except RuntimeError:
-                    failures.append(dict(tile=tile_index,reason='OCR_TIMEOUT_OR_ENGINE_ERROR'))
+                    # Retry only the failed tile as four smaller crops. Never
+                    # certify a tile if even one subtile still fails.
+                    recovery_errors=[]
+                    recovery_count=0
+                    for subrow in range(2):
+                        for subcol in range(2):
+                            subclip=fitz.Rect(
+                                clip.x0+subcol*clip.width/2,
+                                clip.y0+subrow*clip.height/2,
+                                clip.x0+(subcol+1)*clip.width/2,
+                                clip.y0+(subrow+1)*clip.height/2)
+                            reduced_dpi=min(dpi,45)
+                            try:
+                                subpix=page.get_pixmap(matrix=fitz.Matrix(reduced_dpi/72,reduced_dpi/72),
+                                                       clip=subclip,alpha=False)
+                                subimage=Image.open(io.BytesIO(subpix.tobytes('png')))
+                                subdata=pytesseract.image_to_data(
+                                    subimage,lang=languages,config='--psm 6',
+                                    output_type=pytesseract.Output.DICT,timeout=4)
+                            except RuntimeError:
+                                recovery_errors.append([subrow,subcol])
+                                continue
+                            for j,raw_sub in enumerate(subdata['text']):
+                                subword=(raw_sub or '').strip()
+                                try:
+                                    conf=float(subdata['conf'][j])
+                                except (ValueError,TypeError):
+                                    continue
+                                if not subword or conf<min_confidence:
+                                    continue
+                                x=int(subdata['left'][j]); y=int(subdata['top'][j])
+                                w=int(subdata['width'][j]); h=int(subdata['height'][j])
+                                items.append(dict(text=subword,confidence=conf,tile=tile_index,
+                                    fallback_subtile=[subrow,subcol],
+                                    bbox_pdf=[round(subclip.x0+x*72/reduced_dpi,2),
+                                              round(subclip.y0+y*72/reduced_dpi,2),
+                                              round(subclip.x0+(x+w)*72/reduced_dpi,2),
+                                              round(subclip.y0+(y+h)*72/reduced_dpi,2)],
+                                    status='OCR_CANDIDATE_UNVERIFIED'))
+                                recovery_count+=1
+                    if recovery_errors:
+                        failures.append(dict(tile=tile_index,reason='FALLBACK_SUBTILES_FAILED',
+                                             failed_subtiles=recovery_errors,
+                                             recovered_candidates=recovery_count))
                     continue
                 for idx,raw in enumerate(data['text']):
                     value=(raw or '').strip()
