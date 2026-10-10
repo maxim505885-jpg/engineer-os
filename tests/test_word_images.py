@@ -25,6 +25,18 @@ def image_doc(target='media/source.png',mode='',image=None):
 
 
 class ImageReaderTests(unittest.TestCase):
+    def test_image_only_paragraph_is_not_silently_dropped(self):
+        with __import__('zipfile').ZipFile(io.BytesIO(image_doc())) as z:
+            parts={n:z.read(n) for n in z.namelist()}
+        parts['word/document.xml']=parts['word/document.xml'].replace(
+            b'<w:r><w:t>Figure context</w:t></w:r>',b'')
+        units,_=office.read(package(parts),'docx')
+        self.assertEqual(len(units),1)
+        self.assertEqual(units[0]['locator']['kind'],'paragraph')
+        self.assertEqual(units[0]['locator']['images'][0]['part'],'word/media/source.png')
+        self.assertIn('IMAGE_CONTENT_NOT_VERIFIED',units[0]['limitations'])
+        self.assertFalse(any(u['locator']['kind']=='unsupported_body' for u in units))
+
     def test_image_is_bound_to_parent_and_exact_original_bytes(self):
         units,limits=office.read(image_doc(),'docx')
         self.assertEqual(len(units),1,'Adding images must preserve logical unit ordinals')
