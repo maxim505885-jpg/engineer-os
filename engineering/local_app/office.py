@@ -201,6 +201,13 @@ def word_container_units(body,part,package=None):
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
+                    # Nested Word tables were previously omitted entirely. Preserve
+                    # native text as unverified content, without inventing inner cells.
+                    nested=cell.findall('.//'+W+'tbl')
+                    if nested:
+                        nested_text='\n'.join(word_text(p) for p in cell.iter(W+'p') if p not in cell.findall(W+'p'))
+                        if nested_text:
+                            text+='\n[NESTED_TABLE_TEXT_UNVERIFIED]\n'+nested_text
                     locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
                     properties=cell.find(W+'tcPr');merge={}
                     if properties is not None:
