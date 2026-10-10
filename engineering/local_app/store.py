@@ -404,6 +404,24 @@ class Store:
                 db.execute('UPDATE jobs SET result=? WHERE id=?',(json.dumps(result,ensure_ascii=False),job_id))
             return seq
 
+    def reconcile_interrupted_analysis_receipts(self,job_id):
+        """On resumed execution, preserve old incomplete calls as interrupted attempts.
+
+        A RUNNING receipt has no verified response. Never convert it to COMPLETED,
+        reuse it as a cached result, or erase its attempt from the audit trail.
+        """
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute("SELECT id FROM jobs WHERE id=? AND state='RUNNING'",(job_id,)).fetchone() is None:
+                raise ValueError('Task not running')
+            rows=db.execute("SELECT seq,record FROM analysis_receipts WHERE job_id=? AND json_extract(record,'$.status')='RUNNING' ORDER BY seq",(job_id,)).fetchall()
+            for row in rows:
+                record=json.loads(row['record'])
+                record.update(status='INTERRUPTED',error='Prior model response not durably recorded; retry required.',acceptance_granted=False)
+                db.execute("UPDATE analysis_receipts SET record=? WHERE seq=? AND job_id=? AND json_extract(record,'$.status')='RUNNING'",
+                           (json.dumps(record,ensure_ascii=False),row['seq'],job_id))
+            return len(rows)
+
     def analysis_receipts(self,session_id,job_id,*,offset=0,limit=50):
         identifier(session_id);identifier(job_id)
         if type(offset) is not int or offset<0 or type(limit) is not int or not 1<=limit<=50:raise ValueError('Invalid analysis window')
