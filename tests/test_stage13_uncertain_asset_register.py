@@ -41,6 +41,12 @@ class UncertainAssetRegisterTests(unittest.TestCase):
         self.assertEqual(calls[0][0],'evidence')
         self.assertEqual(calls[0][1]['confidence'],'UNCERTAINTY')
 
+    def test_validated_rpc_transport_cannot_be_used_for_asset_candidate(self):
+        from engineering.document_intelligence.supabase_evidence_transport import SupabaseEvidenceTransport
+        rpc=SupabaseEvidenceTransport('https://example.supabase.co','mock-service-key',opener=lambda *a,**k:None)
+        with self.assertRaisesRegex(ValueError,'CANDIDATE_ASSETS_CANNOT_USE_VALIDATED_EVIDENCE_RPC'):
+            UncertainAssetRegisterWriter(rpc)
+
 
 if __name__=='__main__':
     unittest.main()
