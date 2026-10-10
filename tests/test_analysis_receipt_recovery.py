@@ -77,5 +77,32 @@ class ReceiptRecoveryTests(unittest.TestCase):
         db.close()
 
 
+    def test_finish_rejects_model_attempt_ledger_mismatch(self):
+        job_id='00000000-0000-4000-8000-000000000001'
+        db=sqlite3.connect(':memory:')
+        db.row_factory=sqlite3.Row
+        db.execute("CREATE TABLE jobs(id TEXT PRIMARY KEY,state TEXT,error TEXT,result TEXT,session_id TEXT,updated REAL)")
+        db.execute("CREATE TABLE analysis_receipts(seq INTEGER PRIMARY KEY,job_id TEXT,record TEXT)")
+        db.execute("CREATE TABLE messages(session_id TEXT,role TEXT,content TEXT,created REAL)")
+        report={'document_analysis':{'stage':'COMPLETED','model_calls':2}}
+        db.execute("INSERT INTO jobs(id,state,result,session_id) VALUES(?,'RUNNING',?,'s')",
+                   (job_id,json.dumps(report)))
+        db.execute("INSERT INTO analysis_receipts VALUES(1,?,?)",
+                   (job_id,json.dumps({'status':'COMPLETED','attempted':True})))
+        db.commit()
+        store=Store.__new__(Store)
+        store.connection=lambda: db
+        with self.assertRaisesRegex(ValueError,'Model attempt ledger mismatch'):
+            store.finish(job_id,{'text':'draft'})
+        db.rollback()
+        self.assertEqual(db.execute("SELECT state FROM jobs WHERE id=?",(job_id,)).fetchone()[0],'RUNNING')
+        db.execute("INSERT INTO analysis_receipts VALUES(2,?,?)",
+                   (job_id,json.dumps({'status':'INTERRUPTED','attempted':True})))
+        db.commit()
+        store.finish(job_id,{'text':'draft'})
+        self.assertEqual(db.execute("SELECT state FROM jobs WHERE id=?",(job_id,)).fetchone()[0],'SUCCEEDED')
+        db.close()
+
+
 if __name__=='__main__':
     unittest.main()
