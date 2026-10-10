@@ -578,7 +578,10 @@ class Store:
             r=db.execute("SELECT * FROM jobs WHERE id=? AND state='RUNNING' AND (error IS NULL OR error!='CANCEL_REQUESTED')",(job_id,)).fetchone()
             if r is None:raise ValueError('Task is not running')
             prior=json.loads(r['result']) if r['result'] else {}
-            if 'document_analysis' in prior:result['document_analysis']=prior['document_analysis']
+            if 'document_analysis' in prior:
+                if db.execute("SELECT 1 FROM analysis_receipts WHERE job_id=? AND json_extract(record,'$.status')='RUNNING' LIMIT 1",(job_id,)).fetchone():
+                    raise ValueError('Incomplete model receipt; cannot finish analysis')
+                result['document_analysis']=prior['document_analysis']
             now=time.time();db.execute("UPDATE jobs SET state='SUCCEEDED',result=?,updated=? WHERE id=?",(json.dumps(result,ensure_ascii=False),now,job_id))
             db.execute('INSERT INTO messages(session_id,role,content,created) VALUES(?,?,?,?)',(r['session_id'],'assistant',result['text'],now))
 
