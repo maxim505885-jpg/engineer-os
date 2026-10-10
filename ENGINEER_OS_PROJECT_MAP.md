@@ -3071,3 +3071,8 @@ PR110 MERGED squash с expected head `6eb6f1fc8c5341b2969a93adb134b660129ca6e4`;
 PR111 MERGED (expected head `7f24d6c435ec5c201ce4c926cc786a5cfa9b6def`) candidate `b1b01c6e1ae0bcbb99b2178df2c54a74dd828bb6`; Core38044320550, Windows38044320559, Security38044320539 SUCCESS. Графические-only абзацы DOCX теперь сохраняют source units, но визуальная полнота ещё не подтверждена.
 
 Обнаружена следующая потеря: `word_container_units` в `office.py` читал только непосредственные `w:p` outer table cell, пропуская native text из вложенной `w:tbl`. PR112 https://github.com/maxim505885-jpg/engineer-os/pull/112, ветка `fix/docx-nested-table-text-20261010`, опубликованный head `82cc2a86760ca58e6707b8d9820c4407815281bf`: вложенный текст сохраняется с меткой `NESTED_TABLE_TEXT_UNVERIFIED` в source-bound outer cell; существующий `NESTED_TABLE_UNVERIFIED` сохраняется. Отдельный тест проверяет наличие текста и отсутствие заявленной верификации layout. CI/merge PR112 и реальный DOCX replay пока не подтверждены. Это не восстановление настоящей семантики вложенных ячеек или raster tables. №13 остаётся ОТКРЫТ, расчёты ЛИРА отложены.
+
+
+### Продолжение §96 — исправление повторного текста глубоко вложенных таблиц, 10.10.2026
+
+При review PR112 обнаружено, что обход всех descendant `w:tbl` мог дублировать `w:p` самой глубокой таблицы при вложенности более двух уровней. В том же PR112 заменён обход на однократную выборку descendant `w:p`, исключая прямые параграфы внешней ячейки; добавлен focused regression deep nesting. Новый head `a53fe95dbc557ab5e5f10febf16da4ea98351008`. Исходный CI head82cc2a8 ещё выполнялся на момент нового commit, он не доказывает новый head; финальный CI и merge пока НЕ подтверждены. Структура вложенных ячеек остаётся unverified, №13 открыт.
