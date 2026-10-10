@@ -40,7 +40,10 @@ class VectorOCRReviewTests(unittest.TestCase):
             with patch.dict('sys.modules',{'pytesseract':fake_ocr}):
                 result=collect(source,[1])
             self.assertEqual(result['quality_status'],'VISUAL_REVIEW_REQUIRED')
-            self.assertEqual(len(result['records'][0]['candidates']),1)
+            self.assertEqual(len(result['records'][0]['candidates']),4)
+            self.assertEqual(result['records'][0]['candidates'][0]['tile'],0)
+            self.assertEqual(len(result['records'][0]['candidates'][0]['bbox_pdf']),4)
+            self.assertEqual(result['records'][0]['ocr_failures'],[])
             self.assertFalse(result['records'][0]['visual_verified'])
             self.assertEqual(result['records'][0]['candidates'][0]['status'],'OCR_CANDIDATE_UNVERIFIED')
 
