@@ -23,6 +23,15 @@ class WordGridTests(unittest.TestCase):
         self.assertIn('Inner value',units[0]['text'])
         self.assertIn('NESTED_TABLE_UNVERIFIED',units[0]['limitations'])
 
+    def test_deep_nested_paragraph_is_read_once(self):
+        deepest=table('<w:tr>'+cell('Unique deep text')+'</w:tr>',1)
+        middle='<w:tbl><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:tc>'+deepest+'</w:tc></w:tr></w:tbl>'
+        outer='<w:tbl><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:tc>'+middle+'</w:tc></w:tr></w:tbl>'
+        units=self.cells(outer)
+        self.assertEqual(len(units),1)
+        self.assertEqual(units[0]['text'].count('Unique deep text'),1)
+        self.assertIn('NESTED_TABLE_UNVERIFIED',units[0]['limitations'])
+
     def test_vertical_continuations_keep_original_text_and_exact_anchor(self):
         span='<w:gridSpan w:val="2"/>'
         rows='<w:tr>'+cell('A',span+'<w:vMerge w:val="restart"/>')+cell('B')+'</w:tr>'
