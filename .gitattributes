@@ -1,0 +1,3 @@
+
+# Preserve official PDF.js distribution bytes and upstream hashes.
+engineering/local_app/ui/vendor/pdfjs/*.mjs -whitespace

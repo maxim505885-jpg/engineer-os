@@ -69,7 +69,15 @@ jobs:
           if ($failed) { exit 1 }
       - name: Check Stage12 backup restore and recovery
         run: python -m unittest tests.test_local_backup_restore -v
+      - name: Check optional offline raster table backend
+        run: |
+          python -m venv .venv-tables
+          .venv-tables/bin/python -m pip install -r requirements-table-img2table.txt
+          .venv-tables/bin/python -m pip check
+          ENGINEER_OS_TABLE_PYTHON="$PWD/.venv-tables/bin/python" ENGINEER_OS_TABLE_LANG=eng python -m unittest tests.test_table_readback -v
       - name: Run full Python regression suite
+        env:
+          ENGINEER_OS_TEST_FORMULA_RENDER: "1"
         run: python -m unittest discover -s tests -p "test_*.py" -v
       - name: Compile runtime
         run: python -m compileall -q engineering runtime e2e scripts
