@@ -6,7 +6,7 @@ Preserves source and payload identity without changing existing text pipelines.
 from dataclasses import dataclass
 import hashlib
 
-_ALLOWED={"table_cells","omml_formula","emf_graphic","embedded_image"}
+_ALLOWED={"table_cells","omml_formula","emf_graphic","embedded_image","embedded_object"}
 
 @dataclass(frozen=True)
 class DocumentAssetEvidence:

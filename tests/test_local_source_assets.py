@@ -79,3 +79,38 @@ class SourceAssetHTTPTests(unittest.TestCase):
         f=preserve_file(self.store,sid,'nested.docx',out.getvalue())
         with patch('engineering.local_app.source_assets.MAX_IMAGE_TOTAL_BYTES',1024*1024):
             with self.assertRaisesRegex(ValueError,'size/count'):read_assets(self.store,sid,f['id'])
+
+    def test_ole_original_asset_and_authenticated_bitmap_preview(self):
+        from tests.test_word_embedded_layers import doc,R
+        from tests.test_ole_bitmap import compound,bmp
+        import hashlib
+        from PIL import Image
+        data=compound([('CONTENTS',bmp())]);sid=self.create()
+        binary=doc('<w:p><w:object xmlns:o="urn:schemas-microsoft-com:office:office"><o:OLEObject Type="Embed" ProgID="PBrush" r:id="obj"/></w:object></w:p>',
+            f'<Relationship Id="obj" Type="{R}/oleObject" Target="embeddings/a.bin"/>',{'word/embeddings/a.bin':data})
+        status,_,raw=self.request('POST',f'/api/sessions/{sid}/files?name=ole.docx',binary,{'Content-Type':'application/octet-stream'})
+        self.assertEqual(status,201);f=json.loads(raw);route=f'/api/sessions/{sid}/files/{f["id"]}/assets'
+        status,_,raw=self.request('GET',route);self.assertEqual(status,200)
+        item=json.loads(raw)['items'][0];self.assertEqual(item['asset_kind'],'embedded_object');self.assertEqual(item['bitmap']['status'],'AVAILABLE')
+        selected='?candidate='+item['candidate_id']
+        status,_,raw=self.request('GET',route+'/payload'+selected);self.assertEqual(status,200);self.assertEqual(raw,data)
+        status,headers,raw=self.request('GET',route+'/preview'+selected+'&bitmap=1');self.assertEqual(status,200)
+        self.assertEqual(headers['X-Asset-SHA256'],hashlib.sha256(data).hexdigest())
+        with Image.open(io.BytesIO(raw)) as im:self.assertEqual(im.getpixel((0,0)),(255,0,0))
+        self.assertEqual(self.request('GET',route+'/preview'+selected,token=False)[0],403)
+        self.assertEqual(self.request('GET',route+'/preview'+selected+'&bitmap=2')[0],400)
+        self.assertEqual(self.store.snapshot(sid)['evidence'],[])
+
+    def test_nonstandard_embedded_object_target_is_in_inventory(self):
+        from tests.test_word_embedded_layers import doc,R
+        from tests.test_ole_bitmap import compound,bmp
+        from engineering.local_app.files import preserve_file
+        from engineering.local_app.source_assets import read_assets
+        sid=self.create();raw=compound([('CONTENTS',bmp())])
+        source=doc('<w:p><w:object><o:OLEObject Type="Embed" r:id="obj"/></w:object></w:p>',
+            f'<Relationship Id="obj" Type="{R}/oleObject" Target="../custom/object.cfb"/>',{'custom/object.cfb':raw})
+        f=preserve_file(self.store,sid,'custom.docx',source)
+        inventory=read_assets(self.store,sid,f['id'])
+        self.assertEqual(inventory['total'],1)
+        item=inventory['items'][0];self.assertEqual((item['asset_kind'],item['location']),('embedded_object','custom/object.cfb'))
+        self.assertEqual(read_assets(self.store,sid,f['id'],candidate_id=item['candidate_id'])[0],raw)
