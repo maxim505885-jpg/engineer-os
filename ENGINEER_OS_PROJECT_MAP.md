@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план (11.10.2026):** §131 итог — PR136 MERGED, кандидат9e253567a3eaa2fbc024a1a05fd960da5e4206ac; Core915/Windows55/Security SUCCESS,6Chromium routes иreal Ollama PASS. Source-bound assets HTTP/UI иполные V4/DOCX structural audits подтверждены. №13 НЕ закрыт:48page cell conflicts,vector/sparse pages492–534,WDP/OLE/Word/visual/corpus gaps. ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+**Активный план (11.10.2026):** §132 итог — PR137 MERGED, кандидат 93dd656bd57c02e3997abb8870583d59bbb37c49, дерево 51365a6dedae556e683bdbd5e6d6f409ec122a22. Core 943 / Windows 55 / Security SUCCESS; 6 Chromium маршрутов и реальный Ollama PASS. Real DOCX: 14684 native элементов, 704 актива, 11 WDP-привязок, все 21 OLE bitmap/raw/PNG/checkpoint сверены. V4: 534 рендера, 43 OCR-кандидата. №13 остаётся открытым: visual Word/formula/graphics, raster/mixed cells, OCR conflicts и qualified corpus. №14/19 открыты; ПК не обновлён, расчёты отложены; 8✅/8🟡/3❌.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
