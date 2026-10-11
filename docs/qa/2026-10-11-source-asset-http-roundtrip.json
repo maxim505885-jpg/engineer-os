@@ -1,0 +1,67 @@
+{
+  "content_verified": false,
+  "accepted": false,
+  "files": [
+    {
+      "name": "real.docx",
+      "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+      "original_bytes_equal": true,
+      "source_unchanged": true,
+      "inventory_count": 683,
+      "payload_checks": [
+        {
+          "candidate_id": "doc-asset:74fab734569b09db93871dbab7d9122d04398047508a96e50c50ae14f3597e24",
+          "kind": "omml_formula",
+          "bytes": 3033,
+          "payload_match": true
+        },
+        {
+          "candidate_id": "doc-asset:972733ad02e28c7a0cdf8533e70a5b6952c569da0ca4f01e146b2aa02a29d56b",
+          "kind": "emf_graphic",
+          "bytes": 816460,
+          "payload_match": true
+        },
+        {
+          "candidate_id": "doc-asset:ad197d2a78a622890bb5fafd6cfd59a68e4d60490cf0c1eea7a7c378c1a4a40e",
+          "kind": "embedded_image",
+          "bytes": 181137,
+          "payload_match": true
+        }
+      ],
+      "limitations": [
+        "SOURCE_ASSETS_ONLY_CONTENT_UNVERIFIED",
+        "EMBEDDED_OLE_CONTENT_NOT_READ",
+        "WORD_LAYOUT_AND_IMAGE_TRANSFORMS_UNVERIFIED",
+        "FORMULA_VISUAL_AND_MATHEMATICAL_VALIDATION_NOT_PERFORMED"
+      ]
+    },
+    {
+      "name": "real.pdf",
+      "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+      "original_bytes_equal": true,
+      "source_unchanged": true,
+      "inventory_count": 2,
+      "payload_checks": [
+        {
+          "candidate_id": "doc-asset:915e5a61566e5ee35b930a77e604d8f2ee0ad42179e70ac0ae526ab29cdcad7b",
+          "kind": "table_cells",
+          "bytes": 15924,
+          "payload_match": true
+        },
+        {
+          "candidate_id": "doc-asset:84b913ae3c9f677131be79e1375c079a83b3e9d3bdfa7468f8b4008ea8f9f314",
+          "kind": "table_cells",
+          "bytes": 6277,
+          "payload_match": true
+        }
+      ],
+      "limitations": [
+        "SOURCE_ASSETS_ONLY_CONTENT_UNVERIFIED",
+        "TABLE_DETECTION_UNVERIFIED",
+        "NATIVE_TEXT_ONLY_RASTER_CONTENT_NOT_READ"
+      ]
+    }
+  ],
+  "evidence_count": 0,
+  "elapsed_seconds": 23.47
+}

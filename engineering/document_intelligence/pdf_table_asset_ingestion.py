@@ -5,9 +5,12 @@ PyMuPDF table detection may include page frames; nothing is auto-verified.
 import hashlib
 import json
 import math
+import threading
 from pathlib import Path
 from .asset_provenance import DocumentAssetEvidence
 
+
+_TABLE_EXTRACTION_LOCK=threading.RLock()
 
 def _rectangle(value):
     if value is None:
@@ -47,6 +50,13 @@ def _table_payload(table, page, original_rotation, original_rect):
 
 
 def pdf_table_candidates(pdf_path, page_numbers):
+    # PyMuPDF table extraction uses process-global character state. Keep both
+    # find_tables and serialization inside the same lock across all callers.
+    with _TABLE_EXTRACTION_LOCK:
+        return _pdf_table_candidates(pdf_path,page_numbers)
+
+
+def _pdf_table_candidates(pdf_path, page_numbers):
     import fitz
     path=Path(pdf_path)
     with path.open('rb') as f:

@@ -236,6 +236,22 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .review import record_review
                     body=self.json_body()
                     return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
+                if len(parts) in {6,7} and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='assets' and not post:
+                    from .source_assets import read_assets
+                    query=parse_qs(path.query)
+                    if any(len(v)!=1 for v in query.values()):raise ValueError('Duplicate asset query')
+                    if len(parts)==7 and parts[6]!='payload':raise RequestProblem(404,'Route not found')
+                    candidate=query.get('candidate',[None])[0] if len(parts)==7 else None
+                    if len(parts)==7 and not candidate:raise ValueError('Candidate required')
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                    try:
+                        result=read_assets(store,parts[2],parts[4],page=int(query['page'][0]) if 'page' in query else None,
+                            offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0]),candidate_id=candidate)
+                        if candidate:
+                            payload,headers=result
+                            return self.respond(200,payload,'application/octet-stream',extra=headers)
+                        return self.respond(200,result)
+                    finally:self.server.preview_slots.release()
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='preview' and not post:
                     from .preview import render_original
                     query=parse_qs(path.query)
