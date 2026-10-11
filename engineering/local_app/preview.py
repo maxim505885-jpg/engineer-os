@@ -112,3 +112,47 @@ def render_original(store,session_id,file_id,number=1):
             finally:
                 if pdf is not source:pdf.close()
     except Exception:raise ValueError('Original preview unavailable; download original for separate review') from None
+
+
+def render_object_asset(payload,kind,bitmap=None):
+    """Derived PNG of a selected passive OLE stream, never Word composition."""
+    if kind!='embedded_object':raise ValueError('Embedded object required')
+    from . import ole_bitmap
+    import io
+    from PIL import Image
+    descriptor=ole_bitmap.describe(payload)
+    records=descriptor.get('bitmaps',[])
+    if bitmap is None:
+        selected=None
+    else:
+        if type(bitmap) is not int or not 1<=bitmap<=len(records):raise ValueError('Object bitmap outside source')
+        if records[bitmap-1]['status']!='AVAILABLE':raise ValueError('Object bitmap unavailable')
+        selected=records[bitmap-1]['stream']
+    png=ole_bitmap.render(payload,selected)
+    with Image.open(io.BytesIO(png)) as pixels:
+        pixels.thumbnail((1600,1600));out=io.BytesIO();pixels.save(out,format='PNG');result=out.getvalue()
+    if len(result)>10*1024*1024:raise ValueError('Object preview byte limit')
+    return result
+
+
+def render_office_object(store,session_id,source_job,logical_unit,object_number,*,bitmap=1):
+    from .source_binding import office_image_location
+    from .office import Package,MAX_IMAGE_BYTES
+    child=store.extraction_job(session_id,source_job)
+    if len(child['file_ids'])!=1:raise ValueError('Single Office source required')
+    file=store.get_file(child['file_ids'][0])
+    if Path(file['name']).suffix.lower()!='.docx':raise ValueError('Native DOCX object required')
+    binding=office_image_location(store,session_id,file,source_job,logical_unit)
+    records=binding['locator'].get('embedded_objects',[])
+    if type(object_number) is not int or not 1<=object_number<=len(records):raise ValueError('Object outside source element')
+    descriptor=records[object_number-1]
+    if descriptor['status']!='BOUND_PACKAGE_OBJECT':raise ValueError('Object bytes unavailable')
+    with Path(file['path']).open('rb') as stream:data=stream.read(256*1024*1024+1)
+    if len(data)!=file['size'] or hashlib.sha256(data).hexdigest()!=file['sha256']:raise ValueError('Office original identity changed')
+    package=Package(data)
+    try:
+        if package.zip.getinfo(descriptor['part']).file_size>MAX_IMAGE_BYTES:raise ValueError('Object byte limit')
+        asset=package.zip.read(descriptor['part'])
+    finally:package.close()
+    if len(asset)!=descriptor['bytes'] or hashlib.sha256(asset).hexdigest()!=descriptor['sha256']:raise ValueError('Object identity changed')
+    return render_object_asset(asset,'embedded_object',bitmap)

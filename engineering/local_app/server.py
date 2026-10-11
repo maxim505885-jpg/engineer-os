@@ -230,6 +230,13 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
                         try:return self.respond(200,render_office_image(store,parts[2],parts[4],int(query.get('unit',['0'])[0]),int(query.get('image',['0'])[0]),bitmap=int(query['bitmap'][0]) if 'bitmap' in query else None),'image/png')
                         finally:self.server.preview_slots.release()
+                    if len(parts)==6 and parts[5]=='objects' and not post:
+                        from .preview import render_office_object
+                        query=parse_qs(path.query)
+                        if any(len(v)!=1 for v in query.values()):raise ValueError('Duplicate object query')
+                        if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                        try:return self.respond(200,render_office_object(store,parts[2],parts[4],int(query.get('unit',['0'])[0]),int(query.get('object',['0'])[0]),bitmap=int(query.get('bitmap',['1'])[0])),'image/png')
+                        finally:self.server.preview_slots.release()
                     if len(parts)==7 and parts[5]=='pages' and not post:
                         return self.respond(200,store.extraction_page(parts[2],parts[4],int(parts[6])))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='reviews' and post:
@@ -240,7 +247,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .source_assets import read_assets
                     query=parse_qs(path.query)
                     if any(len(v)!=1 for v in query.values()):raise ValueError('Duplicate asset query')
-                    if len(parts)==7 and parts[6]!='payload':raise RequestProblem(404,'Route not found')
+                    if len(parts)==7 and parts[6] not in {'payload','preview'}:raise RequestProblem(404,'Route not found')
                     candidate=query.get('candidate',[None])[0] if len(parts)==7 else None
                     if len(parts)==7 and not candidate:raise ValueError('Candidate required')
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
@@ -249,6 +256,10 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                             offset=int(query.get('offset',['0'])[0]),limit=int(query.get('limit',['50'])[0]),candidate_id=candidate)
                         if candidate:
                             payload,headers=result
+                            if parts[6]=='preview':
+                                from .preview import render_object_asset
+                                png=render_object_asset(payload,headers['X-Asset-Kind'],int(query['bitmap'][0]) if 'bitmap' in query else None)
+                                return self.respond(200,png,'image/png',extra={'X-Source-SHA256':headers['X-Source-SHA256'],'X-Asset-SHA256':headers['X-Asset-SHA256'],'X-Asset-Status':'UNCERTAINTY'})
                             return self.respond(200,payload,'application/octet-stream',extra=headers)
                         return self.respond(200,result)
                     finally:self.server.preview_slots.release()

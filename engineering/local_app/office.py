@@ -21,6 +21,8 @@ MAX_TABLE_GRID_COLUMNS=1024
 MAX_AUXILIARY_PARTS=128
 MAX_IMAGE_BYTES=32*1024*1024
 MAX_IMAGE_TOTAL_BYTES=256*1024*1024
+MAX_OBJECT_TOTAL_BYTES=64*1024*1024
+MAX_ASSET_TOTAL_BYTES=320*1024*1024
 MAX_IMAGE_REFERENCES=4096
 
 
@@ -97,7 +99,7 @@ def equation_units(element,locator):
         payload=dict(scope='NORMALIZED_OMML_UNINTERPRETED',literal_tokens=[e.text or '' for e in current.iter(M+'t')],
                      normalized_omml=ET.tostring(fragment,encoding='unicode'),evaluated=False,layout_verified=False)
         parent=dict(locator);parent.update(kind='equation',parent_kind=locator['kind'],equation=len(out)+1)
-        parent.pop('images',None);parent.pop('declared_drawing_labels',None)
+        parent.pop('images',None);parent.pop('declared_drawing_labels',None);parent.pop('embedded_objects',None)
         out.append(unit(json.dumps(payload,ensure_ascii=False),parent,word_limits(current)+['EQUATION_NOT_READ']))
         # Do not separately serialize nested equations, which duplicates syntax.
     return out
@@ -167,6 +169,15 @@ def word_container_units(body,part,package=None):
         if package is not None:
             from .word_images import bind_images
             images=bind_images(package,element,locator)
+            from .word_objects import bind_objects
+            objects=bind_objects(package,element,locator)
+            if objects:
+                compact_objects=[{k:o[k] for k in ('object','status','part','sha256','reason','program_id') if k in o} for o in objects]
+                text+='\n'+json.dumps(dict(scope='PACKAGE_OBJECT_REFERENCES_UNVERIFIED',objects=compact_objects,executed=False,content_verified=False),ensure_ascii=False)
+                warnings=list(warnings)+['EMBEDDED_OBJECT_CONTENT_UNVERIFIED','OBJECT_NOT_ACTIVATED']
+                if any(o['status']=='UNAVAILABLE' for o in objects):warnings.append('EMBEDDED_OBJECT_REFERENCE_UNAVAILABLE')
+            if any(i.get('reference_kind')=='HD_PHOTO_LAYER' for i in images):
+                warnings=list(warnings)+['IMAGE_LAYER_COMPOSITION_UNVERIFIED']
             if images:
                 # Full descriptors belong to the source locator. Repeating record
                 # geometry here can exhaust Store's text budget before the tail.
@@ -437,6 +448,10 @@ def execute(store,job,stop,*,progress=None):
         available_emf_bitmap_records=sum(b['status']=='AVAILABLE' for u in units for i in u['locator'].get('images',[]) for b in i.get('native_emf',{}).get('bitmap_records',[])),
         unavailable_emf_text_references=sum(i.get('native_emf',{}).get('status')=='UNAVAILABLE' for u in units for i in u['locator'].get('images',[])),
         image_content_verified=False,image_transforms_applied=False,
+        image_layer_references=sum(i.get('reference_kind')=='HD_PHOTO_LAYER' for u in units for i in u['locator'].get('images',[])),
+        embedded_object_references=sum(len(u['locator'].get('embedded_objects',[])) for u in units),
+        bound_embedded_object_references=sum(o['status']=='BOUND_PACKAGE_OBJECT' for u in units for o in u['locator'].get('embedded_objects',[])),
+        embedded_objects_activated=False,
         word_cells_with_merge_declarations=sum(bool(u['locator'].get('declared_merge')) and u['locator']['kind']=='table_cell' for u in units),
         word_grid_consistent_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='CONSISTENT_SOURCE_STRUCTURE' for u in units),
         word_grid_unresolved_cells=sum(u['locator']['kind']=='table_cell' and u['locator']['source_grid']['status']=='UNRESOLVED_SOURCE_STRUCTURE' for u in units),

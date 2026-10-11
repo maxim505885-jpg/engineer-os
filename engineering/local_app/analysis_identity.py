@@ -15,14 +15,19 @@ def parser_identity(backend):
     if backend in {'docx','xlsx','doc'}:
         import sys
         from . import office
-        from . import word_images,emf_text,emf_bitmap
+        from . import word_images,word_objects,ole_bitmap,emf_text,emf_bitmap
         value=dict(schema=1,backend=backend,python=sys.version.split()[0],implementation=hashlib.sha256(Path(office.__file__).read_bytes()).hexdigest(),
                     image_implementation=hashlib.sha256(Path(word_images.__file__).read_bytes()).hexdigest(),
+                    object_implementation=hashlib.sha256(Path(word_objects.__file__).read_bytes()).hexdigest(),
+                    ole_implementation=hashlib.sha256(Path(ole_bitmap.__file__).read_bytes()).hexdigest(),
+                    ole_limits=[ole_bitmap.MAX_OLE_BYTES,ole_bitmap.MAX_STREAMS,ole_bitmap.MAX_DIRECTORY_ENTRIES,ole_bitmap.MAX_STREAM_BYTES,ole_bitmap.MAX_TOTAL_STREAM_BYTES,ole_bitmap.MAX_BITMAP_BYTES,ole_bitmap.MAX_PIXELS,ole_bitmap.MAX_NATIVE_PADDING_BYTES],
                     emf_implementation=hashlib.sha256(Path(emf_text.__file__).read_bytes()).hexdigest(),
                     bitmap_implementation=hashlib.sha256(Path(emf_bitmap.__file__).read_bytes()).hexdigest(),
                     bitmap_limits=[emf_bitmap.MAX_PIXELS,emf_bitmap.MAX_BITMAP_BYTES,emf_bitmap.MAX_BITMAP_RECORDS],
                     emf_limits=[emf_text.MAX_RECORDS,emf_text.MAX_TEXT_RECORDS,emf_text.MAX_TEXT_CODE_UNITS,emf_text.MAX_REFERENCE_JSON_BYTES],
-                    limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT,office.MAX_PACKAGE_EXPANDED,office.MAX_TABLE_GRID_COLUMNS,office.MAX_AUXILIARY_PARTS,office.MAX_IMAGE_BYTES,office.MAX_IMAGE_TOTAL_BYTES,office.MAX_IMAGE_REFERENCES])
+                    limits=[office.MAX_XML,office.MAX_EXPANDED,office.MAX_ENTRIES,office.MAX_UNITS,extraction.MAX_PAGE_TEXT,extraction.MAX_TOTAL_TEXT,office.MAX_PACKAGE_EXPANDED,office.MAX_TABLE_GRID_COLUMNS,office.MAX_AUXILIARY_PARTS,office.MAX_IMAGE_BYTES,office.MAX_IMAGE_TOTAL_BYTES,office.MAX_OBJECT_TOTAL_BYTES,office.MAX_ASSET_TOTAL_BYTES,office.MAX_IMAGE_REFERENCES])
+        try:value['olefile_version']=importlib.metadata.version('olefile')
+        except importlib.metadata.PackageNotFoundError:value['olefile_version']='NOT_INSTALLED'
         if backend=='doc':
             from .doc_conversion import converter_identity
             value['converter']=converter_identity()

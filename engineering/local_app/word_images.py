@@ -11,6 +11,7 @@ R='{http://schemas.openxmlformats.org/officeDocument/2006/relationships}'
 REL='{http://schemas.openxmlformats.org/package/2006/relationships}'
 WP='{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}'
 O='{urn:schemas-microsoft-com:office:office}'
+A14='{http://schemas.microsoft.com/office/drawing/2010/main}'
 
 
 def validate_identity(identity):
@@ -51,25 +52,27 @@ def target_part(part,target):
     return path
 
 
-def image_descriptor(package,part,identity,linked=False):
-    from .office import OfficeError,MAX_IMAGE_BYTES,MAX_IMAGE_TOTAL_BYTES
+def image_descriptor(package,part,identity,linked=False,*,layer=False):
+    from .office import OfficeError,MAX_IMAGE_BYTES,MAX_IMAGE_TOTAL_BYTES,MAX_ASSET_TOTAL_BYTES
     result=dict(relationship_id=identity,status='UNAVAILABLE',scope='PACKAGE_IMAGE_UNTRANSFORMED',
                 content_verified=False,layout_verified=False)
     rel=relationships(package,part).get(identity)
     if linked or (rel and rel.get('TargetMode')=='External'):
         result['reason']='EXTERNAL_IMAGE_NOT_FETCHED';return result
-    if not rel or rel.get('Type')!=R[1:-1]+'/image':
+    allowed_types={R[1:-1]+'/image'}
+    if layer:allowed_types.add('http://schemas.microsoft.com/office/2007/relationships/hdphoto')
+    if not rel or rel.get('Type') not in allowed_types:
         result['reason']='IMAGE_RELATIONSHIP_MISSING_OR_WRONG_TYPE';return result
     if rel.get('TargetMode','Internal')!='Internal':raise OfficeError('Invalid image target mode')
     path=target_part(part,rel.get('Target',''));result['part']=path
     if path not in package.names:result['reason']='IMAGE_PART_MISSING';return result
     cache=getattr(package,'image_assets',None)
-    if cache is None:cache={};package.image_assets=cache;package.image_bytes=0
+    if cache is None:cache={};package.image_assets=cache;package.image_bytes=getattr(package,'image_bytes',0)
     if path not in cache:
         info=package.zip.getinfo(path)
-        if info.is_dir() or info.file_size>MAX_IMAGE_BYTES or package.image_bytes+info.file_size>MAX_IMAGE_TOTAL_BYTES:
+        if info.is_dir() or info.file_size>MAX_IMAGE_BYTES or package.image_bytes+info.file_size>MAX_IMAGE_TOTAL_BYTES or getattr(package,'asset_bytes',0)+info.file_size>MAX_ASSET_TOTAL_BYTES:
             raise OfficeError('Image byte limit')
-        data=package.zip.read(path);package.image_bytes+=len(data)
+        data=package.zip.read(path);package.image_bytes+=len(data);package.asset_bytes=getattr(package,'asset_bytes',0)+len(data)
         cache[path]=dict(bytes=len(data),sha256=hashlib.sha256(data).hexdigest())
         if path.lower().endswith('.emf'):
             from . import emf_text
@@ -92,6 +95,8 @@ def bind_images(package,element,locator):
     for node in element.iter():
         if node.tag==A+'blip':
             identities=[(node.get(R+'embed'),False),(node.get(R+'link'),True)]
+        elif node.tag==A14+'imgLayer':
+            identities=[(node.get(R+'embed'),False),(node.get(R+'link'),True)]
         elif node.tag==V+'imagedata':
             primary=node.get(R+'id');legacy=node.get(O+'relid')
             if primary is not None and legacy is not None and primary!=legacy:raise OfficeError('Conflicting VML image identity')
@@ -102,8 +107,12 @@ def bind_images(package,element,locator):
             validate_identity(identity)
             count=getattr(package,'image_reference_count',0)+1;package.image_reference_count=count
             if count>MAX_IMAGE_REFERENCES or len(identity)>1024:raise OfficeError('Image reference limit')
-            descriptor=image_descriptor(package,locator['part'],identity,linked)
-            descriptor['image']=len(refs)+1;refs.append(descriptor)
+            descriptor=image_descriptor(package,locator['part'],identity,linked,layer=node.tag==A14+'imgLayer')
+            descriptor['image']=len(refs)+1
+            if node.tag==A14+'imgLayer':
+                descriptor['reference_kind']='HD_PHOTO_LAYER'
+                descriptor['layer_composition_verified']=False
+            refs.append(descriptor)
     if refs:
         locator['images']=refs
         # These are native declared alternative labels, not interpreted captions.
