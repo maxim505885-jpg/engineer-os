@@ -61,7 +61,8 @@ class TesseractOCR:
     def __init__(self):
         self.binary,self.data=_paths();self.layout=_layout();self.last_page_dossier=None
 
-    def page_blocks(self,page,page_no,*,bbox=None):
+    def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6):
+        if type(selected_psm)!=int or selected_psm not in (6,11):raise OCRError('OCR_INVALID_PROFILE')
         import fitz
         rotation=page.rotation
         self.last_page_dossier=None
@@ -99,7 +100,8 @@ class TesseractOCR:
                 dossier['pixels']+=count
                 remaining=deadline-time.monotonic()
                 if remaining<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
-                if bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=6)
+                self.last_input_raster=None
+                if bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm)
                 else:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'])
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 dossier['output_bytes']+=len(raw)
@@ -122,8 +124,9 @@ class TesseractOCR:
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 blocks.extend(found)
                 dossier['regions'].append(dict(id=region_id,bbox=dict(zip(('left','top','right','bottom'),clip)),
-                    execution='COMPLETED',render_scale=scale,psm=6 if bbox is not None else 3,
-                    blocks=len(found),characters=sum(len(b['text']) for b in found)))
+                    execution='COMPLETED',render_scale=scale,psm=selected_psm if bbox is not None else 3,
+                    blocks=len(found),characters=sum(len(b['text']) for b in found),
+                    input_raster=getattr(self,'last_input_raster',None)))
                 dossier['completed_passes']+=1
             dossier['coverage']='SELECTED_REGION_EXECUTED' if bbox is not None else ('WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED')
             return blocks
@@ -133,6 +136,8 @@ class TesseractOCR:
         with tempfile.TemporaryDirectory(prefix='engineer-ocr-') as folder:
             root=Path(folder);source=root/'page.png';output=root/'result'
             pixels.save(source)
+            self.last_input_raster=dict(png_sha256=_sha(source),width=pixels.width,height=pixels.height,
+                pixel_origin=[pixels.x,pixels.y],pixels=pixels.width*pixels.height,colorspace='RGB')
             timeout=deadline-time.monotonic()
             if timeout<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
             command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l','rus+eng','--psm',str(psm),'-c','tessedit_create_tsv=1']

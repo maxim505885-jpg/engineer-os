@@ -88,6 +88,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS analysis_receipts(seq INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES jobs(id),record TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
+            CREATE TABLE IF NOT EXISTS source_region_reads(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),result TEXT NOT NULL,result_sha256 TEXT NOT NULL,source_sha256 TEXT NOT NULL,created REAL NOT NULL);
+            CREATE INDEX IF NOT EXISTS source_region_file ON source_region_reads(file_id,created);
             CREATE TABLE IF NOT EXISTS source_reviews(id TEXT PRIMARY KEY,candidate_id TEXT NOT NULL REFERENCES local_evidence(id),session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,created REAL NOT NULL,UNIQUE(candidate_id,revision));
             CREATE TABLE IF NOT EXISTS requirement_sets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS domain_packets(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,revision));

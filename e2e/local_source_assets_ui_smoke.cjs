@@ -25,11 +25,18 @@ child=spawn(process.env.PYTHON||'python3',['-u','-c',fixture,temp],{cwd:path.res
 const origin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Fixture timeout')),15000);child.stdout.on('data',d=>{log+=d;const m=log.match(/ORIGIN (http:\/\/127\.0\.0\.1:\d+)/);if(m){clearTimeout(timer);resolve(m[1]);}});child.once('exit',c=>{clearTimeout(timer);reject(Error('Fixture exit '+c));});});
 browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(origin);
 const pdfCard=page.locator('.file').filter({has:page.getByText('cells.pdf',{exact:true})});
-await pdfCard.locator('.source-assets summary').click();await pdfCard.getByRole('button',{name:'Прочитать активы',exact:true}).click();
+await pdfCard.locator('.source-assets > summary').click();await pdfCard.getByRole('button',{name:'Прочитать активы',exact:true}).click();
 await page.getByRole('button',{name:'Показать ячейки',exact:true}).click();
-await page.waitForSelector('.source-assets table');assert.deepEqual(await page.locator('.source-assets td').allTextContents(),['A','B','1','2']);
-assert.ok((await pdfCard.locator('.source-assets').textContent()).includes('UNCERTAINTY'));
-assert.ok((await pdfCard.locator('.source-assets').textContent()).includes('растровые ячейки не прочитаны'));
+await page.waitForSelector('.source-assets table');assert.deepEqual(await page.locator('.source-assets td').evaluateAll(cells=>cells.map(c=>c.firstChild.textContent)),['A','B','1','2']);
+await pdfCard.getByLabel('Страница таблиц cells.pdf').fill('2');await pdfCard.locator('.region-select').first().click();assert.equal(await pdfCard.getByLabel('Страница фрагмента',{exact:true}).inputValue(),'1');await pdfCard.locator('.region-read').click();await page.waitForSelector('.region-result img');
+assert.ok((await pdfCard.locator('.region-result').textContent()).includes('A'));
+assert.ok((await pdfCard.locator('.region-result').textContent()).includes('UNCERTAINTY'));
+await page.reload();const restored=page.locator('.file').filter({has:page.getByText('cells.pdf',{exact:true})});
+await restored.locator('.source-assets > summary').click();await restored.locator('.region-readback > summary').click();await restored.locator('.region-history').click();await restored.locator('.region-history-open').click();await page.waitForSelector('.region-result img');
+assert.ok((await restored.locator('.region-result').textContent()).includes('A'));
+
+assert.ok((await restored.locator('.source-assets').textContent()).includes('UNCERTAINTY'));
+
 const objectCard=page.locator('.file').filter({has:page.getByText('objects.docx',{exact:true})});
 await objectCard.locator('.source-assets summary').click();await objectCard.getByRole('button',{name:'Прочитать активы',exact:true}).click();
 await objectCard.getByRole('button',{name:'Показать растр OLE',exact:true}).click();
@@ -41,6 +48,6 @@ await page.locator('.ole-bitmap').click();await page.waitForFunction(()=>documen
 assert.ok((await page.locator('#source-caption').textContent()).includes('содержание не подтверждено'));
 await page.getByRole('button',{name:'Закрыть просмотр',exact:true}).click();
 assert.equal(await page.locator('#evidence-list').textContent(),'');assert.deepEqual(errors,[]);
-console.log(JSON.stringify({result:'PASS',checks:['native-table-user-readback','source-bound-candidate','uncertainty-only','no-created-evidence','ole-asset-authenticated-png','ole-checkpoint-png','no-ole-activation'],engineering_acceptance:false}));
+console.log(JSON.stringify({result:'PASS',checks:['region-source-readback-history-reload','native-table-user-readback','source-bound-candidate','uncertainty-only','no-created-evidence','ole-asset-authenticated-png','ole-checkpoint-png','no-ole-activation'],engineering_acceptance:false}));
 }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(e=>{console.error(e);process.exitCode=1;});

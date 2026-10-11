@@ -243,6 +243,21 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .review import record_review
                     body=self.json_body()
                     return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
+                if len(parts) in {6,7} and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='regions':
+                    from .region_history import read_region,get_region,list_regions
+                    if post and len(parts)==6:
+                        body=self.json_body()
+                        if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                        try:return self.respond(201,read_region(store,parts[2],parts[4],body))
+                        finally:self.server.preview_slots.release()
+                    if not post:
+                        if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                        try:
+                            if len(parts)==7:return self.respond(200,get_region(store,parts[2],parts[4],parts[6]))
+                            query=parse_qs(path.query)
+                            if set(query)-{'offset','limit'} or any(len(v)!=1 for v in query.values()):raise ValueError('Invalid region history query')
+                            return self.respond(200,list_regions(store,parts[2],parts[4],int(query.get('offset',['0'])[0]),int(query.get('limit',['50'])[0])))
+                        finally:self.server.preview_slots.release()
                 if len(parts) in {6,7} and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='assets' and not post:
                     from .source_assets import read_assets
                     query=parse_qs(path.query)
