@@ -3,6 +3,7 @@ import io
 import os
 from pathlib import Path
 import tempfile
+import time
 import unittest
 from unittest.mock import patch
 from xml.etree import ElementTree as ET
@@ -25,6 +26,22 @@ def document(formula=None, extras=None, part='word/document.xml'):
         for name, text in parts.items():
             z.writestr(name, text)
     return stream.getvalue()
+
+
+def terminated_within(pid, timeout=1):
+    """SIGKILL delivery is asynchronous; wait on actual state, not a fixed delay."""
+    deadline = time.monotonic()+timeout
+    path = Path('/proc')/str(pid)/'stat'
+    while True:
+        try:
+            state = path.read_text().split(') ', 1)[1][0]
+        except FileNotFoundError:
+            return True
+        if state == 'Z':
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.005)
 
 
 class FormulaPreviewTests(unittest.TestCase):
@@ -147,7 +164,7 @@ class FormulaPreviewTests(unittest.TestCase):
             pid = int((root/'child.pid').read_text())
             # An unreaped zombie is terminated; it cannot continue work.
             path = Path('/proc')/str(pid)/'stat'
-            self.assertTrue(not path.exists() or path.read_text().split(') ', 1)[1].startswith('Z'))
+            self.assertTrue(terminated_within(int(path.parent.name)), 'Converter descendant remained alive after bounded SIGKILL delivery wait')
 
     @unittest.skipUnless(os.sys.platform == 'linux', 'Linux process cleanup')
     def test_converter_log_budget_terminates_without_waiting_for_timeout(self):
@@ -163,7 +180,18 @@ class FormulaPreviewTests(unittest.TestCase):
             code = "import subprocess,sys;from pathlib import Path;child=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)']);Path('child.pid').write_text(str(child.pid))"
             preview._run([os.sys.executable, '-c', code], root, 5, 'child.log')
             path = Path('/proc')/(root/'child.pid').read_text()/'stat'
-            self.assertTrue(not path.exists() or path.read_text().split(') ', 1)[1].startswith('Z'))
+            self.assertTrue(terminated_within(int(path.parent.name)), 'Converter descendant remained alive after bounded SIGKILL delivery wait')
+
+    def test_failing_converter_reports_bounded_stage_exit_code_and_diagnostic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            code = "import sys;print('controlled converter failure',file=sys.stderr);sys.exit(7)"
+            with self.assertRaises(OfficeError) as error:
+                preview._run([os.sys.executable, '-c', code], Path(temp), 5, 'conversion.log')
+            message = str(error.exception)
+            self.assertIn('conversion.log', message)
+            self.assertIn('exit 7', message)
+            self.assertIn('controlled converter failure', message)
+            self.assertLessEqual(len(message), 1500)
 
     def test_formula_and_support_xml_limits_fail_before_launch(self):
         for setting, maximum in (('MAX_FORMULA_XML', 4), ('MAX_NODES', 1), ('MAX_PART_XML', 4), ('MAX_SCAFFOLD', 4)):

@@ -222,7 +222,13 @@ def _run(command, root, timeout, log_name):
     if log_path.stat().st_size > MAX_PDF_BYTES:
         raise OfficeError('Formula converter log byte limit')
     if code != 0:
-        raise OfficeError('Formula converter/rasterizer failed')
+        # Keep failure provenance after the temporary profile/logs are removed.
+        # Read only a bounded suffix; no command/env dump or source package data.
+        with log_path.open('rb') as failed_log:
+            failed_log.seek(max(0, log_path.stat().st_size-1200))
+            diagnostic = failed_log.read(1200).decode('utf-8', errors='replace').strip()
+        diagnostic = ''.join(c if c in '\n\t' or ord(c) >= 32 else '?' for c in diagnostic)
+        raise OfficeError(f'Formula converter/rasterizer failed ({log_name}, exit {code}): {diagnostic}')
     return log_path.read_bytes()[:4096].decode('utf-8', errors='replace').strip()
 
 

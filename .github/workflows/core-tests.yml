@@ -49,6 +49,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core libreoffice-writer
+      - name: Check actual local Word formula renderer
+        env:
+          ENGINEER_OS_TEST_FORMULA_RENDER: "1"
+        run: python -m unittest tests.test_word_formula_preview -v
       - name: Check PDF viewer DOM behavior
         run: node tests/pdf_viewer.test.cjs --dom
       - name: Install locked Playwright Chromium
