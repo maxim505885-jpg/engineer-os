@@ -19,18 +19,18 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,GOOGLE_DRIVE_CLIENT_ID:'',GOOGLE_DRIVE_CLIENT_SECRET:'',GOOGLE_DRIVE_REFRESH_TOKEN:'',ENGINEER_OS_LOCAL_MODEL_URL:`http://127.0.0.1:${model.address().port}`,ENGINEER_OS_LOCAL_MODEL:'qwen3:8b',ENGINEER_OS_LOCAL_PROVIDER:'ollama',ENGINEER_OS_LOCAL_MODEL_KEY:''}});
   const origin=await new Promise((resolve,reject)=>{let log='';const timer=setTimeout(()=>reject(Error('Launcher timeout')),10000);child.stdout.on('data',data=>{log+=data;const f=log.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(f){clearTimeout(timer);resolve(f[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error(`Launcher exited ${code}`));});});
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
-  let releaseBootstrap,bootstrapRequested;const bootstrapGate=new Promise(resolve=>{releaseBootstrap=resolve;}),bootstrapStarted=new Promise(resolve=>{bootstrapRequested=resolve;});
+  let releaseBootstrap,bootstrapSeen=false;const bootstrapGate=new Promise(resolve=>{releaseBootstrap=resolve;});
   async function open({holdBootstrap=false}={}){
    const lifecycle={closing:false,timers:new Set(),pending:new Set()};
    const track=promise=>{lifecycle.pending.add(promise);promise.then(()=>lifecycle.pending.delete(promise),()=>lifecycle.pending.delete(promise));return promise;};
    const opened=await JSDOM.fromURL(origin,{resources:'usable',runScripts:'dangerously',virtualConsole:vc,beforeParse(win){
     const nativeTimeout=win.setTimeout.bind(win);
     win.setTimeout=(callback,delay,...args)=>{if(lifecycle.closing||closing)return 0;const id=nativeTimeout(()=>{lifecycle.timers.delete(id);if(!lifecycle.closing&&!closing)callback(...args);},delay);lifecycle.timers.add(id);return id;};
-    win.fetch=(input,options)=>track(fetch(new URL(input,origin),options).then(async response=>{if(holdBootstrap&&new URL(input,origin).pathname==='/api/sessions'&&(!options?.method||options.method==='GET')){bootstrapRequested();await bootstrapGate;}for(const method of ['json','text','blob','arrayBuffer']){const original=response[method].bind(response);response[method]=(...args)=>track(original(...args));}return response;}));
+    win.fetch=(input,options)=>track(fetch(new URL(input,origin),options).then(async response=>{if(holdBootstrap&&new URL(input,origin).pathname==='/api/sessions'&&(!options?.method||options.method==='GET')){bootstrapSeen=true;await bootstrapGate;}for(const method of ['json','text','blob','arrayBuffer']){const original=response[method].bind(response);response[method]=(...args)=>track(original(...args));}return response;}));
    }});
    lifecycles.set(opened,lifecycle);return opened;
   }
-  dom=await open({holdBootstrap:true});let win=dom.window,doc=win.document;await bootstrapStarted;try{assert.equal(doc.querySelector('#upload').disabled,true,'Upload must remain disabled until a conversation exists; early change is otherwise silently ignored');}finally{releaseBootstrap();}try{await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
+  dom=await open({holdBootstrap:true});let win=dom.window,doc=win.document;try{await until(()=>bootstrapSeen);assert.equal(doc.querySelector('#upload').disabled,true,'Upload must remain disabled until a conversation exists; early change is otherwise silently ignored');}finally{releaseBootstrap();}try{await until(()=>doc.querySelector('nav .session')&&!doc.querySelector('#prompt').disabled);}catch(e){throw new Error(e.message+': '+doc.querySelector('#error').textContent+' / '+errors.join(';'));}
   assert.equal(doc.querySelectorAll('#project-route button').length,6,'Six project stages must be reachable');
   assert.ok(doc.querySelector('#project-next').textContent.includes('документ'),'Empty project needs an actionable next step');
   doc.querySelector('[data-stage="documents"]').click();
