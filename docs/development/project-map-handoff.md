@@ -1,4 +1,4 @@
-# Актуальный результат — §131 итог — PR136 MERGED, кандидат9e253567a3eaa2fbc024a1a05fd960da5e4206ac; Core915/Windows55/Security SUCCESS,6Chromium routes иreal Ollama PASS. Source-bound assets HTTP/UI иполные V4/DOCX structural audits подтверждены. №13 НЕ закрыт:48page cell conflicts,vector/sparse pages492–534,WDP/OLE/Word/visual/corpus gaps. ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+# Актуальный результат — §132 — PR137 OPEN, heade2570bce0425cdb4420ef700b569f380ad538b94; реализованы source-bound WDP layer bindings, passive OLE bitmap preview HTTP/UI и sparse V4 OCR routing. Local943tests PASS/17skips, независимый review PASS. Реальные21PBrush bitmap pixels сверены;V4 all534renders/43OCR candidates,конфликтыП1→111 ив→6 остаются. Full original native Store/HTTP checkpoint proof иfinal-head CI выполняются. №13 OPEN поqualified Word/formula/graphics/table/corpus,№14/19 OPEN;ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
 
 # Актуальный результат — §131: PR136 source assets HTTP/UI,full V4/DOCX audit;№13 НЕ закрыт по выявленным gaps. Читать итог§131 карты;расчёты отложены,ПК не обновлён.
 
@@ -360,3 +360,8 @@ PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9
 ### Итог §131 — PR136 объединён, №13 остаётся открытым по фактическим пробелам
 
 PR136 MERGED expected head54d86a160e4a0161d1a886e380c5192b6b97940e → candidate9e253567a3eaa2fbc024a1a05fd960da5e4206ac,tree92c3ed2e6e849d96830ee40ca79b5467f86de136. Core38127002376 SUCCESS:915tests/97.717s,2Windows-only skips,HTTP/DOM и6Chromium routes включаяnewnative-table-user-readback. Windows38127002396 SUCCESS:55tests/14.979s,cold start/repeat/restart,real Ollama qwen3:0.6b inference и6browser routes. Security38127002368 SUCCESS. Полноеcandidate tree совпадает с опубликованным иlocaltested tree. Local915/17skips;independent finalreview Critical/Important нет. На пользовательскомПК не установлено. Document qualification6/6BLOCK;№13не закрыт,originals unchanged,engineering ACCEPTED не выдан. Следующая независимая работа — конкретные representational/visual/corpus gaps,неЛИРА.
+
+
+## Актуальный проход§132
+
+§132 — PR137 OPEN, heade2570bce0425cdb4420ef700b569f380ad538b94; реализованы source-bound WDP layer bindings, passive OLE bitmap preview HTTP/UI и sparse V4 OCR routing. Local943tests PASS/17skips, независимый review PASS. Реальные21PBrush bitmap pixels сверены;V4 all534renders/43OCR candidates,конфликтыП1→111 ив→6 остаются. Full original native Store/HTTP checkpoint proof иfinal-head CI выполняются. №13 OPEN поqualified Word/formula/graphics/table/corpus,№14/19 OPEN;ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
