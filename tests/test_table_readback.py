@@ -160,5 +160,28 @@ class TableReadbackTests(unittest.TestCase):
         self.assertTrue(all(c['text'] is None for c in result['tables'][0]['cells']))
         self.assertFalse(result['acceptance_granted'])
 
+    @unittest.skipUnless(os.environ.get('ENGINEER_OS_TABLE_PYTHON'),'optional table environment not configured')
+    @unittest.skipIf(os.name=='nt','controlled OCR executable uses POSIX shebang')
+    def test_tesseract_consumes_source_png_bytes_and_explicit_hocr_argument(self):
+        import json, shutil
+        actual=shutil.which('tesseract')
+        with tempfile.TemporaryDirectory() as temp:
+            capture=Path(temp)/'observed.json';binary=Path(temp)/'tesseract'
+            binary.write_text('#!'+sys.executable+'\nimport sys,subprocess,json,hashlib\n'
+                'from pathlib import Path\n'
+                'args=sys.argv[1:]\n'
+                'raw=sys.stdin.buffer.read() if "stdin" in args else None\n'
+                'if raw is not None: Path('+repr(str(capture))+').write_text(json.dumps({"sha256":hashlib.sha256(raw).hexdigest(),"prefix":raw[:8].hex(),"args":args}))\n'
+                'p=subprocess.run(['+repr(actual)+']+args,input=raw,stdout=subprocess.PIPE,stderr=sys.stderr.buffer)\n'
+                'sys.stdout.buffer.write(p.stdout);sys.exit(p.returncode)\n')
+            binary.chmod(0o700)
+            with patch.dict(os.environ,{'PATH':temp+os.pathsep+os.environ.get('PATH','')}):
+                result=reader.read_tables(ruled_table(),1,[30,30,530,370],'img2table')
+            observed=json.loads(capture.read_text())
+        self.assertEqual(observed['prefix'],'89504e470d0a1a0a')
+        self.assertEqual(observed['sha256'],result['raster']['png_sha256'])
+        self.assertIn('tessedit_create_hocr=1',observed['args'])
+        self.assertIn('Number',[c['text'] for c in result['tables'][0]['cells']])
+
 
 if __name__=='__main__': unittest.main()

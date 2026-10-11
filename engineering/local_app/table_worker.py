@@ -27,6 +27,90 @@ def geometry(box, raster, selected):
                 source_bbox_before_selection_clip=mapped, selection_boundary_clipped=mapped != clipped)
 
 
+def compare_native_text(page, selected, tables):
+    """Independent alternatives for a uniquely matching cell; never replace OCR.
+
+    Native PDF text is itself unverified. Agreement is not acceptance and a
+    geometric match never establishes engineering meaning or full coverage.
+    """
+    import fitz
+    import itertools
+    import re
+    index={};count=0;native_bytes=0
+    # Optional alternatives must not crowd a valid OCR payload out of the
+    # protocol. Reserve room for the receipt and cap native additions outright.
+    base_bytes=len(json.dumps(tables,ensure_ascii=False).encode('utf-8'))
+    native_budget=min(512*1024,max(0,MAX_OUTPUT_BYTES-base_bytes-128*1024))
+    try:
+        native=page.find_tables(clip=fitz.Rect(selected)).tables
+        if len(native)>MAX_TABLES:raise ValueError('NATIVE_COMPARISON_LIMIT')
+        for table in native:
+            values=table.extract()
+            for row, geometry_row in enumerate(table.rows):
+                for column, box in enumerate(geometry_row.cells):
+                    if box is None:continue
+                    count+=1
+                    if count>MAX_CELLS:raise ValueError('NATIVE_COMPARISON_LIMIT')
+                    if (box[0]<selected[0] or box[1]<selected[1] or
+                        box[2]>selected[2] or box[3]>selected[3]):continue
+                    text=values[row][column]
+                    if text is not None and (not isinstance(text,str) or len(text)>4096):
+                        raise ValueError('NATIVE_COMPARISON_LIMIT')
+                    native_bytes+=len(json.dumps(text,ensure_ascii=False).encode('utf-8'))+512
+                    if native_bytes>native_budget:raise ValueError('NATIVE_COMPARISON_LIMIT')
+                    key=tuple(math.floor(v) for v in box)
+                    item=(tuple(box),text)
+                    bucket=index.setdefault(key,[])
+                    if item not in bucket:bucket.append(item)
+    except Exception:
+        # Recognition output remains available when the optional independent
+        # reader cannot supply a bounded comparison.
+        for table in tables:
+            table.update(native_comparison='UNAVAILABLE',text_conflict_count=0)
+        return
+    normalize=lambda text:re.sub(r'\s+','',text or '')
+    attached_bytes=0
+    for table in tables:
+        table.update(native_comparison='UNVERIFIED',text_conflict_count=0)
+        for cell in table['cells']:
+            box=cell['source_bbox'];key=tuple(math.floor(v) for v in box);matches=[]
+            for offset in itertools.product((-1,0,1),repeat=4):
+                for item in index.get(tuple(k+d for k,d in zip(key,offset)),[]):
+                    if all(abs(a-b)<=.5 for a,b in zip(box,item[0])) and item not in matches:
+                        matches.append(item)
+            if len(matches)!=1:
+                attached_bytes+=128
+                if attached_bytes>native_budget:
+                    for output_table in tables:
+                        output_table.update(native_comparison='UNAVAILABLE',text_conflict_count=0)
+                        for output_cell in output_table['cells']:
+                            output_cell.pop('native_text_alternative',None)
+                            output_cell.pop('text_comparison',None)
+                    return
+                cell['text_comparison']='NO_UNIQUE_NATIVE_CELL'
+                continue
+            source_box,text=matches[0]
+            alternative=dict(text=text,source_bbox=list(source_box),
+                engine='PyMuPDF',version=fitz.VersionBind,quality_verified=False,
+                association='UNIQUE_BBOX_WITHIN_0.5_SOURCE_POINT',acceptance_granted=False)
+            attached_bytes+=len(json.dumps(alternative,ensure_ascii=False).encode('utf-8'))+256
+            if attached_bytes>native_budget:
+                for output_table in tables:
+                    output_table.update(native_comparison='UNAVAILABLE',text_conflict_count=0)
+                    for output_cell in output_table['cells']:
+                        output_cell.pop('native_text_alternative',None)
+                        output_cell.pop('text_comparison',None)
+                return
+            cell['native_text_alternative']=alternative
+            if cell.get('text') is None or text is None:
+                cell['text_comparison']='TEXT_UNAVAILABLE_IN_ONE_READER'
+            elif normalize(cell['text'])!=normalize(text):
+                cell['text_comparison']='OCR_NATIVE_CONFLICT'
+                table['text_conflict_count']+=1
+            else:
+                cell['text_comparison']='AGREEMENT_UNVERIFIED'
+
+
 def img_tables(png, language):
     if importlib.metadata.version('img2table') != '1.4.2':
         raise ValueError('IMG2TABLE_VERSION_MISMATCH')
@@ -218,10 +302,17 @@ def execute(request):
                          status='UNCERTAINTY',acceptance_granted=False)
             for cell in table['cells']:
                 cell.update(geometry(cell.pop('bbox'),raster,selected))
+        compare_native_text(page,selected,tables)
+        result['text_conflict_count']=sum(t['text_conflict_count'] for t in tables)
+        if result['text_conflict_count']:
+            result['limitations'].append('OCR_NATIVE_CONFLICT_REQUIRES_SOURCE_REVIEW')
         result['tables']=tables
         result['table_count']=len(tables)
         result['backend_version']=importlib.metadata.version('img2table' if backend=='img2table' else 'paddleocr')
         result['engine_identity']=dict(backend=backend,version=result['backend_version'],language=language)
+        result['engine_identity']['adapter_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        result['engine_identity']['native_text_comparison']=dict(engine='PyMuPDF',version=fitz.VersionBind,
+            bbox_tolerance_source_points=.5,normalization='WHITESPACE_ONLY',acceptance_granted=False)
         if backend=='paddleocr':
             manifest=Path(os.environ['ENGINEER_OS_PADDLE_MODELS_MANIFEST'])
             result['engine_identity']['local_models_manifest_sha256']=hashlib.sha256(manifest.read_bytes()).hexdigest()

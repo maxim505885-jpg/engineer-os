@@ -17,6 +17,15 @@ This resolves missing-config table disappearance, not recognition accuracy:
 real V4 p55 rus+eng still confuses italic `d20` with `420`. Such OCR candidates
 must not be accepted without source review.
 
+The selected source PDF is also read independently by PyMuPDF. A native text
+alternative is attached only for one unique cell bounding box within 0.5 source
+PDF point on every boundary; ambiguous/missing matches remain explicit. Both
+texts are retained. Whitespace-only normalized disagreement is
+`OCR_NATIVE_CONFLICT`, visible in the UI beside both versions. Agreement is
+`AGREEMENT_UNVERIFIED`, never acceptance. Native text is also a candidate, not an
+automatic correction or substitute for the exact OCR raster. The receipt
+records adapter SHA, native reader version and comparison policy.
+
 Install the optional environment separately from the core application:
 
 ```sh
