@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план (11.10.2026):** §130 — №13 остаётся открытым; исправлен пропуск per-cell геометрии PDF, реальная native таблица V4 стр.15: 24/24 значения и координаты сверены. Кандидат до интеграции — c52cfb49dee030ce6d98ae3fe69477964f42b57c (PR129). Полные raster/mixed tables, OCR/Word/EMF/OMML/corpus и настоящий app→Supabase replay открыты. Расчёты отложены. 8✅/8🟡/3❌.
+**Активный план (11.10.2026):** §130 итог — PR135 MERGED, кандидат4641743a6da1086be75649a5e34c896283842888; Core910/Security SUCCESS. Native PDF per-cell/header provenance и реальная V4 таблица стр.15 (24/24) проверены. №13 открыт: raster/mixed values, OCR/graphics/Word/EMF/OMML/corpus и live app→Supabase. ПК не обновлён. Расчёты отложены. 8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -18,7 +18,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Производственная полнота документов | ❌ Открыто | PR108 merged,e0754b2:real DOCX14684/14684 послеresume,749/749 controlled-model batches;V4 render534/534 и40OCR candidates. Qualified tables/graphics/formulas/OCR/Word-layout/corpus не подтверждены (§92 итог). |
+| 13 | Production completeness документов | ❌ полностью не закрыто | §130 итог:PR135 merged4641743;Core910/Security PASS,real V4 native24/24 cell geometry/text. Raster/mixed content,OCR/graphics/Word/EMF/OMML/corpus иlive application→Supabase остаются открыты. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -475,3 +475,7 @@ PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9
 §130: native PDF table V2 сохраняет индивидуальные cell/header coordinates, unresolved slots и rotation/source identity. Реальная таблица V4 стр.15:24/24 native значения/rectangle сверены; raster/mixed content остаётся не подтверждён. Кандидат до интеграции c52cfb4. Полный app→Supabase replay не заменён capture transport; критерии №13/14/19 остаются открытыми. Далее — source-bound raster/mixed cell content и графические подписи через существующий application route. ЛИРА/RES отложены.
 
 Публикация §130: PR135 head1a9e0c93d2e31376dfafbea33afc78b04eb12734, full910 OK/17 skips; Core/Security выполняются, MERGE не подтверждён. Другие open browser PR130–134 не включены; не повторять их реализацию.
+
+### Итог §130 — PR135 объединён в кандидат
+
+PR135 MERGED squash с exact expected head1a9e0c93d2e31376dfafbea33afc78b04eb12734. Новый кандидат **4641743a6da1086be75649a5e34c896283842888**, tree3892ae0af7a0cab3b51f5157b3c7c952e14ddea1 совпадает с проверенным локальным/PR деревом. Final-head Core38120688580 и Security38120688628 SUCCESS. Core910 tests/95.747s OK,2 Windows-only skips;HTTP/DOM иexisting Chromium routes PASS. Отдельный Windows workflow нового изменения NOT_RUN (DI-only path filters), physical PC NOT_RUN. Real V4 native sample24/24 сохранён и сверён;оригинал неизменён. Raster/mixed semantics,OCR/graphics/Word/EMF/OMML/corpus иlive app→Supabase остаются открыты;№13/14/19 НЕ закрыты,8✅/8🟡/3❌. Следующий проход — растровые/mixed значения с cell/source geometry через существующий application route. Расчёты отложены.
