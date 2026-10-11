@@ -1,3 +1,5 @@
+# Актуальный результат — §131 итог — PR136 MERGED, кандидат9e253567a3eaa2fbc024a1a05fd960da5e4206ac; Core915/Windows55/Security SUCCESS,6Chromium routes иreal Ollama PASS. Source-bound assets HTTP/UI иполные V4/DOCX structural audits подтверждены. №13 НЕ закрыт:48page cell conflicts,vector/sparse pages492–534,WDP/OLE/Word/visual/corpus gaps. ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+
 # MASTER PLAN — ENGINEER OS
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
@@ -18,7 +20,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR 91–98 merged; все 9 CI SUCCESS, итог §74.1. |
 | 11 | Интерфейс и пользовательский маршрут | 🟡 интеграция | Дизайн кандидата сохранён вместе с формами источников/ТЗ/ролей/черновиков.5 browser workflows включая CAD/memory/mobile/session иsource images/native EMF text/embedded raster PASS (§90 итог). Приёмка UI на реальном accepted объекте остаётся. |
 | 12 | Backup/restore/recovery/security | 🟡 интеграция | Один bounded engine, чтение двух форматов, SHA256/SQLite/no-replace/key/derived/settings. Совместимость двух форматов проверена; воспроизведённые symlink/hardlink внутреннего DB/lock/settings/key устранены. Core/Security CI PASS; CodeQL 29 alerts individually reviewed/dismissed FP,checkSUCCESS; физический Windows NOT_RUN. |
-| 13 | Production completeness документов | ❌ полностью не закрыто | §130 итог:PR135 merged4641743;Core910/Security PASS,real V4 native24/24 cell geometry/text. Raster/mixed content,OCR/graphics/Word/EMF/OMML/corpus иlive application→Supabase остаются открыты. |
+| 13 | Production completeness документов | ❌ полностью не закрыто | §131:PR136 source-bound HTTP/UI активов иnative ячеек;полный V4/DOCX audit выявил48страниц cell differences,43vector/sparse pages,11WDP bindings/21OLE иvisual/corpus gaps. Qualified полнота не подтверждена. |
 | 14 | Реальный принятый инженерный кейс | ❌ | Требуется реальный квалифицированный объект с полным ТЗ, свежими источниками, нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 программный маршрут | Версионное знание только из актуального принятого audit; scope/recall/revoke/delete/export/backup, повторная проверка обязательна. Реальный положительный ACCEPTED→memory сценарий ещё не выполнен. |
 | 16 | Генератор отчётов | 🟡 | Редактируемый черновик, история, источники/координаты, dossier покрытия/stale guards,3 шаблона и источник-связанные иллюстрации DOCX/PDF реализованы. Общая проверка726/Node/DOM/Chromium и визуальная проверка DOCX/PDF PASS; выпуск принятого документа остаётся открыт. |
@@ -479,3 +481,13 @@ PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9
 ### Итог §130 — PR135 объединён в кандидат
 
 PR135 MERGED squash с exact expected head1a9e0c93d2e31376dfafbea33afc78b04eb12734. Новый кандидат **4641743a6da1086be75649a5e34c896283842888**, tree3892ae0af7a0cab3b51f5157b3c7c952e14ddea1 совпадает с проверенным локальным/PR деревом. Final-head Core38120688580 и Security38120688628 SUCCESS. Core910 tests/95.747s OK,2 Windows-only skips;HTTP/DOM иexisting Chromium routes PASS. Отдельный Windows workflow нового изменения NOT_RUN (DI-only path filters), physical PC NOT_RUN. Real V4 native sample24/24 сохранён и сверён;оригинал неизменён. Raster/mixed semantics,OCR/graphics/Word/EMF/OMML/corpus иlive app→Supabase остаются открыты;№13/14/19 НЕ закрыты,8✅/8🟡/3❌. Следующий проход — растровые/mixed значения с cell/source geometry через существующий application route. Расчёты отложены.
+
+
+## Проход №13 — §131,11.10.2026
+
+PR136 добавляет user HTTP/UI readback безпринятия;915local tests PASS/17skips. Полные реальные V4/DOCX сверены структурно;конкретные потери/неподтверждённые представления перечислены в§131 иQA. №13 остаётся OPEN,6document gates BLOCK. Не подменять qualified completeness source hashes/counts/CI. Расчёты отложены;ПК не обновлён.
+
+
+### Итог §131 — PR136 объединён, №13 остаётся открытым по фактическим пробелам
+
+PR136 MERGED expected head54d86a160e4a0161d1a886e380c5192b6b97940e → candidate9e253567a3eaa2fbc024a1a05fd960da5e4206ac,tree92c3ed2e6e849d96830ee40ca79b5467f86de136. Core38127002376 SUCCESS:915tests/97.717s,2Windows-only skips,HTTP/DOM и6Chromium routes включаяnewnative-table-user-readback. Windows38127002396 SUCCESS:55tests/14.979s,cold start/repeat/restart,real Ollama qwen3:0.6b inference и6browser routes. Security38127002368 SUCCESS. Полноеcandidate tree совпадает с опубликованным иlocaltested tree. Local915/17skips;independent finalreview Critical/Important нет. На пользовательскомПК не установлено. Document qualification6/6BLOCK;№13не закрыт,originals unchanged,engineering ACCEPTED не выдан. Следующая независимая работа — конкретные representational/visual/corpus gaps,неЛИРА.

@@ -6,7 +6,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план (11.10.2026):** §130 итог — PR135 MERGED, кандидат4641743a6da1086be75649a5e34c896283842888; Core910/Security SUCCESS. Native PDF per-cell/header provenance и реальная V4 таблица стр.15 (24/24) проверены. №13 открыт: raster/mixed values, OCR/graphics/Word/EMF/OMML/corpus и live app→Supabase. ПК не обновлён. Расчёты отложены. 8✅/8🟡/3❌.
+**Активный план (11.10.2026):** §131 итог — PR136 MERGED, кандидат9e253567a3eaa2fbc024a1a05fd960da5e4206ac; Core915/Windows55/Security SUCCESS,6Chromium routes иreal Ollama PASS. Source-bound assets HTTP/UI иполные V4/DOCX structural audits подтверждены. №13 НЕ закрыт:48page cell conflicts,vector/sparse pages492–534,WDP/OLE/Word/visual/corpus gaps. ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -26,7 +26,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Интерфейс кандидата объединён с инженерными формами/CAD/памятью;4 Chromium маршрута,мобильный экран иsession reset PASS. Перенос и приёмка на реальном объекте остаются. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite, ключи, CAD/память/settings сохраняются. Воспроизведённые внутренние symlink/hardlink ошибки устранены; Core/Security CI PASS. CodeQL29 high требует triage; перенос и physical Windows остаются. |
-| 13 | Производственная полнота документов | ❌ Открыто | §130 итог:PR135 merged4641743;native PDF cell/header geometry,V4 стр.15 24/24 сверены. Qualified raster/mixed values,OCR/graphics/Word/EMF/OMML/corpus иlive application→Supabase не подтверждены. |
+| 13 | Производственная полнота документов | ❌ Открыто | §131 итог:PR136 merged9e253567;Core915/Windows55/Security иnative assets HTTP/UI PASS. Полный V4/DOCX audit выявил48страниц cell conflicts,vector492–534,WDP/OLE/visual/corpus gaps;qualified completeness BLOCK. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
@@ -3301,3 +3301,25 @@ RED/GREEN — native/merged/rotation/source-change;12 профильных reade
 ### Итог §130 — PR135 объединён в кандидат
 
 PR135 MERGED squash с exact expected head1a9e0c93d2e31376dfafbea33afc78b04eb12734. Новый кандидат **4641743a6da1086be75649a5e34c896283842888**, tree3892ae0af7a0cab3b51f5157b3c7c952e14ddea1 совпадает с проверенным локальным/PR деревом. Final-head Core38120688580 и Security38120688628 SUCCESS. Core910 tests/95.747s OK,2 Windows-only skips;HTTP/DOM иexisting Chromium routes PASS. Отдельный Windows workflow нового изменения NOT_RUN (DI-only path filters), physical PC NOT_RUN. Real V4 native sample24/24 сохранён и сверён;оригинал неизменён. Raster/mixed semantics,OCR/graphics/Word/EMF/OMML/corpus иlive app→Supabase остаются открыты;№13/14/19 НЕ закрыты,8✅/8🟡/3❌. Следующий проход — растровые/mixed значения с cell/source geometry через существующий application route. Расчёты отложены.
+
+
+## 131. №13 — полный проход реальных источников и пользовательский readback, 11.10.2026
+
+Исходный кандидат4641743a6da1086be75649a5e34c896283842888 и актуальные AGENTS/§130/master-plan/handoff проверены; расчёты остаются отложены. Поручение «закрой13 за один проход» выполнено как полный доступный анализ/реализация/проверка; сам пункт НЕ закрыт, поскольку выявлены фактические пробелы и отсутствует qualified document approval. Критерии не ослаблены.
+
+Изменение feat/stage13-source-roundtrip-20261011, PR136 https://github.com/maxim505885-jpg/engineer-os/pull/136: local authenticated HTTP/UI выдаёт paginated DOCX native OMML/media inventory и native PDF per-page cell candidates; пользователь читает таблицу или скачивает исходный media/serialized OMML payload. Session/sourceSHA/candidateSHA/bounds проверены, результаты UNCERTAINTY, evidence не создаётся. Нестандартные auxiliary XML формулы поддержаны; OLE и image transforms не интерпретируются. Original binary media byte parity не означает source XML lexeme parity: OMML сериализован ElementTree. Reviewer выявил обход aggregate budget формулами и глобальный PyMuPDF CHARS race между PDF; оба воспроизведены и исправлены incremental budget/process-global extraction lock. Финальный независимый review Critical/Important нет;11 focused tests PASS.
+
+Реальный DOCX147210288/SHA b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5: все18305native w:t покрыты,14639unit prefix comparisons без пропусков;14684reader units.41OMML полных XML-структур совпадают;642media/683asset candidates имеют payload parity;671supported refs совпадают;3357уникальных native EMF text records/138EMF сверены. Конкретные gaps:11WDP image-layer bindings,21OLE/PBrush semantic objects,19EMFcomments,Word placement/transforms/fonts/fields/formula visuals. LibreOffice/Inkscape доступны; sample EMF render inspected. Full original Word render attempted, successful output иexact original-layout fidelity не подтверждены; font substitutions документированы.
+
+Полный V4 PDF74522583/SHA b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916: все534renders иnative/table scans complete/no exceptions,source unchanged;374397native chars.716table candidates,57027slots,23790non-null,33237unresolved nulls;528frame suspects.959whitespace-normalized differences и788character-multiset differences на48точных страницах перечислены в QA. Это кандидаты на сверку, не установленный дефект отчёта/конструкции. Vector labels492–531 безnative;dense diagrams532–534 имеют32/36/60native chars и обходят native-empty OCR-only heuristic. Rus OCR model здесь отсутствует; existing CI runtime OCR не заменяет qualified real V4 OCR/conflict review.
+
+Fresh Store HTTP upload/download original byte equality обоих реальных файлов PASS. Полный DOCX HTTP inventory683IDs/hashes совпал с independent reader; selected formula/EMF/raster payloads иобе PDF candidates page15 сверены по SHA. Это не all683HTTPpayload downloads и не новый полный real Store/Worker/model прогон. Корпус audit264tests/249pass/15OCRskips; существующие «mixed»/«live RPC» fixtures не подтверждают qualified raster corpus/live DB. Все6document qualification gates остаются BLOCK; accepted/evidence не выдуманы.
+
+Local full915tests/70.037s OK,17environment skips;11profile tests,10Node,architecture/compile/JS/diff PASS. Browser новый маршрут включён в Core/Windows, локальныйChromium отсутствует. Опубликованный exact head54d86a160e4a0161d1a886e380c5192b6b97940e/tree92c3ed2e6e849d96830ee40ca79b5467f86de136 совпадает с local72d323a. CI Core38127002376,Windows38127002396,Security38127002368 — итог ниже. QA docs/qa/2026-10-11-{v4-full-document-audit,docx-full-asset-audit,stage13-gate-matrix,source-asset-http-roundtrip}.
+
+Полный машинный audit/reproduction/selected visual evidence сохранён ENGINEER_OS_stage13_audit_20261011.zip,Library libfile_355e03f67e748191bc60d932cbaec0c7. №13/14/19 открыты;8✅/8🟡/3❌. На ПК не установлено, инженерно не принято. Следующая работа№13 по реальным находкам: содержимое/привязки WDP/OLE;vector labels492–534 сOCR/геометрией;resolved real merged/raster cells сsource comparison;qualified full formula/graphics/Word/corpus review. К расчётам не возвращаться.
+
+
+### Итог §131 — PR136 объединён, №13 остаётся открытым по фактическим пробелам
+
+PR136 MERGED expected head54d86a160e4a0161d1a886e380c5192b6b97940e → candidate9e253567a3eaa2fbc024a1a05fd960da5e4206ac,tree92c3ed2e6e849d96830ee40ca79b5467f86de136. Core38127002376 SUCCESS:915tests/97.717s,2Windows-only skips,HTTP/DOM и6Chromium routes включаяnewnative-table-user-readback. Windows38127002396 SUCCESS:55tests/14.979s,cold start/repeat/restart,real Ollama qwen3:0.6b inference и6browser routes. Security38127002368 SUCCESS. Полноеcandidate tree совпадает с опубликованным иlocaltested tree. Local915/17skips;independent finalreview Critical/Important нет. На пользовательскомПК не установлено. Document qualification6/6BLOCK;№13не закрыт,originals unchanged,engineering ACCEPTED не выдан. Следующая независимая работа — конкретные representational/visual/corpus gaps,неЛИРА.
