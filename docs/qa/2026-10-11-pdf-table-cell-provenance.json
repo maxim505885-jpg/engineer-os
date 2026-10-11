@@ -1,0 +1,369 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "source_bytes": 74522583,
+  "source_unchanged": true,
+  "pymupdf_version": "1.26.6",
+  "pages_probed": [
+    15,
+    16
+  ],
+  "detected_candidates": 3,
+  "qualified_native_sample": {
+    "page": 15,
+    "rows": 8,
+    "columns": 3,
+    "cells": 24,
+    "native_clip_matches": 24,
+    "visual_text_and_grid_review": "24/24 native cell values and visible grid reviewed against source page render; no normative assessment",
+    "payload_sha256": "cd7a4d670f6cf9238bcd248ae220fbb4cf7406c6d0ffd81fdae60cd0df4f1641",
+    "candidate_id": "doc-asset:84b913ae3c9f677131be79e1375c079a83b3e9d3bdfa7468f8b4008ea8f9f314"
+  },
+  "backend_callable_replay": "PASS_WITH_CAPTURE_TRANSPORT",
+  "candidate_file_ledger_readback": "PASS",
+  "live_database_write": "NOT_RUN",
+  "full_application_http_ui": "NOT_RUN",
+  "raster_mixed_semantics": "NOT_VERIFIED",
+  "all_document_qualification": "NOT_VERIFIED",
+  "acceptance_granted": false,
+  "native_table_sample": {
+    "values": [
+      [
+        "Параметр",
+        "Значение",
+        "Обоснование"
+      ],
+      [
+        "Климатические условия\nплощадки строительства",
+        "IIIБ",
+        "СП 131.13330.2025"
+      ],
+      [
+        "Вес снегового покрова\n(нормативное значение), S₀",
+        "0,50 кПа",
+        "СП 131.13330.2025"
+      ],
+      [
+        "Ветровое давление\n(нормативное значение), W₀",
+        "0,30 кПа",
+        "СП 131.13330.2025,\nтабл. 11.1"
+      ],
+      [
+        "Абсолютный минимум\nтемпературы воздуха",
+        "-30,0 °C",
+        "СП 131.13330.2025"
+      ],
+      [
+        "Абсолютный максимум\nтемпературы воздуха",
+        "+40,0 °C",
+        "СП 131.13330.2025"
+      ],
+      [
+        "Нормативная глубина сезонного\nпромерзания грунтов",
+        "0,40 м",
+        "СП 131.13330.2025"
+      ],
+      [
+        "Сейсмичность района",
+        "7 баллов",
+        "СП 14.13330.2018"
+      ]
+    ],
+    "cells": [
+      {
+        "row": 1,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          343.84999084472656,
+          283.50999450683594,
+          375.4099884033203
+        ],
+        "text": "Параметр",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 1,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          343.84999084472656,
+          402.8199920654297,
+          375.4099884033203
+        ],
+        "text": "Значение",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 1,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          343.84999084472656,
+          572.3999633789062,
+          375.4099884033203
+        ],
+        "text": "Обоснование",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 2,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          375.4099884033203,
+          283.50999450683594,
+          423.16998291015625
+        ],
+        "text": "Климатические условия\nплощадки строительства",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 2,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          375.4099884033203,
+          402.8199920654297,
+          423.16998291015625
+        ],
+        "text": "IIIБ",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 2,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          375.4099884033203,
+          572.3999633789062,
+          423.16998291015625
+        ],
+        "text": "СП 131.13330.2025",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 3,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          423.16998291015625,
+          283.50999450683594,
+          470.8299865722656
+        ],
+        "text": "Вес снегового покрова\n(нормативное значение), S₀",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 3,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          423.16998291015625,
+          402.8199920654297,
+          470.8299865722656
+        ],
+        "text": "0,50 кПа",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 3,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          423.16998291015625,
+          572.3999633789062,
+          470.8299865722656
+        ],
+        "text": "СП 131.13330.2025",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 4,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          470.8299865722656,
+          283.50999450683594,
+          518.5899658203125
+        ],
+        "text": "Ветровое давление\n(нормативное значение), W₀",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 4,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          470.8299865722656,
+          402.8199920654297,
+          518.5899658203125
+        ],
+        "text": "0,30 кПа",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 4,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          470.8299865722656,
+          572.3999633789062,
+          518.5899658203125
+        ],
+        "text": "СП 131.13330.2025,\nтабл. 11.1",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 5,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          518.5899658203125,
+          283.50999450683594,
+          566.22998046875
+        ],
+        "text": "Абсолютный минимум\nтемпературы воздуха",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 5,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          518.5899658203125,
+          402.8199920654297,
+          566.22998046875
+        ],
+        "text": "-30,0 °C",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 5,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          518.5899658203125,
+          572.3999633789062,
+          566.22998046875
+        ],
+        "text": "СП 131.13330.2025",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 6,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          566.22998046875,
+          283.50999450683594,
+          613.989990234375
+        ],
+        "text": "Абсолютный максимум\nтемпературы воздуха",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 6,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          566.22998046875,
+          402.8199920654297,
+          613.989990234375
+        ],
+        "text": "+40,0 °C",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 6,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          566.22998046875,
+          572.3999633789062,
+          613.989990234375
+        ],
+        "text": "СП 131.13330.2025",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 7,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          613.989990234375,
+          283.50999450683594,
+          661.6599731445312
+        ],
+        "text": "Нормативная глубина сезонного\nпромерзания грунтов",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 7,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          613.989990234375,
+          402.8199920654297,
+          661.6599731445312
+        ],
+        "text": "0,40 м",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 7,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          613.989990234375,
+          572.3999633789062,
+          661.6599731445312
+        ],
+        "text": "СП 131.13330.2025",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 8,
+        "column": 1,
+        "bbox": [
+          63.744001388549805,
+          661.6599731445312,
+          283.50999450683594,
+          693.3399658203125
+        ],
+        "text": "Сейсмичность района",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 8,
+        "column": 2,
+        "bbox": [
+          283.50999450683594,
+          661.6599731445312,
+          402.8199920654297,
+          693.3399658203125
+        ],
+        "text": "7 баллов",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      },
+      {
+        "row": 8,
+        "column": 3,
+        "bbox": [
+          402.8199920654297,
+          661.6599731445312,
+          572.3999633789062,
+          693.3399658203125
+        ],
+        "text": "СП 14.13330.2018",
+        "geometry_status": "DETECTED_UNVERIFIED"
+      }
+    ],
+    "bbox": [
+      63.744001388549805,
+      343.84999084472656,
+      572.3999633789062,
+      693.3399658203125
+    ],
+    "coordinate_system": "PYMUPDF_UNROTATED_PAGE_TOPLEFT_POINTS"
+  }
+}
