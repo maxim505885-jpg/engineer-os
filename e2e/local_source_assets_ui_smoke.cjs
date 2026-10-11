@@ -28,7 +28,7 @@ const pdfCard=page.locator('.file').filter({has:page.getByText('cells.pdf',{exac
 await pdfCard.locator('.source-assets > summary').click();await pdfCard.getByRole('button',{name:'Прочитать активы',exact:true}).click();
 await page.getByRole('button',{name:'Показать ячейки',exact:true}).click();
 await page.waitForSelector('.source-assets table');assert.deepEqual(await page.locator('.source-assets td').evaluateAll(cells=>cells.map(c=>c.firstChild.textContent)),['A','B','1','2']);
-await pdfCard.locator('.region-select').first().click();await pdfCard.locator('.region-read').click();await page.waitForSelector('.region-result img');
+await pdfCard.getByLabel('Страница таблиц cells.pdf').fill('2');await pdfCard.locator('.region-select').first().click();assert.equal(await pdfCard.getByLabel('Страница фрагмента',{exact:true}).inputValue(),'1');await pdfCard.locator('.region-read').click();await page.waitForSelector('.region-result img');
 assert.ok((await pdfCard.locator('.region-result').textContent()).includes('A'));
 assert.ok((await pdfCard.locator('.region-result').textContent()).includes('UNCERTAINTY'));
 await page.reload();const restored=page.locator('.file').filter({has:page.getByText('cells.pdf',{exact:true})});

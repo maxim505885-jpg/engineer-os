@@ -115,7 +115,7 @@ function sourceAssets(f){
  const load=node('button','Прочитать активы','text-button'),content=node('div');if(/\.pdf$/i.test(f.name))details.append(page);details.append(load,content);
  const session=current;const region=/\.pdf$/i.test(f.name)?regionReadback(f,session):null;if(region)details.append(region);
  async function fetchItems(offset=0){load.disabled=true;try{
-  const query=/\.pdf$/i.test(f.name)?`page=${Number(page.value)}&`:'';
+  const sourcePage=Number(page.value);const query=/\.pdf$/i.test(f.name)?`page=${sourcePage}&`:'';
   const base=`/api/sessions/${session}/files/${f.id}/assets`;
   const result=await api(`${base}?${query}offset=${offset}`);if(session!==current)return;
   content.replaceChildren(node('p',`UNCERTAINTY · ${result.total} активов · SHA256 ${result.source_sha256}`));
@@ -125,7 +125,7 @@ function sourceAssets(f){
    const button=node('button',item.asset_kind==='table_cells'?'Показать ячейки':'Скачать исходный актив','text-button');button.onclick=async()=>{button.disabled=true;try{
     const response=await api(`${base}/payload?${query}candidate=${encodeURIComponent(item.candidate_id)}`);if(session!==current)return;
     if(item.asset_kind==='table_cells'){const data=await response.json();const table=node('table');
-     for(const [ri,values] of data.values.slice(0,200).entries()){const tr=node('tr');for(const [ci,value] of values.entries()){const td=node('td',value===null?'[нераспознанная ячейка]':String(value));const cell=data.cells.find(c=>c.row===ri+1&&c.column===ci+1);if(cell?.bbox&&region){const select=node('button','Сверить фрагмент','region-select text-button');select.onclick=()=>region.select(Number(page.value),cell.bbox);td.append(select);}tr.append(td);}table.append(tr);}
+     for(const [ri,values] of data.values.slice(0,200).entries()){const tr=node('tr');for(const [ci,value] of values.entries()){const td=node('td',value===null?'[нераспознанная ячейка]':String(value));const cell=data.cells.find(c=>c.row===ri+1&&c.column===ci+1);if(cell?.bbox&&region){const select=node('button','Сверить фрагмент','region-select text-button');select.onclick=()=>region.select(sourcePage,cell.bbox);td.append(select);}tr.append(td);}table.append(tr);}
      row.querySelector('table')?.remove();row.append(table,node('small','Показаны первые 200 строк. Ячейки, объединения и смысл требуют сверки с оригиналом.'));
     }else{const url=URL.createObjectURL(await response.blob());const link=node('a');link.href=url;link.download=item.asset_kind==='omml_formula'?'formula.xml':item.location.split('/').pop();link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
    }catch(e){error(e);}finally{button.disabled=false;}};row.append(button);content.append(row);}
