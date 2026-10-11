@@ -2,7 +2,7 @@
 
 Единая нумерация: **19 пунктов**. Эта сводка заменяет противоречащие текущие статусы планов17/19; история сохранена в `master-plan-17-history.md`, `master-plan-19-history.md` и живой карте. Результат нельзя переносить между планами по номеру без названия и критерия.
 
-**Активный план:** расчёты отложены. §92 итог: PR108 MERGED, кандидатe0754b2;Core857/Windows55/Security SUCCESS;реальный DOCX Store послеresume14684/14684,749/749 controlled-model batches;V4 renders534/534. №13 открыт:qualified tables/graphics/formulas/OCR/Word-layout/corpus.8✅/8🟡/3❌.
+**Активный план (11.10.2026):** §130 — №13 остаётся открытым; исправлен пропуск per-cell геометрии PDF, реальная native таблица V4 стр.15: 24/24 значения и координаты сверены. Кандидат до интеграции — c52cfb49dee030ce6d98ae3fe69477964f42b57c (PR129). Полные raster/mixed tables, OCR/Word/EMF/OMML/corpus и настоящий app→Supabase replay открыты. Расчёты отложены. 8✅/8🟡/3❌.
 
 | № | Этап | Статус | Проверенный результат и оставшийся критерий |
 |---|---|---|---|
@@ -469,3 +469,9 @@ PR108 MERGED с expected-head guard. Кандидат **e0754b2a3dcfb24a55e68af9
 Финальный повтор V4 audit завершён:534/534 PNG,source SHA неизменён,40/40 страниц492–531 с OCR candidates,62189 chars,1682 low-confidence blocks. Пер-page bbox/native SHA/PNG SHA/OCR SHA сохранены. Это воспроизводимый визуальный реестр и непроверенные кандидаты;структура таблиц,точность подписей,формулы и смысл графики не сертифицированы. Полный Word-layout export LibreOffice не завершён в ограниченном локальном пробном запуске;эквивалентность Word/V4 и применение колонтитулов/сносок к страницам не подтверждены.
 
 **№13 НЕ ЗАКРЫТ.** Реальный пробел:qualified соответствие mixed/raster ячеек и графических подписей источнику,визуальная сверка41 OMML формулы,OCR exactness/conflict adjudication,полная Word/EMF layout проверка и представительный multi-document corpus. Не ослаблять критерии до счётчиков. Следующий проход должен закрывать именно эти информационные потери и эталонные сверки. №14/19 остаются открыты;план8✅/8🟡/3❌. НаПК пользователя не установлено,инженерно не принято;ЛИРА/RES/расчёты отложены. JSON receipt:`docs/qa/2026-10-10-document-visual-coverage-ci.json`.
+
+## 11.10.2026 — следующий информационный пробел №13
+
+§130: native PDF table V2 сохраняет индивидуальные cell/header coordinates, unresolved slots и rotation/source identity. Реальная таблица V4 стр.15:24/24 native значения/rectangle сверены; raster/mixed content остаётся не подтверждён. Кандидат до интеграции c52cfb4. Полный app→Supabase replay не заменён capture transport; критерии №13/14/19 остаются открытыми. Далее — source-bound raster/mixed cell content и графические подписи через существующий application route. ЛИРА/RES отложены.
+
+Публикация §130: PR135 head1a9e0c93d2e31376dfafbea33afc78b04eb12734, full910 OK/17 skips; Core/Security выполняются, MERGE не подтверждён. Другие open browser PR130–134 не включены; не повторять их реализацию.
