@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-12",
+  "timezone": "Europe/Moscow",
+  "candidate": "1a765fa1766add7b5c5950a98893cd6e8099c6f8",
+  "candidate_tree": "f750e239a41e90099313b234170059b8c213e60e",
+  "pr": 140,
+  "pr_status": "OPEN_DRAFT_NOT_MERGED",
+  "branch": "feat/local-tooling-resume-20261011",
+  "head": "d2ed01389a02a6a953c4f3c579d20183ee8e37d5",
+  "tree": "c89a0368eea83ae28df4017092efac79e6064808",
+  "ci": [
+    {
+      "id": 38174414687,
+      "name": "Repository Security Guard",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38174414604,
+      "name": "ENGINEER OS Core Tests",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 38174414644,
+      "name": "Windows local runtime",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "pending": [
+    "Distro LibreOffice actual conversion failure",
+    "Explicit Tesseract hOCR fix not published",
+    "Raw recent QA availability not confirmed after scratch rollback"
+  ],
+  "open_stages": [
+    13,
+    14,
+    19
+  ],
+  "user_pc_updated": false,
+  "engineering_accepted": false,
+  "raw_recent_qa_persisted": false,
+  "docx": {
+    "library_id": "libfile_10792d9386208191b103ee233d892250",
+    "bytes": 147210288,
+    "sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5"
+  },
+  "pdf": {
+    "bytes": 74522583,
+    "sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+    "pages": 534
+  }
+}
