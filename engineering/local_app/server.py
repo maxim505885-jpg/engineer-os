@@ -71,8 +71,8 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/cad-memory.js','/styles.css','/recovery.html','/recovery.js'}:
-                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
+                if not post and route in {'/','/app.js','/cad-memory.js','/pdf-viewer.js','/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs','/styles.css','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/pdf-viewer.js':'pdf-viewer.js','/vendor/pdfjs/pdf.mjs':'vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs':'vendor/pdfjs/pdf.worker.mjs','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
                     if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
                     ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
@@ -105,6 +105,9 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     except OSError as exc:raise RequestProblem(400,str(exc)) from None
                     finally:self.server.data_slots.release()
                 if recovery_only:raise RequestProblem(409,'Режим обслуживания: чат и модель не запускаются.')
+                if route=='/api/tooling' and not post:
+                    from .tooling import report
+                    return self.respond(200,report())
                 if route=='/api/status' and not post:
                     with self.server.health_lock:
                         if time.monotonic()-self.server.health_at>15:
@@ -243,6 +246,14 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     from .review import record_review
                     body=self.json_body()
                     return self.respond(201,record_review(store,parts[2],parts[4],expected_revision=body.get('expected_revision'),decision=body.get('decision'),note=body.get('note'),actor=body.get('actor')))
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5] in {'formula-preview','tables'} and post:
+                    from .document_visuals import formula_preview,table_readback
+                    body=self.json_body()
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
+                    try:
+                        operation=formula_preview if parts[5]=='formula-preview' else table_readback
+                        return self.respond(200,operation(store,parts[2],parts[4],body))
+                    finally:self.server.preview_slots.release()
                 if len(parts) in {6,7} and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='regions':
                     from .region_history import read_region,get_region,list_regions
                     if post and len(parts)==6:

@@ -156,7 +156,7 @@ def _archive(data):
     offset = data.rfind(b'PK\x05\x06', max(0,len(data)-65557))
     try:
         fields = struct.unpack('<4s4H2LH', data[offset:offset+22]) if offset>=0 and len(data[offset:offset+22])==22 else None
-        if not fields or fields[1]!=0 or fields[2]!=0 or fields[3]!=fields[4] or fields[4]>MAX_MEMBERS or fields[5]>65536 or data[max(0,offset-20):offset-16]==b'PK\x06\x07':
+        if not fields or fields[1]!=0 or fields[2]!=0 or fields[3]!=fields[4] or fields[4]>MAX_MEMBERS or fields[5]>65536 or offset+22+fields[7]!=len(data) or fields[6]+fields[5]!=offset or data[:4]!=b'PK\x03\x04' or data[max(0,offset-20):offset-16]==b'PK\x06\x07':
             report['reasons'] = ['ARCHIVE_INVENTORY_LIMIT_OR_INVALID']; return report
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             entries = archive.infolist(); names = set(); total = 0
@@ -179,6 +179,24 @@ def _archive(data):
                 payloads[info.filename] = member
                 report['members'].append(dict(name=info.filename,source_sha256=hashlib.sha256(member).hexdigest(),
                     bytes=len(member),report=None, status='NOT_ANALYZED'))
+            from .native_results import observe_native_results
+            native_results = observe_native_results(payloads)
+            if native_results is not None:
+                report.update(kind='LIRA_NATIVE_RESULT_PACKAGE', **native_results)
+                report['observations'].update(member_count=len(report['members']), expanded_bytes=total)
+                verified = {item['file']: item for item in native_results['observations'].get('files', [])}
+                for item in report['members']:
+                    if item['name'] in verified:
+                        table = _base(payloads[item['name']], 'LIRA_NATIVE_RESULT_TABLE')
+                        file = verified[item['name']]
+                        table.update(full_information_extracted=False,
+                            results_exported=file['part_value_rows'] > 0,
+                            source_result_binding_verified=False, completed_solver_run_verified=False,
+                            model_result_association='UNVERIFIED')
+                        table['observations'] = file
+                        table['reasons'] = native_results['reasons']
+                        item.update(report=table, status='OBSERVATIONS_RECORDED')
+                return report
             from .native_tables import observe_native_package
             native = observe_native_package(payloads)
             if native is not None:
@@ -211,6 +229,12 @@ def report_note(report):
         message = f"ЛИРА: разобран полный текстовый источник. Узлов: {obs.get('nodes', 'не определено')}; КЭ: {obs.get('elements', 'не определено')}. Ссылок вне диапазона: {obs.get('invalid_node_references', 'не определено')}."
     elif kind == 'LIRA_SOLVER_LOG':
         message = 'ЛИРА: журнал прочитан. '+('Расчёт прерван пользователем.' if report['solver_execution']=='INTERRUPTED_BY_USER' else 'Завершение полного расчёта не подтверждено.')
+    elif kind == 'LIRA_NATIVE_RESULT_PACKAGE':
+        if 'NATIVE_RESULT_PACKAGE_INVALID' in report['reasons']:
+            message = 'ЛИРА: native RESULT ZIP не прошёл проверку manifest/хешей/таблиц.'
+        else:
+            message = f"ЛИРА: в части RESULT ZIP численных значений {obs['part_value_rows']}; недоступных значений {obs['part_unavailable_rows']}."
+            message += ' Связь модели с результатами и завершение расчёта не подтверждены.'
     elif kind == 'LIRA_NATIVE_TABLE_PACKAGE':
         if 'NATIVE_PACKAGE_INVALID' in report['reasons']:
             message = 'ЛИРА: native ZIP не прошёл проверку manifest/хешей/таблиц.'

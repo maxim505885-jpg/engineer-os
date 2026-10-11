@@ -176,3 +176,13 @@ footer{color:var(--muted-2);font-size:10px;padding-top:16px}
 #conclusion-results th, #conclusion-results td { border: 1px solid #d9d9d9; padding: .4rem; vertical-align: middle; overflow-wrap: anywhere; font-size: .8rem; }
 
 .region-fields{display:grid;grid-template-columns:auto minmax(5em,10em);gap:.4em}.region-image{max-width:100%;height:auto;border:1px solid #bbb}.region-conflict{border-left:3px solid #a66;padding-left:.6em}
+
+/* Local source-only PDF viewer. No inline styling is needed under the CSP. */
+.pdf-viewer { width: min(96vw, 1100px); max-width: 96vw; max-height: 94vh; padding: 1rem; background: var(--surface, #fff); color: var(--text, #172331); border: 1px solid #ccd4df; border-radius: 12px; }
+.pdf-viewer::backdrop { background: rgba(12,20,32,.65); }
+.pdf-viewer-toolbar, .pdf-viewer-controls { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.pdf-viewer-heading { margin: .3rem 0; }
+.pdf-viewer-caption { overflow-wrap: anywhere; }
+.pdf-viewer-canvas-wrap { max-height: 70vh; overflow: auto; background: #e6e9ed; padding: .5rem; }
+.pdf-viewer-canvas { display: block; margin: auto; }
+.pdf-viewer-status { min-height: 1.5em; }

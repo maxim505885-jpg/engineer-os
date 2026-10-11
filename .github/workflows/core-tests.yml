@@ -31,6 +31,7 @@ jobs:
           node --check app.js
           node --check engineering/local_app/ui/app.js
           node --check engineering/local_app/ui/cad-memory.js
+          node --check engineering/local_app/ui/pdf-viewer.js
       - name: Check dashboard behavior
         run: node --test tests/dashboard_counts.test.cjs
       - name: Check architecture boundaries
@@ -47,7 +48,9 @@ jobs:
       - name: Install local OCR regression models
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core libreoffice-writer
+      - name: Check PDF viewer DOM behavior
+        run: node tests/pdf_viewer.test.cjs --dom
       - name: Install locked Playwright Chromium
         run: npx --prefix e2e playwright install --with-deps chromium
       - name: Check Windows launcher PowerShell syntax
@@ -80,7 +83,10 @@ jobs:
           PYTHON: python
           ENGINEER_OS_ATTACHMENT_PARSER: native
           ENGINEER_OS_UI_SCREENSHOT_DIR: e2e/.artifacts/stage11
+          ENGINEER_OS_FORMULA_REQUIRED: "1"
         run: npm run test:browser --prefix e2e
+      - name: Check offline vendored PDF viewer in Chromium
+        run: node tests/pdf_viewer.test.cjs
       - name: Upload Chromium UI reference screens
         if: always()
         uses: actions/upload-artifact@v4

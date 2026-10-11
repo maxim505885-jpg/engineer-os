@@ -1,0 +1,4 @@
+# Optional CPU environment; model weights must be provisioned locally in advance.
+paddleocr==3.2.0
+paddlepaddle==3.2.0
+PyMuPDF==1.26.6

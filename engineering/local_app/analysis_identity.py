@@ -15,13 +15,14 @@ def parser_identity(backend):
     if backend in {'docx','xlsx','doc'}:
         import sys
         from . import office
-        from . import word_images,word_objects,ole_bitmap,emf_text,emf_bitmap
+        from . import word_images,word_objects,ole_bitmap,emf_text,emf_bitmap,emfplus
         value=dict(schema=1,backend=backend,python=sys.version.split()[0],implementation=hashlib.sha256(Path(office.__file__).read_bytes()).hexdigest(),
                     image_implementation=hashlib.sha256(Path(word_images.__file__).read_bytes()).hexdigest(),
                     object_implementation=hashlib.sha256(Path(word_objects.__file__).read_bytes()).hexdigest(),
                     ole_implementation=hashlib.sha256(Path(ole_bitmap.__file__).read_bytes()).hexdigest(),
                     ole_limits=[ole_bitmap.MAX_OLE_BYTES,ole_bitmap.MAX_STREAMS,ole_bitmap.MAX_DIRECTORY_ENTRIES,ole_bitmap.MAX_STREAM_BYTES,ole_bitmap.MAX_TOTAL_STREAM_BYTES,ole_bitmap.MAX_BITMAP_BYTES,ole_bitmap.MAX_PIXELS,ole_bitmap.MAX_NATIVE_PADDING_BYTES],
                     emf_implementation=hashlib.sha256(Path(emf_text.__file__).read_bytes()).hexdigest(),
+                    emfplus_implementation=hashlib.sha256(Path(emfplus.__file__).read_bytes()).hexdigest(),
                     bitmap_implementation=hashlib.sha256(Path(emf_bitmap.__file__).read_bytes()).hexdigest(),
                     bitmap_limits=[emf_bitmap.MAX_PIXELS,emf_bitmap.MAX_BITMAP_BYTES,emf_bitmap.MAX_BITMAP_RECORDS],
                     emf_limits=[emf_text.MAX_RECORDS,emf_text.MAX_TEXT_RECORDS,emf_text.MAX_TEXT_CODE_UNITS,emf_text.MAX_REFERENCE_JSON_BYTES],
@@ -65,7 +66,7 @@ def parser_identity(backend):
 def identity(store,job,model):
     from . import automatic_analysis,core_run,worker,model as model_module,core_plan,coverage,requirements,source_binding,specialist_checks,domain_packets,engineering_review,provenance
     from engineering.normative import verification,numeric_comparison,substantive_review
-    from engineering.calculation import model_intake,upload_analysis
+    from engineering.calculation import model_intake,upload_analysis,native_results
     from engineering.model_gateway import openai_compatible
     files=[store.get_file(fid) for fid in job['file_ids']]
     from .core_plan import verify_originals
@@ -74,7 +75,7 @@ def identity(store,job,model):
     backend=os.environ.get('ENGINEER_OS_ATTACHMENT_PARSER','native')
     if backend not in {'native','docling','ocr'}:raise ValueError('Unknown parser')
     selected=model.checkpoint_identity() if hasattr(model,'checkpoint_identity') else None
-    implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible,requirements,source_binding,specialist_checks,domain_packets,engineering_review,verification,numeric_comparison,model_intake,upload_analysis,provenance)}
+    implementation={Path(m.__file__).name:hashlib.sha256(Path(m.__file__).read_bytes()).hexdigest() for m in (automatic_analysis,core_run,worker,model_module,core_plan,coverage,openai_compatible,requirements,source_binding,specialist_checks,domain_packets,engineering_review,verification,numeric_comparison,model_intake,upload_analysis,native_results,provenance)}
     implementation['identity']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     implementation['substantive_review']=hashlib.sha256(Path(substantive_review.__file__).read_bytes()).hexdigest()
     if job['mode']=='CORE_RUN':
