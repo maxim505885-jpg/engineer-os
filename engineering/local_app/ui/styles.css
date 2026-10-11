@@ -174,3 +174,5 @@ footer{color:var(--muted-2);font-size:10px;padding-top:16px}
 #conclusion-results table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: .75rem 0; }
 
 #conclusion-results th, #conclusion-results td { border: 1px solid #d9d9d9; padding: .4rem; vertical-align: middle; overflow-wrap: anywhere; font-size: .8rem; }
+
+.region-fields{display:grid;grid-template-columns:auto minmax(5em,10em);gap:.4em}.region-image{max-width:100%;height:auto;border:1px solid #bbb}.region-conflict{border-left:3px solid #a66;padding-left:.6em}

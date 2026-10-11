@@ -95,6 +95,17 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   assert.ok(doc.querySelector('#source-caption').textContent.includes('preview.pdf'));
   const pdfCard=[...doc.querySelectorAll('.file')].find(c=>c.textContent.includes('preview.pdf'));
   assert.ok(pdfCard.querySelector('.coverage').textContent.includes('1/1'),'Actual PDF coverage must be visible');
+  const region=pdfCard.querySelector('.region-readback');region.open=true;
+  region.querySelector('[aria-label="Страница фрагмента"]').value='1';
+  [20,20,130,60].forEach((v,i)=>region.querySelectorAll('.region-fields input')[i+1].value=String(v));
+  const regionWindow=dom.window,regionFetch=regionWindow.fetch;regionWindow.fetch=(input,options)=>regionFetch(input,options).then(async response=>{if(String(input).endsWith('/regions')&&options?.method==='POST')await new Promise(resolve=>setTimeout(resolve,1800));return response;});
+  region.querySelector('.region-read').click();await until(()=>region.querySelector('.region-result img'));
+  regionWindow.fetch=regionFetch;assert.ok(doc.contains(region),'Polling must preserve active region controls and completed readback');
+  assert.ok(region.querySelector('.region-result').textContent.includes('height 4m'));
+  region.querySelector('.region-history').click();await until(()=>region.querySelector('.region-history-open'));
+  region.querySelector('.region-history-open').click();await until(()=>!region.querySelector('.region-history-open').disabled);
+  assert.ok(region.querySelector('.region-result').textContent.includes('Инженерное принятие отсутствует'));
+
   assert.ok(doc.querySelector('#source-caption').textContent.includes('не подтверждает'));
   [...doc.querySelectorAll('nav .session')].find(b=>b.textContent==='Новый диалог').click();
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');

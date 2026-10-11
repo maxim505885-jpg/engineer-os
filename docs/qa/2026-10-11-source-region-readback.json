@@ -1,0 +1,257 @@
+{
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "source_bytes": 74522583,
+  "results": [
+    {
+      "label": "p493-raster-legend",
+      "page": 493,
+      "bbox": [
+        580,
+        2080,
+        1200,
+        2130
+      ],
+      "seconds": 1.5346970558166504,
+      "read_id": "168a2424-4bd8-4f45-88a9-c28a03e5e5f6",
+      "native": [],
+      "ocr": [
+        "/11- Трещины на верхней поверхности перекрытии, расположенные вокруг колонн. С1- Bepm",
+        "[12 - Грещины на верхней поверхности перекрытии, расположенные над верхними стержнями армирования. (2 - Дефе",
+        "13 - Грещины Ha вертикальной грани ригелец, расположенных по периметру перекрытии 6 приопорнои зоне. бетона, н",
+        "ПА = Toews! на нижнее повепхногги! пепекпыгии!. пагположенные ппеимиииегтвВенно В гепейине пполета C3 - Треш"
+      ],
+      "conflicts": [],
+      "dossier": {
+        "layout": "selected_region",
+        "page_no": 493,
+        "scope": "UNVERIFIED_OCR_CANDIDATES",
+        "coverage": "SELECTED_REGION_EXECUTED",
+        "page_bbox": {
+          "left": 0,
+          "top": 0,
+          "right": 1684.0,
+          "bottom": 2384.0
+        },
+        "coordinate_space": "UNROTATED_CROP_RELATIVE",
+        "planned_passes": 1,
+        "completed_passes": 1,
+        "pixels": 729243,
+        "output_bytes": 3147,
+        "words": 57,
+        "regions": [
+          {
+            "id": "selected",
+            "bbox": {
+              "left": 580.0,
+              "top": 2080.0,
+              "right": 1200.0,
+              "bottom": 2130.0
+            },
+            "execution": "COMPLETED",
+            "render_scale": 4.838709677419355,
+            "psm": 6,
+            "blocks": 4,
+            "characters": 411,
+            "input_raster": {
+              "png_sha256": "13fb868b2f10a4d5d08b43a7fc148718cb1ab1474aedc5a8420a74719e665969",
+              "width": 3001,
+              "height": 243,
+              "pixel_origin": [
+                2806,
+                10064
+              ],
+              "pixels": 729243,
+              "colorspace": "RGB"
+            }
+          }
+        ],
+        "quality_verified": false,
+        "acceptance_granted": false,
+        "limits": {
+          "page_pixels": 45000000,
+          "pass_pixels": 9000000,
+          "output_bytes": 2097152,
+          "words": 20000,
+          "seconds": 60
+        }
+      },
+      "image_sha256": "13fb868b2f10a4d5d08b43a7fc148718cb1ab1474aedc5a8420a74719e665969",
+      "acceptance_granted": false
+    },
+    {
+      "label": "p534-numeric-pairs",
+      "page": 534,
+      "bbox": [
+        305,
+        120,
+        380,
+        180
+      ],
+      "seconds": 0.7430026531219482,
+      "read_id": "b1f96f51-2c14-4c43-8cbd-bd16b2e11302",
+      "native": [],
+      "ocr": [
+        "19",
+        "11",
+        "20 7"
+      ],
+      "conflicts": [],
+      "dossier": {
+        "layout": "selected_region",
+        "page_no": 534,
+        "scope": "UNVERIFIED_OCR_CANDIDATES",
+        "coverage": "SELECTED_REGION_EXECUTED",
+        "page_bbox": {
+          "left": 0,
+          "top": 0,
+          "right": 1684.0,
+          "bottom": 1191.0
+        },
+        "coordinate_space": "UNROTATED_CROP_RELATIVE",
+        "planned_passes": 1,
+        "completed_passes": 1,
+        "pixels": 162000,
+        "output_bytes": 524,
+        "words": 4,
+        "regions": [
+          {
+            "id": "selected",
+            "bbox": {
+              "left": 305.0,
+              "top": 120.0,
+              "right": 380.0,
+              "bottom": 180.0
+            },
+            "execution": "COMPLETED",
+            "render_scale": 6.0,
+            "psm": 11,
+            "blocks": 3,
+            "characters": 8,
+            "input_raster": {
+              "png_sha256": "ced9a5d759a2615cbf49c56f28439c74184d4e2a77a14386ce0de266c083a68e",
+              "width": 450,
+              "height": 360,
+              "pixel_origin": [
+                1830,
+                720
+              ],
+              "pixels": 162000,
+              "colorspace": "RGB"
+            }
+          }
+        ],
+        "quality_verified": false,
+        "acceptance_granted": false,
+        "limits": {
+          "page_pixels": 45000000,
+          "pass_pixels": 9000000,
+          "output_bytes": 2097152,
+          "words": 20000,
+          "seconds": 60
+        }
+      },
+      "image_sha256": "ced9a5d759a2615cbf49c56f28439c74184d4e2a77a14386ce0de266c083a68e",
+      "acceptance_granted": false
+    },
+    {
+      "label": "p534-level",
+      "page": 534,
+      "bbox": [
+        1180,
+        350,
+        1330,
+        405
+      ],
+      "seconds": 0.7553884983062744,
+      "read_id": "4e653413-cf67-4d6f-8293-9439a2c3cd14",
+      "native": [],
+      "ocr": [
+        "47\"",
+        "-0,450",
+        "44",
+        "38",
+        "9N",
+        "Af"
+      ],
+      "conflicts": [],
+      "dossier": {
+        "layout": "selected_region",
+        "page_no": 534,
+        "scope": "UNVERIFIED_OCR_CANDIDATES",
+        "coverage": "SELECTED_REGION_EXECUTED",
+        "page_bbox": {
+          "left": 0,
+          "top": 0,
+          "right": 1684.0,
+          "bottom": 1191.0
+        },
+        "coordinate_space": "UNROTATED_CROP_RELATIVE",
+        "planned_passes": 1,
+        "completed_passes": 1,
+        "pixels": 297000,
+        "output_bytes": 890,
+        "words": 6,
+        "regions": [
+          {
+            "id": "selected",
+            "bbox": {
+              "left": 1180.0,
+              "top": 350.0,
+              "right": 1330.0,
+              "bottom": 405.0
+            },
+            "execution": "COMPLETED",
+            "render_scale": 6.0,
+            "psm": 11,
+            "blocks": 6,
+            "characters": 17,
+            "input_raster": {
+              "png_sha256": "0ceee7710b2bae4c5971443c8428a8c77c138a447306b30584680f24e1613300",
+              "width": 900,
+              "height": 330,
+              "pixel_origin": [
+                7080,
+                2100
+              ],
+              "pixels": 297000,
+              "colorspace": "RGB"
+            }
+          }
+        ],
+        "quality_verified": false,
+        "acceptance_granted": false,
+        "limits": {
+          "page_pixels": 45000000,
+          "pass_pixels": 9000000,
+          "output_bytes": 2097152,
+          "words": 20000,
+          "seconds": 60
+        }
+      },
+      "image_sha256": "0ceee7710b2bae4c5971443c8428a8c77c138a447306b30584680f24e1613300",
+      "acceptance_granted": false
+    }
+  ],
+  "history_reload": true,
+  "no_created_evidence": true,
+  "original_unchanged": true,
+  "document_complete": false,
+  "acceptance_granted": false,
+  "implementation": "Authenticated selected native/render/OCR readback with append-only source-bound history, PSM6/11, no evidence or acceptance",
+  "table_audit": {
+    "pages": 48,
+    "previous_differences": 788,
+    "detector_selected_characters_lost": 0,
+    "detector_selected_characters_added": 0,
+    "same_flags_matches": 788,
+    "qualified_full_tables": false
+  },
+  "remaining": [
+    "Raster legend P1 recognition still incorrect",
+    "Numeric pairs and neighboring labels remain inaccurate",
+    "Detected table geometry and raster/mixed table semantics unqualified",
+    "Full V4 visual/semantic coverage and representative qualified corpus incomplete",
+    "Word exact layout/font/formula equivalence unverified",
+    "User PC not updated"
+  ]
+}
