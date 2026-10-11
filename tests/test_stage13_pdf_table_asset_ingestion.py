@@ -139,5 +139,36 @@ class PDFTableAssetTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'SOURCE_IDENTITY_CHANGED_DURING_EXTRACTION'):
                     pdf_table_candidates(path,[1])
 
+    def test_concurrent_sources_do_not_mix_pymupdf_global_characters(self):
+        import fitz
+        import threading,time
+        from concurrent.futures import ThreadPoolExecutor
+        from engineering.document_intelligence import pdf_table_asset_ingestion as module
+        with tempfile.TemporaryDirectory() as folder:
+            paths=[]
+            for label in ('SOURCEA','SOURCEB'):
+                doc=fitz.open();page=doc.new_page()
+                for x in (40,140,240):page.draw_line((x,40),(x,140))
+                for y in (40,90,140):page.draw_line((40,y),(240,y))
+                for x,y,text in ((50,65,label),(150,65,'B'),(50,115,'1'),(150,115,'2')):page.insert_text((x,y),text)
+                path=Path(folder)/(label+'.pdf');doc.save(path);doc.close();paths.append(path)
+            first_ready=threading.Event();second_started=threading.Event();original=module._table_payload
+            counter=0;counter_lock=threading.Lock()
+            def interleave(*args):
+                nonlocal counter
+                with counter_lock:counter+=1;first=counter==1
+                if first:
+                    first_ready.set()
+                    if not second_started.wait(3):raise AssertionError('Second request did not start')
+                    time.sleep(.1) # Permit second detector to overwrite CHARS if lock is absent.
+                return original(*args)
+            def second():
+                if not first_ready.wait(3):raise AssertionError('First request did not start')
+                second_started.set();return pdf_table_candidates(paths[1],[1])
+            with patch.object(module,'_table_payload',side_effect=interleave),ThreadPoolExecutor(2) as pool:
+                a=pool.submit(pdf_table_candidates,paths[0],[1]);b=pool.submit(second)
+                self.assertEqual(json.loads(a.result(timeout=5)[0][1])['values'][0][0],'SOURCEA')
+                self.assertEqual(json.loads(b.result(timeout=5)[0][1])['values'][0][0],'SOURCEB')
+
 if __name__=='__main__':
     unittest.main()
