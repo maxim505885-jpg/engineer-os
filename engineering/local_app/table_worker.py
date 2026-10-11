@@ -40,9 +40,39 @@ def img_tables(png, language):
     languages = subprocess.run([binary, '--list-langs'], capture_output=True, text=True, timeout=10)
     if any(part not in languages.stdout.splitlines() for part in language.split('+')):
         return None, 'TESSERACT_LANGUAGE_UNAVAILABLE'
-    tables = Image(src=png, detect_rotation=False).extract_tables(
-        ocr=TesseractOCR(n_threads=1, lang=language), implicit_rows=False,
-        implicit_columns=False, borderless_tables=False)
+    class ExactPngOCR(TesseractOCR):
+        def content(self, document):
+            # This adapter handles one selected raster only. Feed its original
+            # PNG bytes, avoiding upstream JPEG reencoding and named configs.
+            if len(document.images) != 1:
+                raise ValueError('OCR_SINGLE_RASTER_REQUIRED')
+            import tempfile
+            with tempfile.TemporaryFile() as output, tempfile.TemporaryFile() as errors:
+                process = subprocess.run([binary, 'stdin', 'stdout', '--psm', str(self.psm),
+                    '-l', self.lang, '-c', 'tessedit_create_hocr=1'], input=png,
+                    stdout=output, stderr=errors, env=self.env, timeout=30)
+                if process.returncode:
+                    raise ValueError('TESSERACT_HOCR_FAILED')
+                if output.tell() > MAX_OUTPUT_BYTES or errors.tell() > MAX_OUTPUT_BYTES:
+                    raise ValueError('TESSERACT_OUTPUT_LIMIT')
+                output.seek(0)
+                return [output.read(MAX_OUTPUT_BYTES).decode('utf-8')]
+
+    options = dict(implicit_rows=False, implicit_columns=False, borderless_tables=False)
+    detected = Image(src=png, detect_rotation=False).extract_tables(ocr=None, **options)
+    if not detected:
+        return [], None
+    recognized = Image(src=png, detect_rotation=False).extract_tables(
+        ocr=ExactPngOCR(n_threads=1, lang=language), **options)
+    # Upstream removes empty OCR rows/tables. Keep the original detected grid
+    # and associate only cells with exactly matching geometry, never row offsets.
+    texts = {}
+    for table in recognized:
+        for entries in table.content.values():
+            for cell in entries:
+                box=cell.bbox
+                texts[(box.x1,box.y1,box.x2,box.y2)]=cell.value
+    tables = detected
     result=[]
     for table in tables:
         if len(result) >= MAX_TABLES:
@@ -56,7 +86,9 @@ def img_tables(png, language):
                     raise ValueError('TABLE_CELL_LIMIT')
                 box=cell.bbox
                 key=(box.x1, box.y1, box.x2, box.y2)
-                item=unique.setdefault(key, dict(text=cell.value, bbox=list(key), positions=[]))
+                value=texts.get(key)
+                item=unique.setdefault(key, dict(text=value, bbox=list(key), positions=[],
+                    text_status='TEXT_CANDIDATE' if value else 'TEXT_UNAVAILABLE'))
                 item['positions'].append((int(row), column))
         cells=[]
         for cell in unique.values():
@@ -66,7 +98,10 @@ def img_tables(png, language):
                         span_basis='REPEATED_CELL_GEOMETRY')
             cells.append(cell)
         box=table.bbox
-        result.append(dict(bbox=[box.x1,box.y1,box.x2,box.y2], cells=cells, confidence=None))
+        result.append(dict(bbox=[box.x1,box.y1,box.x2,box.y2], cells=cells, confidence=None,
+            ocr_status='TEXT_CANDIDATE' if any(c['text'] for c in cells) else 'TEXT_UNAVAILABLE',
+            ocr_input_png_sha256=hashlib.sha256(png).hexdigest(),
+            cell_association='EXACT_DETECTED_GEOMETRY',geometry_preserved_without_ocr=True))
     return result, None
 
 

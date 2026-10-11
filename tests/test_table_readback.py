@@ -124,5 +124,41 @@ class TableReadbackTests(unittest.TestCase):
         self.assertEqual(len(cells),11)
         self.assertTrue(any(c['column_span']==2 and c['text']=='Number' for c in cells))
 
+    @unittest.skipUnless(os.environ.get('ENGINEER_OS_TABLE_PYTHON'),'optional table environment not configured')
+    def test_custom_tessdata_without_hocr_config_still_reads_exact_png(self):
+        import re, shutil, subprocess
+        langs=subprocess.run(['tesseract','--list-langs'],capture_output=True,text=True,check=True)
+        directory=re.search(r'in "([^"]+)"',langs.stdout).group(1)
+        with tempfile.TemporaryDirectory() as temp:
+            shutil.copy(Path(directory)/'eng.traineddata',temp)
+            with patch.dict(os.environ,{'TESSDATA_PREFIX':temp}):
+                result=reader.read_tables(ruled_table(),1,[30,30,530,370],'img2table')
+        self.assertEqual(result['status'],'UNCERTAINTY',result)
+        self.assertEqual(result['table_count'],1,result)
+        self.assertIn('Number',[c['text'] for c in result['tables'][0]['cells']])
+        self.assertEqual(result['tables'][0]['ocr_input_png_sha256'],result['raster']['png_sha256'])
+
+    @unittest.skipUnless(os.environ.get('ENGINEER_OS_TABLE_PYTHON'),'optional table environment not configured')
+    @unittest.skipIf(os.name=='nt','controlled OCR executable uses POSIX shebang')
+    def test_empty_ocr_preserves_detected_table_geometry(self):
+        # A text-free image may not be detected upstream (character-height
+        # estimation). Use a real detectable grid and an empty OCR response.
+        with tempfile.TemporaryDirectory() as temp:
+            binary=Path(temp)/'tesseract'
+            binary.write_text('#!'+sys.executable+'\nimport sys\n'
+                'if "--list-langs" in sys.argv: print("eng")\n'
+                'elif "--version" in sys.argv: print("controlled empty OCR")\n'
+                'else:\n'
+                ' if "stdin" in sys.argv: sys.stdin.buffer.read()\n'
+                ' print("<html><body></body></html>")\n')
+            binary.chmod(0o700)
+            with patch.dict(os.environ,{'PATH':temp+os.pathsep+os.environ.get('PATH','')}):
+                result=reader.read_tables(ruled_table(),1,[30,30,530,370],'img2table')
+        self.assertEqual(result['table_count'],1,result)
+        self.assertEqual(len(result['tables'][0]['cells']),12)
+        self.assertEqual(result['tables'][0]['ocr_status'],'TEXT_UNAVAILABLE')
+        self.assertTrue(all(c['text'] is None for c in result['tables'][0]['cells']))
+        self.assertFalse(result['acceptance_granted'])
+
 
 if __name__=='__main__': unittest.main()

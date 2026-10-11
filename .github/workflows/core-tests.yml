@@ -48,7 +48,9 @@ jobs:
       - name: Install local OCR regression models
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core libreoffice-writer
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng fonts-dejavu-core libreoffice-writer strace
+      - name: Diagnose fixed benign distro formula startup
+        run: python scripts/probe_formula_runtime.py
       - name: Check actual local Word formula renderer
         env:
           ENGINEER_OS_TEST_FORMULA_RENDER: "1"
