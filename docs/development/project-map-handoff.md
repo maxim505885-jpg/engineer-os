@@ -1,4 +1,4 @@
-# Актуальный результат — §132 — PR137 OPEN, heade2570bce0425cdb4420ef700b569f380ad538b94; реализованы source-bound WDP layer bindings, passive OLE bitmap preview HTTP/UI и sparse V4 OCR routing. Local943tests PASS/17skips, независимый review PASS. Реальные21PBrush bitmap pixels сверены;V4 all534renders/43OCR candidates,конфликтыП1→111 ив→6 остаются. Full original native Store/HTTP checkpoint proof иfinal-head CI выполняются. №13 OPEN поqualified Word/formula/graphics/table/corpus,№14/19 OPEN;ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+# Актуальный результат — §132 — PR137 OPEN, head 8fd34f7fead37c389b77c24f781e24328d55fc82, tree 51365a6dedae556e683bdbd5e6d6f409ec122a22. Реальный DOCX: 14684/14684 native checkpoints, 704 HTTP актива, все 21 OLE raw/PNG/checkpoint совпали; 11 WDP-привязок сохранены. V4: 534 рендера, 43 OCR-кандидата; конфликты подписей остаются. Локально 943 Python/10 Node/DOM PASS; ранняя потеря загрузки воспроизведена и исправлена. Final-head CI выполняется. №13/14/19 открыты, ПК не обновлён, расчёты отложены.
 
 # Актуальный результат — §131: PR136 source assets HTTP/UI,full V4/DOCX audit;№13 НЕ закрыт по выявленным gaps. Читать итог§131 карты;расчёты отложены,ПК не обновлён.
 
@@ -365,3 +365,12 @@ PR136 MERGED expected head54d86a160e4a0161d1a886e380c5192b6b97940e → candidate
 ## Актуальный проход§132
 
 §132 — PR137 OPEN, heade2570bce0425cdb4420ef700b569f380ad538b94; реализованы source-bound WDP layer bindings, passive OLE bitmap preview HTTP/UI и sparse V4 OCR routing. Local943tests PASS/17skips, независимый review PASS. Реальные21PBrush bitmap pixels сверены;V4 all534renders/43OCR candidates,конфликтыП1→111 ив→6 остаются. Full original native Store/HTTP checkpoint proof иfinal-head CI выполняются. №13 OPEN поqualified Word/formula/graphics/table/corpus,№14/19 OPEN;ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+
+
+
+
+### Проверка полного исходного DOCX и исправление ранней загрузки
+
+Реальный источник 147210288 байт / SHA256 b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5 прошёл authenticated HTTP upload/original download byte equality. Полный inventory: 704 кандидата = 683 прежних + 21 OLE. Все 21 raw OLE hash и derived PNG pixels совпали. Production office.execute в автоматическом EXTRACT_DOCX child сохранил 14684/14684 логических элементов, 1366524 символа; cycle_complete=true, errors=0, budget_exhausted=false. Все 21 checkpoint-bound object PNG сверены. Оригинал неизменён. Выполнение 538.94s. Это полный native Store/HTTP checkpoint route, не полный Worker/model inference большого отчёта; model_inference_performed=false. Сквозной Worker/model/receipt проверен на контролируемом документе. JSON QA: docs/qa/2026-10-11-docx-layer-ole-coverage.json.
+
+Начальный head e2570bce0425cdb4420ef700b569f380ad538b94: Core38144958474 SUCCESS (943 tests/103.218s, 2 Windows-only skips, HTTP/DOM и 6 Chromium маршрутов, включая OLE inventory/checkpoint); Security38144958468 SUCCESS. Windows38144958476 attempt1 упал на существующем intake .file wait; attempt2 того же head SUCCESS. Дополнительное исследование воспроизвело реальную причину: HTML upload enabled до current session, ранний change молча игнорируется. Delayed-bootstrap DOM regression RED→GREEN; upload теперь disabled до появления диалога, дальнейший upload/worker/history PASS. Await ограничен по времени и gate освобождается при любом выходе. Новый итоговый head 8fd34f7fead37c389b77c24f781e24328d55fc82 / tree 51365a6dedae556e683bdbd5e6d6f409ec122a22 совпадает с локальным деревом; его свежий Core/Windows/Security требуется до merge. Новый итог не переносит ранние CI на изменённый head.
