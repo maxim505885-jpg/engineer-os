@@ -7,10 +7,10 @@
 Бесплатное локальное приложение Windows: ТЗ → документы → проверка извлечения → доказательства → профильные проверки → заключение → FINAL AUDIT. Чат, история, задачи, память, CAD и восстановление входят в выпуск. Обязательные платные API не вводятся; оригиналы неизменны.
 
 ## Текущая позиция
-**РАБОТАЕМ: №13, шаг A1 — воспроизведение и минимальное исправление LibreOffice в Ubuntu CI.**
-План опубликован; выполнение A1 ещё не начато в этом проходе. Затем A2 — Tesseract hOCR/сохранение геометрии таблицы.
+**РАБОТАЕМ: №13 / A4 + B3 — финальная проверка исправлений и видимые конфликты OCR/Native.**
+A1 и A2 исправлены и проверены (см. §139 карты). Промежуточный d2fa1d6 имеет все три CI SUCCESS; новый comparison проходит свежую проверку. №13 ещё не закрыт.
 Последний объединённый кандидат: integration/release-candidate-v1, 1a765fa1766add7b5c5950a98893cd6e8099c6f8.
-PR140 OPEN/DRAFT/NOT_MERGED, feat/local-tooling-resume-20261011, d2ed01389a02a6a953c4f3c579d20183ee8e37d5: Core FAILURE, Windows SUCCESS, Security SUCCESS.
+PR140 OPEN/DRAFT/NOT_MERGED, feat/local-tooling-resume-20261011, d2fa1d6dcf4bc7c62c25e49977028186b7631852: Core SUCCESS, Windows SUCCESS, Security SUCCESS. Новые локальные изменения comparator/UI требуют нового final-head CI.
 PR102 с экспортёром результатов ЛИРА OPEN/DRAFT/NOT_MERGED, b623bc3abd58adbf46432fbc4e3adb96d647235c.
 Установка обновления на пользовательском ПК и инженерный ACCEPTED не подтверждены. Расчёты отложены пользователем; установка SDK, запуск solver/R4/получение RES не входят в независимую работу A–C.
 
@@ -43,8 +43,8 @@ PR102 с экспортёром результатов ЛИРА OPEN/DRAFT/NOT_M
 
 ### A. Стабилизировать новые инструменты — №13
 Файлы: engineering/local_app/word_formula_preview.py, table_worker.py, table_readback.py; tests/test_word_formula_preview.py, tests/test_table_readback.py; scripts/probe_formula_runtime.py на docs-ветке.
-- [ ] A1. На безопасном фиксированном fixture воспроизвести distro LibreOffice exit1. Сравнить launcher/SVP/direct binary/профиль памяти и безопасный reference. Зафиксировать причину, минимальный fix и regression. Не открывать user original в unsandboxed контроле; javaldx warning не считать причиной без доказательства.
-- [ ] A2. Воспроизвести custom tessdata без configs/hocr. Явно включить tessedit_create_hocr=1 с exact PNG input. При пустом OCR сохранить найденную геометрию с TEXT_UNAVAILABLE. Проверить отсутствующий config, empty OCR, merged cells и настоящий V4 p55 bbox[55,68,582,462].
+- [x] A1. На безопасном фиксированном fixture воспроизвести distro LibreOffice exit1. Сравнить launcher/SVP/direct binary/профиль памяти и безопасный reference. Зафиксировать причину, минимальный fix и regression. Не открывать user original в unsandboxed контроле; javaldx warning не считать причиной без доказательства.
+- [x] A2. Воспроизвести custom tessdata без configs/hocr. Явно включить tessedit_create_hocr=1 с exact PNG input. При пустом OCR сохранить найденную геометрию с TEXT_UNAVAILABLE. Проверить отсутствующий config, empty OCR, merged cells и настоящий V4 p55 bbox[55,68,582,462].
 - [ ] A3. Проверить source SHA/координаты/лимиты/authenticated HTTP/UI и неизменность оригиналов. Реальные QA JSON/PNG/logs сохранить долговременно, записать ID и хеши.
 - [ ] A4. На окончательном head выполнить focused/full suite, HTTP/DOM/Chromium и review; получить Core/Windows/Security SUCCESS на этом же head. Только затем объединить PR140 и сверить merged tree.
 **Выход A:** работающие в квалифицированных средах инструменты в общем кандидате. №13 этим целиком не закрывается.
@@ -725,3 +725,13 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **Сохранность:** временныйcheckout вновь оказался72d323a; опубликованныйPR140 сохранился. Новые сырые41-formula QA PNG/JSON и последние незапубликованные агентские правки в текущей среде не подтверждены; локальныеpaths/agents/PASSне наследовать. Промпт сохраняет известные результаты как контекст сscope/ограничениями и точные задачи для восстановления, но не заменяет пропавшие сырые доказательства. Если их нет в долговременномхранилище — повторить на оригиналах, сохранитьQAmanifest/logs/PNG/JSON. Публикация малыхпроверенныхcheckpoints и идентичностьhead/tree обязательны для дальнейшей сохранности.
 
 **Точный следующий шаг:** восстановитьfeat/local-tooling-resume-20261011 изactualremote, устранитьLibreOffice/hOCR, пройтиfreshfinalheadCore/Windows/Security+review, затемmerge/treecomparison и актуальная карта. №13/14/19 остаютсяOPEN;8✅/8🟡/3❌. Добавление библиотек не равно производственной полноте или инженерной приёмке.
+
+
+## §139. 12.10.2026 — LibreOffice/hOCR исправлены; проверка конфликтов OCR/Native
+По поручению закрыть №13 выполнен новый проход без снятия evidence gates. GitHub PR140 head **d2fa1d6dcf4bc7c62c25e49977028186b7631852** / tree **dce647bd734ff385d440cf9d5b4b388a338889bc**: Core38180844882, Windows38180844836, Security38180844952 **SUCCESS**. PR140 пока OPEN/DRAFT, кандидат пока1a765fa.
+**Причина LibreOffice доказана CI strace:** strict seccomp запрещал AF_UNIX OSL pipes; SVP/directbinary/6GiB не исправляли, безопасный reference создавал PDF. Реализован отдельный passive-formula IPC profile: закрыты существующие sockets, разрешено только создание AF_UNIX; прямые AF_INET/IPv6 запрещены; legacy DOC/table profile сохранён строгим. Dossier явно отражает local IPC и предел direct-network guarantee; общего filesystem sandbox/защиты от Unix proxy не заявлено.
+**hOCR fix опубликован:** exact source PNG на stdin Tesseract, явный tessedit_create_hocr=1 без configs/hocr/JPEG; detector geometry не пропадает при пустом OCR; текст сопоставляется по exact bbox. RED→GREEN missing-config/empty-OCR/merged cases, независимый stdin/argv regression.
+**Проверено локально:**1027full tests/24skips,14genuine table tests;7Chromium routes,HTTP/DOM/PDFviewer/architecture. Review не нашёл Critical/Important; Minor о независимой проверке stdin исправлен. Новые сравнения ещё проходят собственный final suite/CI, их PASS не переносится с d2fa1d6.
+**Реальные источники:** DOCX SHA b253439b… —41/41производных формул сexactXML hashes; V4 SHA b5d95b66… —534/534постраничных рендера/инвентаря,716native detections (не716qualifiedtables). ДополнительныеPDF:Графика21pages,Геодезия22pages,V3 534pages;577страниц технически читаются, семантика не квалифицирована.
+**p55:**21×4/84gridpositions/74unique cells; визуальный эталон74ячеек совпал сnative extraction (0расхождений),OCR rus+eng имеет41расхождение, включаяd20→420/d16→416. Локально добавлено bounded independent native alternative comparison и видимые UIконфликты без подменыOCR/приёмки; rawQA сохраняется перед завершением этого прохода.
+**Текущий шаг:** №13/A4 + B3: итоговый head,свежие тесты/CI/review,source-boundHTTP41формул иp55,QAwriteback. №13 остаётсяOPEN: fullWord layout/fonts/fields/formula visualequivalence, fullV4graphic/raster/mixed semantics иqualifiedcorpus не доказаны. ИнженерныйACCEPTED иустановкаПК не объявлены;расчёты не запускались;8DONE/8PARTIAL/3OPEN.
