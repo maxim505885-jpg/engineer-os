@@ -185,7 +185,7 @@ def _run(command, root, timeout, log_name):
     if timeout <= 0:
         raise OfficeError('Formula preview timeout')
     if sys.platform == 'linux':
-        command = [sys.executable, str(Path(__file__).with_name('doc_sandbox.py'))] + command
+        command = [sys.executable, str(Path(__file__).with_name('doc_sandbox.py')), '--passive-local-ipc'] + command
     elif sys.platform != 'win32':
         raise OfficeError('Controlled formula converter unavailable on platform')
     options = dict(start_new_session=True) if sys.platform != 'win32' else dict(creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
@@ -294,11 +294,13 @@ def render_formula(data: bytes, part: str, ordinal: int):
             dossier.update(scope='DERIVED_UNVERIFIED', status='UNCERTAINTY', preview_sha256=_sha(png), pdf_sha256=_sha(pdf.read_bytes()),
                            converter=dict(path=str(executable), executable_sha256=_sha(executable.read_bytes()), version=version[:512], platform=sys.platform,
                                           adapter_sha256=_sha(Path(__file__).read_bytes()), sandbox_sha256=_sha(Path(__file__).with_name('doc_sandbox.py').read_bytes()) if sys.platform == 'linux' else None),
-                           raster=raster, network_denied=sys.platform=='linux', macros_disabled=True, scaffold_passive=True,
+                           raster=raster, network_denied=sys.platform=='linux', local_unix_ipc_allowed=sys.platform=='linux',
+                           network_profile='DIRECT_INET_DENIED_EXISTING_SOCKETS_CLOSED_LOCAL_IPC_ONLY' if sys.platform=='linux' else 'NOT_ENFORCED',
+                           macros_disabled=True, scaffold_passive=True,
                            original_package_opened_by_converter=False, layout_verified=False, math_verified=False,
                            font_substitution_verified=False, acceptance_granted=False, evaluated=False,
                            elapsed_seconds=round(time.monotonic()-started, 3),
-                           limitations=['SOURCE_LAYOUT_NOT_VERIFIED', 'MATH_NOT_VERIFIED', 'FONT_SUBSTITUTION_NOT_VERIFIED', 'PASSIVE_SCAFFOLD_CONTEXT_OMITTED'] + ([] if sys.platform=='linux' else ['NETWORK_DENIAL_NOT_ENFORCED']),
+                           limitations=['SOURCE_LAYOUT_NOT_VERIFIED', 'MATH_NOT_VERIFIED', 'FONT_SUBSTITUTION_NOT_VERIFIED', 'PASSIVE_SCAFFOLD_CONTEXT_OMITTED'] + (['LOCAL_UNIX_IPC_ALLOWED_PASSIVE_SCAFFOLD_ONLY'] if sys.platform=='linux' else ['NETWORK_DENIAL_NOT_ENFORCED']),
                            limits=dict(source_bytes=MAX_SOURCE_BYTES, part_xml_bytes=MAX_PART_XML, formula_xml_bytes=MAX_FORMULA_XML, scaffold_bytes=MAX_SCAFFOLD, pdf_bytes=MAX_PDF_BYTES, png_bytes=MAX_PNG_BYTES, pixels=MAX_PIXELS, dimension=MAX_DIMENSION, timeout_seconds=TIMEOUT, derived_pages=1))
             return png, dossier
     except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as error:

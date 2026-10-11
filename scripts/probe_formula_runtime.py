@@ -17,7 +17,7 @@ def main():
     binary=converter.parent/'soffice.bin'
     cases=[('launcher-strict',converter,False,3,True),('launcher-svp-strict',converter,True,3,True),
            ('binary-strict',binary,False,3,True),('binary-svp-strict',binary,True,3,True),
-           ('launcher-svp-memory6-strict',converter,True,6,True),('launcher-svp-benign-reference',converter,True,3,False)]
+           ('launcher-svp-memory6-strict',converter,True,6,True),('launcher-svp-passive-ipc',converter,True,3,True),('launcher-svp-benign-reference',converter,True,3,False)]
     for label,exe,svp,memory,sandbox in cases:
         if not exe.is_file():continue
         with tempfile.TemporaryDirectory(prefix='formula-startup-probe-') as tmp:
@@ -27,7 +27,7 @@ def main():
             env=dict(os.environ,PYTHONPATH=str(ROOT))
             if svp:env['SAL_USE_VCLPLUGIN']='svp'
             if sandbox:
-                code="import os,resource,sys;original=resource.setrlimit;resource.setrlimit=lambda which,limits:original(which,("+str(memory)+"*1024**3,"+str(memory)+"*1024**3) if which==resource.RLIMIT_AS else limits);from engineering.local_app.doc_sandbox import apply;apply();os.execv(sys.argv[1],sys.argv[1:])"
+                code="import os,resource,sys;original=resource.setrlimit;resource.setrlimit=lambda which,limits:original(which,("+str(memory)+"*1024**3,"+str(memory)+"*1024**3) if which==resource.RLIMIT_AS else limits);from engineering.local_app.doc_sandbox import apply;apply(passive_local_ipc="+str(label=='launcher-svp-passive-ipc')+");os.execv(sys.argv[1],sys.argv[1:])"
                 command=[sys.executable,'-c',code]+command
             log=root/'startup.log';timed_out=False
             trace=root/'socket.trace'

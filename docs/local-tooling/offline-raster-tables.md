@@ -7,6 +7,16 @@ returns JSON-compatible source-bound candidates. `page` is 1-based and `bbox` is
 selected PDF clip is rasterized once and those PNG bytes are the backend input;
 no native PDF table or surrounding-page text is substituted.
 
+The Tesseract adapter receives these exact PNG bytes on stdin and explicitly
+sets `tessedit_create_hocr=1`; it does not depend on `configs/hocr` and does not
+use upstream's JPEG reencoding. Geometry is detected independently of OCR and
+preserved even when upstream discards empty rows/tables. Text is associated only
+by identical cell bounding boxes. `TEXT_UNAVAILABLE` is explicit; no missing
+text is invented. `ocr_input_png_sha256` records the actual OCR input identity.
+This resolves missing-config table disappearance, not recognition accuracy:
+real V4 p55 rus+eng still confuses italic `d20` with `420`. Such OCR candidates
+must not be accepted without source review.
+
 Install the optional environment separately from the core application:
 
 ```sh

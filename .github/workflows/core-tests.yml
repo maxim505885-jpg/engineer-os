@@ -54,7 +54,7 @@ jobs:
       - name: Check actual local Word formula renderer
         env:
           ENGINEER_OS_TEST_FORMULA_RENDER: "1"
-        run: python -m unittest tests.test_word_formula_preview -v
+        run: python -m unittest tests.test_word_formula_preview tests.test_formula_ipc_sandbox -v
       - name: Check PDF viewer DOM behavior
         run: node tests/pdf_viewer.test.cjs --dom
       - name: Install locked Playwright Chromium

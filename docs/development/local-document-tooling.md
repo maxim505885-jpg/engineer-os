@@ -3,6 +3,16 @@
 These components extend the existing application. Originals remain read-only;
 derived text, tables, formulas and images are unverified candidates.
 
+LibreOffice 24 needs local OSL Unix pipe IPC. Formula previews use a separate
+passive-scaffold sandbox profile: existing socket descriptors are closed and
+new socket creation is limited to AF_UNIX. Direct AF_INET/AF_INET6 networking,
+sendmsg/sendto and io_uring remain denied. The legacy DOC/table sandbox stays
+strict. `network_denied` in this formula dossier means direct Internet socket
+denial; `network_profile` and `local_unix_ipc_allowed` disclose the local IPC
+exception. This is not a filesystem sandbox or a guarantee against an ambient
+Unix service acting as a network proxy. Only whitelisted passive formula
+scaffolds, not original DOC/DOCX/OLE packages, use this profile.
+
 | Component | Runtime integration | Qualification boundary |
 | --- | --- | --- |
 | LibreOffice | Selected source OMML formula -> passive DOCX scaffold -> PDF -> PNG; authenticated formula-preview route and UI | Source fonts, full Word layout, physical pages, fields and mathematics not verified |
