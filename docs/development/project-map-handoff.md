@@ -422,3 +422,12 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **№13 остаётся OPEN по реальным неподтверждённым критериям:** raster/mixedtable values and relationships, fullV4graphictext/labels/units/geometry/associations, productionWordvisual/layout/font/field/formulaequivalence, representativequalifiedmultidocumentcorpus. Дальше нужна работа над этими содержательными пробелами; увеличение числа тестов или processedpages их не закрывает. №14/19 такжеOPEN;8✅/8🟡/3❌. UserPC не обновлён, engineeringACCEPTED не выдан,ЛИРА/RES не возобновлялись.
 
 Финальный архив: ENGINEER_OS_stage13_source_readback_20261011.zip, тот жеlibfile_6a4e2c88f07881919d035e8afb966d66, **version1**,31700092bytes,SHA256 **540cedde2fb8b606413e2dd006a6a376769e38287839b8559ae5f23ebecdcbb9**;77payloads,CRC PASS,originals excluded. Включает derivedPDF, source/canonical/sourcehash proof, actualOCR readbacks, independentcells, reproduciblescripts,finalCore/Windows proofs,local964log/DOMregression. Первоначальная version0 сохранена как история, финальнаяversion1 добавила CI/merge identity.
+
+
+## §134. 11.10.2026 — отбор upstream-репозиториев для Word/PDF/DWG и desktop
+
+По новому поручению пользователя выполнен поиск через GitHub plugin и сверка официальных README/документации с текущим кандидатом **1a765fa1766add7b5c5950a98893cd6e8099c6f8**. Отбор и ограничения: [docs/development/document-tooling-repositories-20261011.md](document-tooling-repositories-20261011.md).
+
+Приоритет №13: производственное визуальное чтение Word через существующий LibreOffice-контур; затем ограниченный пилот PaddleOCR PP-StructureV3/img2table на проблемных областях V4 и сравнение с уже имеющимися native/Tesseract/Docling. GMFT — резерв native таблиц без собственного OCR; PDF.js — просмотр исходника. Для CAD сохраняется имеющийся ezdxf и отдельный LibreDWG-конвертер, с учётом неполноты и проверки потерь. pywebview — будущая оболочка; Playwright уже используется. ONLYOFFICE — резерв отдельного Word renderer; docxjs не подтверждает поля/динамическую пагинацию.
+
+**Статус: исследовано, не внедрено этим шагом.** Не установлен новый компонент, не выполнена новая квалификация файлов/Windows, не изменён runtime-кандидат. Обязательные платные API не вводятся. №13/14/19 остаются OPEN, итог **8✅/8🟡/3❌** без изменения; инженерная приёмка/обновление на ПК не объявлены. ЛИРА/RES не возобновлялись. §133 сохраняет последний проверенный программный/реальный результат.
