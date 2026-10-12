@@ -7,12 +7,13 @@
 Бесплатное локальное приложение Windows: ТЗ → документы → проверка извлечения → доказательства → профильные проверки → заключение → FINAL AUDIT. Чат, история, задачи, память, CAD и восстановление входят в выпуск. Обязательные платные API не вводятся; оригиналы неизменны.
 
 ## Текущая позиция
-**РАБОТАЕМ: №13 / B2+B3 — эквивалентность оригинального Word и квалификация графики/таблиц PDF.**
-A1–A4 выполнены, см. §140. LibreOffice/hOCR и видимые OCR/native конфликты исправлены и объединены.
-Кандидат integration/release-candidate-v1: **4bae5948072384f271376eb15c14c81fcbfdec1c**, tree **2592b7c2714db2c80d047fea9ccf7dca8ff887a5**.
-PR140 MERGED; final head6f33d039cf58f571e45dd39896286446f961a4e4. Core38204983979/Windows38204983966/Security38204983889 SUCCESS; tested/merged tree совпал.
+**РАБОТАЕМ: №13 / B2+B3 — исходный Word render/fonts и точность растровых/графических данных.**
+A1–A4 выполнены. B2/B3: PR141 исправил field ranges и лишние PDF metadata writes, см. §141; baseline corpus расширен.
+Кандидат integration/release-candidate-v1: **52996bb62c8a96fa297c6924749d510415b0f6e2**, tree **a29c8dc8d439f03de49a285c14b01ff8fb31a0de**.
+PR141 MERGED; final head9bf4232466dde19dd25943e0e507e9c0db1e63c7. Core38214608519/Windows38214608540/Security38214608466 SUCCESS; tested/merged tree совпал. Local1044/8skips,Core1044/7skips,Windows145/12skips.
 PR102 OPEN/DRAFT/NOT_MERGED, b623bc3abd58adbf46432fbc4e3adb96d647235c.
-№13 OPEN: originalWord layout/fonts/fields/formulaequivalence, fullV4 graphic/raster/mixed semantics и representative qualified corpus. Установка на пользовательском ПК и инженерный ACCEPTED не подтверждены. Расчёты отложены пользователем; независимая работа B не требует RES.
+№13 OPEN: Word source-bound reference render/font/layout/field/formulaequivalence отсутствует; на6новыхrastercrops только3/12строгихOCRprofilematches. Следующая работа должна решать эти пробелы и fullqualifiedcorpus, а не повторять уже закрытую стабилизацию.
+Установка на пользовательском ПК и инженерный ACCEPTED не подтверждены. ЛИРА/SCAD/RES отложены пользователем; независимая работа B не требует расчётов.
 
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 12.10.2026 | Оставшийся критерий |
@@ -101,6 +102,7 @@ PR102 OPEN/DRAFT/NOT_MERGED, b623bc3abd58adbf46432fbc4e3adb96d647235c.
 ## Журнал продвижения
 | Дата | Шаг | Сделано | Осталось | Текущий/следующий |
 |---|---|---|---|---|
+|12.10.2026|B2/B3 второй проход|PR141 merged; Word field context/PDF no-oprotation исправлены;12realHTTPregions,1044Core/145Windows/QA|OriginalWord reference/fonts;9/12OCRmismatches;fullgraphicsemantics/corpus|№13/B2+B3|
 |12.10.2026|A1–A4, частично B|LibreOffice/hOCR и native conflicts исправлены; PR140 merged, freshCI SUCCESS, QAversion1|B2+B3, fullqualifiedcorpus; №13 OPEN|№13/B2+B3|
 |12.10.2026|План выпуска|Сверены карта §§133–137, master-plan, отбор Word/PDF/CAD/ЛИРА/SCAD, PR102/139/140 и CI PR140; сформирован порядок A–G|Реализация A1–G4; старые PASS не повторялись в этом проходе|№13/A1 — начать воспроизведение LibreOffice|
 
@@ -748,3 +750,17 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **QA сохранён:** ENGINEER_OS_STAGE13_QA_20261012.zip, тот же libfile_fa998953e1ac81919d5c9d8bd4acd15d, **version1**,217payloads/1060612bytes, SHA256 **eba2d747b012a068aa9b57c3e30edf8253e41b1f9d6c83e7c8a6f1406824dfa9**; CRC PASS. Оригинальные пакеты и модели исключены. Архив содержит final CI/review/merge proof, source-bound receipts, PNG, gold и reproducible scripts.
 
 **В плане A1–A4 выполнены. Текущий пункт №13, следующий шаг B2+B3:** originalWord visual/layout/fonts/fields/formulaequivalence; полная qualifiedV4 graphic/raster/mixed/merged semantics, labels/units/value relationships; затем representativequalifiedcorpus B1/B5. B1–B5 остаются частично выполненными/OPEN, не закрываются этим merge. №13/14/19 OPEN,8DONE/8PARTIAL/3OPEN; engineeringACCEPTED=false, userPC NOT_VERIFIED. ЛИРА/RES не запускались; PR102 draft/unmerged. Для закрытия №13 нужны перечисленные содержательные доказательства, не новый счёт тестов.
+
+## §141. 12.10.2026 — второй проход B2/B3: исправлены Word field ranges и лишние PDF rotation writes
+
+**PR141 MERGED:** final head **9bf4232466dde19dd25943e0e507e9c0db1e63c7**, кандидат **52996bb62c8a96fa297c6924749d510415b0f6e2**, tested/merged tree **a29c8dc8d439f03de49a285c14b01ff8fb31a0de** совпал. Core **38214608519** SUCCESS:1044tests/103.263s/7skips; Windows **38214608540** SUCCESS:145tests/36.935s/12skips; Security **38214608466** SUCCESS. Local1044/92.333s/8skips. Все9новых regression выполнены также в Windows CI. Независимый whole-branch review без Critical/Important/Minor; workflow follow-up/tree/SHA проверены. PR141 без unresolved threads. Первые два локальных OLE failures вызваны отсутствием существующей pinnedolefile0.47; зависимость восстановлена, focused и fullGREEN. Тесты не отключались.
+
+**Два конкретных исправления:** complex Word field context сохраняется между paragraphs/cells, вложенными fields и marker-only units; cached results остаются FIELD_NOT_EVALUATED, malformed ranges FIELD_STRUCTURE_UNVERIFIED. Native/region/table/OCR PDF чтение не делает set_rotation(0) для уже unrotated страницы; nonzero rotation/CropBox контракт сохранён. Обе ошибки воспроизведены RED→GREEN,6+3regressions.
+
+**На исходниках:** DOCX SHA b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5: все14684прежних logicalunits/text сохранены, восстановлена1field-marker unit (14685total),21/21passiveOLEbitmaps и41OMMLunits доступны,71instruction fragments не вычислялись. Это не original Word physical layout. В fontTable27семейств безembeddedfonts; в document.xml явноArial/Calibri/CambriaMath/TimesNewRoman/TimesNewRomanПолужирный, локальные fontconfig families их заменяют. FontTable не означает27реальноиспользуемыхfonts. Source-bound эталон originalWord fullrender отсутствует.
+
+**Растровая графика:** визуально сверены6exactsourcecrops изГрафикиp18 иГеодезииp13: +46,740/−0,450/−4,200, title с+42.650,Прогиб27мм/20мм. PSM6/11 дают3/12строгих whitespace-only совпадения; остальные9не объявлены correct.12authenticatedHTTP/isolatedworker/reopenedhistory проверок PASS,source/PNG hashes совпали,evidence0,originals unchanged. Для этих же12requests ошибкиobject-out-of-range **5976→0**, OCRtext unchanged. Числоошибок/регионов не переносится на весь534pageV4.
+
+**QA:** тот же ENGINEER_OS_STAGE13_QA_20261012.zip / libfile_fa998953e1ac81919d5c9d8bd4acd15d; новый архив **275payloads/1337223bytes**, SHA256 **08d00c8ceaef8bd4812d23013411d5dbd45a94d8d7509e9b0b0a16035d8bfb82**,CRC PASS; сохранены предыдущие receipts и новыеpass2data/CI/review/source-crops. Originalpackages/models/repositorycode/browser screenshots excluded.
+
+**№13 остаётся OPEN, B1/B5 baseline расширен, B2/B3 частично выполнены. Текущие конкретные условия:** source-bound полный Word reference render с исходнымиfonts и проверкой layout/fields/formulas; устранение/сверка literalOCRerrors и проверка signs/units/value-to-geometry relationships на всём graphic/raster/mixed corpus. Никакое число тестов не заменяет эти результаты. №14/19 OPEN,8DONE/8PARTIAL/3OPEN; engineeringACCEPTED=false,PC NOT_VERIFIED,ЛИРА/RES отложены.
