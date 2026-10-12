@@ -2,7 +2,7 @@
 import base64
 import hashlib
 import io
-import re
+import string
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from .files import file_limit
@@ -28,7 +28,9 @@ def unchanged(f):
 def formula_preview(store,sid,fid,body):
     if set(body)!={'part','ordinal','candidate_id','expected_sha256'}:raise ValueError('Formula source locator required')
     part=body['part'];ordinal=body['ordinal']
-    if not isinstance(part,str) or not re.fullmatch(r'word/[A-Za-z0-9_./-]+\.xml',part) or any(p in {'','..','.'} for p in part.split('/')):raise ValueError('Invalid formula part')
+    if (not isinstance(part,str) or len(part)>1024 or not part.startswith('word/') or
+        not part.endswith('.xml') or any(c not in string.ascii_letters+string.digits+'_./-' for c in part) or
+        any(p in {'','..','.'} for p in part.split('/'))):raise ValueError('Invalid formula part')
     if type(ordinal) is not int or not 0<=ordinal<=20000:raise ValueError('Invalid formula ordinal')
     f,data=source(store,sid,fid,'.docx',body['expected_sha256'])
     package=Package(data)

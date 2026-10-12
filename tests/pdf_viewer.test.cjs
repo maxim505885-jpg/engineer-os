@@ -93,6 +93,10 @@ async function domTests() {
 (async()=>{
   if(process.argv.includes('--dom')) {await domTests();return;}
   const requests=[];
+  const assets=new Map([
+    ['/vendor/pdfjs/pdf.mjs',path.join(ui,'vendor/pdfjs/pdf.mjs')],
+    ['/vendor/pdfjs/pdf.worker.mjs',path.join(ui,'vendor/pdfjs/pdf.worker.mjs')]
+  ]);
   const server=http.createServer((req,res)=>{
     requests.push(req.url);res.setHeader('Content-Security-Policy',CSP);
     res.setHeader('Content-Type',(req.url.endsWith('.css')?'text/css':req.url.endsWith('.mjs')||req.url.endsWith('.js')?'text/javascript':'text/html')+'; charset=utf-8');
@@ -100,9 +104,8 @@ async function domTests() {
     if(req.url==='/source-fixture.pdf' && sourceFixture){res.setHeader('Content-Type','application/pdf');return fs.createReadStream(sourceFixture).pipe(res);}
     if(req.url==='/test.css')return res.end('.pdf-viewer{max-width:95vw;max-height:95vh}.pdf-viewer-canvas-wrap{overflow:auto;max-height:65vh}.pdf-viewer-canvas{display:block}');
     if(req.url==='/pdf-viewer.js')return res.end(viewer);
-    const file=path.join(ui,req.url);
     if(req.url==='/vendor/pdfjs/pdf.mjs' && server.mock) return res.end(fake);
-    if(['/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs'].includes(req.url))return res.end(fs.readFileSync(file));
+    if(assets.has(req.url))return res.end(fs.readFileSync(assets.get(req.url)));
     res.writeHead(404);res.end();
   });
   await new Promise(r=>server.listen(0,'127.0.0.1',r));

@@ -36,6 +36,14 @@ class DocumentToolHTTPTests(unittest.TestCase):
         self.assertEqual(self.request('POST',route,{},token=False)[0],403)
         self.assertEqual(self.request('POST',route,{})[0],400)
 
+    def test_oversized_formula_part_rejected_before_reading_original(self):
+        from engineering.local_app import document_visuals
+        body=dict(part='word/'+'a'*1024+'.xml',ordinal=0,candidate_id='candidate',expected_sha256='0'*64)
+        with patch.object(document_visuals,'source') as source:
+            with self.assertRaises(ValueError):
+                document_visuals.formula_preview(None,'session','file',body)
+            source.assert_not_called()
+
     def test_formula_exact_candidate_and_project_boundaries(self):
         sid,f,item=self.fixture();route=f'/api/sessions/{sid}/files/{f["id"]}/formula-preview'
         body=dict(part='word/document.xml',ordinal=0,candidate_id=item['candidate_id'],expected_sha256=f['sha256'])
