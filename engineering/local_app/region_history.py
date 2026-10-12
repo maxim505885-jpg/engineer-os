@@ -34,7 +34,7 @@ def _source(store,sid,fid):
 def _run(file,request):
     environment={k:v for k,v in os.environ.items() if k in {'PATH','SYSTEMROOT','WINDIR','TEMP','TMP','TESSDATA_PREFIX','ENGINEER_OS_TESSERACT_BIN','ENGINEER_OS_TESSDATA_DIR','ENGINEER_OS_OCR_LAYOUT'}}
     environment['PYTHONUTF8']='1'
-    payload=_json(dict(source=file['path'],page=request['page'],bbox=request['bbox'],sha256=request['expected_sha256'],ocr=request['ocr'],ocr_psm=request.get('ocr_psm',6))).encode()
+    payload=_json(dict(source=file['path'],page=request['page'],bbox=request['bbox'],sha256=request['expected_sha256'],ocr=request['ocr'],ocr_psm=request.get('ocr_psm',6),ocr_preprocess=request.get('ocr_preprocess','none'))).encode()
     child=subprocess.Popen([sys.executable,'-m','engineering.local_app.region_process'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=environment,cwd=Path(__file__).resolve().parents[2],start_new_session=os.name!='nt')
     try:output,_=child.communicate(payload,timeout=PROCESS_TIMEOUT)
     except subprocess.TimeoutExpired:
@@ -59,10 +59,13 @@ def _run(file,request):
     return response['result']
 
 def _validate_request(request,file):
-    if not isinstance(request,dict) or set(request)-{'page','bbox','expected_sha256','ocr','ocr_psm'} or not {'page','bbox','expected_sha256','ocr'}<=set(request):raise ValueError('Exact region request fields required')
+    if not isinstance(request,dict) or set(request)-{'page','bbox','expected_sha256','ocr','ocr_psm','ocr_preprocess'} or not {'page','bbox','expected_sha256','ocr'}<=set(request):raise ValueError('Exact region request fields required')
     if request['expected_sha256']!=file['sha256']:raise ValueError('Region source hash mismatch')
     if type(request['page'])!=int or request['page']<1 or type(request['ocr'])!=bool:raise ValueError('Invalid region request profile')
     if type(request.get('ocr_psm',6))!=int or request.get('ocr_psm',6) not in (6,7,11):raise ValueError('Invalid OCR profile')
+    profile=request.get('ocr_preprocess','none')
+    if type(profile)!=str or profile not in ('none','padded','italic'):raise ValueError('Invalid OCR preprocessing')
+    if profile!='none' and (not request['ocr'] or request.get('ocr_psm',6)!=7):raise ValueError('OCR preprocessing requires selected line')
     bbox=request['bbox']
     if not isinstance(bbox,list) or len(bbox)!=4 or any(type(v) not in (int,float) or not math.isfinite(v) for v in bbox) or not (0<=bbox[0]<bbox[2] and 0<=bbox[1]<bbox[3]):raise ValueError('Invalid region request bounds')
 
@@ -85,6 +88,15 @@ def _validate(result,file,request):
         if not isinstance(regions,list) or len(regions)!=1:raise ValueError('OCR selected input missing')
         region=regions[0];input_raster=region.get('input_raster',{})
         if region.get('bbox')!=dict(zip(('left','top','right','bottom'),request['bbox'])) or region.get('execution')!='COMPLETED' or region.get('psm')!=request.get('ocr_psm',6) or not isinstance(input_raster,dict) or input_raster.get('png_sha256')!=raster['png_sha256'] or input_raster.get('width')!=raster['width'] or input_raster.get('height')!=raster['height']:raise ValueError('OCR selected raster mismatch')
+        profile=request.get('ocr_preprocess','none')
+        derived=region.get('processed_raster')
+        if profile=='none':
+            if derived is not None or region.get('preprocessing','none')!='none':raise ValueError('Unexpected processed raster')
+        else:
+            from .ocr_label_preprocessing import prepare
+            expected,metadata=prepare(png,profile)
+            if not isinstance(derived,dict) or region.get('preprocessing')!=profile or derived.get('source_png_sha256')!=raster['png_sha256'] or any(derived.get(k)!=v for k,v in metadata.items()):raise ValueError('OCR processed raster identity mismatch')
+            if derived.get('png_sha256')!=hashlib.sha256(expected).hexdigest() or derived.get('png_base64')!=base64.b64encode(expected).decode('ascii'):raise ValueError('OCR processed raster content mismatch')
 
 
 def _budget(db,fid):

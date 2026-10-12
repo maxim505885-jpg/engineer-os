@@ -11,7 +11,7 @@ import fitz
 from engineering.local_app.ocr import TesseractOCR,identity
 
 
-def recognize_region(source,page_no,bbox,expected_sha,*,psm=6):
+def recognize_region(source,page_no,bbox,expected_sha,*,psm=6,preprocess='none'):
     source=Path(source)
     # Open the exact hashed bytes, rather than a path which could change mid-read.
     raw=source.read_bytes();sha=hashlib.sha256(raw).hexdigest()
@@ -21,7 +21,7 @@ def recognize_region(source,page_no,bbox,expected_sha,*,psm=6):
     parser=TesseractOCR()
     with fitz.open(stream=raw,filetype='pdf') as document:
         if page_no>len(document):raise ValueError('INVALID_PAGE')
-        blocks=parser.page_blocks(document[page_no-1],page_no,bbox=bbox,selected_psm=psm)
+        blocks=parser.page_blocks(document[page_no-1],page_no,bbox=bbox,selected_psm=psm,preprocess=preprocess)
     engine_identity['render_scale']=parser.last_page_dossier['regions'][0]['render_scale']
     if hashlib.sha256(source.read_bytes()).hexdigest()!=sha:raise ValueError('SOURCE_CHANGED')
     return dict(scope='SELECTED_REGION_OCR_UNVERIFIED',source_sha256=sha,page_no=page_no,
@@ -36,9 +36,10 @@ def main():
     parser.add_argument('--bbox',type=float,nargs=4,required=True)
     parser.add_argument('--sha256',required=True);parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--psm',type=int,choices=(6,7,11),default=6)
+    parser.add_argument('--preprocess',choices=('none','padded','italic'),default='none')
     args=parser.parse_args()
     if args.output.exists() or args.output.is_symlink():raise ValueError('OUTPUT_ALREADY_EXISTS')
-    result=recognize_region(args.source,args.page,args.bbox,args.sha256,psm=args.psm)
+    result=recognize_region(args.source,args.page,args.bbox,args.sha256,psm=args.psm,preprocess=args.preprocess)
     # Exclusive creation also protects against aliases/races after the preflight.
     with args.output.open('x',encoding='utf-8') as stream:json.dump(result,stream,ensure_ascii=False,indent=2)
 
