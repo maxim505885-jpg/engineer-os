@@ -80,15 +80,17 @@ class RegionProcessSafetyTests(unittest.TestCase):
         self.assertEqual(Path(self.file['path']).read_bytes(),self.raw)
 
     def test_optional_psm_binding_survives_real_worker_save_and_reload(self):
-        request=dict(self.request,ocr_psm=11)
-        item=history.read_region(self.store,self.sid,self.file['id'],request)
-        self.assertEqual(item['result']['request_binding'],request)
-        reloaded=history.get_region(self.store,self.sid,self.file['id'],item['id'])
-        self.assertEqual(reloaded,item)
-        self.assertFalse(reloaded['result']['quality_verified'])
+        for psm in (7,11):
+            with self.subTest(psm=psm):
+                request=dict(self.request,ocr_psm=psm)
+                item=history.read_region(self.store,self.sid,self.file['id'],request)
+                self.assertEqual(item['result']['request_binding'],request)
+                reloaded=history.get_region(self.store,self.sid,self.file['id'],item['id'])
+                self.assertEqual(reloaded,item)
+                self.assertFalse(reloaded['result']['quality_verified'])
 
     def test_invalid_psm_profiles_never_start_worker_or_write_history(self):
-        for psm in (True,3,7,11.0,'11',None):
+        for psm in (True,3,99,11.0,'11',None):
             with self.subTest(psm=psm),patch.object(history,'_run') as worker,self.assertRaisesRegex(ValueError,'OCR profile'):
                 history.read_region(self.store,self.sid,self.file['id'],dict(self.request,ocr_psm=psm))
             worker.assert_not_called()

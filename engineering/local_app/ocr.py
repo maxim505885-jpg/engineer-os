@@ -62,7 +62,7 @@ class TesseractOCR:
         self.binary,self.data=_paths();self.layout=_layout();self.last_page_dossier=None
 
     def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6):
-        if type(selected_psm)!=int or selected_psm not in (6,11):raise OCRError('OCR_INVALID_PROFILE')
+        if type(selected_psm)!=int or selected_psm not in (6,7,11):raise OCRError('OCR_INVALID_PROFILE')
         import fitz
         rotation=page.rotation
         self.last_page_dossier=None

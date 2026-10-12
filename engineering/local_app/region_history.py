@@ -62,7 +62,7 @@ def _validate_request(request,file):
     if not isinstance(request,dict) or set(request)-{'page','bbox','expected_sha256','ocr','ocr_psm'} or not {'page','bbox','expected_sha256','ocr'}<=set(request):raise ValueError('Exact region request fields required')
     if request['expected_sha256']!=file['sha256']:raise ValueError('Region source hash mismatch')
     if type(request['page'])!=int or request['page']<1 or type(request['ocr'])!=bool:raise ValueError('Invalid region request profile')
-    if type(request.get('ocr_psm',6))!=int or request.get('ocr_psm',6) not in (6,11):raise ValueError('Invalid OCR profile')
+    if type(request.get('ocr_psm',6))!=int or request.get('ocr_psm',6) not in (6,7,11):raise ValueError('Invalid OCR profile')
     bbox=request['bbox']
     if not isinstance(bbox,list) or len(bbox)!=4 or any(type(v) not in (int,float) or not math.isfinite(v) for v in bbox) or not (0<=bbox[0]<bbox[2] and 0<=bbox[1]<bbox[3]):raise ValueError('Invalid region request bounds')
 
