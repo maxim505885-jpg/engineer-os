@@ -145,7 +145,7 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6)
     native library calls and require process isolation for a hard wall-clock kill.
     """
     deadline=time.monotonic()+TIMEOUT
-    if type(ocr_psm)!=int or ocr_psm not in (6,11):raise RegionReadbackError('INVALID_OCR_PROFILE')
+    if type(ocr_psm)!=int or ocr_psm not in (6,7,11):raise RegionReadbackError('INVALID_OCR_PROFILE')
     if isinstance(page_no,bool) or not isinstance(page_no,int) or page_no<1:raise RegionReadbackError('INVALID_PAGE')
     if type(ocr_enabled) is not bool:raise RegionReadbackError('INVALID_OCR_FLAG')
     if not isinstance(expected_sha,str) or re.fullmatch(r'[0-9a-fA-F]{64}',expected_sha) is None:

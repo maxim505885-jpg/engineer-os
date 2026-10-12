@@ -28,7 +28,12 @@ const pdfCard=page.locator('.file').filter({has:page.getByText('cells.pdf',{exac
 await pdfCard.locator('.source-assets > summary').click();await pdfCard.getByRole('button',{name:'Прочитать активы',exact:true}).click();
 await page.getByRole('button',{name:'Показать ячейки',exact:true}).click();
 await page.waitForSelector('.source-assets table');assert.deepEqual(await page.locator('.source-assets td').evaluateAll(cells=>cells.map(c=>c.firstChild.textContent)),['A','B','1','2']);
-await pdfCard.getByLabel('Страница таблиц cells.pdf').fill('2');await pdfCard.locator('.region-select').first().click();assert.equal(await pdfCard.getByLabel('Страница фрагмента',{exact:true}).inputValue(),'1');await pdfCard.locator('.region-read').click();await page.waitForSelector('.region-result img');
+await pdfCard.getByLabel('Страница таблиц cells.pdf').fill('2');await pdfCard.locator('.region-select').first().click();assert.equal(await pdfCard.getByLabel('Страница фрагмента',{exact:true}).inputValue(),'1');
+await pdfCard.getByLabel('Расположение текста фрагмента',{exact:true}).selectOption('7');
+const profileResponse=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/regions'));
+await pdfCard.locator('.region-read').click();const profileReceipt=await (await profileResponse).json();
+assert.equal(profileReceipt.result.request_binding.ocr_psm,7);assert.equal(profileReceipt.result.request_binding.ocr,false);
+await page.waitForSelector('.region-result img');
 assert.ok((await pdfCard.locator('.region-result').textContent()).includes('A'));
 assert.ok((await pdfCard.locator('.region-result').textContent()).includes('UNCERTAINTY'));
 await page.reload();const restored=page.locator('.file').filter({has:page.getByText('cells.pdf',{exact:true})});
@@ -48,6 +53,6 @@ await page.locator('.ole-bitmap').click();await page.waitForFunction(()=>documen
 assert.ok((await page.locator('#source-caption').textContent()).includes('содержание не подтверждено'));
 await page.getByRole('button',{name:'Закрыть просмотр',exact:true}).click();
 assert.equal(await page.locator('#evidence-list').textContent(),'');assert.deepEqual(errors,[]);
-console.log(JSON.stringify({result:'PASS',checks:['region-source-readback-history-reload','native-table-user-readback','source-bound-candidate','uncertainty-only','no-created-evidence','ole-asset-authenticated-png','ole-checkpoint-png','no-ole-activation'],engineering_acceptance:false}));
+console.log(JSON.stringify({result:'PASS',checks:['single-line-profile-request-binding-native-only','region-source-readback-history-reload','native-table-user-readback','source-bound-candidate','uncertainty-only','no-created-evidence','ole-asset-authenticated-png','ole-checkpoint-png','no-ole-activation'],engineering_acceptance:false}));
 }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(e=>{console.error(e);process.exitCode=1;});

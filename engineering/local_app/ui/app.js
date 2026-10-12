@@ -97,7 +97,7 @@ function regionReadback(f,session){
  const coords=['Слева','Сверху','Справа','Снизу'].map(label=>{const input=node('input');input.type='number';input.step='any';input.setAttribute('aria-label',label+' · точки PDF');return input;});
  const fields=node('div',undefined,'region-fields');fields.append(node('label','Страница'),page);coords.forEach((input,i)=>fields.append(node('label',['Слева','Сверху','Справа','Снизу'][i]),input));
  const ocr=node('input');ocr.type='checkbox';const label=node('label','Прочитать растр локальным OCR');label.prepend(ocr);
- const mode=node('select');mode.setAttribute('aria-label','Расположение текста фрагмента');for(const [value,text] of [[6,'Блок текста'],[11,'Разрозненные подписи']]){const option=node('option',text);option.value=String(value);mode.append(option);}
+ const mode=node('select');mode.setAttribute('aria-label','Расположение текста фрагмента');for(const [value,text] of [[6,'Блок текста'],[7,'Одна строка · отметка или подпись'],[11,'Разрозненные подписи']]){const option=node('option',text);option.value=String(value);mode.append(option);}
  const read=node('button','Прочитать фрагмент','region-read text-button'),history=node('button','История фрагментов','region-history text-button'),output=node('div',undefined,'region-result'),saved=node('div',undefined,'region-history-items');
  const base=`/api/sessions/${session}/files/${f.id}/regions`;
  const tableBackend=node('select');tableBackend.setAttribute('aria-label','Чтение растровой таблицы');for(const [value,text] of [['img2table','Таблица · img2table + Tesseract'],['paddleocr','Таблица · PaddleOCR (локальные модели)']]){const option=node('option',text);option.value=value;tableBackend.append(option);}
