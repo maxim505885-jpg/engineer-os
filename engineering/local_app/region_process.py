@@ -7,7 +7,7 @@ def main():
         raw=sys.stdin.buffer.read(65537)
         if len(raw)>65536:raise ValueError('REGION_REQUEST_LIMIT')
         request=json.loads(raw)
-        result=recognize(request['source'],request['page'],request['bbox'],request['sha256'],request['ocr'],request.get('ocr_psm',6),request.get('ocr_preprocess','none'))
+        result=recognize(request['source'],request['page'],request['bbox'],request['sha256'],request['ocr'],request.get('ocr_psm',6),request.get('ocr_preprocess','none'),request.get('ocr_language','rus+eng'))
         result['limitations']=[v for v in result['limitations'] if v!='NATIVE_RENDER_CALLS_REQUIRE_PROCESS_ISOLATION_FOR_HARD_DEADLINE']
         result['process_isolated']=True
         output=json.dumps(dict(result=result),ensure_ascii=False,allow_nan=False).encode()

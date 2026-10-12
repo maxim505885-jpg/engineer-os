@@ -62,10 +62,12 @@ class TesseractOCR:
     def __init__(self):
         self.binary,self.data=_paths();self.layout=_layout();self.last_page_dossier=None
 
-    def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6,preprocess='none'):
+    def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6,preprocess='none',language='rus+eng'):
         if type(selected_psm)!=int or selected_psm not in (6,7,11):raise OCRError('OCR_INVALID_PROFILE')
         if type(preprocess)!=str or preprocess not in ('none','padded','italic'):raise OCRError('OCR_INVALID_PREPROCESSING')
         if preprocess!='none' and (bbox is None or selected_psm!=7):raise OCRError('OCR_PREPROCESSING_REQUIRES_SELECTED_LINE')
+        if type(language)!=str or language not in ('rus+eng','eng'):raise OCRError('OCR_INVALID_LANGUAGE')
+        if language!='rus+eng' and bbox is None:raise OCRError('OCR_LANGUAGE_REQUIRES_SELECTED_REGION')
         import fitz
         rotation=page.rotation
         self.last_page_dossier=None
@@ -107,7 +109,8 @@ class TesseractOCR:
                 if remaining<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 self.last_input_raster=None
                 self.last_processed_raster=None
-                if preprocess!='none':raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm,preprocess=preprocess)
+                if language!='rus+eng':raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm,preprocess=preprocess,language=language)
+                elif preprocess!='none':raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm,preprocess=preprocess)
                 elif bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm)
                 else:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'])
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
@@ -143,13 +146,14 @@ class TesseractOCR:
                     blocks=len(found),characters=sum(len(b['text']) for b in found),
                     input_raster=getattr(self,'last_input_raster',None)))
                 if derived:dossier['regions'][-1].update(preprocessing=preprocess,processed_raster=derived)
+                if language!='rus+eng':dossier['regions'][-1]['language']=language
                 dossier['completed_passes']+=1
             dossier['coverage']='SELECTED_REGION_EXECUTED' if bbox is not None else ('WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED')
             return blocks
         finally:
             if rotation:page.set_rotation(rotation)
 
-    def _recognize(self,pixels,deadline,output_budget,*,psm=3,preprocess='none'):
+    def _recognize(self,pixels,deadline,output_budget,*,psm=3,preprocess='none',language='rus+eng'):
         with tempfile.TemporaryDirectory(prefix='engineer-ocr-') as folder:
             root=Path(folder);source=root/'page.png';output=root/'result'
             pixels.save(source)
@@ -163,7 +167,7 @@ class TesseractOCR:
                     png_sha256=hashlib.sha256(derived).hexdigest(),png_base64=base64.b64encode(derived).decode('ascii'))
             timeout=deadline-time.monotonic()
             if timeout<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
-            command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l','rus+eng','--psm',str(psm),'-c','tessedit_create_tsv=1']
+            command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l',language,'--psm',str(psm),'-c','tessedit_create_tsv=1']
             environment={key:value for key,value in os.environ.items() if key in {'SYSTEMROOT','WINDIR','TEMP','TMP'}}
             environment.update(PATH=os.defpath,LANG='C.UTF-8',OMP_THREAD_LIMIT='2')
             try:result=subprocess.run(command,shell=False,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
