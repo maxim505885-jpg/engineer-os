@@ -76,7 +76,7 @@ jobs:
       - name: Check Windows backup, locks and persisted restart
         shell: pwsh
         run: |
-          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat tests.test_emf_native_text tests.test_emf_bitmap tests.test_emf_bitfields tests.test_office_image_text_budget tests.test_pdf_visual_coverage_audit tests.test_region_readback_http tests.test_region_process_safety -v
+          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat tests.test_emf_native_text tests.test_emf_bitmap tests.test_emf_bitfields tests.test_office_image_text_budget tests.test_pdf_visual_coverage_audit tests.test_region_readback_http tests.test_region_process_safety tests.test_document_tooling_http tests.test_word_formula_preview tests.test_table_readback tests.test_table_native_comparison tests.test_word_layer_pairs tests.test_emfplus_inventory tests.test_lira_native_results -v
           if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }
@@ -87,6 +87,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Browser dependencies failed' }
           npx --prefix e2e playwright install chromium
           if ($LASTEXITCODE -ne 0) { throw 'Chromium installation failed' }
+      - name: Check offline PDF viewer on Windows Chromium
+        shell: pwsh
+        run: |
+          node tests/pdf_viewer.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'PDF viewer regression failed' }
       - name: Check real Ollama inference through Windows browser
         shell: pwsh
         env:

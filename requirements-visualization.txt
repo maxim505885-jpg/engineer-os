@@ -1,0 +1,2 @@
+# Optional local VTK mesh visualization, independent of core application/CAD intake.
+pyvista==0.46.4

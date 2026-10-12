@@ -3,6 +3,7 @@ import hashlib
 import json
 import posixpath
 import re
+import xml.etree.ElementTree as ET
 from urllib.parse import unquote, urlsplit
 
 A='{http://schemas.openxmlformats.org/drawingml/2006/main}'
@@ -12,6 +13,9 @@ REL='{http://schemas.openxmlformats.org/package/2006/relationships}'
 WP='{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}'
 O='{urn:schemas-microsoft-com:office:office}'
 A14='{http://schemas.microsoft.com/office/drawing/2010/main}'
+MAX_EFFECT_XML_BYTES=1024*1024
+MAX_EFFECT_RECORDS=10000
+MAX_EFFECT_REFERENCE_XML_BYTES=16*1024*1024
 
 
 def validate_identity(identity):
@@ -89,9 +93,44 @@ def image_descriptor(package,part,identity,linked=False,*,layer=False):
     return result
 
 
+def layer_metadata(package,node,parents,part):
+    from .office import OfficeError
+    result=dict(cached_bitmap_association_status='UNAVAILABLE',cached_processed_bitmap=None,
+                declared_effects=[],effects_applied=False,render_verified=False,layout_verified=False)
+    used=0
+    for effect in node.iter(A14+'imgEffect'):
+        xml=ET.tostring(effect,encoding='unicode')
+        size=len(xml.encode('utf-8'));used+=size
+        package.effect_reference_xml_bytes=getattr(package,'effect_reference_xml_bytes',0)+size
+        if package.effect_reference_xml_bytes>MAX_EFFECT_REFERENCE_XML_BYTES:raise OfficeError('Image declared effects reference limit')
+        if used>MAX_EFFECT_XML_BYTES or len(result['declared_effects'])>=MAX_EFFECT_RECORDS:
+            raise OfficeError('Image declared effects limit')
+        result['declared_effects'].append(dict(qname=effect.tag,attributes=dict(effect.attrib),normalized_xml=xml,
+            children=[dict(qname=e.tag,attributes=dict(e.attrib)) for e in effect],
+            wrapper_attributes=dict(node.attrib)))
+    ancestor=parents.get(node)
+    while ancestor is not None and ancestor.tag!=A+'blip':ancestor=parents.get(ancestor)
+    reason=None
+    if node.get(R+'embed') is not None and node.get(R+'link') is not None:reason='LAYER_AMBIGUOUS_IDENTITY'
+    elif node.get(R+'link') is not None:reason='LAYER_LINKED_IMAGE'
+    elif ancestor is None:reason='ANCESTOR_BLIP_MISSING'
+    elif ancestor.get(R+'embed') is not None and ancestor.get(R+'link') is not None:reason='ANCESTOR_BLIP_AMBIGUOUS_IDENTITY'
+    elif ancestor.get(R+'link') is not None:reason='ANCESTOR_BLIP_LINKED_IMAGE'
+    elif ancestor.get(R+'embed') is None:reason='ANCESTOR_BLIP_IDENTITY_MISSING'
+    else:
+        identity=ancestor.get(R+'embed');validate_identity(identity)
+        cached=image_descriptor(package,part,identity)
+        result['cached_processed_bitmap']=cached
+        if cached['status']=='BOUND_PACKAGE_IMAGE':result['cached_bitmap_association_status']='BOUND_ANCESTOR_BLIP'
+        else:reason=cached.get('reason','ANCESTOR_BLIP_UNAVAILABLE')
+    if reason:result['cached_bitmap_association_reason']=reason
+    return result
+
+
 def bind_images(package,element,locator):
     from .office import OfficeError,MAX_IMAGE_REFERENCES
     refs=[]
+    parents={child:parent for parent in element.iter() for child in parent}
     for node in element.iter():
         if node.tag==A+'blip':
             identities=[(node.get(R+'embed'),False),(node.get(R+'link'),True)]
@@ -112,6 +151,7 @@ def bind_images(package,element,locator):
             if node.tag==A14+'imgLayer':
                 descriptor['reference_kind']='HD_PHOTO_LAYER'
                 descriptor['layer_composition_verified']=False
+                descriptor.update(layer_metadata(package,node,parents,locator['part']))
             refs.append(descriptor)
     if refs:
         locator['images']=refs

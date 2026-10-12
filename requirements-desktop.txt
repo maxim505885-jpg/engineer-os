@@ -1,0 +1,2 @@
+# Optional desktop window. Core local application does not require this extra.
+pywebview==6.1
