@@ -67,7 +67,9 @@ class TesseractOCR:
         rotation=page.rotation
         self.last_page_dossier=None
         try:
-            page.set_rotation(0)
+            # Even a no-op set_rotation dirties the PDF and can rebuild broken
+            # object references in real drawings. Leave unrotated sources alone.
+            if rotation:page.set_rotation(0)
             width,height=page.rect.width,page.rect.height
             if not all(math.isfinite(n) and n>0 for n in (width,height)):raise OCRError('OCR_INVALID_PAGE_GEOMETRY')
             regions=[('whole',fitz.Rect(0,0,width,height))]
@@ -130,7 +132,8 @@ class TesseractOCR:
                 dossier['completed_passes']+=1
             dossier['coverage']='SELECTED_REGION_EXECUTED' if bbox is not None else ('WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED')
             return blocks
-        finally:page.set_rotation(rotation)
+        finally:
+            if rotation:page.set_rotation(rotation)
 
     def _recognize(self,pixels,deadline,output_budget,*,psm=3):
         with tempfile.TemporaryDirectory(prefix='engineer-ocr-') as folder:

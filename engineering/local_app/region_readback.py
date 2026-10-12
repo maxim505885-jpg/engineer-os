@@ -162,7 +162,7 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6)
         if len(document)>MAX_PAGES:raise RegionReadbackError('PAGE_COUNT_LIMIT')
         if page_no>len(document):raise RegionReadbackError('INVALID_PAGE')
         page=document[page_no-1];rotation=page.rotation;cropbox=list(page.cropbox)
-        page.set_rotation(0)
+        if rotation:page.set_rotation(0)
         width,height=page.rect.width,page.rect.height
         if not all(math.isfinite(n) and 0<n<=20000 for n in (width,height)):raise RegionReadbackError('INVALID_PAGE_GEOMETRY')
         left,top,right,bottom=selected

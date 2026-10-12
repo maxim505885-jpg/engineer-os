@@ -83,9 +83,48 @@ def word_limits(element):
     limits=[];tags={e.tag.rsplit('}',1)[-1] for e in element.iter()}
     if 'sym' in tags:limits.append('SYMBOL_NOT_DECODED')
     for group,reason in [(('drawing','pict'),'DRAWING_NOT_READ'),(('oMath','oMathPara'),'EQUATION_NOT_READ'),
-                         (('ins','del','moveFrom','moveTo'),'TRACKED_CHANGES_UNVERIFIED'),(('instrText','fldSimple'),'FIELD_NOT_EVALUATED')]:
+                         (('ins','del','moveFrom','moveTo'),'TRACKED_CHANGES_UNVERIFIED'),(('instrText','fldSimple','fldChar'),'FIELD_NOT_EVALUATED')]:
         if tags.intersection(group):limits.append(reason)
     return limits
+
+
+def word_field_context(body):
+    """Track source field ranges, including cached results across logical units.
+
+    Field instructions/results are never executed or made current. An explicit
+    enter/exit walk keeps simple fields local and complex fields open until an
+    end marker. Malformed ranges make the whole container structurally unknown;
+    guessing where an unmatched field ends could expose its cache as plain text.
+    """
+    affected=set();owners=[];complex_fields=[];simple_depth=0;malformed=False
+    unsupported={child for child in body if child.tag not in {W+'p',W+'tbl',W+'sectPr'}}
+    pending=[(body,False)]
+    while pending:
+        element,leaving=pending.pop()
+        owner=element.tag in {W+'p',W+'tc'} or element in unsupported
+        if leaving:
+            if element.tag==W+'fldSimple':simple_depth-=1
+            if owner:owners.pop()
+            continue
+        if owner:
+            owners.append(element)
+            if complex_fields or simple_depth:affected.add(element)
+        if element.tag in {W+'fldChar',W+'fldSimple',W+'instrText'}:
+            affected.update(owners)
+        if element.tag==W+'fldSimple':simple_depth+=1
+        elif element.tag==W+'fldChar':
+            kind=element.get(W+'fldCharType')
+            if kind=='begin':complex_fields.append(False)
+            elif kind=='separate':
+                if not complex_fields or complex_fields[-1]:malformed=True
+                else:complex_fields[-1]=True
+            elif kind=='end':
+                if not complex_fields:malformed=True
+                else:complex_fields.pop()
+            else:malformed=True
+        pending.append((element,True))
+        pending.extend((child,False) for child in reversed(list(element)))
+    return affected,malformed or bool(complex_fields)
 
 
 def equation_units(element,locator):
@@ -165,7 +204,11 @@ def word_table_grid(table):
 
 def word_container_units(body,part,package=None):
     out=[];paragraph=0;table=0
+    field_affected,field_structure_unknown=word_field_context(body)
     def append(text,locator,warnings,element):
+        warnings=list(warnings)
+        if element in field_affected:warnings.append('FIELD_NOT_EVALUATED')
+        if field_structure_unknown:warnings.append('FIELD_STRUCTURE_UNVERIFIED')
         if package is not None:
             from .word_images import bind_images
             images=bind_images(package,element,locator)
@@ -198,6 +241,8 @@ def word_container_units(body,part,package=None):
     for child in body:
         if child.tag==W+'p':
             paragraph+=1;text=word_text(child);warnings=word_limits(child)
+            if child in field_affected:warnings.append('FIELD_NOT_EVALUATED')
+            if field_structure_unknown:warnings.append('FIELD_STRUCTURE_UNVERIFIED')
             locator=dict(kind='paragraph',part=part,paragraph=paragraph)
             # Image-only Word paragraphs have no w:t, but still carry source evidence.
             # Keep their logical unit so bind_images can preserve exact media refs.
