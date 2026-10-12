@@ -7,12 +7,12 @@
 Бесплатное локальное приложение Windows: ТЗ → документы → проверка извлечения → доказательства → профильные проверки → заключение → FINAL AUDIT. Чат, история, задачи, память, CAD и восстановление входят в выпуск. Обязательные платные API не вводятся; оригиналы неизменны.
 
 ## Текущая позиция
-**РАБОТАЕМ: №13 / A4 + B3 — финальная проверка исправлений и видимые конфликты OCR/Native.**
-A1 и A2 исправлены и проверены (см. §139 карты). Промежуточный d2fa1d6 имеет все три CI SUCCESS; новый comparison проходит свежую проверку. №13 ещё не закрыт.
-Последний объединённый кандидат: integration/release-candidate-v1, 1a765fa1766add7b5c5950a98893cd6e8099c6f8.
-PR140 OPEN/DRAFT/NOT_MERGED, feat/local-tooling-resume-20261011, d2fa1d6dcf4bc7c62c25e49977028186b7631852: Core SUCCESS, Windows SUCCESS, Security SUCCESS. Новые локальные изменения comparator/UI требуют нового final-head CI.
-PR102 с экспортёром результатов ЛИРА OPEN/DRAFT/NOT_MERGED, b623bc3abd58adbf46432fbc4e3adb96d647235c.
-Установка обновления на пользовательском ПК и инженерный ACCEPTED не подтверждены. Расчёты отложены пользователем; установка SDK, запуск solver/R4/получение RES не входят в независимую работу A–C.
+**РАБОТАЕМ: №13 / B2+B3 — эквивалентность оригинального Word и квалификация графики/таблиц PDF.**
+A1–A4 выполнены, см. §140. LibreOffice/hOCR и видимые OCR/native конфликты исправлены и объединены.
+Кандидат integration/release-candidate-v1: **4bae5948072384f271376eb15c14c81fcbfdec1c**, tree **2592b7c2714db2c80d047fea9ccf7dca8ff887a5**.
+PR140 MERGED; final head6f33d039cf58f571e45dd39896286446f961a4e4. Core38204983979/Windows38204983966/Security38204983889 SUCCESS; tested/merged tree совпал.
+PR102 OPEN/DRAFT/NOT_MERGED, b623bc3abd58adbf46432fbc4e3adb96d647235c.
+№13 OPEN: originalWord layout/fonts/fields/formulaequivalence, fullV4 graphic/raster/mixed semantics и representative qualified corpus. Установка на пользовательском ПК и инженерный ACCEPTED не подтверждены. Расчёты отложены пользователем; независимая работа B не требует RES.
 
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 12.10.2026 | Оставшийся критерий |
@@ -45,8 +45,8 @@ PR102 с экспортёром результатов ЛИРА OPEN/DRAFT/NOT_M
 Файлы: engineering/local_app/word_formula_preview.py, table_worker.py, table_readback.py; tests/test_word_formula_preview.py, tests/test_table_readback.py; scripts/probe_formula_runtime.py на docs-ветке.
 - [x] A1. На безопасном фиксированном fixture воспроизвести distro LibreOffice exit1. Сравнить launcher/SVP/direct binary/профиль памяти и безопасный reference. Зафиксировать причину, минимальный fix и regression. Не открывать user original в unsandboxed контроле; javaldx warning не считать причиной без доказательства.
 - [x] A2. Воспроизвести custom tessdata без configs/hocr. Явно включить tessedit_create_hocr=1 с exact PNG input. При пустом OCR сохранить найденную геометрию с TEXT_UNAVAILABLE. Проверить отсутствующий config, empty OCR, merged cells и настоящий V4 p55 bbox[55,68,582,462].
-- [ ] A3. Проверить source SHA/координаты/лимиты/authenticated HTTP/UI и неизменность оригиналов. Реальные QA JSON/PNG/logs сохранить долговременно, записать ID и хеши.
-- [ ] A4. На окончательном head выполнить focused/full suite, HTTP/DOM/Chromium и review; получить Core/Windows/Security SUCCESS на этом же head. Только затем объединить PR140 и сверить merged tree.
+- [x] A3. Проверить source SHA/координаты/лимиты/authenticated HTTP/UI и неизменность оригиналов. Реальные QA JSON/PNG/logs сохранить долговременно, записать ID и хеши.
+- [x] A4. На окончательном head выполнить focused/full suite, HTTP/DOM/Chromium и review; получить Core/Windows/Security SUCCESS на этом же head. Только затем объединить PR140 и сверить merged tree.
 **Выход A:** работающие в квалифицированных средах инструменты в общем кандидате. №13 этим целиком не закрывается.
 
 ### B. Доказать качество чтения — №13
@@ -101,13 +101,14 @@ PR102 с экспортёром результатов ЛИРА OPEN/DRAFT/NOT_M
 ## Журнал продвижения
 | Дата | Шаг | Сделано | Осталось | Текущий/следующий |
 |---|---|---|---|---|
+|12.10.2026|A1–A4, частично B|LibreOffice/hOCR и native conflicts исправлены; PR140 merged, freshCI SUCCESS, QAversion1|B2+B3, fullqualifiedcorpus; №13 OPEN|№13/B2+B3|
 |12.10.2026|План выпуска|Сверены карта §§133–137, master-plan, отбор Word/PDF/CAD/ЛИРА/SCAD, PR102/139/140 и CI PR140; сформирован порядок A–G|Реализация A1–G4; старые PASS не повторялись в этом проходе|№13/A1 — начать воспроизведение LibreOffice|
 
 
 ---
 
 ## Исторические сводки до плана выпуска 12.10.2026
-Следующий текст сохранён для истории. Его ранние «актуальные» заголовки и статусы не заменяют активный план выше; текущий пункт — №13/A1.
+Следующий текст сохранён для истории. Его ранние «актуальные» заголовки и статусы не заменяют активный план выше; текущий пункт указан в активном плане выше.
 
 # Актуальный результат — §133 итог — PR139 MERGED; кандидат1a765fa1766add7b5c5950a98893cd6e8099c6f8/tree f750e239a41e90099313b234170059b8c213e60e. Core964/Windows69/Security SUCCESS;6 Chromium и real Ollama PASS. Source-region native/PNG/OCR/history реализован; V4 −0,450/44/38 recovered,788cell serialization differences clarified. Word visual audit41OMML/11WDP/19EMF/493derived pages остаётся QA, не authoritative production render. №13 открыт: точность raster/mixed/OCR, source layout и qualified corpus. №14/19 открыты,ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
 
@@ -735,3 +736,15 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **Реальные источники:** DOCX SHA b253439b… —41/41производных формул сexactXML hashes; V4 SHA b5d95b66… —534/534постраничных рендера/инвентаря,716native detections (не716qualifiedtables). ДополнительныеPDF:Графика21pages,Геодезия22pages,V3 534pages;577страниц технически читаются, семантика не квалифицирована.
 **p55:**21×4/84gridpositions/74unique cells; визуальный эталон74ячеек совпал сnative extraction (0расхождений),OCR rus+eng имеет41расхождение, включаяd20→420/d16→416. Локально добавлено bounded independent native alternative comparison и видимые UIконфликты без подменыOCR/приёмки; rawQA сохраняется перед завершением этого прохода.
 **Текущий шаг:** №13/A4 + B3: итоговый head,свежие тесты/CI/review,source-boundHTTP41формул иp55,QAwriteback. №13 остаётсяOPEN: fullWord layout/fonts/fields/formula visualequivalence, fullV4graphic/raster/mixed semantics иqualifiedcorpus не доказаны. ИнженерныйACCEPTED иустановкаПК не объявлены;расчёты не запускались;8DONE/8PARTIAL/3OPEN.
+
+## §140. 12.10.2026 — PR140 объединён, стабилизация A завершена; №13 остаётся OPEN
+
+**Опубликовано и объединено:** PR140, final head **6f33d039cf58f571e45dd39896286446f961a4e4**, кандидат **4bae5948072384f271376eb15c14c81fcbfdec1c** в integration/release-candidate-v1. Tested/merged tree **2592b7c2714db2c80d047fea9ccf7dca8ff887a5** идентичен по git rev-parse. Core **38204983979**, Windows **38204983966**, Security **38204983889** SUCCESS на final head. Core1035tests/160.313s/7skips; Windows136tests/43.757s/12skips. Local1035tests/86.166s/25environment skips. Пропуски не объявлены выполненными проверками.
+
+**Исправлено:** LibreOffice passive-formula AF_UNIX IPC с закрытием прежних sockets и запретом direct INET; exact PNG/hOCR без зависимости от configs/hocr; сохранение grid при пустом OCR. Добавлены bounded independent native alternatives и UI OCR_NATIVE_CONFLICT без подмены исходного OCR. Два замечания CodeQL устранены: bounded ASCII formula part проверяется до source IO, PDF test server выбирает фиксированные paths из Map. Оба review threads resolved; независимый review без Critical/Important/Minor. Свежий Security Guard SUCCESS; отдельный новый CodeQL scan этим протоколом не заявляется.
+
+**На оригиналах:** authenticated HTTP41/41OMML с exactXML/PNG/source/candidate hashes; evidence0 и originals unchanged. Native DOCX14684logical units, не physical layout. V4 534pages render/inventory и716native candidates, включая drawingframes; не716qualifiedtables. Дополнительные21+22+534pages технически inventoried, не semanticqualification. Реальный p55:21×4grid/74unique cells; визуальный эталон74cells/native0различий, OCR41различие; все41конфликта доступны, originalOCR сохранён. Linux actual formula renderer, HTTP/DOM,7Chromium routes/PDFviewer PASS; Windows cold/repeat/restart/backup/PDFviewer/realOllama/browser PASS. Windows формульный converter не установлен в этом CI, formula_rendered=false; пользовательскийПК не обновлён.
+
+**QA сохранён:** ENGINEER_OS_STAGE13_QA_20261012.zip, тот же libfile_fa998953e1ac81919d5c9d8bd4acd15d, **version1**,217payloads/1060612bytes, SHA256 **eba2d747b012a068aa9b57c3e30edf8253e41b1f9d6c83e7c8a6f1406824dfa9**; CRC PASS. Оригинальные пакеты и модели исключены. Архив содержит final CI/review/merge proof, source-bound receipts, PNG, gold и reproducible scripts.
+
+**В плане A1–A4 выполнены. Текущий пункт №13, следующий шаг B2+B3:** originalWord visual/layout/fonts/fields/formulaequivalence; полная qualifiedV4 graphic/raster/mixed/merged semantics, labels/units/value relationships; затем representativequalifiedcorpus B1/B5. B1–B5 остаются частично выполненными/OPEN, не закрываются этим merge. №13/14/19 OPEN,8DONE/8PARTIAL/3OPEN; engineeringACCEPTED=false, userPC NOT_VERIFIED. ЛИРА/RES не запускались; PR102 draft/unmerged. Для закрытия №13 нужны перечисленные содержательные доказательства, не новый счёт тестов.
