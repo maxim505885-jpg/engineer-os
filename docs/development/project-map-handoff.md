@@ -1,4 +1,4 @@
-> **Активный план на 12.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **№13 / B3 corpus+B2 Wordreference.** PR144 MERGED, кандидатb2c2960/treec1f44ad; Core1057/Windows158/Security SUCCESS. Явный LatinOCR;4таблицы V4p55–56:170literalcells/192positions/89sourceHTTPrequests exact. Остались Wordreference/fonts/fullphysical layout и остальные graphic/raster/mixed semantics. №13 OPEN,8DONE/8PARTIAL/3OPEN. Итог §144; ранние сводки исторические.
+> **Активный план на 12.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 Word correspondence+B3 corpus.** PR144 MERGED, кандидатb2c2960/treec1f44ad. §145:43/43 листа графики сопоставлены с V4;6/6 выбранных надписей HTTP/history exact. Четыре таблицы квалифицированы (§144). V4 — доступный кандидат Word-эталона;244 абзаца требуют сопоставления, physical layout/fields/formulas/fonts и остальная семантика открыты. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
 
 # Актуальный результат — §133 итог — PR139 MERGED; кандидат1a765fa1766add7b5c5950a98893cd6e8099c6f8/tree f750e239a41e90099313b234170059b8c213e60e. Core964/Windows69/Security SUCCESS;6 Chromium и real Ollama PASS. Source-region native/PNG/OCR/history реализован; V4 −0,450/44/38 recovered,788cell serialization differences clarified. Word visual audit41OMML/11WDP/19EMF/493derived pages остаётся QA, не authoritative production render. №13 открыт: точность raster/mixed/OCR, source layout и qualified corpus. №14/19 открыты,ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
 
@@ -574,3 +574,24 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **Что дальше и почему №13 открыт:** B3 — остальные graphic/raster/mixed/merged таблицы и схемы, знаки/единицы иvalue-to-geometry связи на representative corpus; B2 — source-bound эталонный экспорт исходногоDOCX изMicrosoftWord с исходнымиfonts дляphysical layout/fields/formula equivalence. Доступный substitution-font render не заменяет этот эталон. B1/B5 qualifiedbaseline расширен четырьмя таблицами, веськорпус не закрыт. A1–A4 в прежнем объёме выполнены;B1–B5partial/OPEN. №13/14/19OPEN,8DONE/8PARTIAL/3OPEN, engineeringACCEPTED=false,userPC NOT_VERIFIED. ЛИРА/RES отложены.
 
 **QA:** ENGINEER_OS_STAGE13_QA_20261012.zip, тот же libfile_fa998953e1ac81919d5c9d8bd4acd15d, сохраняетpass1–4 и добавляетpass5: diagnostic/REDGREEN/full/CI/browser/review,sourcecrops/fixtures/89HTTPreceipts,170cellqualifiedledgers/44associationpairs иmerge/treeproof. Originalpackages/models/venv/repositorycode/browser screenshots исключены; CRC иполныйpayloadSHAmanifest проверяются.
+
+
+## 145. Проверка графики и кандидата Word-эталона — 12.10.2026
+Код не менялся: PR144 MERGED, кандидат b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75. Core1057/Windows158/Security — результаты CI PR144 из §144, не новый полный прогон pass6.
+
+### Проверено
+- Все 21 лист графики соответствуют V4 p492–512; все 22 листа геодезии — V4 p513–534. На 43/43 совпали точные разобранные геометрические сигнатуры и пиксели контрольного рендера. Проверка размеров/CropBox/rotation всех 534 страниц исключила другие совместимые страницы. Сигнатуры и рендер выполнены одним PyMuPDF1.26.6: это взаимодополняющие проверки, не независимые движки и не доказательство всей семантики.
+- Исправлено прежнее предположение о слоях: эти 43 листа содержат векторные пути и не содержат изображений; 40 не имеют native words. Отсутствие извлекаемого текста не означает растровый оригинал. Происхождение шрифта SHX не доказано.
+- Шесть выбранных надписей заново прочитаны непосредственно из V4 p509/p525 через authenticated HTTP → worker → history → reopened Store: 6/6 точных совпадений после нормализации только пробелов. PNG/source SHA/page/bbox привязаны к текущему чтению; более ранние широкие визуальные контексты сохранены отдельно. Original unchanged; evidence_count=0; инженерная приёмка не выполнялась.
+- Предыдущая квалификация четырёх таблиц V4p55–56 сохраняется:170 уникальных ячеек/192 позиции/89 точных HTTP чтений (§144). Соответствие 43 листов не делает автоматически квалифицированными все их подписи и инженерные связи.
+
+### Word: доступный кандидат, ещё не квалифицированный эталон
+DOCX имеет cached Pages491; V4 содержит491 основную страницу+43 сопоставленных листа графики. PDF создан примерно через2минуты после изменения DOCX. Это признаки возможного связанного экспорта, не доказательство одинаковой версии или экспорта Word.
+Из3086 абзацев длиной≥12 нормализованных символов2247 найдены первоначальным substring поиском, ещё595 — эвристиками порядка текста/переносов/точек оглавления.244 остались несопоставленными; у176 найдены32-символьные фрагменты, у68 не найдены. Повторы, поля, формулы и порядок чтения ограничивают эти числа: это диагностика, не literal coverage и не244 доказанные ошибки. Проверка вложенных DOCX абзацев не выявила нового подтверждённого parser bug.
+Ранее «Wordreference отсутствует» уточняется: V4 доступен как кандидат, но его correspondence/layout/fields/formulas/font equivalence ещё не доказаны. Новый экспорт нельзя требовать до проверки имеющегося кандидата.
+
+### Дальше работаем и критерий закрытия
+1. B2: сопоставить244 оставшихся абзаца по странице/контексту; отделить порядок чтения и поля от реальных пропусков/различий версии. Для подтверждённых дефектов — воспроизводимый тест, исправление, проверка.
+2. B2: проверить source-bound physical layout, поля,41OMML и доступность/замены исходных шрифтов; metadata и cached page count не заменяют визуальную квалификацию.
+3. B3: расширить заранее размеченный corpus на остальные векторные/растровые/смешанные данные и связи значений с осями/этажами/единицами; совпадение страниц не заменяет эту работу.
+№13 OPEN;8DONE/8PARTIAL/3OPEN. №14/19 открыты, физический ПК не проверен, расчёты отложены. QA pass6, независимый review: оставшихся замечаний по43-page map и6-label provenance нет.
