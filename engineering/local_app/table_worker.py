@@ -261,7 +261,8 @@ def execute(request):
         if len(document)>5000: raise ValueError('PAGE_COUNT_LIMIT')
         number=request['page']
         if type(number) is not int or not 1<=number<=len(document): raise ValueError('INVALID_PAGE')
-        page=document[number-1]; rotation=page.rotation; cropbox=list(page.cropbox); page.set_rotation(0)
+        page=document[number-1]; rotation=page.rotation; cropbox=list(page.cropbox)
+        if rotation:page.set_rotation(0)
         selected=request['bbox']; left,top,right,bottom=selected
         if not 0<=left<right<=page.rect.width or not 0<=top<bottom<=page.rect.height:
             raise ValueError('INVALID_REGION')
