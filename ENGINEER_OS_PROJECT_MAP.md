@@ -1,6 +1,6 @@
 # ENGINEER OS — живая карта проекта
 
-> **Активный план на 12.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **№13 / B2+B3.** PR141 MERGED, кандидат52996bb/treea29c8dc; Core1044/Windows145/Security SUCCESS. Field context и PDF no-oprotation исправлены. Остались Word reference/fonts/layout и точность полного raster/graphic corpus. №13 OPEN,8DONE/8PARTIAL/3OPEN. Итог §141; ранние сводки исторические.
+> **Активный план на 12.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **№13 / B3+B2.** PR142 MERGED, кандидатcdd0cdd/tree35a3dfb; Core1048/Windows149/Security SUCCESS. PSM7 добавлен, exact raster3/6; RapidOCR diagnostic0/6. Остались literalOCR/signs/units/geometry и originalWord reference/fonts/layout. №13 OPEN,8DONE/8PARTIAL/3OPEN. Итог §142; ранние сводки исторические.
 
 
 Обновлено: 12.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
@@ -3502,3 +3502,17 @@ PR139 MERGED с expected-head d7d4dea14cd012a9cb50bb7cd80cc7eefdde6476. Канд
 **QA:** тот же ENGINEER_OS_STAGE13_QA_20261012.zip / libfile_fa998953e1ac81919d5c9d8bd4acd15d; новый архив **275payloads/1337223bytes**, SHA256 **08d00c8ceaef8bd4812d23013411d5dbd45a94d8d7509e9b0b0a16035d8bfb82**,CRC PASS; сохранены предыдущие receipts и новыеpass2data/CI/review/source-crops. Originalpackages/models/repositorycode/browser screenshots excluded.
 
 **№13 остаётся OPEN, B1/B5 baseline расширен, B2/B3 частично выполнены. Текущие конкретные условия:** source-bound полный Word reference render с исходнымиfonts и проверкой layout/fields/formulas; устранение/сверка literalOCRerrors и проверка signs/units/value-to-geometry relationships на всём graphic/raster/mixed corpus. Никакое число тестов не заменяет эти результаты. №14/19 OPEN,8DONE/8PARTIAL/3OPEN; engineeringACCEPTED=false,PC NOT_VERIFIED,ЛИРА/RES отложены.
+
+## §142. 12.10.2026 — третий проход B3: явный single-line OCR, PR142 MERGED
+
+**Готовое исправление:** профиль PSM7 «Одна строка · отметка или подпись» проходит через UI/API/изолированный worker/history/CLI. Default6 и sparse11 сохранены. CLI записывает фактический render_scale. Никаких автоматических замен текста, изменения источника или инженерного принятия.
+
+**PR142 MERGED:** final head8d469f3fc29225c7c0bbe4248674105528294a64; кандидат cdd0cddadc44a9362f4d718d54dd9492f9581c31; tested/merged tree35a3dfb29944566bdf17b8d09b7364cbc3160360 совпал. Core38218813753 SUCCESS:1048tests/118.590s/7skips; Windows38218813740 SUCCESS:149tests/34.726s/14skips; Security38218813892 SUCCESS. Local1048tests/94.666s/8skips PASS,7Chromium routes PASS. Независимый whole-branch review:0Critical/Important/Minor. Исправлен устаревший отрицательный тест PSM7; invalid99 и positive7/11 worker/history проверены. Windows два genuineOCR regressions SKIP из-за отсутствия rus+eng models; controlled profile/CLI проверки выполнены. Пропуски не объявлены PASS.
+
+**На тех же оригинальных пикселях:** six source-bound crops, PSM6=1/6, PSM11=2/6, PSM7=3/6 strict whitespace-only совпадений. +46,740 больше не дублируется; −4,200 и title распознаны. −0,450 с рамкой и Прогиб27мм/20мм остаются ошибочными. Все6 authenticatedHTTP/isolatedworker/reopenedhistory запросов выполнены, PNG/source hashes совпали, evidence0. Это не квалификация всех страниц.
+
+**Диагностика альтернатив:** tessdata_best не дал общего улучшения; p55conflicts41→40 лишь диагностический результат. Отдельный RapidOCR3.4.1 Cyrillic PP-OCRv3 / ONNXRuntime1.23.2, localmodelSHA1efb65bdc460af1c0e8733d005b20952b17ca5aac10ddb56c968333791c5eaa3, на exact6PNGs:0/6 и приheight48, и приheight32. Network во время inference запрещён; неявный fontdownload заблокирован, затем указан localfont. Ни один альтернативный engine/model не стал production default; автокоррекция «д→б» не добавлена. QA содержит диагностические receipts, но не модели или зависимости.
+
+**Что делаем дальше / критерии закрытия:** B3 — устойчиво распознавать оставшиеся literal labels/signs/units и проверить value-to-geometry associations на полном graphic/raster/mixed corpus; B2 — source-bound originalWord reference с исходнымиfonts, layout/fields/formulas equivalence; B1/B5 — representative qualified corpus. Эти критерии остаются OPEN/частично выполненными. A1–A4 выполнены в ранее указанном объёме. №13/14/19 OPEN;8DONE/8PARTIAL/3OPEN, engineeringACCEPTED=false, userPC NOT_VERIFIED, ЛИРА/RES отложены. Новый счёт тестов не закрывает содержательные критерии.
+
+**QA:** ENGINEER_OS_STAGE13_QA_20261012.zip сохраняет предыдущие receipts и добавляет pass3 RED/GREEN/full/browser/HTTP/CI/review/probe данные; тот же файл libfile_fa998953e1ac81919d5c9d8bd4acd15d. Originals/models/venv/repositorycode/browser screenshots исключены; полный payload SHA manifest и CRC проверяются перед сохранением.
