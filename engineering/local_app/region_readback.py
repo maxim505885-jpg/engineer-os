@@ -136,7 +136,7 @@ def _conflicts(native,recognized,deadline):
     return conflicts
 
 
-def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6):
+def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6,ocr_preprocess='none'):
     """Read a 1-based source PDF page selection, preserving exact source bytes.
 
     Return JSON-compatible native/render/OCR candidates. Raise RegionReadbackError
@@ -152,6 +152,8 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6)
         raise RegionReadbackError('INVALID_SOURCE_SHA256')
     if not isinstance(bbox,(list,tuple)) or len(bbox)!=4 or any(isinstance(n,bool) or not isinstance(n,(int,float)) or not math.isfinite(n) for n in bbox):
         raise RegionReadbackError('INVALID_REGION')
+    if type(ocr_preprocess)!=str or ocr_preprocess not in ('none','padded','italic'):raise RegionReadbackError('INVALID_OCR_PREPROCESSING')
+    if ocr_preprocess!='none' and (not ocr_enabled or ocr_psm!=7):raise RegionReadbackError('OCR_PREPROCESSING_REQUIRES_SELECTED_LINE')
     selected=list(bbox)
     raw,sha,source_identity=_snapshot(source_path,deadline)
     if sha!=expected_sha.lower():raise RegionReadbackError('SOURCE_SHA256_MISMATCH')
@@ -174,9 +176,13 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6)
         recognized=[];dossier=None;engine=None
         if ocr_enabled:
             _check_deadline(deadline)
-            parser=TesseractOCR();recognized=parser.page_blocks(page,page_no,bbox=selected,selected_psm=ocr_psm)
+            parser=TesseractOCR()
+            options=dict(bbox=selected,selected_psm=ocr_psm)
+            if ocr_preprocess!='none':options['preprocess']=ocr_preprocess
+            recognized=parser.page_blocks(page,page_no,**options)
             dossier=parser.last_page_dossier;engine=identity()
             engine.update(layout='selected_region',render_scale=rendered['scale'],psm=ocr_psm)
+            if ocr_preprocess!='none':engine['preprocessing']=ocr_preprocess
             # Raster rounding may add less than one pixel around the requested clip.
             # Retain original geometry explicitly rather than silently widening scope.
             for block in recognized:

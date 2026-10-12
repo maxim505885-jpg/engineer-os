@@ -1,5 +1,6 @@
 """Local bounded OCR. Recognized text and boxes remain unverified candidates."""
 import csv
+import base64
 import hashlib
 import io
 import math
@@ -61,8 +62,10 @@ class TesseractOCR:
     def __init__(self):
         self.binary,self.data=_paths();self.layout=_layout();self.last_page_dossier=None
 
-    def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6):
+    def page_blocks(self,page,page_no,*,bbox=None,selected_psm=6,preprocess='none'):
         if type(selected_psm)!=int or selected_psm not in (6,7,11):raise OCRError('OCR_INVALID_PROFILE')
+        if type(preprocess)!=str or preprocess not in ('none','padded','italic'):raise OCRError('OCR_INVALID_PREPROCESSING')
+        if preprocess!='none' and (bbox is None or selected_psm!=7):raise OCRError('OCR_PREPROCESSING_REQUIRES_SELECTED_LINE')
         import fitz
         rotation=page.rotation
         self.last_page_dossier=None
@@ -103,12 +106,15 @@ class TesseractOCR:
                 remaining=deadline-time.monotonic()
                 if remaining<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 self.last_input_raster=None
-                if bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm)
+                self.last_processed_raster=None
+                if preprocess!='none':raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm,preprocess=preprocess)
+                elif bbox is not None:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'],psm=selected_psm)
                 else:raw=self._recognize(pixels,deadline,MAX_OUTPUT-dossier['output_bytes'])
                 if time.monotonic()>=deadline:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
                 dossier['output_bytes']+=len(raw)
                 try:
-                    found=self._blocks(raw.decode('utf-8'),page_no,scale,pixels.width,pixels.height,
+                    derived=self.last_processed_raster
+                    found=self._blocks(raw.decode('utf-8'),page_no,scale,derived['width'] if derived else pixels.width,derived['height'] if derived else pixels.height,
                         word_limit=MAX_WORDS-dossier['words'])
                 except (UnicodeError,ValueError,KeyError,csv.Error) as exc:
                     if isinstance(exc,OCRError):raise
@@ -116,6 +122,13 @@ class TesseractOCR:
                 dossier['words']+=sum(b['ocr_word_count'] for b in found)
                 for block in found:
                     box=block['provenance'][0]['bbox']
+                    if derived:
+                        # Invert padding/shear at every corner, then enclose in
+                        # source pixels. Never treat transformed coordinates as PDF coordinates.
+                        shear=derived['shear'];pad=derived['padding']
+                        corners=[(box[x]*scale-pad-shear*(box[y]*scale-pad),box[y]*scale-pad) for x in ('left','right') for y in ('top','bottom')]
+                        box.update(left=max(0,min(x for x,y in corners))/scale,right=min(pixels.width,max(x for x,y in corners))/scale,
+                                   top=max(0,min(y for x,y in corners))/scale,bottom=min(pixels.height,max(y for x,y in corners))/scale)
                     for key in ('left','right'):box[key]+=pixels.x/scale
                     for key in ('top','bottom'):box[key]+=pixels.y/scale
                     # Pixmap rounding can extend an edge by at most a pixel.
@@ -129,18 +142,25 @@ class TesseractOCR:
                     execution='COMPLETED',render_scale=scale,psm=selected_psm if bbox is not None else 3,
                     blocks=len(found),characters=sum(len(b['text']) for b in found),
                     input_raster=getattr(self,'last_input_raster',None)))
+                if derived:dossier['regions'][-1].update(preprocessing=preprocess,processed_raster=derived)
                 dossier['completed_passes']+=1
             dossier['coverage']='SELECTED_REGION_EXECUTED' if bbox is not None else ('WHOLE_PAGE_AND_REGIONS_EXECUTED' if self.layout=='regions' else 'WHOLE_PAGE_EXECUTED')
             return blocks
         finally:
             if rotation:page.set_rotation(rotation)
 
-    def _recognize(self,pixels,deadline,output_budget,*,psm=3):
+    def _recognize(self,pixels,deadline,output_budget,*,psm=3,preprocess='none'):
         with tempfile.TemporaryDirectory(prefix='engineer-ocr-') as folder:
             root=Path(folder);source=root/'page.png';output=root/'result'
             pixels.save(source)
             self.last_input_raster=dict(png_sha256=_sha(source),width=pixels.width,height=pixels.height,
                 pixel_origin=[pixels.x,pixels.y],pixels=pixels.width*pixels.height,colorspace='RGB')
+            if preprocess!='none':
+                from .ocr_label_preprocessing import prepare
+                derived,metadata=prepare(source.read_bytes(),preprocess)
+                source=root/'processed.png';source.write_bytes(derived)
+                self.last_processed_raster=dict(metadata,source_png_sha256=self.last_input_raster['png_sha256'],
+                    png_sha256=hashlib.sha256(derived).hexdigest(),png_base64=base64.b64encode(derived).decode('ascii'))
             timeout=deadline-time.monotonic()
             if timeout<=0:raise OCRError('OCR_TIMEOUT: текущая страница не распознана')
             command=[str(self.binary),str(source),str(output),'--tessdata-dir',str(self.data),'-l','rus+eng','--psm',str(psm),'-c','tessedit_create_tsv=1']
