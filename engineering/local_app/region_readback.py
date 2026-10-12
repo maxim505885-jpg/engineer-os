@@ -136,7 +136,7 @@ def _conflicts(native,recognized,deadline):
     return conflicts
 
 
-def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6,ocr_preprocess='none'):
+def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6,ocr_preprocess='none',ocr_language='rus+eng'):
     """Read a 1-based source PDF page selection, preserving exact source bytes.
 
     Return JSON-compatible native/render/OCR candidates. Raise RegionReadbackError
@@ -154,6 +154,8 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6,
         raise RegionReadbackError('INVALID_REGION')
     if type(ocr_preprocess)!=str or ocr_preprocess not in ('none','padded','italic'):raise RegionReadbackError('INVALID_OCR_PREPROCESSING')
     if ocr_preprocess!='none' and (not ocr_enabled or ocr_psm!=7):raise RegionReadbackError('OCR_PREPROCESSING_REQUIRES_SELECTED_LINE')
+    if type(ocr_language)!=str or ocr_language not in ('rus+eng','eng'):raise RegionReadbackError('INVALID_OCR_LANGUAGE')
+    if ocr_language!='rus+eng' and not ocr_enabled:raise RegionReadbackError('OCR_LANGUAGE_REQUIRES_OCR')
     selected=list(bbox)
     raw,sha,source_identity=_snapshot(source_path,deadline)
     if sha!=expected_sha.lower():raise RegionReadbackError('SOURCE_SHA256_MISMATCH')
@@ -179,10 +181,12 @@ def recognize(source_path,page_no,bbox,expected_sha,ocr_enabled=False,ocr_psm=6,
             parser=TesseractOCR()
             options=dict(bbox=selected,selected_psm=ocr_psm)
             if ocr_preprocess!='none':options['preprocess']=ocr_preprocess
+            if ocr_language!='rus+eng':options['language']=ocr_language
             recognized=parser.page_blocks(page,page_no,**options)
             dossier=parser.last_page_dossier;engine=identity()
             engine.update(layout='selected_region',render_scale=rendered['scale'],psm=ocr_psm)
             if ocr_preprocess!='none':engine['preprocessing']=ocr_preprocess
+            if ocr_language!='rus+eng':engine['language']=ocr_language
             # Raster rounding may add less than one pixel around the requested clip.
             # Retain original geometry explicitly rather than silently widening scope.
             for block in recognized:
