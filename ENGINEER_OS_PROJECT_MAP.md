@@ -1,15 +1,15 @@
-# ENGINEER OS — живая карта проекта
+> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 поля/графика/physical Word и B3 полный корпус.** §149: PR145 draft, head `c97c8c9`; исправлен CLI UnicodeEncodeError, стабилизирована ZIP-фикстура. Word 2021, исходный DOCX сохранён; 491 страниц bounded text match, но PDF содержит ещё 43 графических листа, все 43 BLOCK по vector audit; OLE/графика/шрифты и OCR остаются непроверенными. Полный Windows suite локально:1058 tests/0 failures/13 errors/49 skips; Windows CI run170 и Security Guard SUCCESS для code commit047; точный head c97 CI проверяется. №13 OPEN,8DONE/8PARTIAL/3OPEN.
 
 > **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 fields/graphic layers/physical Word+B3 corpus.** §147: два DOCX разобраны,12826 логических gridrecords совпали;41формула сопоставлена с V4 в ограниченном визуальном объёме;61Word test PASS. PR144 MERGED,кандидатb2c2960/treec1f44ad. Полная font/layout/field/graphic equivalence и остальная PDF семантика открыты. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
 
 
-Обновлено: 12.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
+Обновлено: 13.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
 
 Идентичность этой карты: пользовательский файл `libfile_947c39aad11c81918c7887832c1411bb`, имя `ENGINEER_OS_PROJECT_MAP.md`. Обновлять этот же ID с фактической текущей версией. Правило сопровождения — `AGENTS.md`; краткий указатель — `docs/development/project-map-handoff.md` и README. Актуальная ветка и проверенный результат указаны ниже; ранние SHA и результаты сохраняются в исторических разделах.
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план (11.10.2026):** §133 итог — PR139 MERGED; кандидат1a765fa1766add7b5c5950a98893cd6e8099c6f8/tree f750e239a41e90099313b234170059b8c213e60e. Core964/Windows69/Security SUCCESS;6 Chromium и real Ollama PASS. Source-region native/PNG/OCR/history реализован; V4 −0,450/44/38 recovered,788cell serialization differences clarified. Word visual audit41OMML/11WDP/19EMF/493derived pages остаётся QA, не authoritative production render. №13 открыт: точность raster/mixed/OCR, source layout и qualified corpus. №14/19 открыты,ПК не обновлён,расчёты отложены;8✅/8🟡/3❌.
+> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 поля/графика/physical Word и B3 полный корпус.** §149: PR145 draft, head `c97c8c9`; исправлен CLI UnicodeEncodeError, стабилизирована ZIP-фикстура. Word 2021, исходный DOCX сохранён; 491 страниц bounded text match, но PDF содержит ещё 43 графических листа, все 43 BLOCK по vector audit; OLE/графика/шрифты и OCR остаются непроверенными. Полный Windows suite локально:1058 tests/0 failures/13 errors/49 skips; Windows CI run170 и Security Guard SUCCESS для code commit047; точный head c97 CI проверяется. №13 OPEN,8DONE/8PARTIAL/3OPEN.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -29,7 +29,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Интерфейс кандидата объединён с инженерными формами/CAD/памятью;4 Chromium маршрута,мобильный экран иsession reset PASS. Перенос и приёмка на реальном объекте остаются. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite, ключи, CAD/память/settings сохраняются. Воспроизведённые внутренние symlink/hardlink ошибки устранены; Core/Security CI PASS. CodeQL29 high требует triage; перенос и physical Windows остаются. |
-| 13 | Production completeness документов | ❌ полностью не закрыто | §147:дваDOCX/12826gridrecords,41bounded formula review,61Wordtests PASS. Работаем B2:fields/graphic layers/fonts/physical layout; B3:остальная семантика corpus. |
+| 13 | Production completeness документов | ❌ полностью не закрыто | §149:Word491 страниц против PDF534; все43 векторных листа дают BLOCK; DOCX OLE/графика/шрифты и B3 corpus остаются открытыми. PR145 draft, №13 OPEN. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
@@ -3610,3 +3610,30 @@ Pass9 диагностически проверил71поле каждогоDOCX
 12новыхmedia payloads имеют14runtime image bindings, в основномtable1rows2–9/paragraph63,507,530,703,705; дополнительныйHD_PHOTO_LAYER. Визуальнаякомпозиция остаётся открытой. проверено12добавленныхpayloadbindings, не весьgraphiccorpus.
 Архив QA обновляется тем жеID сpass9, сохраняяpass1–5/8; rawpass6/7 отсутствуют, историческиерезультаты§145–146 сохранены.
 №13 OPEN. Следующийработник—Codex; B2 поля/graphiclayers/fonts/physicalWord иB3 semantic corpus. ЛИРА/SCAD отложены;ПК/engineeringACCEPTED/стабильныйrelease не подтверждены.
+
+
+## 149. Word Windows reference и ASCII CLI — 13.10.2026
+
+Кандидат `integration/release-candidate-v1` не менялся: base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, tree `c1f44ad1839ecf763faedb98deaf87fd219e5e75`, PR144 MERGED. Открыт draft [PR145](https://github.com/maxim505885-jpg/engineer-os/pull/145), head `c97c8c9d39246261c5891b192af8c083a75893a9), base PR остаётся b2c2960. Он содержит commit `047838418cf5a6fadfbf0759ae189cdf8cd2909f` с исправлением CLI и отдельный commit только с уточнённой QA статистикой. Ни один PR не объединён.
+
+### Word и PDF, source-bound проход
+
+V4 DOCX `147560922` байта, SHA `c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685`; 694 ZIP entries/CRC PASS. V4 PDF `74522583` байта, SHA `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`. Word 2021 build `16.0.14228.20204`, Windows10 build19045. Read-only открыть удалось на byte-identical DOCX copy; source иcopy hashes после закрытия совпали с оригиналом.
+
+Word вывел491 страницу; PDF содержит534. Безопасно обновлены57 PAGEREF,11 SEQ,1 TOC и общий header PAGE через два section placements. HYPERLINK и EMBED не активировались. До/после обновления поля native text и raster hashes Word PDF совпали на всех491 страницах. Первая491 страница PDF:483 exact text,489 equal после whitespace removal. На 491 страницах размеры отличаются на0.12pt по каждой оси; pixel hashes0/491 equal, поэтому physical/visual equivalence не подтверждена.
+
+Страницы492–534 PDF — 43 графических листа за индексом чертежей; Word export заканчивается на491. Полный native visual audit PyMuPDF1.26.6:125 trimmed text chars,40 листов без native text, vector paths на43/43 листах (2513–67955 на лист). Приложение вернуло `VECTOR_CONTENT_UNVERIFIED`/BLOCK для43/43; Tesseract и локальные русские/английские модели недоступны. В DOCX 21 embedded OLE `PBrush` (44,983,296 байт),696 image references,463 DrawingML paragraphs; соответствие этих объектов 43 листам не установлено. 11 `unsupported_body` units отдельно подтверждены пустыми bookmarkEnd markers без текста/графики. 41 equation unit и вспомогательное размещение не квалифицированы этим pass.
+
+### Регрессии, воспроизведение и состояние CI
+
+Новая subprocess regression сначала воспроизвела `UnicodeEncodeError` при Cyrillic JSON и ASCII stdout. CLI теперь выводит ASCII-escaped JSON; сохранённый отчёт остаётся UTF-8, входные байты и acceptance gates не меняются. Test проверяет ASCII pipe и восстановление исходной Cyrillic при JSON decode. ZIP test fixtures этапа7 получили фиксированные timestamps после нестабильного полного прогона; три теста этапа7 прошли.
+
+Полный локальный Windows suite:1058 tests/297.549s,0 assertion failures,13 errors,49 skips. Ошибки: SQLite locks в шести backup/recovery тестах, один открытный NamedTemporaryFile fixture, шесть тестов не смогли создать symlinks без Windows privilege. Skips включают отсутствующие OCR модели, optional table OCR, Linux-only seccomp/process checks и link capabilities; ничего не отключалось. Подробности и private log SHA находятся в `docs/qa/2026-10-13-stage13-word-reference-windows.md`.
+
+Для code commit `0478384` Windows workflow run170 SUCCESS, включая запуск нового CLI regression, а Repository Security Guard run693 SUCCESS. Core Tests run968 оставался in progress при записи; текущий draft head `c97c8c9` проверяется отдельно. Полные тесты PR144 не считать свежим evidence для PR145.
+
+### Следующий шаг и открытые критерии
+
+Продолжить source-bound сопоставление43 PDF листов с DOCX package/placement, затем квалифицировать графику/OLE/WDP/EMF, fonts и physical pagination и расширить B3 corpus. Нужен полный local OCR с координатами, visual cross-check и матрица coverage по листам/меткам. Не выводить значения из индекса чертежей и не считать VECTOR_CONTENT_UNVERIFIED как прочитанное содержимое.
+
+CLI regression issue закрыт только в proposed PR; source-level Word/PDF completeness остаётся OPEN. Не объявлять100%, ACCEPTED или закрытие №13. ЛИРА/SCAD остаются отложены; paid/API/production dependencies не добавлялись.

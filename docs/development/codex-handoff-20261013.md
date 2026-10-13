@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний проверенный кандидат: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. Предложенный PR145 draft: head c97c8c9d39246261c5891b192af8c083a75893a9; see §149 in the maintained map/master plan.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
@@ -54,3 +54,14 @@ Drive ID1JXWTnNH27To91_S5Fv5KFVy5hw6WczRU.
 6. Обновляй карту/план/handoff после каждого существенного результата: точныйHEAD/tree/PR,тесты/skips,проверенный объём,ограничения и следующий шаг.
 Пункт13 сейчас OPEN. Всего8DONE/8PARTIAL/3OPEN. №14ACCEPTED и№19release тожеOPEN. Не закрывай13 по одной выборке, совпадениюхешей, успешнымтестам или снятиюfail-closed ограничений. Не обещай работу в фоне после завершения ответа.
 Работай до конкретного проверенного результата, без повторных вопросов «продолжать?». Если обязательный критерий реально зависит от отсутствующего доступа/исходника, объясни точную причину и минимальное действие пользователя; не выдавай фиктивный100%.
+
+
+## Дополнение — Windows Word/PDF и CLI, 13.10.2026
+
+Draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145, current head `c97c8c9d39246261c5891b192af8c083a75893a9`, based on merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. Full details and source evidence are in map/master-plan §149 and `docs/qa/2026-10-13-stage13-word-reference-windows.md`.
+
+Read-only Word2021 build16.0.14228.20204 comparison used a byte-identical copy of V4 DOCX SHA `c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685`; original unchanged. Word PDF491 pages; source V4 PDF534. First491 pages have bounded native text correspondence, but physical/page raster equivalence is not established. Full application native visual audit on source pages492–534 found vector content43/43,40 pages with no native text, and BLOCK43/43. Local OCR is unavailable. DOCX has21 PBrush OLE parts (44,983,296 bytes) without semantic reading. Item13 remains OPEN.
+
+Verified CLI defect: Cyrillic JSON failed through ASCII stdout. Proposed fix emits ASCII-escaped JSON while retaining UTF-8 report files and current gates; Windows CI run170 passed for code commit0478384, Security Guard run693 passed, Core run968 was pending at the previous check. Local full suite:1058 tests,0 assertion failures,13 Windows environment errors,49 skips; retain these counts and do not call the full suite green. LIRA/SCAD calculations remain deferred.
+
+Next: bind the 43 source graphic sheets to DOCX package objects and page placement, provide local OCR for the full vector corpus with source-bound visual review, finish font/layout and B3 coverage. Do not infer unread values from captions/index or close №13 without evidence.
