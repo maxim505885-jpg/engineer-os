@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 7d7347293714c50e87fdb4106b4279e02430adbc. Exact-head Core run979, Windows run181, Security run722 and PR check run492 all SUCCESS. See §155 in the maintained map/master plan.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2. Exact-head Core run980 (1,060 tests/7 skips), Windows run182 and Security run731 all SUCCESS. See §156 in the maintained map/master plan. Item13 remains OPEN.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
