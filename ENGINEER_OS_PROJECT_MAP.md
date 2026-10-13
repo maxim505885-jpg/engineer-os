@@ -1,4 +1,4 @@
-> **Актуально на 13.10.2026:** продолжается пункт №13 / B2 graphics, OCR, physical Word и B3 полный корпус. §154: все21 OLE имеют точную OOXML связь ShapeID→VML→imagedata; native BMP render совпадает с привязанным PNG 21/21. Page-level Word PDF match подтверждён для всех21: 18 object instances exact-XObject/17 previews, остальные три визуально сопоставлены со страницами 74,84,99. Точные границы/масштаб и связь с43 листами не доказаны; приложение по-прежнему блокирует все43 листа по OCR confidence. Fonts/layout и B3 открыты. PR145 draft head 7d73472; Core979, Windows181, Security722, PR492 SUCCESS. Кандидат PR144 остаётся b2c2960; №13 OPEN.
+> **Актуально на 13.10.2026:** продолжается №13 / B2–B3; №11 получил исправление невидимого keyboard focus у textarea. §156: PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`; Core run980 PASS (1,060 tests/7 skips), Windows run182 PASS после повтора нестабильного ожидания панели памяти, Security run731 PASS. Все21 OLE связаны с ShapeID→VML→imagedata и previews, native BMP pixel match 21/21; page-level Word association 21/21. Все43 appendix graphics остаются OCR BLOCK; точные bounds/scale, связь с appendix, fonts/layout и B3 semantic corpus открыты. Кандидат PR144: `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; пункт13 OPEN, без 100%/ACCEPTED.
 
 > **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 fields/graphic layers/physical Word+B3 corpus.** §147: два DOCX разобраны,12826 логических gridrecords совпали;41формула сопоставлена с V4 в ограниченном визуальном объёме;61Word test PASS. PR144 MERGED,кандидатb2c2960/treec1f44ad. Полная font/layout/field/graphic equivalence и остальная PDF семантика открыты. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
 
@@ -9,11 +9,11 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 поля/графика/physical Word и B3 полный корпус.** §149: PR145 draft, head `c97c8c9`; исправлен CLI UnicodeEncodeError, стабилизирована ZIP-фикстура. Word 2021, исходный DOCX сохранён; 491 страниц bounded text match, но PDF содержит ещё 43 графических листа, все 43 BLOCK по vector audit; OLE/графика/шрифты и OCR остаются непроверенными. Полный Windows suite локально:1058 tests/0 failures/13 errors/49 skips; Windows CI run170 и Security Guard SUCCESS для code commit047; точный head c97 CI проверяется. №13 OPEN,8DONE/8PARTIAL/3OPEN.
+> **Актуальный handoff:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13/B2–B3; PR145 draft exact head `884c19a`, Core980/Windows182/Security731 SUCCESS. №13 OPEN: все43 graphic pages остаются OCR BLOCK; недоказанные критерии перечислены в §156/master-plan B. Кандидат PR144 `b2c2960`; 8 DONE в ограниченном программном объёме, 8 PARTIAL, 3 OPEN.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
-Сводка на 09.10.2026: **8 выполнены в указанном программном объёме, 8 частично готовы, 3 открыты**. ✅ не означает принятие объекта или готовность всего продукта.
+Сводка на 13.10.2026: **8 выполнены в указанном программном объёме, 8 частично готовы, 3 открыты**. ✅ не означает принятие объекта или готовность всего продукта.
 
 | № | Пункт | Статус | Что сделано / что осталось |
 |---|---|---|---|
@@ -27,7 +27,7 @@
 | 8 | FINAL AUDIT и граница приёмки | ✅ Программный контур | Проверены неизменяемость, устаревание, подмена и чужой источник; реальное положительное принятие не подтверждено. |
 | 9 | Windows: один запуск | 🟡 Отложено | Launcher/supervisor реализованы; физический холодный старт, перезагрузка и сквозной запуск NOT_RUN. |
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
-| 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Интерфейс кандидата объединён с инженерными формами/CAD/памятью;4 Chromium маршрута,мобильный экран иsession reset PASS. Перенос и приёмка на реальном объекте остаются. |
+| 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Дизайн-система, responsive UI и браузерные маршруты проверяются; §156 устранил невидимый клавиатурный фокус textarea. Полный реальный пользовательский сценарий/приёмка на объекте и физический release остаются. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite, ключи, CAD/память/settings сохраняются. Воспроизведённые внутренние symlink/hardlink ошибки устранены; Core/Security CI PASS. CodeQL29 high требует triage; перенос и physical Windows остаются. |
 | 13 | Production completeness документов | ❌ полностью не закрыто | §154: all43 graphics remain OCR BLOCK; page-level association identified for all21 OLE (18 exact XObject instances + visual matches on Word pp.74/84/99); exact bounds/scale, appendix linkage, Word fonts/layout and B3 corpus open. PR145 draft, №13 OPEN. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
@@ -3689,3 +3689,10 @@ The §153 findings remain: exact OOXML ShapeID→VML→imagedata binding for all
 ## §155 — exact-head CI completion (13.10.2026)
 
 At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks completed successfully: ENGINEER OS Core Tests run979, Windows local runtime run181, Repository Security Guard run722, and PR check run492. The draft remains open and the base remains the merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. No merge or release acceptance is implied.
+
+
+## §156 — клавиатурный фокус и exact-head release checks (13.10.2026)
+
+На текущем UI audit найдено правило `textarea:focus{outline:0}`, которое отменяло общий `:focus-visible` и делало клавиатурный фокус в поле сообщения невидимым. Правило удалено; добавлена регрессия в `tests/test_stage11_design_system.py`. Весь design-system module: 5/5 PASS; полный Chromium suite: 7/7 PASS локально на pinned Python; browser test подтверждает mobile/desktop no-overflow и все основные flows. Local screenshot review относится к синтетической модели и не является оценкой инженерной точности.
+
+PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`, base candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`: Core run980 SUCCESS (1,060 tests, 7 skips), Windows run182 SUCCESS after a retried transient timeout in the first memory-panel browser run, Security Guard run731 SUCCESS. Browser and UI verification do not close document completeness or physical release gates. Item11 remains PARTIAL; item13 remains OPEN. All43 graphics pages still BLOCK in the document OCR assessment; exact Word object bounds/scale, appendix linkage, full fonts/layout and the complete source-bound B3 semantic corpus remain unresolved. No ACCEPTED/100% claim is made. LIRA/SCAD remain deferred; local/free product constraints are unchanged.
