@@ -6,8 +6,16 @@
     "file": "15.09.2026 ТЗК БЦ ул. Набережная28А V4 сшито с графикой.pdf",
     "sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
     "source_page": 513,
-    "page_rect_pt": [0, 0, 1684, 1191],
-    "raster_px": [7017, 4963],
+    "page_rect_pt": [
+      0,
+      0,
+      1684,
+      1191
+    ],
+    "raster_px": [
+      7017,
+      4963
+    ],
     "render_dpi": 300,
     "local_renderer": "Current local replay: PyMuPDF 1.26.6, MuPDF 1.26.11; original manifest does not record renderer version",
     "current_raw_rgb_sha256": "62caaacb4de7ccd23010a84df0a7c94ec10ab678365fa08db6725c358ad4c474",
@@ -18,15 +26,24 @@
     "pipeline": "Tesseract 5.5.3.20260724, rus+eng, OEM 1, PSM 11, 300 dpi",
     "text": "54.185",
     "confidence": 46.661663,
-    "bbox_px": [5538, 491, 76, 34],
+    "bbox_px": [
+      5538,
+      491,
+      76,
+      34
+    ],
     "review": "FALSE_READ"
   },
   "source_review": {
     "expected_text_normalized": "-4.185",
     "observed_print": "−4.185",
     "basis": "Visual inspection of the source-bound 300-dpi crop from the hash-verified V4 PDF page; the candidate box covers the printed negative elevation label.",
-    "error_classes": ["lost_leading_minus", "spurious_leading_digit"],
-    "engineering_risk": "A sign/value error in an elevation could be misused as a measured value if accepted without source review."
+    "error_classes": [
+      "lost_leading_minus",
+      "spurious_leading_digit"
+    ],
+    "engineering_risk": "A sign/value error in an elevation could be misused as a measured value if accepted without source review.",
+    "review_basis": "All three candidate boxes were inspected against the hash-verified source-bound page crop. The 54.185 candidate corresponds to printed −4.185; the 202 and 4.19 boxes correspond to printed −4.202 and −4.197."
   },
   "application_gate": {
     "verified_state": "The previously recorded application OCR profiles BLOCK all 43 vector appendix pages on low-confidence/vector-content guards.",
@@ -35,6 +52,37 @@
   "scope": {
     "source_original_modified": false,
     "independent_full_page_semantic_review": false,
-    "remaining": "Review all high-risk labels, dimensions, signs, decimal marks, units, orientation, omissions, and spatial associations across all 43 sheets; establish renderer provenance and complete B3 corpus."
-  }
+    "remaining": "Review all high-risk labels, dimensions, signs, decimal marks, units, orientation, omissions, and spatial associations across all 43 sheets; establish renderer provenance and complete B3 corpus.",
+    "numeric_candidate_boxes_screened_on_page": 162,
+    "numeric_screen_status": "Visual contact-sheet screening only; the page's entire content is not transcribed or qualified.",
+    "full_semantic_review_of_page": false
+  },
+  "additional_candidates": [
+    {
+      "text": "202",
+      "confidence": 93.873665,
+      "bbox_px": [
+        5909,
+        503,
+        44,
+        23
+      ],
+      "expected_source_text": "-4.202",
+      "assessment": "INCOMPLETE_FRAGMENT_MISSING_SIGN_AND_PREFIX",
+      "notes": "The box covers only the trailing digits of the printed elevation."
+    },
+    {
+      "text": "4.19",
+      "confidence": 91,
+      "bbox_px": [
+        5986,
+        510,
+        46,
+        22
+      ],
+      "expected_source_text": "-4.197",
+      "assessment": "TRUNCATED_VALUE_AND_MISSING_SIGN",
+      "notes": "The source label is adjacent to the -4.202 marker; this crop shows the 4.197 label."
+    }
+  ]
 }
