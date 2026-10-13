@@ -1,6 +1,6 @@
-> **Актуально на 13.10.2026, обновление §162:** PR145 draft exact head `101f8cbcca413689bb8de9808a9ce5eb5eb4eafe` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run997 (1,060 tests/7 skips), Windows run199 and Security Guard run770 passed. A private QA TXT builder was corrected after quote-sensitive TSV parsing corrupted 11 page transcripts; all43 TSVs now reparse to 22,821 candidates, 6,594 below60, mean confidence71.51. Diagnostic only: all43 app pages remain BLOCK and item13 OPEN. CodeQL #45, renderer mismatch, Word layout, appendix linkage and B3 remain open. No ACCEPTED/100% claim.
+> **Актуально на 13.10.2026, обновление §163:** PR145 draft exact head `143dd4a21ee6c101ce52359e1f34caa3aefedbec` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run998 (1,060 tests, 7 skips), Windows run200 and Security Guard run790 passed on that exact head. README now documents deferred LIRA/SCAD/RES calculations and unverified physical-PC clean install. Corrected OCR diagnostics are not accuracy proof; all43 application pages remain BLOCK, item13 OPEN. CodeQL #45, Word physical semantics/layout, renderer mismatch, appendix linkage and B3 remain open. No ACCEPTED/100% claim.
 
-> **Активный план на 13.10.2026 / §162:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13 / B2–B3. Исправлены диагностические TXT-метрики, но все43 листа остаются OCR BLOCK; полный source-ground-truth, OLE/vector semantics, Word-layout equivalence и B3 corpus открыты.
+> **Активный план на 13.10.2026 / §163:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13: corrected transcript verified, but exhaustive source-ground-truth and Word/B3 qualification remain outstanding.
 
 
 Обновлено: 13.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
@@ -3756,3 +3756,18 @@ Next actions, in order:
 6. Continue the remaining plan items in their existing order: №14 positive ACCEPTED case; №6 only within the user's deferred calculation boundary; physical Windows release gates №9/12; №15–19 integration and release work. Do not mark anything complete without its stated evidence.
 
 No `ACCEPTED`, 100%, release-complete, or item13 closure is claimed. Free/local operation is preserved; LIRA/SCAD/RES calculations remain deferred.
+
+
+## §163 — exact-head validation and current work order (13.10.2026)
+
+PR145 remains open/draft at exact head `143dd4a21ee6c101ce52359e1f34caa3aefedbec`, based on merged candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Exact-head GitHub Actions all passed: Core run998 (1,060 tests, 7 skips; HTTP/DOM, Chromium, vendored PDF.js and artifact upload), Windows local runtime run200 (cold/repeat startup, restart, persistence, backup/locks, legacy-stdout CLI, offline PDF viewer, local Ollama inference and four Windows browser workflows), and Security Guard run790. These results qualify the checked software/CI paths only; they do not establish OCR completeness, physical-PC clean install, or engineering acceptance.
+
+The README on PR145 was corrected to match the user's scope: LIRA/SCAD/RES calculations are deferred, while physical-PC clean install/restart and final release remain unverified. It also states that OCR needs local Tesseract plus Russian/English models and that all43 V4 graphics pages remain BLOCK. The app remains free and local.
+
+The §162 corrected diagnostic facts remain current: original V4 PDF SHA-256 `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`; corrected TSV-derived candidates 22,821, mean confidence71.51, 6,594/22,821 (28.89%) below60; application parser produced identical per-page counts from all43 stored TSVs. The page492–505 caption screen found 12/14 OCR/source mismatches and no missing captions. This does not complete source-ground-truth reconciliation: all43 application pages remain BLOCK, and labels, dimensions, signs, units, symbols, orientations, and spatial associations still need exhaustive review.
+
+CodeQL alert #45 (`py/path-injection`, `engineering/local_app/lock.py:52`) remains open. Security Guard is not a substitute for exact SARIF review. Word print/vector semantics, appendix correspondence, full physical layout/font equivalence, renderer-hash discrepancy, complete B3 semantic corpus, and physical-PC release evidence remain open. Overall count remains 8 DONE in bounded scope, 8 PARTIAL, 3 OPEN; this is not a percentage.
+
+Next work: (1) reconcile every earlier TXT-derived source observation against corrected TSV/text and page crops; (2) complete the source-ground-truth ledger for pages492–534; (3) finish Word layout, fonts, OLE/print-stream and appendix-link qualification; (4) build and run the B3 source-bound corpus; (5) inspect and resolve CodeQL #45 from exact SARIF data; (6) continue items14–19 within the user's deferred-calculation boundary and record physical-PC/release evidence. Keep unresolved content BLOCK and preserve originals.
+
+No item13 closure, ACCEPTED, 100%, or release-complete claim is made. LIRA/SCAD/RES calculations remain user-deferred.
