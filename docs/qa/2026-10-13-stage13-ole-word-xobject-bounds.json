@@ -20,6 +20,7 @@
         595.4400024414062,
         842.0399780273438
       ],
+      "pdf_xobject_axis_aligned": true,
       "pdf_xobject_bbox_pt": [
         379.45001220703125,
         391.699951171875,
@@ -36,6 +37,14 @@
       ],
       "pdf_xobject_format": "jpeg",
       "pdf_xobject_sha256": "fd0a6e9b2361f3fdeab6e86fbd0a77f7cc9c9e473e32d533a7f9dfce1a496fd7",
+      "pdf_xobject_transform": [
+        179.25,
+        0.0,
+        -0.0,
+        188.25,
+        379.45001220703125,
+        391.699951171875
+      ],
       "pdf_xobject_xref": 950,
       "preview_dimensions_px": [
         325,
@@ -69,6 +78,7 @@
         595.4400024414062,
         842.0399780273438
       ],
+      "pdf_xobject_axis_aligned": true,
       "pdf_xobject_bbox_pt": [
         195.85000610351562,
         32.39996337890625,
@@ -85,6 +95,14 @@
       ],
       "pdf_xobject_format": "jpeg",
       "pdf_xobject_sha256": "f3505d4a4ec11522657e665c3dc40d46af4a2871908cf8b49a562ab4059462da",
+      "pdf_xobject_transform": [
+        171.0,
+        0.0,
+        -0.0,
+        442.1000061035156,
+        195.85000610351562,
+        32.39996337890625
+      ],
       "pdf_xobject_xref": 979,
       "preview_dimensions_px": [
         234,
@@ -118,6 +136,7 @@
         595.4400024414062,
         842.0399780273438
       ],
+      "pdf_xobject_axis_aligned": true,
       "pdf_xobject_bbox_pt": [
         239.75,
         235.7999725341797,
@@ -134,6 +153,14 @@
       ],
       "pdf_xobject_format": "png",
       "pdf_xobject_sha256": "aea1fcf476ae20c64eced1211221ef02c3d0d4ac510b028cb4cd30c485e35490",
+      "pdf_xobject_transform": [
+        255.9499969482422,
+        0.0,
+        -0.0,
+        162.6999969482422,
+        239.75,
+        235.7999725341797
+      ],
       "pdf_xobject_xref": 1015,
       "preview_dimensions_px": [
         1301,
