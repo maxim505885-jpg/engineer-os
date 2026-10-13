@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2. Exact-head Core run980 (1,060 tests/7 skips), Windows run182 and Security run731 all SUCCESS. See §156 in the maintained map/master plan. Item13 remains OPEN.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 1bb9b37240dc93eccb3682e704228838909c2517. Exact-head Core run992 (1,060 tests/7 skips; HTTP/DOM, Chromium, vendored PDF.js PASS), Windows run194 and Security run746 all SUCCESS. See §157–158 in the maintained map/master plan. Item13 remains OPEN.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
@@ -58,7 +58,7 @@ Drive ID1JXWTnNH27To91_S5Fv5KFVy5hw6WczRU.
 
 ## Дополнение — Windows Word/PDF и CLI, 13.10.2026
 
-Draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145, current head `c97c8c9d39246261c5891b192af8c083a75893a9`, based on merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. Full details and source evidence are in map/master-plan §149 and `docs/qa/2026-10-13-stage13-word-reference-windows.md`.
+Draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145, current head `1bb9b37240dc93eccb3682e704228838909c2517`, based on merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. Full details and source evidence are in map/master-plan §149 and `docs/qa/2026-10-13-stage13-word-reference-windows.md`.
 
 Read-only Word2021 build16.0.14228.20204 comparison used a byte-identical copy of V4 DOCX SHA `c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685`; original unchanged. Word PDF491 pages; source V4 PDF534. First491 pages have bounded native text correspondence, but physical/page raster equivalence is not established. Full application native visual audit on source pages492–534 found vector content43/43,40 pages with no native text, and BLOCK43/43. Local OCR is unavailable. DOCX has21 PBrush OLE parts (44,983,296 bytes) without semantic reading. Item13 remains OPEN.
 
