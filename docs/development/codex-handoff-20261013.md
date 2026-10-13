@@ -109,3 +109,14 @@ The §153 findings remain: exact OOXML ShapeID→VML→imagedata binding for all
 ## §155 — exact-head CI completion (13.10.2026)
 
 At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks completed successfully: ENGINEER OS Core Tests run979, Windows local runtime run181, Repository Security Guard run722, and PR check run492. The draft remains open and the base remains the merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. No merge or release acceptance is implied.
+
+
+## Дополнение — OLE bounds, Word fonts и точный статус PR145, 13.10.2026
+
+PR145 draft head `1bb9b37240dc93eccb3682e704228838909c2517`; exact-head Core/Windows/Security checks are Core run992 SUCCESS (1,060 tests, 7 skips; HTTP/DOM, Chromium and vendored PDF.js PASS); Windows run194 SUCCESS; Security Guard run746 SUCCESS. Bounds/scale for the three previously decomposed OLE rasters are measured within 0.151 pt, axis-aligned with no rotation; the source font inventory is recorded (27 names, 6,302 references, no embedded DOCX fonts, 17 exact registry-name matches, 18/27 PDF font XRefs embedded). All43 appendix pages remain OCR BLOCK. Stage13 remains OPEN; no ACCEPTED/100% claim. Merged candidate base is `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`.
+
+Bounds audit: three previously visually associated image XObjects (Word pages74/84/99) match source VML dimensions within0.151pt; all transforms are axis-aligned/no rotation. Reproducible files are `scripts/qa/audit_stage13_ole_pdf_bounds.py` and `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`.
+
+Font inventory: 27 explicit DOCX names across6,302 references; no embedded DOCX font programs; exact local Windows registry matches for17 names; Word PDF has27 font XRefs,18 with embedded subset data. A mismatch may be an unused style/fallback; it is not proof of substitution. No fonts were installed. Evidence: `scripts/qa/audit_stage13_font_inventory.py` and `docs/qa/2026-10-13-stage13-word-font-inventory.json`.
+
+These results close only two bounded inventory subcriteria. Full font/run/layout, OLE print semantics, appendix linkage and source-bound OCR/B3 corpus remain open. User-deferred calculations stay deferred.
