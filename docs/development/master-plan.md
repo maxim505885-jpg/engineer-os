@@ -1,4 +1,4 @@
-> **Актуально на 13.10.2026, обновление §162:** PR145 draft exact head `101f8cbcca413689bb8de9808a9ce5eb5eb4eafe` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`); Core run997 (1,060 tests/7 skips), Windows run199, Security Guard run770 passed. Corrected all43 diagnostic TSV reparsing exposed that prior TXT/metrics were quote-corrupted; clean candidates 22,821, mean confidence 71.51, 28.89% below60. This is not accuracy proof. All43 app pages remain BLOCK; item13 OPEN. CodeQL #45 and renderer/layout/B3 checks remain unresolved. No ACCEPTED/100% claim.
+> **Актуально на 13.10.2026, обновление §163:** PR145 draft exact head `143dd4a21ee6c101ce52359e1f34caa3aefedbec` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run998 SUCCESS: 1,060 tests, 7 skipped, HTTP/DOM, Chromium and vendored PDF.js; Windows runtime run200 SUCCESS; Security Guard run790 SUCCESS. README now accurately states that LIRA/SCAD/RES calculations are user-deferred and physical-PC clean install remains unverified. OCR diagnostics are corrected (22,821 candidates, mean confidence71.51, 28.89% below60), not acceptance evidence. All43 app pages remain BLOCK; item13 OPEN. CodeQL #45, Word physical layout/semantics, renderer hash discrepancy and B3 remain unresolved. No ACCEPTED/100% claim.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -1013,3 +1013,18 @@ Next actions, in order:
 6. Continue the remaining plan items in their existing order: №14 positive ACCEPTED case; №6 only within the user's deferred calculation boundary; physical Windows release gates №9/12; №15–19 integration and release work. Do not mark anything complete without its stated evidence.
 
 No `ACCEPTED`, 100%, release-complete, or item13 closure is claimed. Free/local operation is preserved; LIRA/SCAD/RES calculations remain deferred.
+
+
+## §163 — exact-head validation and current work order (13.10.2026)
+
+PR145 remains open/draft at exact head `143dd4a21ee6c101ce52359e1f34caa3aefedbec`, based on merged candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Exact-head GitHub Actions all passed: Core run998 (1,060 tests, 7 skips; HTTP/DOM, Chromium, vendored PDF.js and artifact upload), Windows local runtime run200 (cold/repeat startup, restart, persistence, backup/locks, legacy-stdout CLI, offline PDF viewer, local Ollama inference and four Windows browser workflows), and Security Guard run790. These results qualify the checked software/CI paths only; they do not establish OCR completeness, physical-PC clean install, or engineering acceptance.
+
+The README on PR145 was corrected to match the user's scope: LIRA/SCAD/RES calculations are deferred, while physical-PC clean install/restart and final release remain unverified. It also states that OCR needs local Tesseract plus Russian/English models and that all43 V4 graphics pages remain BLOCK. The app remains free and local.
+
+The §162 corrected diagnostic facts remain current: original V4 PDF SHA-256 `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`; corrected TSV-derived candidates 22,821, mean confidence71.51, 6,594/22,821 (28.89%) below60; application parser produced identical per-page counts from all43 stored TSVs. The page492–505 caption screen found 12/14 OCR/source mismatches and no missing captions. This does not complete source-ground-truth reconciliation: all43 application pages remain BLOCK, and labels, dimensions, signs, units, symbols, orientations, and spatial associations still need exhaustive review.
+
+CodeQL alert #45 (`py/path-injection`, `engineering/local_app/lock.py:52`) remains open. Security Guard is not a substitute for exact SARIF review. Word print/vector semantics, appendix correspondence, full physical layout/font equivalence, renderer-hash discrepancy, complete B3 semantic corpus, and physical-PC release evidence remain open. Overall count remains 8 DONE in bounded scope, 8 PARTIAL, 3 OPEN; this is not a percentage.
+
+Next work: (1) reconcile every earlier TXT-derived source observation against corrected TSV/text and page crops; (2) complete the source-ground-truth ledger for pages492–534; (3) finish Word layout, fonts, OLE/print-stream and appendix-link qualification; (4) build and run the B3 source-bound corpus; (5) inspect and resolve CodeQL #45 from exact SARIF data; (6) continue items14–19 within the user's deferred-calculation boundary and record physical-PC/release evidence. Keep unresolved content BLOCK and preserve originals.
+
+No item13 closure, ACCEPTED, 100%, or release-complete claim is made. LIRA/SCAD/RES calculations remain user-deferred.
