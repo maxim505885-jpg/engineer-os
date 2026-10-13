@@ -84,3 +84,12 @@ The reproducible utility is `scripts/qa/audit_stage13_ole_pdf_bounds.py`; its de
 A read-only Windows inventory checked every Word XML part in the immutable DOCX and all font resources in the 491-page Word PDF. It found 27 distinct explicit family names across 6,302 `w:rFonts` references and 27 `fontTable.xml` entries. The package contains no `word/fonts/` embedded font parts. The local Windows font registry has exact display-name matches for 17 of those 27 source names; a name without an exact match may be an unused style or a fallback, so this is not evidence by itself that Word substituted a font. The PDF references 27 unique font XRefs: 18 expose embedded subset font data and nine are non-embedded references. This inventory does not map every visible run to a specific PDF font or prove physical layout equivalence.
 
 Reproduction: `scripts/qa/audit_stage13_font_inventory.py` (Windows only; PyMuPDF plus standard library) with the same two source files. Its deterministic output is `docs/qa/2026-10-13-stage13-word-font-inventory.json`, SHA-256 `b81ac8c8d636112d710585b82a384588cb7c11544cf5d7e29d9b8f73c00813fc`; two local runs were byte-identical. Font family/file hashes are recorded as metadata only; no fonts were installed or copied. Full source-run→rendered-font mapping and layout review remain open.
+
+
+## Source-bound OCR failure sample — V4 page 513
+
+A visual review of a 300-dpi source-bound crop found a false Tesseract candidate: TSV reports `54.185` at confidence 46.66, bbox `[5538,491,76,34]`, while the printed source label is `−4.185`. This is a lost-minus and spurious-leading-digit error on an elevation. The application’s recorded profiles still BLOCK this page as part of all43 vector appendix sheets; no incorrect value was accepted. Evidence and hashes are in `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json`.
+
+The current local renderer replay is PyMuPDF1.26.6/MuPDF1.26.11. It renders the standalone geodesy packet page1 and combined PDF page513 identically at72/150/300dpi. Its300-dpi raw pixel hash differs from the previous manifest hash; that manifest does not state renderer version/options, so this remains a provenance discrepancy. The original PDF hash and source files remain unchanged.
+
+This finding confirms why a candidate count or average OCR confidence cannot close Stage13. It is one reviewed error sample; a complete, source-bound semantic corpus for all43 sheets, exact physical Word layout/fonts, native PBrush semantics, and OLE/appendix correspondence remain OPEN.
