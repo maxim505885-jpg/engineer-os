@@ -863,3 +863,11 @@ QA архив сохраняет восстановленныеpass1–5 и до
 
 
 **Уточнение независимого review pass8:** все41визуальных обозначения/числа и source/preview/crop hashes подтверждены. Сравнение12826ячеек относится только к part/table/row/column/source_grid. **148полных locator dictionaries различаются** в image bindings/declared drawing labels; complete locator equivalence не заявляется. Квалификация physical/fonts/layout и расчётов остаётся false.
+
+
+## 148. Передача Codex и cached Word fields — 13.10.2026
+Полный промт сохранён: [codex-handoff-20261013.md](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/codex-handoff-20261013.md). Production-код/кандидат PR144 не изменены. Сначала читать этотhandoff,AGENTS иактуальныйmaster-plan, проверять фактическийHEAD.
+Pass9 диагностически проверил71поле каждогоDOCX:57PAGEREF/1TOC/11SEQ/2PAGE; balanced, orphan/unclosed не выявлены.71cached results equal.57bookmark names отличаются, но все57range targets существуют, target text иcached page одинаковы;57/57target texts найдены native вV4 наcached pages. Поля Word не перевычислялись, physical pagination/render/font equivalence не заявляется. Скрипты и19XML/rels частей каждого оригинала/source manifests сохранены отдельно; перед snapshot проверены полныйsourceSHA иZIPCRC.
+12новыхmedia payloads имеют14runtime image bindings, в основномtable1rows2–9/paragraph63,507,530,703,705; дополнительныйHD_PHOTO_LAYER. Визуальнаякомпозиция остаётся открытой. проверено12добавленныхpayloadbindings, не весьgraphiccorpus.
+Архив QA обновляется тем жеID сpass9, сохраняяpass1–5/8; rawpass6/7 отсутствуют, историческиерезультаты§145–146 сохранены.
+№13 OPEN. Следующийработник—Codex; B2 поля/graphiclayers/fonts/physicalWord иB3 semantic corpus. ЛИРА/SCAD отложены;ПК/engineeringACCEPTED/стабильныйrelease не подтверждены.
