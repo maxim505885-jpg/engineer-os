@@ -52,7 +52,7 @@ At PR head `bded12a438bdffaf4d551eabb05cf8b20505738f`, the Windows local-runtime
 
 1. Improve or otherwise qualify OCR for every vector sheet against full-resolution source visuals, including all labels, dimensions, orientation, symbols and omissions; determine whether the 43 PDF sheets are absent from Word or represented through other objects. Both current application layouts block all 43 pages on low confidence.
 2. The app parser identifies all 21 OLE objects as bound package objects with available BMP bitmaps; exact ShapeID-bound native payload renders match 20 unique previews (21 objects). Page-level Word PDF visual associations are confirmed for all 21 object instances (18 exact XObject matches plus manual preview-to-page matches for `image166.png`→74, `image180.png`→84 and `image200.png`→99). Qualify the three decomposed visual placements, determine whether any OLE details represent the 43 appended sheets, and finish the full-source graphics/layout review.
-3. Qualify all relevant images, OLE/WDP/EMF layers, equations, headers/footers, fonts, physical pagination, and table geometry across the complete source.
+3. Qualify all relevant images, OLE/WDP/EMF layers, equations, headers/footers, source-run-to-rendered-font mapping, physical pagination, and table geometry across the complete source.
 4. Review the still-open draft PR and keep item 13 OPEN until all remaining source-bound criteria are resolved. The earlier local Windows errors/skips remain documented; exact-head GitHub workflows passed after the WAL fix.
 
 This pass does not close item 13. It does not claim 100%, `ACCEPTED`, or a production Word renderer. LIRA/SCAD calculations remain deferred.
@@ -77,3 +77,10 @@ All three PDF raster bounds agree with the source VML dimensions within 0.151 pt
 The reproducible utility is `scripts/qa/audit_stage13_ole_pdf_bounds.py`; its deterministic, source-bound output is `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`. Two local runs produced identical JSON SHA-256 `9ee9779acdb260533a10dd084e968c1212f392516249a30d3dd8c1dab513154e`. Original sources remained hash-identical. The audit requires the local QA copies plus PyMuPDF, Pillow and NumPy; those are not made production dependencies.
 
 **Status change:** the three bounds/scale checks are resolved. OLE print-stream semantics, appendix correspondence, full layout/font qualification, all-43-page semantic OCR review and representative B3 corpus remain open. Item 13 remains **OPEN**.
+
+
+## Source font inventory — 2026-10-13
+
+A read-only Windows inventory checked every Word XML part in the immutable DOCX and all font resources in the 491-page Word PDF. It found 27 distinct explicit family names across 6,302 `w:rFonts` references and 27 `fontTable.xml` entries. The package contains no `word/fonts/` embedded font parts. The local Windows font registry has exact display-name matches for 17 of those 27 source names; a name without an exact match may be an unused style or a fallback, so this is not evidence by itself that Word substituted a font. The PDF references 27 unique font XRefs: 18 expose embedded subset font data and nine are non-embedded references. This inventory does not map every visible run to a specific PDF font or prove physical layout equivalence.
+
+Reproduction: `scripts/qa/audit_stage13_font_inventory.py` (Windows only; PyMuPDF plus standard library) with the same two source files. Its deterministic output is `docs/qa/2026-10-13-stage13-word-font-inventory.json`, SHA-256 `b81ac8c8d636112d710585b82a384588cb7c11544cf5d7e29d9b8f73c00813fc`; two local runs were byte-identical. Font family/file hashes are recorded as metadata only; no fonts were installed or copied. Full source-run→rendered-font mapping and layout review remain open.
