@@ -3709,3 +3709,12 @@ Three previously visually associated OLE placements now have source VML-to-Word-
 The Windows font inventory found27 explicit DOCX names across6,302 references, no embedded DOCX font programs, 17 exact registry-name matches, and27 Word PDF font XRefs (18 expose embedded subset data). This does not prove a mismatch was used in visible content. Script/JSON: `scripts/qa/audit_stage13_font_inventory.py`, `docs/qa/2026-10-13-stage13-word-font-inventory.json`.
 
 These results close only the three OLE bounds/scale checks and the font inventory. All43 graphic appendix pages still BLOCK under application OCR; semantics, PBrush print streams, appendix correspondence, run-to-font mapping/full Word layout and B3 corpus remain open. №13 OPEN; no 100%/ACCEPTED claim. LIRA/SCAD calculations remain deferred.
+
+
+## §159 — source-bound OCR false read, page 513 (13.10.2026)
+
+The 300-dpi Tesseract PSM11 candidate at V4 PDF page 513 reads `54.185` (confidence 46.66; bbox px `[5538,491,76,34]`). Visual review of the hash-verified source crop reads `−4.185`; this is a confirmed lost-minus/spurious-leading-digit error in the candidate. It is high-risk elevation data. The application's recorded OCR state remains BLOCK for all43 vector appendix pages, so this sample is not accepted by the product and confirms the need for that gate. Reproduction data: `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json` on PR145.
+
+The source combined PDF SHA remains `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`. Current PyMuPDF 1.26.6 / MuPDF 1.26.11 renders the standalone geodesy packet page1 and combined V4 page513 to identical raw RGB at 72/150/300 dpi. The 300-dpi raw pixel hash does not match the earlier manifest (`f1dbe...` vs current `62caa...`); that manifest omitted renderer version/options, so this discrepancy is documented, not explained away.
+
+This is one confirmed error sample, not an exhaustive corpus result. All43 pages remain BLOCK; full semantic OCR, OLE/appendix linkage, physical Word layout/font equivalence, and B3 corpus coverage remain OPEN. PR145 exact head `098506e6271d3070c0aa109306f5bc5400f5efe2`; Core run994 and Windows run196 are pending, Security run755 passed. No 100%, ACCEPTED, or item13 closure is claimed.
