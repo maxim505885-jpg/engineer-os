@@ -1,6 +1,6 @@
 # ENGINEER OS — живая карта проекта
 
-> **Активный план на 12.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 visual Word+B3 corpus.** PR144 MERGED, кандидатb2c2960/treec1f44ad. §146:244 Word/PDF residuals разобраны (229 diagnostic alignment+15 объяснённых причин),3 номера оглавления OCR HTTP/history exact. §145:43 листа графики сопоставлены,6 выбранных надписей exact;§144:4 таблицы квалифицированы. Открыты41OMML/fields/assets/fonts/physical layout и остальная семантика. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
+> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 fields/graphic layers/physical Word+B3 corpus.** §147: два DOCX разобраны,12826 логических gridrecords совпали;41формула сопоставлена с V4 в ограниченном визуальном объёме;61Word test PASS. PR144 MERGED,кандидатb2c2960/treec1f44ad. Полная font/layout/field/graphic equivalence и остальная PDF семантика открыты. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
 
 
 Обновлено: 12.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
@@ -29,7 +29,7 @@
 | 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
 | 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Интерфейс кандидата объединён с инженерными формами/CAD/памятью;4 Chromium маршрута,мобильный экран иsession reset PASS. Перенос и приёмка на реальном объекте остаются. |
 | 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite, ключи, CAD/память/settings сохраняются. Воспроизведённые внутренние symlink/hardlink ошибки устранены; Core/Security CI PASS. CodeQL29 high требует triage; перенос и physical Windows остаются. |
-| 13 | Production completeness документов | ❌ полностью не закрыто | §146:244 residuals разобраны,3 TOC OCR exact;4 таблицы квалифицированы,43 листа сопоставлены. Работаем B2:41OMML/fields/assets/fonts/layout; B3:остальная семантика corpus. |
+| 13 | Production completeness документов | ❌ полностью не закрыто | §147:дваDOCX/12826gridrecords,41bounded formula review,61Wordtests PASS. Работаем B2:fields/graphic layers/fonts/physical layout; B3:остальная семантика corpus. |
 | 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
 | 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
 | 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
@@ -3577,3 +3577,25 @@ DOCX имеет cached Pages491; V4 содержит491 основную стр�
 -2247 первоначальных+595 предыдущих+229 новых совпадений=3071/3086 диагностических substring совпадений;15 имеют объяснение. НЕ заявлены3086/3086 literal matches, отсутствие всех расхождений версий, квалификация всех формул или physical layout.
 Отдельный подтверждённый runtime parser bug на этих residuals не найден; диагностические скрипты исправлены, производственные файлы не менялись. Результаты Core1057/Windows158/Security из§144 остаются прежними CI, не новым прогоном.
 **Работаем дальше B2:** source-bound визуальная сверка41OMML/полей/OLE/WDP/EMF/шрифтов и physical layout. V4 имеет сильное подтверждение текстового соответствия и остаётся кандидатом связанного экспорта, но происхождение из конкретного Word renderer не доказано. B3: расширение квалифицированных областей и связей. №13 OPEN; критерия B2 нельзя заменить объяснением substring расхождений.
+
+
+## 147. Два DOCX и проверка41 формулы — 13.10.2026
+Production-код не менялся: PR144 MERGED; кандидат b2c29604d3a8a2a8079a670a7affca4f55b2b9c6/tree c1f44ad1839ecf763faedb98deaf87fd219e5e75.
+
+### Исходники и границы версий
+Восстановлены и проверены оригиналы: прежний DOCX147210288байт/SHA b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5; Drive V4 DOCX147560922байт/SHA c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685; PDF74522583байт/SHA b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916. Неполные рабочие DOCX-копии после перерыва заменены повторными загрузками; перед проверкой SHA и ZIP CRC PASS.
+Обе DOCX версии имеют одинаковые последовательности w:t абзацев и XML всех41OMML. Все642 прежних media payloads сохранены по multiset SHA, добавлены12;21embedding payloads byte-identical. Drawings655→668, media642→654. Это разные версии файлов, не byte-identical документы; графическую композицию нельзя объявить равной по этим числам.
+Styles/numbering/theme byte-identical; settings изменились в rsids; fontTable byte-different, но названия шрифтов и explicit body families совпадают. Embedded font programs отсутствуют в обоих; это не подтверждает наличие исходных шрифтов или эквивалентность замен.
+
+### Проверки текущим приложением
+Полный production read_docx обоих оригиналов:14685→14689units,12826table_cells в каждом,682→696image references,21embedded_object references,41equation units. Source unchanged; physical pages/layout/auxiliary placement/embedded interpretation остаются unverified.
+Все12826 логических table locator/source_grid записей между версиями совпали. Это проверка сетки и связи, не квалификация содержания каждой ячейки или физических страниц.
+Focused Word regression:61tests/2.401s/0fail PASS. Восстановлена существующая pinned olefile0.47; новых production зависимостей или кода нет. Core1057/Windows158/Security — прежние CI PR144, не новый полный прогон.
+
+### Формулы: конкретное продвижение B2
+41/41 source formula XML и preview PNG hashes совпали с сохранённым provenance; XML41формулы одинаков в обоих DOCX. Все41 derivative previews и12crops исходных PDF страниц просмотрены, видимые обозначения/числа/дроби/индексы сопоставлены с контекстом V4. Формулы27–29 находятся наp337; p338 лишь соседний контекст.
+41-formula-correspondence.json закрепляет source/formula/PNG SHA,ordinal иcandidate page. В этой ограниченной визуальной проверке различий содержимого обозначений не наблюдалось. Это не pixel/physical/font/layout equivalence и не расчётная верификация; math/engineering acceptance не выдано. V4 остаётся candidate reference без доказанного происхождения конкретного Word-экспорта.
+
+### Осталось и сохранность
+№13 OPEN. Следующий B2: поля, размещение графических/встроенных слоёв и полная physical/font/layout equivalence исходногоWord. B3: оставшиеся representative PDF semantic области/единицы/связи. Текстовое correspondence и41bounded formula review не заменяют эти критерии. Расчёты ЛИРА/SCAD отложены и не являются причиной OPEN13.
+QA архив сохраняет восстановленныеpass1–5 и добавляет воспроизводимыйpass8. Rawpass6/7 не успели сохраниться до очистки workspace; их результаты остаются историческими§145–146 наGitHub, наличие их исходных receipts в архиве не заявляется. 8DONE/8PARTIAL/3OPEN; ПК и engineeringACCEPTED не подтверждены.
