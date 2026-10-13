@@ -1,4 +1,4 @@
-> **Актуально на 13.10.2026, обновление §159:** PR145 draft, latest exact head `ec4a6545279245081110bad4984070efe7c158d0`, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Security Guard run760 SUCCESS; Core run995 and Windows runtime run197 are IN_PROGRESS. A source-bound OCR review confirmed candidate `54.185` is actually `−4.185` on V4 page513; app OCR keeps all43 vector appendix pages BLOCK. Item13 remains OPEN. Full evidence and the unresolved prior-renderer hash discrepancy are in §159 and the linked QA JSON. No ACCEPTED/100% claim.
+> **Актуально на 13.10.2026, обновление §159:** PR145 draft, latest exact head `ec4a6545279245081110bad4984070efe7c158d0`, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Security Guard run760 SUCCESS; Core run995 and Windows runtime run197 SUCCESS. A source-bound OCR review confirmed candidate `54.185` is actually `−4.185` on V4 page513; app OCR keeps all43 vector appendix pages BLOCK. Item13 remains OPEN. Full evidence and the unresolved prior-renderer hash discrepancy are in §159 and the linked QA JSON. No ACCEPTED/100% claim.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -10,7 +10,7 @@
 
 ## Текущая позиция
 **РАБОТАЕМ: №13 / B2 — полный source-bound graphics/OLE/Word physical check; затем B3 — семантический regression corpus.**
-Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 is open/draft at head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`. Exact-head Core run980 passed 1,060 tests (7 skips); Windows run182 passed after a retry of a transient memory-panel browser timeout; Security Guard run731 passed.
+Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 remains open/draft at exact head `ec4a6545279245081110bad4984070efe7c158d0`; Core run995, Windows local runtime run197 and Security Guard run760 all SUCCESS on that exact head. The full CI includes HTTP/DOM, Chromium, vendored PDF.js and Windows browser/Ollama workflows. This does not close item13.
 §157 resolves bounds/scale for the three remaining OLE placements (unrotated; within 0.151 pt); §158 inventories source and rendered fonts without proving substitution. All43 V4 graphic appendix pages remain BLOCK under application OCR. Source-bound OCR semantics, OLE-to-appendix relation, complete Word layout/fonts, and B3 semantic corpus remain open. Item11 got a keyboard-focus accessibility fix and remains PARTIAL. Physical PC install, real ACCEPTED case, and user-deferred LIRA/SCAD/RES remain as documented.
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
