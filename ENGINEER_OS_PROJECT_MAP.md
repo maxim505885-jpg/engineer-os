@@ -1,6 +1,6 @@
-> **Актуально на 13.10.2026:** продолжается №13 / B2–B3; №11 получил исправление невидимого keyboard focus у textarea. §156: PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`; Core run980 PASS (1,060 tests/7 skips), Windows run182 PASS после повтора нестабильного ожидания панели памяти, Security run731 PASS. Все21 OLE связаны с ShapeID→VML→imagedata и previews, native BMP pixel match 21/21; page-level Word association 21/21. Все43 appendix graphics остаются OCR BLOCK; точные bounds/scale, связь с appendix, fonts/layout и B3 semantic corpus открыты. Кандидат PR144: `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; пункт13 OPEN, без 100%/ACCEPTED.
+> **Актуально на 13.10.2026:** PR145 draft head `1bb9b37240dc93eccb3682e704228838909c2517`; exact-head Core run992 SUCCESS (1,060 tests, 7 skips; HTTP/DOM, Chromium and vendored PDF.js PASS); Windows run194 SUCCESS; Security Guard run746 SUCCESS. Bounds/scale for the three previously decomposed OLE rasters are measured within 0.151 pt, axis-aligned with no rotation; the source font inventory is recorded (27 names, 6,302 references, no embedded DOCX fonts, 17 exact registry-name matches, 18/27 PDF font XRefs embedded). All43 appendix pages remain OCR BLOCK. Stage13 remains OPEN; no ACCEPTED/100% claim. Merged candidate base is `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`.
 
-> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 fields/graphic layers/physical Word+B3 corpus.** §147: два DOCX разобраны,12826 логических gridrecords совпали;41формула сопоставлена с V4 в ограниченном визуальном объёме;61Word test PASS. PR144 MERGED,кандидатb2c2960/treec1f44ad. Полная font/layout/field/graphic equivalence и остальная PDF семантика открыты. №13 OPEN,8DONE/8PARTIAL/3OPEN; ранние сводки исторические.
+> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13 / B2–B3; §157–158 закрывают только exact bounds/scale трёх OLE и инвентарь шрифтов. OCR/семантика43 листов, PBrush stream, связь appendix, полноценная Word-layout equivalence и B3 corpus открыты.
 
 
 Обновлено: 13.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
@@ -13,31 +13,33 @@
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
-Сводка на 13.10.2026: **8 выполнены в указанном программном объёме, 8 частично готовы, 3 открыты**. ✅ не означает принятие объекта или готовность всего продукта.
+Сверенная сводка на 13.10.2026. DONE означает только установленный программный результат; ACCEPTED объекта и release учитываются отдельно.
 
-| № | Пункт | Статус | Что сделано / что осталось |
+| № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
-| 1 | Единая рабочая версия | ✅ Кандидат | PR91 перенесён в официальный кандидат22ad4c1; tree2670623 совпадает с проверенным90263af. Финальный main/release отдельно. |
-| 2 | OCR и локальная модель | ✅ Программный контур | Извлечение, метрики, отрицательные проверки и Linux/Qwen проверены; полнота всех документов относится к №13. |
-| 3 | Большие документы, resume/recovery | ✅ Программный контур | Контрольные точки, идентичность, лимиты и повторный запуск реализованы и проверены. |
-| 4 | DOCX/XLSX/DOC и заявленные форматы | ✅ Программный контур | Оригиналы, координаты и происхождение данных связаны; сложные таблицы остаются в №13. |
-| 5 | ТЗ → источник → требование → вывод | ✅ Программный контур | 47 требований, 42 позиции источников, версионные оценки и общие запреты приёмки проверены. |
-| 6 | Нормативная и расчётная верификация | 🟡 Частично | Расчётная часть отложена пользователем09.10.2026. Native input ZIP в кандидате PR101; R4 helper PR102 отдельно, real RES/KE57/нагрузки/полные сочетания/model→run/нормы открыты; §§85–87. |
-| 7 | Реальный инженерный сценарий | ✅ Отрицательный сценарий | 3 оригинала, 36 кандидатов, роли и повторная проверка норм пройдены с BLOCK; положительный кейс — №14. |
-| 8 | FINAL AUDIT и граница приёмки | ✅ Программный контур | Проверены неизменяемость, устаревание, подмена и чужой источник; реальное положительное принятие не подтверждено. |
-| 9 | Windows: один запуск | 🟡 Отложено | Launcher/supervisor реализованы; физический холодный старт, перезагрузка и сквозной запуск NOT_RUN. |
-| 10 | Консолидация и источник истины | ✅ Интеграция | PR91 merged squash по правилам репозитория; общий код официального кандидата22ad4c1. История исходного объединения сохранена на integration/engineering-streams-20261009. |
-| 11 | Интерфейс и рабочий процесс | 🟡 Интеграция | Дизайн-система, responsive UI и браузерные маршруты проверяются; §156 устранил невидимый клавиатурный фокус textarea. Полный реальный пользовательский сценарий/приёмка на объекте и физический release остаются. |
-| 12 | Backup, restore, recovery и защита | 🟡 Интеграция | Единое ядро двух форматов, SHA/SQLite, ключи, CAD/память/settings сохраняются. Воспроизведённые внутренние symlink/hardlink ошибки устранены; Core/Security CI PASS. CodeQL29 high требует triage; перенос и physical Windows остаются. |
-| 13 | Production completeness документов | ❌ полностью не закрыто | §154: all43 graphics remain OCR BLOCK; page-level association identified for all21 OLE (18 exact XObject instances + visual matches on Word pp.74/84/99); exact bounds/scale, appendix linkage, Word fonts/layout and B3 corpus open. PR145 draft, №13 OPEN. |
-| 14 | Реальный ACCEPTED-кейс | ❌ Открыто | Нужен квалифицированный объект с полным ТЗ, свежими нормами/расчётами и положительным FINAL AUDIT. |
-| 15 | Подтверждённая инженерная память | 🟡 Программный маршрут | Актуальный accepted audit → точные основания → HMAC scope/origin → версии/recall/revoke/delete/export/backup реализованы; повторная проверка обязательна. Реальный положительный объект остаётся нужен. |
-| 16 | Генератор заключений | 🟡 Частично | Черновики/история/координаты/coverage dossier/stale export,3 шаблона и исходные иллюстрации в DOCX/PDF проверены. Принятый инженерный выпуск остаётся открыт. |
-| 17 | CAD/DWG | 🟡 DXF маршрут | Оригинал DXF/DWG,DXF inventory/locator/отдельная аннотация/diff/export/backup проверены,включая ресурсы и точные параметры аннотации. Реальный CAD файл и проверенный DWG конвертер/roundtrip остаются. |
-| 18 | Несколько ИИ | 🟡 Частично | Локальный Ollama/Open WebUI/диагностика готовы; shared gateway проверяет hostname/redirect/response bounds/completion. Полный optional-provider receipt/live-provider сценарий ещё не завершён. |
-| 19 | Стабильный финальный выпуск | ❌ Открыто | Нужны все продуктовые критерии, чистая установка, Windows, ACCEPTED-кейс, release/tag и соответствующий main. |
+|1|Единая версия|DONE в объёме кандидата|Финальный release относится к19|
+|2|OCR и локальная модель|DONE программный контур|Качество конкретного документа относится к13|
+|3|Большие документы/resume|DONE программный контур|Сохранить совместимость при изменениях|
+|4|Форматы и происхождение данных|DONE программный контур|Поддерживаемые ограничения явно документированы; сложные случаи в13|
+|5|ТЗ→источник→вывод|DONE программный контур|Сквозной положительный кейс в14|
+|6|Нормы/расчёты|PARTIAL; расчёты отложены|Редакции/применимость норм; реальные model/run/results и сверка|
+|7|Реальный сценарий|DONE отрицательный сценарий|Положительный сценарий в14|
+|8|FINAL AUDIT gates|DONE программный контур|Инженерная приёмка в14|
+|9|Windows один запуск|PARTIAL|Чистая установка/перезапуск/перезагрузка на реальном ПК|
+|10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
+|11|Интерфейс|PARTIAL|§156: textarea keyboard focus fixed and tests pass; full real-user acceptance and physical release remain|
+|12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
+|13|Полнота документов|OPEN — текущий пункт|§157–158: bounds/scale and unrotated placement confirmed for three remaining OLE images; source font inventory recorded. All43 vector appendix pages remain OCR BLOCK; semantic OCR, OLE print-stream/appendix linkage, full Word layout and B3 corpus open|
+|14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
+|15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
+|16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
+|17|CAD/DWG|PARTIAL|Геометрия/размеры/текст/единицы, потери конвертации и roundtrip|
+|18|Несколько ИИ|PARTIAL|Полный локальный маршрут; выбранные optional providers квалифицируются отдельно|
+|19|Стабильный выпуск|OPEN|Все обязательные release gates, clean install, main/tag и воспроизводимые инструкции|
 
-**Интеграция завершена:** PR91 merged в официальный кандидат. Следующий этап — №13 полнота документов и остальные четыре направления.
+Итого: 8 DONE в указанном объёме, 8 PARTIAL, 3 OPEN. Это счёт пунктов, не процент инженерной готовности.
+
+**Интеграция завершена:** PR91 merged в официальный кандидат. Текущий этап — №13: завершить B2/B3 по доказательствам ниже; после этого перейти к CAD, позитивному инженерному кейсу и выпускным gate.
 
 Подробности прежнего объединения — §65; актуальная сводка и новый проход — §67.
 
@@ -3696,3 +3698,14 @@ At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks co
 На текущем UI audit найдено правило `textarea:focus{outline:0}`, которое отменяло общий `:focus-visible` и делало клавиатурный фокус в поле сообщения невидимым. Правило удалено; добавлена регрессия в `tests/test_stage11_design_system.py`. Весь design-system module: 5/5 PASS; полный Chromium suite: 7/7 PASS локально на pinned Python; browser test подтверждает mobile/desktop no-overflow и все основные flows. Local screenshot review относится к синтетической модели и не является оценкой инженерной точности.
 
 PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`, base candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`: Core run980 SUCCESS (1,060 tests, 7 skips), Windows run182 SUCCESS after a retried transient timeout in the first memory-panel browser run, Security Guard run731 SUCCESS. Browser and UI verification do not close document completeness or physical release gates. Item11 remains PARTIAL; item13 remains OPEN. All43 graphics pages still BLOCK in the document OCR assessment; exact Word object bounds/scale, appendix linkage, full fonts/layout and the complete source-bound B3 semantic corpus remain unresolved. No ACCEPTED/100% claim is made. LIRA/SCAD remain deferred; local/free product constraints are unchanged.
+
+
+## §157–158 — exact OLE bounds and source font inventory (13.10.2026)
+
+PR145 remains open/draft at `1bb9b37240dc93eccb3682e704228838909c2517`, based on merged candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Exact-head Core run992 SUCCESS (1,060 tests, 7 skips; HTTP/DOM, Chromium and vendored PDF.js PASS); Windows run194 SUCCESS; Security Guard run746 SUCCESS.
+
+Three previously visually associated OLE placements now have source VML-to-Word-PDF bounds/scale evidence: pages74/84/99, XRefs950/979/1015, axis-aligned with no rotation; all dimensions agree within0.151pt. Script/JSON: `scripts/qa/audit_stage13_ole_pdf_bounds.py`, `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`. JPEG/re-rasterized pixel differences are retained; pixel equality and semantic content are not claimed.
+
+The Windows font inventory found27 explicit DOCX names across6,302 references, no embedded DOCX font programs, 17 exact registry-name matches, and27 Word PDF font XRefs (18 expose embedded subset data). This does not prove a mismatch was used in visible content. Script/JSON: `scripts/qa/audit_stage13_font_inventory.py`, `docs/qa/2026-10-13-stage13-word-font-inventory.json`.
+
+These results close only the three OLE bounds/scale checks and the font inventory. All43 graphic appendix pages still BLOCK under application OCR; semantics, PBrush print streams, appendix correspondence, run-to-font mapping/full Word layout and B3 corpus remain open. №13 OPEN; no 100%/ACCEPTED claim. LIRA/SCAD calculations remain deferred.
