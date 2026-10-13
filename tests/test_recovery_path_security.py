@@ -2,11 +2,14 @@
 import os
 from pathlib import Path
 import sqlite3
+import stat
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from engineering.local_app.backup import create_backup, restore_backup
-from engineering.local_app.lock import DataLock
+from engineering.local_app.lock import DataLock, managed_database
 from engineering.local_app.settings import activate, active_directory, load
 from engineering.local_app.store import Store
 
@@ -76,6 +79,20 @@ class RecoveryPathSecurityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             with store.connection():pass
         self.assertEqual(external.read_bytes(),b'keep')
+
+    def test_unlinked_database_sidecar_is_rechecked_as_sqlite_removes_it(self):
+        store=Store(self.root);sidecar=self.root/'history.sqlite3-wal';sidecar.write_bytes(b'wal')
+        original_lstat=Path.lstat;first=True
+        def unlink_after_lookup(path,*args,**kwargs):
+            nonlocal first
+            info=original_lstat(path,*args,**kwargs)
+            if path==sidecar and first:
+                first=False;sidecar.unlink()
+                return SimpleNamespace(st_mode=stat.S_IFREG|0o600,st_nlink=0)
+            return info
+        with patch('engineering.local_app.lock.IS_WINDOWS',False),patch.object(Path,'lstat',unlink_after_lookup):
+            managed_database(store.path)
+        self.assertFalse(sidecar.exists())
 
     def test_backup_parent_alias_cannot_put_archive_inside_managed_data(self):
         Store(self.root);alias=self.base/'alias'

@@ -3,6 +3,7 @@ import os
 import stat
 from pathlib import Path
 
+IS_WINDOWS=os.name=='nt'
 
 def _windows_shared_stat(path):
     """Read authoritative attributes without excluding SQLite's open handles."""
@@ -41,8 +42,14 @@ def managed_file(path):
     path=Path(path)
     try:info=path.lstat()
     except FileNotFoundError:return None
-    if os.name=='nt' and stat.S_ISREG(info.st_mode) and info.st_nlink==0:
+    if IS_WINDOWS and stat.S_ISREG(info.st_mode) and info.st_nlink==0:
         try:info=_windows_shared_stat(path)
+        except FileNotFoundError:return None
+    elif stat.S_ISREG(info.st_mode) and info.st_nlink==0:
+        # SQLite may unlink a WAL/SHM sidecar after lstat has resolved its
+        # directory entry but before the metadata is returned. Confirm that
+        # the path still exists before treating this stale inode as unsafe.
+        try:info=path.lstat()
         except FileNotFoundError:return None
     if not stat.S_ISREG(info.st_mode) or info.st_nlink!=1:
         raise ValueError('Managed data file must be a regular, unlinked file: '+path.name)
