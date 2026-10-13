@@ -1,4 +1,4 @@
-> **Актуально на 13.10.2026, обновление §159:** PR145 draft, latest exact head `ec4a6545279245081110bad4984070efe7c158d0`, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Security Guard run760 SUCCESS; Core run995 and Windows runtime run197 are IN_PROGRESS. A source-bound OCR review confirmed candidate `54.185` is actually `−4.185` on V4 page513; app OCR keeps all43 vector appendix pages BLOCK. Item13 remains OPEN. Full evidence and the unresolved prior-renderer hash discrepancy are in §159 and the linked QA JSON. No ACCEPTED/100% claim.
+> **Актуально на 13.10.2026, обновление §159:** PR145 draft, latest exact head `ec4a6545279245081110bad4984070efe7c158d0`, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Security Guard run760 SUCCESS; Core run995 and Windows runtime run197 SUCCESS. A source-bound OCR review confirmed candidate `54.185` is actually `−4.185` on V4 page513; app OCR keeps all43 vector appendix pages BLOCK. Item13 remains OPEN. Full evidence and the unresolved prior-renderer hash discrepancy are in §159 and the linked QA JSON. No ACCEPTED/100% claim.
 
 > **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13 / B2–B3; §157–158 закрывают только exact bounds/scale трёх OLE и инвентарь шрифтов. OCR/семантика43 листов, PBrush stream, связь appendix, полноценная Word-layout equivalence и B3 corpus открыты.
 
@@ -9,7 +9,7 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-> **Актуальный handoff:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13/B2–B3; PR145 draft exact head `884c19a`, Core980/Windows182/Security731 SUCCESS. №13 OPEN: все43 graphic pages остаются OCR BLOCK; недоказанные критерии перечислены в §156/master-plan B. Кандидат PR144 `b2c2960`; 8 DONE в ограниченном программном объёме, 8 PARTIAL, 3 OPEN.
+> **Актуальный handoff:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). PR145 draft exact head `ec4a6545279245081110bad4984070efe7c158d0`; Core995, Windows197 and Security760 SUCCESS. Работаем №13/B2–B3; all43 vector appendix pages remain OCR BLOCK and №13 OPEN. Project status remains 8 DONE in bounded software scope, 8 PARTIAL, 3 OPEN.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
