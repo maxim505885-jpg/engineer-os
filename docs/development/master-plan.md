@@ -11,7 +11,7 @@
 ## Текущая позиция
 **РАБОТАЕМ: №13 / B2 — 43 графических листа и Word physical reference; затем B3 — полный semantic corpus.**
 Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. Draft [PR145](https://github.com/maxim505885-jpg/engineer-os/pull/145), current head `c97c8c9d39246261c5891b192af8c083a75893a9`. Exact-head Windows workflow run171, Core Tests run969, Repository Security Guard run694, CodeQL, Actions analysis и все семь checks завершились SUCCESS.
-§149 documents a real ASCII-stdout UnicodeEncodeError and fix, full local regression (1058 tests,0 assertion failures,13 Windows errors,49 skips), and read-only Microsoft Word 2021 comparison. Word export491 pages vs V4 PDF534; the last43 PDF graphic pages all have vector content and all block in native extraction. OLE/object mapping, OCR, full layout/fonts and B3 corpus remain open.
+§150 adds a full local OCR candidate pass on all43 graphic pages (19,644 words; weighted mean confidence71.35,29.12% below60) and 20 OLE fallback previews (616 candidates; mean61.82). Vector audit remains BLOCK43/43; OCR human validation, exact OLE print-page/native payload mapping, fonts/layout and B3 corpus remain open. See QA report for tool/model hashes and the unchanged Word comparison.
 A1–A4 completed in stated scope. PR102 remains OPEN/DRAFT/NOT_MERGED. Physical PC and engineering ACCEPTED are unconfirmed. LIRA/SCAD/RES remain deferred by the user.
 
 ## Единый реестр 19 пунктов
@@ -898,3 +898,13 @@ Word вывел491 страницу; PDF содержит534. Безопасно
 Продолжить source-bound сопоставление43 PDF листов с DOCX package/placement, затем квалифицировать графику/OLE/WDP/EMF, fonts и physical pagination и расширить B3 corpus. Нужен полный local OCR с координатами, visual cross-check и матрица coverage по листам/меткам. Не выводить значения из индекса чертежей и не считать VECTOR_CONTENT_UNVERIFIED как прочитанное содержимое.
 
 CLI regression issue закрыт только в proposed PR; source-level Word/PDF completeness остаётся OPEN. Не объявлять100%, ACCEPTED или закрытие №13. ЛИРА/SCAD остаются отложены; paid/API/production dependencies не добавлялись.
+
+## 150. Полный OCR-кандидат на графических листах и карта OLE preview — 13.10.2026
+
+По исходному V4 PDF SHA-256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916 выполнен отдельный локальный OCR всех страниц 492–534 (43/43): Tesseract 5.5.3.20260724, rus+eng, OEM 1, PSM 11, 300 dpi. Сохранено 19,644 OCR-кандидата с TSV координатами; среднее confidence, взвешенное по словам, 71.35; 29.12% ниже 60; среднее по листу 57.61–85.31. Это не доказывает полноту/точность: значения, символы, поворот, reading order и пропуски не выверены целиком по исходным изображениям, а все 43 native vector pages по-прежнему дают VECTOR_CONTENT_UNVERIFIED/BLOCK.
+
+OOXML-карта 21 PBrush OLE relationship найдена: 20 уникальных fallback PNG, привязанных к body paragraph indices; два OLE-пары делят одинаковые previews. OCR этих 20 PNG дал 616 кандидатов при среднем confidence 61.82 по изображениям. Native OLE payload и точная печатная страница DOCX не декодированы; соответствие этих деталей 43 страницам PDF не установлено. Исходные DOCX/PDF остались неизменны. Официальный Windows OCR runtime использован только как локальный диагностический инструмент и не добавлен в приложение или его зависимости.
+
+Обновлён draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145 (head после записи QA отчёта и плана: d1a41484a3b27c55301fbb832423a23483054553; новые exact-head checks ожидаются). Полный источник, параметры, хеши моделей и границы проверки записаны в docs/qa/2026-10-13-stage13-word-reference-windows.md; приватные TSV, manifest и OOXML relationship audit остаются в локальном stage13-qa.
+
+Далее: проверить OCR-кандидаты каждого листа, в том числе размеры/обозначения/ориентацию, сопоставить все native OLE и previews с печатными страницами, затем завершить B2 visual/font/layout и B3 corpus coverage. №13 OPEN; не заявлять 100%, ACCEPTED или полноту. LIRA/SCAD по-прежнему отложены.
