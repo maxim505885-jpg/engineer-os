@@ -153,6 +153,8 @@ def audit(docx_path: Path, pdf_path: Path) -> dict[str, object]:
                 )
             info, bbox, bbox_width, bbox_height = candidates[0]
             xref = int(info["xref"])
+            transform = [float(value) for value in info["transform"]]
+            axis_aligned = abs(transform[1]) <= 1e-6 and abs(transform[2]) <= 1e-6
             extracted = document.extract_image(xref)
             metric = pixel_metrics(preview_bytes, extracted["image"])
             width_delta = bbox_width - width
@@ -167,6 +169,8 @@ def audit(docx_path: Path, pdf_path: Path) -> dict[str, object]:
                     "pdf_page_rect_pt": [float(value) for value in page.rect],
                     "pdf_xobject_xref": xref,
                     "pdf_xobject_bbox_pt": list(bbox),
+                    "pdf_xobject_transform": transform,
+                    "pdf_xobject_axis_aligned": axis_aligned,
                     "pdf_xobject_dimensions_pt": [bbox_width, bbox_height],
                     "bounds_delta_pt": [width_delta, height_delta],
                     "bounds_within_0_2_pt": abs(width_delta) <= 0.2 and abs(height_delta) <= 0.2,
