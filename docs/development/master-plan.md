@@ -860,3 +860,6 @@ Focused Word regression:61tests/2.401s/0fail PASS. Восстановлена с
 ### Осталось и сохранность
 №13 OPEN. Следующий B2: поля, размещение графических/встроенных слоёв и полная physical/font/layout equivalence исходногоWord. B3: оставшиеся representative PDF semantic области/единицы/связи. Текстовое correspondence и41bounded formula review не заменяют эти критерии. Расчёты ЛИРА/SCAD отложены и не являются причиной OPEN13.
 QA архив сохраняет восстановленныеpass1–5 и добавляет воспроизводимыйpass8. Rawpass6/7 не успели сохраниться до очистки workspace; их результаты остаются историческими§145–146 наGitHub, наличие их исходных receipts в архиве не заявляется. 8DONE/8PARTIAL/3OPEN; ПК и engineeringACCEPTED не подтверждены.
+
+
+**Уточнение независимого review pass8:** все41визуальных обозначения/числа и source/preview/crop hashes подтверждены. Сравнение12826ячеек относится только к part/table/row/column/source_grid. **148полных locator dictionaries различаются** в image bindings/declared drawing labels; complete locator equivalence не заявляется. Квалификация physical/fonts/layout и расчётов остаётся false.
