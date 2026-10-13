@@ -693,3 +693,10 @@ The §153 findings remain: exact OOXML ShapeID→VML→imagedata binding for all
 ## §155 — exact-head CI completion (13.10.2026)
 
 At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks completed successfully: ENGINEER OS Core Tests run979, Windows local runtime run181, Repository Security Guard run722, and PR check run492. The draft remains open and the base remains the merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. No merge or release acceptance is implied.
+
+
+## §159 handoff addendum — source-bound OCR false read (13.10.2026)
+
+A page-513 high-recall OCR candidate `54.185` (46.66 confidence) was visually checked against the hash-verified V4 source crop and is a false read of `−4.185` (lost minus plus spurious leading digit). This confirms an engineering-risk OCR failure; it remains blocked by the application’s recorded vector/low-confidence gates (43/43). QA record: PR145 `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json`. Current renderer replay (PyMuPDF 1.26.6 / MuPDF 1.26.11) matches the standalone source packet and combined PDF page at 72/150/300 dpi, but does not reproduce the prior manifest’s 300-dpi raw hash; original renderer version/options are absent. Keep this provenance discrepancy open.
+
+Only one sample has been reviewed here. B3 corpus, all-sheet semantics, OLE/appendix link, and physical Word layout/fonts remain OPEN. Latest PR145 head `098506e6271d3070c0aa109306f5bc5400f5efe2`: Security run755 passed; Core run994 and Windows run196 pending at documentation time. No item13 closure/100%/ACCEPTED. Next: await exact-head checks; then add source-bound high-risk samples and systematic page-by-page review while preserving BLOCKs.
