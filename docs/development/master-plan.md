@@ -11,7 +11,7 @@
 ## Текущая позиция
 **РАБОТАЕМ: №13 / B2 — 43 графических листа и Word physical reference; затем B3 — полный semantic corpus.**
 Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. Draft [PR145](https://github.com/maxim505885-jpg/engineer-os/pull/145), current head `c97c8c9d39246261c5891b192af8c083a75893a9`. Exact-head Windows workflow run171, Core Tests run969, Repository Security Guard run694, CodeQL, Actions analysis и все семь checks завершились SUCCESS.
-§150 adds a full local OCR candidate pass on all43 graphic pages (19,644 words; weighted mean confidence71.35,29.12% below60) and 20 OLE fallback previews (616 candidates; mean61.82). Vector audit remains BLOCK43/43; OCR human validation, exact OLE print-page/native payload mapping, fonts/layout and B3 corpus remain open. See QA report for tool/model hashes and the unchanged Word comparison.
+§151 records the application's actual OCR profiles across all43 graphic pages. Whole returned11,993 words (mean line confidence43.38;58.22% below50); regions returned30,607 words (mean47.79;52.07% below50; overlapping candidates unmerged). Both layouts complete all raster passes but block all43 pages on low confidence, besides the vector audit. OCR accuracy and visual cross-check, exact OLE print-page/native payload mapping, fonts/layout and B3 corpus remain open. §150 retains the independent300dpi PSM11 and OLE preview evidence.
 A1–A4 completed in stated scope. PR102 remains OPEN/DRAFT/NOT_MERGED. Physical PC and engineering ACCEPTED are unconfirmed. LIRA/SCAD/RES remain deferred by the user.
 
 ## Единый реестр 19 пунктов
@@ -908,3 +908,13 @@ OOXML-карта 21 PBrush OLE relationship найдена: 20 уникальн�
 Обновлён draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145 (head после записи QA отчёта и плана: d1a41484a3b27c55301fbb832423a23483054553; новые exact-head checks ожидаются). Полный источник, параметры, хеши моделей и границы проверки записаны в docs/qa/2026-10-13-stage13-word-reference-windows.md; приватные TSV, manifest и OOXML relationship audit остаются в локальном stage13-qa.
 
 Далее: проверить OCR-кандидаты каждого листа, в том числе размеры/обозначения/ориентацию, сопоставить все native OLE и previews с печатными страницами, затем завершить B2 visual/font/layout и B3 corpus coverage. №13 OPEN; не заявлять 100%, ACCEPTED или полноту. LIRA/SCAD по-прежнему отложены.
+
+## 151. Проверка фактического OCR-контура приложения — 13.10.2026
+
+На неизменном V4 PDF SHA-256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916 запущен текущий TesseractOCR приложения на всех43 листах, с теми же rus+eng моделями. Default whole завершил 1/1 проход на каждой странице: 11,993 слова, 2,530 блоков; средняя confidence строки43.38, 58.22% ниже50. Каждая страница получила низкоуверенные строки, поэтому критерий OCR LOW CONFIDENCE блокирует все43 листа. Layout regions завершил 5/5 проходов: 30,607 слов, 7,235 блоков; средняя confidence строки47.79, 52.07% ниже50. Перекрывающиеся регионы остаются явно UNMERGED; они не считаются подтверждёнными и могут дублировать кандидаты. Таймаутов и исчерпания pixel/word budgets не было. Это подтверждает fail-closed поведение и одновременно показывает, что текущая точность OCR не годится для чтения этих чертежей.
+
+Независимый единый полноформатный PSM11 проход при300dpi дал19,644 word candidates; weighted confidence71.35 и29.12% слов ниже60. Значения различаются, поскольку это другой профиль, и ни один профиль ещё не прошёл полную source-bound human review. Контактные листы всех43 страниц просмотрены на обзорном уровне; они содержат разнотипные планы, разрезы, цветные карты результатов и узлы армирования. Это не проверка каждого числа, обозначения или легенды. Все21 OLE relationships сопоставлены с20 уникальными previews/paragraph indices; сами native payloads и точная печатная пагинация остаются открытыми.
+
+Draft PR145 обновлён QA отчётом и планом; текущий head a7bd87ac8fa20d475b30817e02479e2d76d4756a, exact-head Windows/Core workflows ожидаются. См. docs/qa/2026-10-13-stage13-word-reference-windows.md. OCR-файлы/досье, fonts/source raw data остаются частными локальными доказательствами.
+
+Следующий шаг: улучшить/обосновать OCR профили для чертежей и проверить каждую страницу по полной векторной графике; затем закончить OLE payload/page mapping, font/layout physical checks и B3 full corpus. Item13 OPEN. Не заявлять полноту, 100% или ACCEPTED. ЛИРА/SCAD остаются отложенными; платные runtime/API зависимости не добавлены.
