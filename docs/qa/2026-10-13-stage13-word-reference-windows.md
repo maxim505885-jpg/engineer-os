@@ -60,3 +60,20 @@ This pass does not close item 13. It does not claim 100%, `ACCEPTED`, or a produ
 ## Visual page association follow-up — 13.10.2026
 
 The three previews without an exact standalone PDF image XObject were compared directly with full-page Word export rasters (596×843 px). `image166.png` matches the right-hand reinforcement detail on page 74; `image180.png` matches the left grid/deflection diagram on page 84; `image200.png` matches the two braced-column diagrams with directional arrows and numeric annotations on page 99. This confirms page-level visual association. It does not establish precise image bounds, scale, decomposition into PDF drawing operations, or semantic correspondence to any of the 43 V4 appendix sheets. Their exact-XObject status remains unchanged.
+
+
+## OLE PDF bounds and scale verification — 2026-10-13
+
+A read-only, reproducible audit now resolves the bounds/scale subcriterion for the three previously visually associated OLE objects. The audit verified the source DOCX SHA-256 `c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685` and Word reference PDF SHA-256 `6dc88d91e41070bc9353e4d2cc6b2236fe4be39678935d4665816e841b2a8a14`, then bound each `ShapeID → VML imagedata relationship → preview` and matched one PDF image XObject by bounds on the previously visually reviewed page.
+
+| OLE / preview | Word page | PDF XObject | PDF bbox (pt) | Δ vs VML width × height (pt) | Pixel comparison |
+|---|---:|---:|---|---|---|
+| OLEObject15 / image166.png | 74 | 950 | (379.45, 391.70)–(558.70, 579.95) | −0.150 / 0.000 | JPEG; NCC 0.9938, MAE 2.06 |
+| OLEObject16 / image180.png | 84 | 979 | (195.85, 32.40)–(366.85, 474.50) | −0.100 / +0.100 | JPEG; NCC 0.9754, MAE 11.58 |
+| OLEObject20 / image200.png | 99 | 1015 | (239.75, 235.80)–(495.70, 398.50) | +0.000 / −0.150 | PNG; NCC 0.9968, MAE 0.26 after resize |
+
+All three PDF raster bounds agree with the source VML dimensions within 0.151 pt. The first two PDF XObjects are JPEG-compressed; the third was re-rasterized to 710×451 px from its 1301×749 px fallback preview. Their extracted bytes/pixels are not exact matches, so this result qualifies printed image bounds and scale only. It does not qualify the PBrush print stream, drawing semantics, omitted labels, or a link to any of the 43 V4 appendix sheets.
+
+The reproducible utility is `scripts/qa/audit_stage13_ole_pdf_bounds.py`; its deterministic, source-bound output is `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`. Two local runs produced identical JSON SHA-256 `bfd503d43e90762b642c8dcea1c8dea8e36ff2953572ec3f4eb49b33a3ac75d2`. Original sources remained hash-identical. The audit requires the local QA copies plus PyMuPDF, Pillow and NumPy; those are not made production dependencies.
+
+**Status change:** the three bounds/scale checks are resolved. OLE print-stream semantics, appendix correspondence, full layout/font qualification, all-43-page semantic OCR review and representative B3 corpus remain open. Item 13 remains **OPEN**.
