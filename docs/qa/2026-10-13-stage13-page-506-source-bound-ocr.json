@@ -1,0 +1,104 @@
+{
+  "schema": "engineer-os.stage13.source-bound-ocr-findings.v1",
+  "reviewed_at": "2026-10-13",
+  "status": "SAMPLE_CONFIRMED_ERRORS_CORPUS_REMAINS_INCOMPLETE",
+  "acceptance_granted": false,
+  "source": {
+    "file": "15.09.2026 ТЗК БЦ ул. Набережная28А V4 сшито с графикой.pdf",
+    "sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+    "source_page": 506,
+    "page_rect_pt": [
+      0,
+      0,
+      1684,
+      1191
+    ],
+    "rotation_degrees": 0,
+    "render": {
+      "renderer": "PyMuPDF 1.28.2 / MuPDF 1.28.2",
+      "dpi": 300,
+      "pixel_size": [
+        7017,
+        4963
+      ],
+      "sha256": "69bf44e793ca68a251cc18be5c0f86b8ec88f7c1c024e618b3b28a31842c8f88"
+    }
+  },
+  "candidate_pipeline": {
+    "engine": "Tesseract 5.5.3.20260724",
+    "languages": "rus+eng",
+    "oem": 1,
+    "psm": 11,
+    "dpi": 300,
+    "corrected_manifest_sha256": "f4716b946e21833f893161aa0c13eff4971b0414616bbade7539c0c0d1d46550",
+    "stored_tsv": "page-506.tsv",
+    "stored_tsv_sha256": "3332feaa46c01f514442f727ff9897830ddcfb8d1403cfb1b2657de40a50da3d"
+  },
+  "findings": [
+    {
+      "id": "p506-defect-marker-p3",
+      "candidate": {
+        "text": "0=63",
+        "confidence": 0,
+        "bbox_px": [
+          6293,
+          2258,
+          80,
+          30
+        ],
+        "tsv_row": 374,
+        "corrected_txt_line": 86
+      },
+      "source_visual": {
+        "text": "П3 δ=0,3",
+        "basis": "Hash-verified source-page 506 full rendering and enlarged candidate crop.",
+        "review": "FALSE_READ"
+      },
+      "error_classes": [
+        "marker_lost",
+        "Greek_delta_lost",
+        "decimal_value_corrupted"
+      ],
+      "impact": "Defect marker identity and value are not preserved."
+    },
+    {
+      "id": "p506-defect-marker-p1",
+      "candidate": {
+        "text": "_д=0,4",
+        "confidence": 23.882027,
+        "bbox_px": [
+          5012,
+          3706,
+          97,
+          38
+        ],
+        "tsv_row": 962,
+        "corrected_txt_line": 197
+      },
+      "source_visual": {
+        "text": "П1 δ=0,4",
+        "basis": "Hash-verified source-page 506 full rendering and enlarged candidate crop.",
+        "review": "FALSE_READ"
+      },
+      "error_classes": [
+        "marker_corrupted",
+        "Greek_delta_misread"
+      ],
+      "impact": "Marker identity and delta symbol are corrupted; numeric value happens to remain."
+    }
+  ],
+  "reparse_crosscheck": {
+    "finding": "The earlier candidate string `_�=0,4` in the pre-correction visual report does not occur in corrected TXT; corrected output is `_д=0,4`. The source mismatch remains, so the observation was refined rather than cleared.",
+    "all43_tsv_application_parser_counts_match": true
+  },
+  "application_gate": {
+    "state": "BLOCK on all43 V4 graphic appendix pages in the recorded app OCR profiles.",
+    "interpretation": "This sample supports retaining the fail-closed gate; it does not qualify production extraction or estimate whole-corpus accuracy."
+  },
+  "scope": {
+    "source_original_modified": false,
+    "full_semantic_review_of_page": false,
+    "complete_source_vs_ocr_reconciliation": false,
+    "remaining": "Review all labels, dimensions, signs, decimals, units, orientation, omissions and spatial associations across all43 sheets; complete Word physical/layout and B3 corpus qualification."
+  }
+}
