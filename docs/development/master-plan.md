@@ -1,4 +1,4 @@
-> **Актуально на 13.10.2026:** продолжается №13 / B2–B3; №11 получил исправление невидимого keyboard focus у textarea. §156: PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`; Core run980 PASS (1,060 tests/7 skips), Windows run182 PASS после повтора нестабильного ожидания панели памяти, Security run731 PASS. Все21 OLE связаны с ShapeID→VML→imagedata и previews, native BMP pixel match 21/21; page-level Word association 21/21. Все43 appendix graphics остаются OCR BLOCK; точные bounds/scale, связь с appendix, fonts/layout и B3 semantic corpus открыты. Кандидат PR144: `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; пункт13 OPEN, без 100%/ACCEPTED.
+> **Актуально на 13.10.2026:** PR145 draft head `1bb9b37240dc93eccb3682e704228838909c2517`; exact-head Core/Windows/Security checks are Core run992 SUCCESS (1,060 tests, 7 skips; HTTP/DOM, Chromium and vendored PDF.js PASS); Windows run194 SUCCESS; Security Guard run746 SUCCESS. Bounds/scale for the three previously decomposed OLE rasters are measured within 0.151 pt, axis-aligned with no rotation; the source font inventory is recorded (27 names, 6,302 references, no embedded DOCX fonts, 17 exact registry-name matches, 18/27 PDF font XRefs embedded). All43 appendix pages remain OCR BLOCK. Stage13 remains OPEN; no ACCEPTED/100% claim. Merged candidate base is `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -11,7 +11,7 @@
 ## Текущая позиция
 **РАБОТАЕМ: №13 / B2 — полный source-bound graphics/OLE/Word physical check; затем B3 — семантический regression corpus.**
 Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 is open/draft at head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`. Exact-head Core run980 passed 1,060 tests (7 skips); Windows run182 passed after a retry of a transient memory-panel browser timeout; Security Guard run731 passed.
-§154 binds all21 OLE objects to page-level Word locations and exact fallback previews, but 3 bounds/scales remain unqualified. All43 V4 graphic appendix pages remain BLOCK under application OCR. Source-bound OCR semantics, OLE-to-appendix relation, complete Word layout/fonts, and B3 semantic corpus remain open. Item11 got a keyboard-focus accessibility fix and remains PARTIAL. Physical PC install, real ACCEPTED case, and user-deferred LIRA/SCAD/RES remain as documented.
+§157 resolves bounds/scale for the three remaining OLE placements (unrotated; within 0.151 pt); §158 inventories source and rendered fonts without proving substitution. All43 V4 graphic appendix pages remain BLOCK under application OCR. Source-bound OCR semantics, OLE-to-appendix relation, complete Word layout/fonts, and B3 semantic corpus remain open. Item11 got a keyboard-focus accessibility fix and remains PARTIAL. Physical PC install, real ACCEPTED case, and user-deferred LIRA/SCAD/RES remain as documented.
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 i
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|§156: textarea keyboard focus fixed and tests pass; full real-user acceptance and physical release remain|
 |12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
-|13|Полнота документов|OPEN — текущий пункт|§154: all43 graphics remain OCR BLOCK; page-level Word placement identified for21/21 OLE (18 exact XObject instances + visual matches p74/p84/p99); exact bounds/scale, appendix linkage, OCR semantics, Word layout/fonts and B3 corpus open|
+|13|Полнота документов|OPEN — текущий пункт|§157–158: bounds/scale for the three remaining OLE placements resolved; font inventory recorded. All43 graphics still OCR BLOCK; appendix linkage, semantics, full layout and B3 corpus open|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
@@ -49,7 +49,7 @@ Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 i
 
 ### B. Доказать качество чтения — №13
 - [ ] B1. Создать эталонный реестр исходников/областей: SHA, формат, page/part/bbox, ожидаемый текст/числа/знаки/единицы/ячейки/связи, основание визуальной сверки. Включить реальные V4/DOCX и дополнительные представительные документы; synthetic fixtures отдельно.
-- [ ] B2. Word: сверить все 41 OMML, графику/OLE/WDP/EMF, таблицы, поля, шрифты и порядок; документировать расхождения оригинального Word и производных изображений. Эффекты, инвентаризация и PNG не заменяют полноценную визуальную эквивалентность.
+- [ ] B2. Word: сверить все 41 OMML, графику/OLE/WDP/EMF, таблицы, поля, шрифты и порядок; документировать расхождения оригинального Word и производных изображений. По §157 exact bounds/scale/no-rotation для трёх оставшихся OLE подтверждены; §158 source font inventory completed, run→render font mapping remains open. Эффекты, инвентаризация и PNG не заменяют полноценную визуальную эквивалентность.
 - [ ] B3. PDF: полный V4 реестр покрытия; raster/mixed/merged таблицы, мелкие подписи, минусы/десятичные знаки/единицы, связи значений и заголовков, графические обозначения. Проверять ошибки, а не только число обработанных страниц.
 - [ ] B4. img2table/Paddle/Docling использовать по измеримому приросту. Paddle проверять только с лицензированными заранее доступными локальными моделями; отсутствие модели явно UNAVAILABLE. Исследованные резервы не устанавливать автоматически.
 - [ ] B5. Закрепить поддерживаемый объём и эталонные проверки в regression corpus. Критические числа/единицы/знаки/связи на квалифицированных областях должны совпадать с эталоном; пропуски и ошибки явно блокируются, полнота не выдается без основания.
@@ -955,3 +955,14 @@ At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks co
 На текущем UI audit найдено правило `textarea:focus{outline:0}`, которое отменяло общий `:focus-visible` и делало клавиатурный фокус в поле сообщения невидимым. Правило удалено; добавлена регрессия в `tests/test_stage11_design_system.py`. Весь design-system module: 5/5 PASS; полный Chromium suite: 7/7 PASS локально на pinned Python; browser test подтверждает mobile/desktop no-overflow и все основные flows. Local screenshot review относится к синтетической модели и не является оценкой инженерной точности.
 
 PR145 draft exact head `884c19a7a5a0e62b21d5f52525fc001e6d7cbdb2`, base candidate `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`: Core run980 SUCCESS (1,060 tests, 7 skips), Windows run182 SUCCESS after a retried transient timeout in the first memory-panel browser run, Security Guard run731 SUCCESS. Browser and UI verification do not close document completeness or physical release gates. Item11 remains PARTIAL; item13 remains OPEN. All43 graphics pages still BLOCK in the document OCR assessment; exact Word object bounds/scale, appendix linkage, full fonts/layout and the complete source-bound B3 semantic corpus remain unresolved. No ACCEPTED/100% claim is made. LIRA/SCAD remain deferred; local/free product constraints are unchanged.
+
+
+## §157–158 — Word OLE bounds and source font inventory (13.10.2026)
+
+PR145 draft head `1bb9b37240dc93eccb3682e704228838909c2517`; exact-head Core/Windows/Security checks are Core run992 SUCCESS (1,060 tests, 7 skips; HTTP/DOM, Chromium and vendored PDF.js PASS); Windows run194 SUCCESS; Security Guard run746 SUCCESS. Bounds/scale for the three previously decomposed OLE rasters are measured within 0.151 pt, axis-aligned with no rotation; the source font inventory is recorded (27 names, 6,302 references, no embedded DOCX fonts, 17 exact registry-name matches, 18/27 PDF font XRefs embedded). All43 appendix pages remain OCR BLOCK. Stage13 remains OPEN; no ACCEPTED/100% claim. Merged candidate base is `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`.
+
+§157: read-only script `scripts/qa/audit_stage13_ole_pdf_bounds.py` and JSON `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`; three PDF XObjects (pages74/84/99) are axis-aligned and match source VML bounds within0.151pt. JPEG/re-rasterized pixel differences are recorded; no pixel equality or semantics are claimed.
+
+§158: Windows font inventory script `scripts/qa/audit_stage13_font_inventory.py` and JSON `docs/qa/2026-10-13-stage13-word-font-inventory.json`; 27 source names/6,302 refs/no embedded DOCX fonts; 17 exact local registry matches; 27 PDF font XRefs,18 with embedded data. This is an inventory and does not infer substitution for an unused style.
+
+B2/B3 remain incomplete, all43 appendix sheets remain BLOCK, and item13 remains OPEN. User-deferred LIRA/SCAD calculations remain out of scope.
