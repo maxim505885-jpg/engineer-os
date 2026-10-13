@@ -1,4 +1,4 @@
-> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 графика, OCR, physical Word и B3 полный корпус.** §152: все43 PDF-листа привязаны к двум исходным Drive packet PDF (21+22); размеры/native-text/72dpi pixel hashes совпали с V4 на43/43 в PyMuPDF. Это подтверждает provenance/render mapping, но не OCR смысл. Default/regions OCR блокирует все43 по confidence; 40 листов без native text. OLE/page, ручная проверка графики, fonts/layout и B3 открыты. Draft PR145 head bded12a; Security710 SUCCESS, Windows177/Core975 pending. №13 OPEN,8DONE/8PARTIAL/3OPEN.
+> **Актуально на 13.10.2026:** продолжается пункт №13 / B2 graphics, OCR, physical Word и B3 полный корпус. §153 уточняет OLE: точная связь OOXML ShapeID→VML→imagedata найдена для 21 объектов; приложение парсит 21/21 как доступный BMP и рендер каждого совпал с его PNG. Word PDF exact-XObject совпадение: 18/21 вхождений, 17/20 уникальных превью; три превью остаются без доказанного page placement. OCR приложения блокирует все43 листа; ручное подтверждение чтения, связь OLE с appendix, fonts/layout и B3 открыты. PR145 draft head 42ac6b0; последняя завершённая проверка head 3e1e94a: Core977, Windows179, Security716 и PR486 SUCCESS. Кандидат PR144 остаётся b2c2960; пункт13 OPEN.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -10,10 +10,9 @@
 
 ## Текущая позиция
 **РАБОТАЕМ: №13 / B2 — 43 графических листа и Word physical reference; затем B3 — полный semantic corpus.**
-Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. Draft [PR145](https://github.com/maxim505885-jpg/engineer-os/pull/145), current head `c97c8c9d39246261c5891b192af8c083a75893a9`. Exact-head Windows workflow run171, Core Tests run969, Repository Security Guard run694, CodeQL, Actions analysis и все семь checks завершились SUCCESS.
-§151 records the application's actual OCR profiles across all43 graphic pages. Whole returned11,993 words (mean line confidence43.38;58.22% below50); regions returned30,607 words (mean47.79;52.07% below50; overlapping candidates unmerged). Both layouts complete all raster passes but block all43 pages on low confidence, besides the vector audit. OCR accuracy and visual cross-check, exact OLE print-page/native payload mapping, fonts/layout and B3 corpus remain open. §150 retains the independent300dpi PSM11 and OLE preview evidence.
+Candidate base b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, PR144 MERGED. Draft PR145 head 42ac6b0bd29a158912c14da9950e7e7d82ae9786. The preceding head 3e1e94ac8c62f1fc385164d98f159a3d439a957f passed Core run977, Windows run179, Security run716, and PR check run486; exact-head checks for 42ac6b0 are pending.
+§153 corrects OLE mapping: OOXML ShapeID→VML→imagedata binds all 21 package objects to 20 unique previews, and all 21 available native BMP renders match the exact bound preview. Word PDF exact-XObject placement is proven for 18 object instances / 17 unique previews; three previews remain unlocated. App whole/regions OCR still blocks all43 graphic pages. Source-bound OCR semantics, relation between OLE details and the 43-sheet appendix, page layout/fonts and complete B3 corpus remain open.
 A1–A4 completed in stated scope. PR102 remains OPEN/DRAFT/NOT_MERGED. Physical PC and engineering ACCEPTED are unconfirmed. LIRA/SCAD/RES remain deferred by the user.
-
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 12.10.2026 | Оставшийся критерий |
 |---|---|---|---|
@@ -29,7 +28,7 @@ A1–A4 completed in stated scope. PR102 remains OPEN/DRAFT/NOT_MERGED. Physical
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|Полный реальный пользовательский сценарий и понятные статусы|
 |12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
-|13|Полнота документов|OPEN — текущий пункт|§152: V4 appendix pages492–534 provenance/render matched43/43 against two Drive source packets at72dpi; native text absent on40 pages; app OCR blocks43/43 on low confidence; Word/OLE placement, semantic OCR, visual/layout/font and B3 corpus open|
+|13|Полнота документов|OPEN — текущий пункт|§153: all43 PDF graphics remain OCR BLOCK; exact OLE BMP/preview pixel match21/21 through ShapeID; Word PDF XObject placement18/21 instances, 3 unique previews unlocated; semantic OCR, Word layout/fonts and B3 corpus open|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
@@ -926,3 +925,13 @@ Draft PR145 обновлён QA отчётом и планом; текущий h
 §151 quality finding is unchanged: application whole and regions profiles complete their raster passes on all43 pages but block every page for OCR_LOW_CONFIDENCE; the independent300dpi PSM11 output is only an unverified candidate set. The package comparison does not qualify OCR completeness, raster table/label semantics, source Word object placement, physical pagination, fonts or B3 corpus.
 
 Draft PR145 QA/report now has source packet hashes and page-by-page comparison. Current PR head bded12a438bdffaf4d551eabb05cf8b20505738f; Repository Security Guard run710 SUCCESS; Windows run177/Core run975 pending. Exact-base candidate remains b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. №13 OPEN; no 100% or ACCEPTED. LIRA/SCAD deferred.
+
+## §153 — exact OLE ShapeID binding and corrected placement counts (13.10.2026)
+
+PR145 draft now includes the corrected QA report and plan at head 42ac6b0bd29a158912c14da9950e7e7d82ae9786; exact-head CI for this newest documentation commit is pending. The preceding documentation-only head 3e1e94ac8c62f1fc385164d98f159a3d439a957f has Core run977, Windows local runtime run179, Security Guard run716, and PR check run486 all SUCCESS. Code head 6b132093c8d4adb164ce7071275d3b6ed77b0413 passed Core run976 (1,059 tests, 7 skips, including HTTP/DOM and Chromium), Windows run178, and Security run715. The candidate branch remains at b2c29604d3a8a2a8079a670a7affca4f55b2b9c6; PR145 is open and draft.
+
+A corrected OOXML resolver binds each OLEObject ShapeID to the VML shape with the same ID and its imagedata relationship. This avoids the ambiguous paragraph-level pairing used in an earlier diagnostic. The 21 OLE objects map to 20 distinct preview PNGs; OLEObject12 and OLEObject17 share image67.png. The application's read-only DOCX parse returns 14,689 logical units and classifies all 21 as BOUND_PACKAGE_OBJECT, with available BMP bitmaps and no activation. All 21 native Ole10Native BMP render outputs are pixel-identical to the exact ShapeID-bound OOXML preview.
+
+Exact pixel matching against Word's 491-page PDF establishes XObject page associations for 18 object instances / 17 distinct previews. image166.png (OLEObject15), image180.png (OLEObject16), and image200.png (OLEObject20) have no exact standalone XObject match; their printed page positions remain unproven. Paragraph/page context does not count as proof. The comparison establishes bitmap/fallback equivalence only, not PBrush print-stream engineering semantics or linkage to the 43-sheet PDF appendix.
+
+No source file changed: V4 DOCX SHA-256 remains c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685; V4 PDF SHA-256 remains b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916. Both production OCR layouts still BLOCK all 43 vector pages on confidence; candidate OCR has not been exhaustively checked against every label, dimension, symbol, rotation, and omission. Physical Word pagination, fonts/layout, and full B3 semantic corpus remain unresolved. Item13 remains OPEN; no 100%, ACCEPTED, or closure claim.
