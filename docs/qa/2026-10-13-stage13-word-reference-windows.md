@@ -88,7 +88,7 @@ Reproduction: `scripts/qa/audit_stage13_font_inventory.py` (Windows only; PyMuPD
 
 ## Source-bound OCR failure sample — V4 page 513
 
-A visual review of a 300-dpi source-bound crop found a false Tesseract candidate: TSV reports `54.185` at confidence 46.66, bbox `[5538,491,76,34]`, while the printed source label is `−4.185`. This is a lost-minus and spurious-leading-digit error on an elevation. The application’s recorded profiles still BLOCK this page as part of all43 vector appendix sheets; no incorrect value was accepted. Evidence and hashes are in `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json`.
+Visual source-bound screening of 162 numeric candidate boxes on V4 page513 confirmed three bad OCR outputs: `54.185` (46.66 confidence; bbox `[5538,491,76,34]`) for printed `−4.185`; `202` (93.87; `[5909,503,44,23]`) as a fragment of `−4.202`; and `4.19` (91.0; `[5986,510,46,22]`) for printed `−4.197`. The latter two lose the sign/prefix, and one also truncates the final digit. This exposes high-confidence numeric fragmentation as well as a low-confidence sign/value error. The application’s recorded profiles still BLOCK this page as part of all43 vector appendix sheets; no candidate was accepted. Evidence and hashes are in `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json`.
 
 The current local renderer replay is PyMuPDF1.26.6/MuPDF1.26.11. It renders the standalone geodesy packet page1 and combined PDF page513 identically at72/150/300dpi. Its300-dpi raw pixel hash differs from the previous manifest hash; that manifest does not state renderer version/options, so this remains a provenance discrepancy. The original PDF hash and source files remain unchanged.
 
