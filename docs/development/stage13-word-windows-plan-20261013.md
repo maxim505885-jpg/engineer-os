@@ -22,3 +22,10 @@ Base: integration/release-candidate-v1 b2c29604d3a8a2a8079a670a7affca4f55b2b9c6,
 5. Update the maintained map, master plan and handoff with the candidate commit/PR and exact CI results. No engineering acceptance or LIRA/SCAD calculation is in scope.
 
 QA scripts/exports/raw document text remain private local evidence. Word and OCR are existing/workstation-local diagnostics; no mandatory Word/Tesseract dependency, paid API or installed commercial fonts are introduced. Calculations remain deferred. Capability limits must be reported, not bypassed to mark complete.
+
+
+## §157 — source-bound bounds and scale for the three decomposed OLE objects (13.10.2026)
+
+The Windows Word reference PDF pass now resolves the bounds/scale subcriterion for OLEObject15, OLEObject16 and OLEObject20. Read-only script `scripts/qa/audit_stage13_ole_pdf_bounds.py` binds source ShapeID/VML relationship/preview to the previously visually reviewed Word pages 74, 84 and 99, then records PDF XObjects 950, 979 and 1015. Their raster rectangles match source VML dimensions within 0.151 pt. Pixel bytes do not match: two XObjects are JPEG-compressed and one is a differently sized PNG raster. The repeatable JSON evidence is `docs/qa/2026-10-13-stage13-ole-word-xobject-bounds.json`; two local runs had identical SHA-256 `bfd503d43e90762b642c8dcea1c8dea8e36ff2953572ec3f4eb49b33a3ac75d2`. Source DOCX/PDF hashes were verified before the audit and remain unchanged.
+
+This closes only bounds/scale for those three placements. It does not decode PBrush print semantics or establish OLE correspondence to the 43-page PDF appendix. All43 vector pages still BLOCK under the application OCR layouts; full source-bound label/dimension/symbol/orientation review, fonts/layout, and the B3 semantic regression corpus remain. Item13 OPEN; no ACCEPTED/100% claim. PR145 remains a draft on the merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6.
