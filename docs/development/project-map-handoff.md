@@ -638,3 +638,14 @@ Pass9 диагностически проверил71поле каждогоDOCX
 12новыхmedia payloads имеют14runtime image bindings, в основномtable1rows2–9/paragraph63,507,530,703,705; дополнительныйHD_PHOTO_LAYER. Визуальнаякомпозиция остаётся открытой. проверено12добавленныхpayloadbindings, не весьgraphiccorpus.
 Архив QA обновляется тем жеID сpass9, сохраняяpass1–5/8; rawpass6/7 отсутствуют, историческиерезультаты§145–146 сохранены.
 №13 OPEN. Следующийработник—Codex; B2 поля/graphiclayers/fonts/physicalWord иB3 semantic corpus. ЛИРА/SCAD отложены;ПК/engineeringACCEPTED/стабильныйrelease не подтверждены.
+
+
+## 150. Полный OCR-кандидат на графических листах и карта OLE preview — 13.10.2026
+
+По исходному V4 PDF SHA-256 b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916 выполнен отдельный локальный OCR всех страниц 492–534 (43/43): Tesseract 5.5.3.20260724, rus+eng, OEM 1, PSM 11, 300 dpi. Сохранено 19,644 OCR-кандидата с TSV координатами; среднее confidence, взвешенное по словам, 71.35; 29.12% ниже 60; среднее по листу 57.61–85.31. Это не доказывает полноту/точность: значения, символы, поворот, reading order и пропуски не выверены целиком по исходным изображениям, а все 43 native vector pages по-прежнему дают VECTOR_CONTENT_UNVERIFIED/BLOCK.
+
+OOXML-карта 21 PBrush OLE relationship найдена: 20 уникальных fallback PNG, привязанных к body paragraph indices; два OLE-пары делят одинаковые previews. OCR этих 20 PNG дал 616 кандидатов при среднем confidence 61.82 по изображениям. Native OLE payload и точная печатная страница DOCX не декодированы; соответствие этих деталей 43 страницам PDF не установлено. Исходные DOCX/PDF остались неизменны. Официальный Windows OCR runtime использован только как локальный диагностический инструмент и не добавлен в приложение или его зависимости.
+
+Обновлён draft PR145: https://github.com/maxim505885-jpg/engineer-os/pull/145 (head после записи QA отчёта и плана: d1a41484a3b27c55301fbb832423a23483054553; новые exact-head checks ожидаются). Полный источник, параметры, хеши моделей и границы проверки записаны в docs/qa/2026-10-13-stage13-word-reference-windows.md; приватные TSV, manifest и OOXML relationship audit остаются в локальном stage13-qa.
+
+Далее: проверить OCR-кандидаты каждого листа, в том числе размеры/обозначения/ориентацию, сопоставить все native OLE и previews с печатными страницами, затем завершить B2 visual/font/layout и B3 corpus coverage. №13 OPEN; не заявлять 100%, ACCEPTED или полноту. LIRA/SCAD по-прежнему отложены.
