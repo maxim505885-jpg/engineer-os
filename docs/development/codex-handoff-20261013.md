@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 7d7347293714c50e87fdb4106b4279e02430adbc. Security run722 passed; Core run979 and Windows run181 are in progress. See §154 in the maintained map/master plan.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 7d7347293714c50e87fdb4106b4279e02430adbc. Exact-head Core run979, Windows run181, Security run722 and PR check run492 all SUCCESS. See §155 in the maintained map/master plan.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
@@ -102,3 +102,10 @@ At PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, Security Guard run722 ha
 Side-by-side inspection of the 596×843 rendered Word pages and the three previews lacking an exact standalone PDF image XObject establishes their page-level visual association: image166.png / OLEObject15 appears as the right-hand reinforcement detail on page74; image180.png / OLEObject16 matches the left grid/deflection diagram on page84; image200.png / OLEObject20 matches the paired braced-column diagrams with arrows and numeric annotations on page99. Combined with the 18 exact-XObject object instances, page-level association is now identified for all21 OLE objects. The three visual matches do not establish exact PDF object decomposition, image bounds or scale. They also do not establish whether any objects correspond to the 43-sheet V4 appendix.
 
 The §153 findings remain: exact OOXML ShapeID→VML→imagedata binding for all21 objects; 20 unique fallback PNGs (OLEObject12 and OLEObject17 share image67.png); application parse classifies 21/21 as bound package objects with available BMP bitmaps and no activation; native Ole10Native BMP renders pixel-match the exact ShapeID-bound fallback preview 21/21. All43 vector appendix pages still BLOCK under both app OCR layouts. Full label/dimension/symbol/rotation/omission review, PBrush print semantics, exact visual bounds/scale, relationship to the appendix, physical pagination/fonts and B3 corpus remain open. Item13 stays OPEN; no 100%, ACCEPTED or closure claim.
+
+
+## Amendment — §155 exact-head CI completion, 13.10.2026
+
+## §155 — exact-head CI completion (13.10.2026)
+
+At exact PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, all four checks completed successfully: ENGINEER OS Core Tests run979, Windows local runtime run181, Repository Security Guard run722, and PR check run492. The draft remains open and the base remains the merged candidate b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. No merge or release acceptance is implied.
