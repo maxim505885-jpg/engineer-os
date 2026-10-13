@@ -966,3 +966,12 @@ PR145 draft head `1bb9b37240dc93eccb3682e704228838909c2517`; exact-head Core/Win
 §158: Windows font inventory script `scripts/qa/audit_stage13_font_inventory.py` and JSON `docs/qa/2026-10-13-stage13-word-font-inventory.json`; 27 source names/6,302 refs/no embedded DOCX fonts; 17 exact local registry matches; 27 PDF font XRefs,18 with embedded data. This is an inventory and does not infer substitution for an unused style.
 
 B2/B3 remain incomplete, all43 appendix sheets remain BLOCK, and item13 remains OPEN. User-deferred LIRA/SCAD calculations remain out of scope.
+
+
+## §159 — source-bound OCR false read, page 513 (13.10.2026)
+
+The 300-dpi Tesseract PSM11 candidate at V4 PDF page 513 reads `54.185` (confidence 46.66; bbox px `[5538,491,76,34]`). Visual review of the hash-verified source crop reads `−4.185`; this is a confirmed lost-minus/spurious-leading-digit error in the candidate. It is high-risk elevation data. The application's recorded OCR state remains BLOCK for all43 vector appendix pages, so this sample is not accepted by the product and confirms the need for that gate. Reproduction data: `docs/qa/2026-10-13-stage13-ocr-source-bound-sample.json` on PR145.
+
+The source combined PDF SHA remains `b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916`. Current PyMuPDF 1.26.6 / MuPDF 1.26.11 renders the standalone geodesy packet page1 and combined V4 page513 to identical raw RGB at 72/150/300 dpi. The 300-dpi raw pixel hash does not match the earlier manifest (`f1dbe...` vs current `62caa...`); that manifest omitted renderer version/options, so this discrepancy is documented, not explained away.
+
+This is one confirmed error sample, not an exhaustive corpus result. All43 pages remain BLOCK; full semantic OCR, OLE/appendix linkage, physical Word layout/font equivalence, and B3 corpus coverage remain OPEN. PR145 exact head `098506e6271d3070c0aa109306f5bc5400f5efe2`; Core run994 and Windows run196 are pending, Security run755 passed. No 100%, ACCEPTED, or item13 closure is claimed.
