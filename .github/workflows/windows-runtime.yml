@@ -8,6 +8,8 @@ on:
       - ".github/workflows/windows-runtime.yml"
       - "scripts/windows_*.ps1"
       - "scripts/windows_poststart_smoke.py"
+      - "scripts/evaluate_docling_extraction.py"
+      - "tests/test_extraction_regression.py"
       - "engineering/local_app/**"
       - "requirements-*.txt"
       - "e2e/**"
@@ -80,6 +82,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }
+      - name: Check document regression CLI on legacy stdout
+        shell: pwsh
+        run: |
+          & ./.venv/Scripts/python.exe -m unittest tests.test_extraction_regression -v
+          if ($LASTEXITCODE -ne 0) { throw 'Document regression CLI failed' }
       - name: Install locked browser dependencies
         shell: pwsh
         run: |

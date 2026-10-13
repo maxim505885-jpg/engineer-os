@@ -15,11 +15,14 @@ class Stage7OfflineTests(unittest.TestCase):
     def office(self,name,member):
         p=self.root/name
         with zipfile.ZipFile(p,"w") as z:
-            z.writestr("[Content_Types].xml","x");z.writestr(member,"x")
+            for item in ("[Content_Types].xml",member):
+                info=zipfile.ZipInfo(item,date_time=(2020,1,1,0,0,0))
+                z.writestr(info,"x")
         return p
     def lir(self,name):
         p=self.root/name
-        with zipfile.ZipFile(p,"w") as z:z.writestr("0","x")
+        with zipfile.ZipFile(p,"w") as z:
+            z.writestr(zipfile.ZipInfo("0",date_time=(2020,1,1,0,0,0)),"x")
         return p
     def manifest(self):
         files=[
