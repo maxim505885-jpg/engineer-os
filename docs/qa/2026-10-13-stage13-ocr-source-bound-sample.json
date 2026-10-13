@@ -9,7 +9,7 @@
     "page_rect_pt": [0, 0, 1684, 1191],
     "raster_px": [7017, 4963],
     "render_dpi": 300,
-    "local_renderer": "PyMuPDF version not recorded in original manifest; current replay uses local installed PyMuPDF",
+    "local_renderer": "Current local replay: PyMuPDF 1.26.6, MuPDF 1.26.11; original manifest does not record renderer version",
     "current_raw_rgb_sha256": "62caaacb4de7ccd23010a84df0a7c94ec10ab678365fa08db6725c358ad4c474",
     "original_manifest_raw_raster_sha256": "f1dbe93fc849e28cbbc64888668e55b51eee54803e5920000a96173024678489",
     "renderer_hash_note": "Raw raster hashes differ. The same current renderer produced byte-identical RGB samples for source packet page 1 and combined V4 page 513 at 72, 150, and 300 dpi; dimensions, page rectangle, cropbox, rotation, and page content are consistent. Original manifest does not identify renderer version/options, so its 300-dpi pixel hash is not reproduced."
