@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. Предложенный PR145 draft: head c97c8c9d39246261c5891b192af8c083a75893a9; see §149 in the maintained map/master plan.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 42ac6b0bd29a158912c14da9950e7e7d82ae9786; exact-head checks for this docs-only push pending. Latest completed check head 3e1e94ac8c62f1fc385164d98f159a3d439a957f: Core977, Windows179, Security716, PR486 all SUCCESS. See §153 in the maintained map/master plan.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
@@ -79,3 +79,15 @@ Next: bind the 43 source graphic sheets to DOCX package objects and page placeme
 ## Дополнение — source packet mapping all43 V4 appendix sheets, 13.10.2026
 
 Two original Drive PDFs were fetched read-only and SHA-verified: graphics packet 10,793,106 bytes (SHA-256 fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c) and geodesy packet 7,563,047 bytes (SHA-256 6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce). The one-to-one mapping is graphics1–21→V4 p492–512, geodesy1–22→V4 p513–534. PyMuPDF page rectangles, native-text hashes and 72dpi pixel hashes equal43/43. This establishes page provenance/render identity at one renderer/resolution; it does not decode semantic content. Forty pages still have no native text. All43 remain BLOCK due vector/low-confidence OCR controls. PR145 head bded12a438bdffaf4d551eabb05cf8b20505738f, Security710 SUCCESS, Windows177/Core975 pending. Item13 OPEN.
+
+## Amendment — §153 OLE mapping and current PR state, 13.10.2026
+
+## §153 — exact OLE ShapeID binding and corrected placement counts (13.10.2026)
+
+PR145 draft now includes the corrected QA report and plan at head 42ac6b0bd29a158912c14da9950e7e7d82ae9786; exact-head CI for this newest documentation commit is pending. The preceding documentation-only head 3e1e94ac8c62f1fc385164d98f159a3d439a957f has Core run977, Windows local runtime run179, Security Guard run716, and PR check run486 all SUCCESS. Code head 6b132093c8d4adb164ce7071275d3b6ed77b0413 passed Core run976 (1,059 tests, 7 skips, including HTTP/DOM and Chromium), Windows run178, and Security run715. The candidate branch remains at b2c29604d3a8a2a8079a670a7affca4f55b2b9c6; PR145 is open and draft.
+
+A corrected OOXML resolver binds each OLEObject ShapeID to the VML shape with the same ID and its imagedata relationship. This avoids the ambiguous paragraph-level pairing used in an earlier diagnostic. The 21 OLE objects map to 20 distinct preview PNGs; OLEObject12 and OLEObject17 share image67.png. The application's read-only DOCX parse returns 14,689 logical units and classifies all 21 as BOUND_PACKAGE_OBJECT, with available BMP bitmaps and no activation. All 21 native Ole10Native BMP render outputs are pixel-identical to the exact ShapeID-bound OOXML preview.
+
+Exact pixel matching against Word's 491-page PDF establishes XObject page associations for 18 object instances / 17 distinct previews. image166.png (OLEObject15), image180.png (OLEObject16), and image200.png (OLEObject20) have no exact standalone XObject match; their printed page positions remain unproven. Paragraph/page context does not count as proof. The comparison establishes bitmap/fallback equivalence only, not PBrush print-stream engineering semantics or linkage to the 43-sheet PDF appendix.
+
+No source file changed: V4 DOCX SHA-256 remains c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685; V4 PDF SHA-256 remains b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916. Both production OCR layouts still BLOCK all 43 vector pages on confidence; candidate OCR has not been exhaustively checked against every label, dimension, symbol, rotation, and omission. Physical Word pagination, fonts/layout, and full B3 semantic corpus remain unresolved. Item13 remains OPEN; no 100%, ACCEPTED, or closure claim.
