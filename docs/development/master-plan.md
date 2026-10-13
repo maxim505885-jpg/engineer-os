@@ -1,4 +1,4 @@
-> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 поля/графика/physical Word и B3 полный корпус.** §149: draft [PR145](https://github.com/maxim505885-jpg/engineer-os/pull/145), head `c97c8c9`; исправлен CLI UnicodeEncodeError, стабилизирована ZIP-фикстура. Word 2021, исходный DOCX сохранён; 491 страниц bounded text match, но PDF содержит ещё 43 графических листа, все 43 BLOCK по vector audit; OLE/графика/шрифты и OCR остаются непроверенными. Полный Windows suite локально:1058 tests/0 failures/13 errors/49 skips. Exact-head GitHub CI: Windows171/Core969/Security694 и 7/7 checks SUCCESS. №13 OPEN,8DONE/8PARTIAL/3OPEN.
+> **Активный план на 13.10.2026:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). **Работаем №13 / B2 графика, OCR, physical Word и B3 полный корпус.** §152: все43 PDF-листа привязаны к двум исходным Drive packet PDF (21+22); размеры/native-text/72dpi pixel hashes совпали с V4 на43/43 в PyMuPDF. Это подтверждает provenance/render mapping, но не OCR смысл. Default/regions OCR блокирует все43 по confidence; 40 листов без native text. OLE/page, ручная проверка графики, fonts/layout и B3 открыты. Draft PR145 head bded12a; Security710 SUCCESS, Windows177/Core975 pending. №13 OPEN,8DONE/8PARTIAL/3OPEN.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -29,7 +29,7 @@ A1–A4 completed in stated scope. PR102 remains OPEN/DRAFT/NOT_MERGED. Physical
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|Полный реальный пользовательский сценарий и понятные статусы|
 |12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
-|13|Полнота документов|OPEN — текущий пункт|§149: Word491/PDF534; все43 graphic vector sheets BLOCK; OLE mapping, OCR, physical/font/layout, tables/formulas and representative B3 corpus open|
+|13|Полнота документов|OPEN — текущий пункт|§152: V4 appendix pages492–534 provenance/render matched43/43 against two Drive source packets at72dpi; native text absent on40 pages; app OCR blocks43/43 on low confidence; Word/OLE placement, semantic OCR, visual/layout/font and B3 corpus open|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
@@ -918,3 +918,11 @@ OOXML-карта 21 PBrush OLE relationship найдена: 20 уникальн�
 Draft PR145 обновлён QA отчётом и планом; текущий head a7bd87ac8fa20d475b30817e02479e2d76d4756a, exact-head Windows/Core workflows ожидаются. См. docs/qa/2026-10-13-stage13-word-reference-windows.md. OCR-файлы/досье, fonts/source raw data остаются частными локальными доказательствами.
 
 Следующий шаг: улучшить/обосновать OCR профили для чертежей и проверить каждую страницу по полной векторной графике; затем закончить OLE payload/page mapping, font/layout physical checks и B3 full corpus. Item13 OPEN. Не заявлять полноту, 100% или ACCEPTED. ЛИРА/SCAD остаются отложенными; платные runtime/API зависимости не добавлены.
+
+## 152. Исходное происхождение графических листов V4 подтверждено — 13.10.2026
+
+Из Drive read-only получены исходные пакеты: Графика 03.09.2026.pdf — 10,793,106 bytes, SHA-256 fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c; Геодезические измерения 03.09 пакетная печать.pdf — 7,563,047 bytes, SHA-256 6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce. Pages1–21 graphics map one-to-one to V4 pages492–512; geodesy pages1–22 map to513–534. All43 corresponding page rectangles, native-text hashes and full rendered pixel hashes matched at72dpi in PyMuPDF. This proves page provenance and render identity only under that same renderer and resolution; no labels or engineering values were decoded by this comparison. Forty pages have no native text and remain VECTOR_CONTENT_UNVERIFIED/BLOCK.
+
+§151 quality finding is unchanged: application whole and regions profiles complete their raster passes on all43 pages but block every page for OCR_LOW_CONFIDENCE; the independent300dpi PSM11 output is only an unverified candidate set. The package comparison does not qualify OCR completeness, raster table/label semantics, source Word object placement, physical pagination, fonts or B3 corpus.
+
+Draft PR145 QA/report now has source packet hashes and page-by-page comparison. Current PR head bded12a438bdffaf4d551eabb05cf8b20505738f; Repository Security Guard run710 SUCCESS; Windows run177/Core run975 pending. Exact-base candidate remains b2c29604d3a8a2a8079a670a7affca4f55b2b9c6. №13 OPEN; no 100% or ACCEPTED. LIRA/SCAD deferred.
