@@ -6,7 +6,7 @@
 ## Где код и источник состояния
 Репозиторий: https://github.com/maxim505885-jpg/engineer-os
 Рабочий кандидат: integration/release-candidate-v1.
-Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 42ac6b0bd29a158912c14da9950e7e7d82ae9786; exact-head checks for this docs-only push pending. Latest completed check head 3e1e94ac8c62f1fc385164d98f159a3d439a957f: Core977, Windows179, Security716, PR486 all SUCCESS. See §153 in the maintained map/master plan.
+Последний merged base: b2c29604d3a8a2a8079a670a7affca4f55b2b9c6, tree c1f44ad1839ecf763faedb98deaf87fd219e5e75, PR144 MERGED. PR145 draft current head: 7d7347293714c50e87fdb4106b4279e02430adbc. Security run722 passed; Core run979 and Windows run181 are in progress. See §154 in the maintained map/master plan.
 Живая документация находится в ОТДЕЛЬНОЙ ветке docs/project-map-handoff-20261005:
 - ENGINEER_OS_PROJECT_MAP.md — читать верхнюю актуальную сводку и последние разделы, особенно144–148.
 - docs/development/master-plan.md — критерии и порядок работы.
@@ -91,3 +91,14 @@ A corrected OOXML resolver binds each OLEObject ShapeID to the VML shape with th
 Exact pixel matching against Word's 491-page PDF establishes XObject page associations for 18 object instances / 17 distinct previews. image166.png (OLEObject15), image180.png (OLEObject16), and image200.png (OLEObject20) have no exact standalone XObject match; their printed page positions remain unproven. Paragraph/page context does not count as proof. The comparison establishes bitmap/fallback equivalence only, not PBrush print-stream engineering semantics or linkage to the 43-sheet PDF appendix.
 
 No source file changed: V4 DOCX SHA-256 remains c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685; V4 PDF SHA-256 remains b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916. Both production OCR layouts still BLOCK all 43 vector pages on confidence; candidate OCR has not been exhaustively checked against every label, dimension, symbol, rotation, and omission. Physical Word pagination, fonts/layout, and full B3 semantic corpus remain unresolved. Item13 remains OPEN; no 100%, ACCEPTED, or closure claim.
+
+
+## Amendment — §154 current visual OLE page associations, 13.10.2026
+
+## §154 — визуальная привязка оставшихся OLE-превью к страницам Word (13.10.2026)
+
+At PR145 head 7d7347293714c50e87fdb4106b4279e02430adbc, Security Guard run722 has succeeded; Core run979 and Windows local runtime run181 were in progress at the latest check. The preceding code head 6b132093c8d4adb164ce7071275d3b6ed77b0413 passed Core run976 (1,059 tests, 7 skips, including HTTP/DOM and Chromium), Windows run178, and Security run715. The latest merged candidate remains b2c29604d3a8a2a8079a670a7affca4f55b2b9c6; PR145 is open and draft.
+
+Side-by-side inspection of the 596×843 rendered Word pages and the three previews lacking an exact standalone PDF image XObject establishes their page-level visual association: image166.png / OLEObject15 appears as the right-hand reinforcement detail on page74; image180.png / OLEObject16 matches the left grid/deflection diagram on page84; image200.png / OLEObject20 matches the paired braced-column diagrams with arrows and numeric annotations on page99. Combined with the 18 exact-XObject object instances, page-level association is now identified for all21 OLE objects. The three visual matches do not establish exact PDF object decomposition, image bounds or scale. They also do not establish whether any objects correspond to the 43-sheet V4 appendix.
+
+The §153 findings remain: exact OOXML ShapeID→VML→imagedata binding for all21 objects; 20 unique fallback PNGs (OLEObject12 and OLEObject17 share image67.png); application parse classifies 21/21 as bound package objects with available BMP bitmaps and no activation; native Ole10Native BMP renders pixel-match the exact ShapeID-bound fallback preview 21/21. All43 vector appendix pages still BLOCK under both app OCR layouts. Full label/dimension/symbol/rotation/omission review, PBrush print semantics, exact visual bounds/scale, relationship to the appendix, physical pagination/fonts and B3 corpus remain open. Item13 stays OPEN; no 100%, ACCEPTED or closure claim.
