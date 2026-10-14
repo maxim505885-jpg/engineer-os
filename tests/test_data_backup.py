@@ -29,7 +29,7 @@ class DataBackupTests(unittest.TestCase):
         self.assertEqual(restored.get_file(self.file['id'])['sha256'],self.file['sha256'])
         self.assertEqual(Path(restored.get_file(self.file['id'])['path']).read_bytes(),b'original engineering source')
         restored_path=Path(restored.get_file(self.file['id'])['path'])
-        self.assertTrue(restored_path.is_relative_to(target),f'restored path {restored_path!s} is outside target {target!s}')
+        self.assertTrue(restored_path.is_relative_to(target.resolve()),f'restored path {restored_path!s} is outside target {target!s}')
         self.assertEqual(restored.verification_key(),b'x'*32)
         self.assertEqual((target/'derived'/'converted.docx').read_bytes(),b'derived')
 
