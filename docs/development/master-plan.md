@@ -1028,3 +1028,12 @@ CodeQL alert #45 (`py/path-injection`, `engineering/local_app/lock.py:52`) remai
 Next work: (1) reconcile every earlier TXT-derived source observation against corrected TSV/text and page crops; (2) complete the source-ground-truth ledger for pages492–534; (3) finish Word layout, fonts, OLE/print-stream and appendix-link qualification; (4) build and run the B3 source-bound corpus; (5) inspect and resolve CodeQL #45 from exact SARIF data; (6) continue items14–19 within the user's deferred-calculation boundary and record physical-PC/release evidence. Keep unresolved content BLOCK and preserve originals.
 
 No item13 closure, ACCEPTED, 100%, or release-complete claim is made. LIRA/SCAD/RES calculations remain user-deferred.
+
+
+## §165 — opaque-image text conflict and Windows test cleanup (14.10.2026)
+
+PR145 remains draft on base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; new head `fe76ee07273179e4ab694668654b39cd1cf76031` adds `NATIVE_TEXT_OCCLUDED_BY_LATER_IMAGE` with character count, coordinates, and SHA-256 per covered native span, while retaining the native candidate and keeping the page BLOCK. A synthetic regression passed. Read-only source QA on a separate user-provided PDF reproduced 57 covered spans on its first page; source identifiers, text, hashes, and rendered files remain private. Local Tesseract read the visible cover as a warehouse report, but this is OCR candidate text, not acceptance or completeness proof. The two user-provided originals were rehashed unchanged.
+
+The pinned Windows `.venv-stage13` full local run at the candidate had 1,060 tests, 0 assertion failures, 13 errors, and 49 skips. Isolation showed five errors came from `tests/test_data_backup.py` using sqlite connection context managers that commit/rollback but do not close handles. The test fixtures now close those handles; that module passes 13/13. The other Windows errors/skips remain platform limitations and are not reported as passing. The new PDF occlusion regression passes; `compileall` and `git diff --check` pass. Exact-head Core run1002 and Windows runtime run204 were pending; Security Guard run800 was queued at the last check. Recheck all workflows on the final head before updating status.
+
+Item13 remains OPEN. V4's 43 graphic appendix pages still require source-bound review of labels, dimensions, signs, units, symbols and associations; Word physical layout/font qualification and the full B3 semantic corpus remain open. No ACCEPTED, 100%, or release-complete claim. Free/local operation remains; LIRA/SCAD/RES calculations remain deferred.
