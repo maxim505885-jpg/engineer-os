@@ -1,11 +1,6 @@
-> **Актуально на 14.10.2026, обновление §164:** PR145 draft exact head `17cab7e6485c5b4d206764cc35a505e3d4570acc` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run999, Windows run201, Security Guard run794 passed. Page506 source-bound evidence confirms two OCR marker errors; full document remains blocked pending exhaustive source reconciliation. All43 application pages remain BLOCK and item13 OPEN. CodeQL #45, Word/B3 and physical release gates remain unresolved. No ACCEPTED/100% claim.
+> **Актуально на 14.10.2026, §165:** по решению пользователя пункт №13 отложен до завершения независимых работ и будет последним отдельным блоком по полноте документов перед зависимыми acceptance/release gates. №13 остаётся OPEN; BLOCK не считается закрытием. Реестр листов/значений и пилот source-bound сверки 506/513 зафиксированы в master-plan §165. PR145 открыт draft на `4ae39ce567d12d9aca83fd0694869e5ef012873e`: Core1003, Windows205, Security808 SUCCESS. PR146 открыт draft на `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`: Core1004, Security811 SUCCESS; локальный sandbox rerun не подтверждён. Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Следом — независимые №12/17/D1 и локальные reliability/UI/provider checks. ЛИРА/SCAD/RES расчёты отложены. ACCEPTED/100%/release-complete не заявляются.
 
-> **Активный план на 14.10.2026 / §164:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Продолжать №13 / B2–B3; затем обязательные положительный кейс №14 и release gates №9/12/19.
-
-
-Обновлено: 13.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
-
-Идентичность этой карты: пользовательский файл `libfile_947c39aad11c81918c7887832c1411bb`, имя `ENGINEER_OS_PROJECT_MAP.md`. Обновлять этот же ID с фактической текущей версией. Правило сопровождения — `AGENTS.md`; краткий указатель — `docs/development/project-map-handoff.md` и README. Актуальная ветка и проверенный результат указаны ниже; ранние SHA и результаты сохраняются в исторических разделах.
+> **Активный порядок работ:** выполнить независимые от №13 критерии; затем вернуться к №13 последним отдельным блоком. Положительный реальный кейс и выпускные gates, зависящие от полноты документов, остаются после него. Подробный порядок — [master-plan §165](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md).
 
 ## 1. Новому чату: сначала прочитай это
 
