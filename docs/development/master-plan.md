@@ -1,6 +1,6 @@
-> **Актуально 14.10.2026 / §166:** порядок №13 зафиксирован по решению пользователя: сначала независимые пункты, №13 последним содержательным блоком перед зависящими acceptance/release gates; это не меняет критерии и №13 остаётся OPEN. PR146 объединён squash в кандидат: merge commit / candidate HEAD `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`. На точном PR head `9808252fd7694c8b488c3ff3f5c0d4c6343d32d0` прошли Core run1008 (1,057 тестов/7 skips), Windows run209 (183/18 skips, включая recovery/security, cold/restart, Ollama и browser workflows), Security Guard run818 и CodeQL run588. После merge candidate push Core1009 и Windows210, Security Guard819 — SUCCESS. PR-triggered Core1010/Windows211 и Security Guard820 — SUCCESS; CodeQL PR run588/590 — SUCCESS. №12 остаётся PARTIAL из-за CodeQL alert #45 и отсутствия проверки переноса/restore на физическом ПК. №13 OPEN. №17 частичен: в checkout нет оригинального DWG/DXF; данные инвентаризации относятся к производной DXF и не доказывают геометрическую эквивалентность. ЛИРА/SCAD/RES расчёты остаются отложенными.
+> **Актуально 14.10.2026 / §169:** порядок №13 не меняется; он остаётся OPEN и последним содержательным документным блоком. PR147 squash merged: candidate 091edd1c2881b1f7c416034b45c1d6f48899bcdd. PR head 92a2396d441e2005712f85cd20f3e40693b618a4 passed Core, Windows Runtime, Repository Guard and CodeQL. Candidate push Core1012/1013, Windows213/214, Security829/830 and push workflow599 passed. Windows Runtime included the end-to-end receipt/source-page test plus cold/restart, backup/security, offline PDF viewer, live Ollama and browser workflows. Local Ollama qwen3:8b returned PASS; Open WebUI port8080 was not listening. #18 remains PARTIAL and E3 open until live Open WebUI/optional-provider receipt is verified. #12 remains PARTIAL: CodeQL alert #45 and physical transfer/restore remain open; candidate CodeQL status associated with PR74 reported 4 HIGH/1 MEDIUM alerts needing separate reconciliation. #17 PARTIAL (source DWG/DXF absent). #13 OPEN and last. LIRA/SCAD/RES calculations deferred; no 100%, ACCEPTED or release-complete claim.
 # ENGINEER OS — план доведения до стабильного выпуска
-Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
+Обновлено: 14.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
 Исполнение: самостоятельно по шагам через superpowers:executing-plans; этот документ является дорожной картой, конкретный implementation plan составляется для изменяемого подсистемного блока перед кодом.
 
 ## Цель и критерий 100%
@@ -39,7 +39,7 @@
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
 |17|CAD/DWG|PARTIAL|Реальный DWG отдельно преобразован GNU LibreDWG0.14:15,906 объектов;1,304 предупреждения и210 ошибок конвертации; CAD_ENTITY_LIMIT=10,000. Геометрия, потери и roundtrip не подтверждены|
-|18|Несколько ИИ|PARTIAL|Полный локальный маршрут; выбранные optional providers квалифицируются отдельно|
+|18|Несколько ИИ|PARTIAL|§169: live Ollama и receipt/source-page provenance прошли; Open WebUI на ПК UNAVAILABLE; optional-provider receipt/gate не квалифицирован.|
 |19|Стабильный выпуск|OPEN|Все обязательные release gates, clean install, main/tag и воспроизводимые инструкции|
 
 Итого: 8 DONE в указанном объёме, 8 PARTIAL, 3 OPEN. Это счёт пунктов, не процент инженерной готовности.
@@ -79,7 +79,7 @@
 ### E. Завершить рабочие сценарии — №15/16/18
 - [ ] E1. Реальный ACCEPTED→knowledge→recall; отмена принятия/устаревание источника должны отзывать основание и запрещать некорректное повторное использование.
 - [ ] E2. Из того же кейса выпустить DOCX/PDF: источники, таблицы, изображения, нормы и выводы; визуально сверить оба файла и историю изменений.
-- [ ] E3. Проверить локальные Ollama/Open WebUI, ошибки/таймаут/неполный ответ и происхождение ответа. Дополнительные провайдеры только optional, без обязательной платной зависимости; отдельно указать проверенные и недоступные.
+- [ ] E3. Ollama qwen3:8b live inference на локальном ПК и end-to-end receipt/source-page regression проверены; Windows PR CI прошёл. Open WebUI API mapping покрыт loopback tests, но live service на ПК UNAVAILABLE (8080 не слушает); optional-provider receipt/gate не квалифицирован. E3 остаётся OPEN до проверки выбранного полного локального набора.
 **Выход E:** проверенные память, отчёт и локальный AI-сценарий.
 
 ### F. Надёжность и пользовательская установка — №9/12/11
@@ -106,6 +106,7 @@
 ## Журнал продвижения
 | Дата | Шаг | Сделано | Осталось | Текущий/следующий |
 |---|---|---|---|---|
+|14.10.2026|E3 / №18 локальный receipt|PR147 merged 091edd1c2881b1f7c416034b45c1d6f48899bcdd; exact PR-head Core/Windows/Guard/CodeQL SUCCESS; candidate push Core1012/1013,Windows213/214,Security829/830,push599 SUCCESS; локально qwen3:8b inference PASS; добавлен end-to-end source receipt/hash/provenance test и Windows CI trigger.|OpenWebUI live unavailable на ПК (8080); optional-provider receipt/gate не квалифицирован; №18 PARTIAL; №13 OPEN.|№6 D1, затем оставшиеся независимые пункты перед возвратом к №13|
 |12.10.2026|B2/B3 второй проход|PR141 merged; Word field context/PDF no-oprotation исправлены;12realHTTPregions,1044Core/145Windows/QA|OriginalWord reference/fonts;9/12OCRmismatches;fullgraphicsemantics/corpus|№13/B2+B3|
 |12.10.2026|A1–A4, частично B|LibreOffice/hOCR и native conflicts исправлены; PR140 merged, freshCI SUCCESS, QAversion1|B2+B3, fullqualifiedcorpus; №13 OPEN|№13/B2+B3|
 |12.10.2026|План выпуска|Сверены карта §§133–137, master-plan, отбор Word/PDF/CAD/ЛИРА/SCAD, PR102/139/140 и CI PR140; сформирован порядок A–G|Реализация A1–G4; старые PASS не повторялись в этом проходе|№13/A1 — начать воспроизведение LibreOffice|
