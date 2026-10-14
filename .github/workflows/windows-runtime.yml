@@ -79,7 +79,7 @@ jobs:
           $testPort = 18765
           & ./scripts/windows_stop.ps1
           if ($LASTEXITCODE -ne 0) { throw 'Could not stop the default ENGINEER OS instance before port test' }
-          & ./scripts/windows_supervisor.ps1 -NoBrowser -SkipOpenWebUI -Port $testPort
+          & ./Start_ENGINEER_OS.cmd -NoBrowser -SkipOpenWebUI -Port $testPort
           if ($LASTEXITCODE -ne 0) { throw 'Supervisor failed on an explicitly selected loopback port' }
           $state = Get-Content .engineer-os/runtime/windows/startup-state.json -Raw | ConvertFrom-Json
           if ($state.engineer_os -ne "http://127.0.0.1:$testPort") { throw 'Startup state did not record the selected app port' }
