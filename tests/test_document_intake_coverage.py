@@ -51,6 +51,18 @@ class DocumentIntakeCoverageTests(unittest.TestCase):
         self.assertIn('VECTOR_CONTENT_UNVERIFIED',page['limitations'])
         self.assertEqual(page['status'],'BLOCK');self.assertFalse(page['acceptance_granted'])
 
+    def test_vector_regions_are_persisted_for_review_while_page_stays_blocked(self):
+        with fitz.open() as doc:
+            page=doc.new_page(width=200,height=100);page.draw_rect(fitz.Rect(10,20,80,60))
+            data=doc.tobytes()
+        file=preserve_file(self.store,self.session,'vector.pdf',data)
+        job=self.store.enqueue_extraction(self.session,file['id'],'native');Worker(self.store,None).run_once()
+        page=self.store.extraction_page(self.session,job['id'],1)
+        self.assertEqual(page['visual_components']['vector_regions'],[[10.0,20.0,80.0,60.0]])
+        self.assertEqual(page['visual_components']['vector_regions_omitted'],0)
+        self.assertIn('VECTOR_CONTENT_UNVERIFIED',page['limitations'])
+        self.assertEqual(page['status'],'BLOCK');self.assertFalse(page['acceptance_granted'])
+
     def test_corrupt_pdf_has_explicit_reason(self):
         self.assertIn('CORRUPT_PDF',extract_preview('broken.pdf',b'broken')[4]['stop_reasons'])
 

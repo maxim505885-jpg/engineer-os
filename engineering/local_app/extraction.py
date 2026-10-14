@@ -1,6 +1,7 @@
 """Durable page extraction; observed parser output is never accepted evidence."""
 from dataclasses import asdict
 import importlib.util
+import math
 import os
 from pathlib import Path
 
@@ -10,6 +11,7 @@ MAX_PAGES=5000
 MAX_PAGE_TEXT=20000
 MAX_BLOCKS=1000
 MAX_TOTAL_TEXT=2000000
+MAX_VECTOR_REGIONS=100
 
 
 def parse_failure_message(error):
@@ -62,8 +64,17 @@ def visual_components(page):
     reasons=[]
     if images:reasons.append('IMAGE_CONTENT_UNVERIFIED')
     if vectors:reasons.append('VECTOR_CONTENT_UNVERIFIED')
+    vector_regions=[]
+    for drawing in vectors[:MAX_VECTOR_REGIONS]:
+        rect=drawing.get('rect')
+        if rect is None:
+            vector_regions.append(None);continue
+        bounds=[float(rect.x0),float(rect.y0),float(rect.x1),float(rect.y1)]
+        vector_regions.append(bounds if all(math.isfinite(value) for value in bounds) else None)
     return dict(images=len(images),vector_paths=len(vectors),tables='NOT_PARSED',
-                image_regions=[dict(zip(('left','top','right','bottom'),i['bbox'])) for i in images[:100]]),reasons
+                image_regions=[dict(zip(('left','top','right','bottom'),i['bbox'])) for i in images[:100]],
+                vector_regions=vector_regions,
+                vector_regions_omitted=max(0,len(vectors)-len(vector_regions))),reasons
 
 
 def retain_blocks(blocks,page,budget):

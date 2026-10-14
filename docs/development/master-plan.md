@@ -1,5 +1,16 @@
 # MASTER PLAN — ENGINEER OS
 
+## Актуализация №14 — 14.10.2026, PR150 / очередность до v1.0
+
+Текущий проверенный candidate: `integration/release-candidate-v1` `091edd1c2881b1f7c416034b45c1d6f48899bcdd`. PR150 открыт на этом candidate; повторный GitHub `core-tests` PASS (включая full Python suite и Chromium UI smoke). Ветка PR дополняется bounded locator для vector graphics; 20 focused local tests PASS, exact-head CI ещё ожидается.
+
+- №13 остаётся BLOCK. Сохранённый V4 extraction-review охватывает очередь всех534 страниц: 137 extraction BLOCK,19 visual table review,378 text semantic review; triage отдельно выделяет143 manual entries. Причины двух отчётов различаются: старый triage содержит8 `OTHER_EXTRACTION_FAILURE`, extraction-review —2. Разницу в6 страниц надо сверить с source-bound page audits до любых выводов о покрытии.
+- Векторные страницы теперь могут записывать максимум100 bounding boxes на страницу и число пропусков. Это только локатор для review; `VECTOR_CONTENT_UNVERIFIED`, BLOCK и `acceptance=false` сохранены. Оригиналы не изменялись.
+- №14: свежий узкий Stage7/8 run на реальном объекте закончился BLOCK/BLOCK; `ACCEPTED=false`. Подробные hashes/пользовательские метаданные хранятся только локально.
+- №6: нормативные/расчётные предметные gates открыты; фактические LIRA/SCAD расчёты отложены пользователем. №9 physical Windows и №19 финальный release audit не пройдены.
+
+Последовательность: (1) exact-head CI и merge PR150; (2) исправить/reconcile V4 page-level discrepancies, проверить extraction regression corpus и весь 534-page review без подмены выборкой; (3) закрыть доступные нормативные и инженерные gates №6, оставив solver открытым до отмены отсрочки; (4) повторить полный fresh Stage7 + Stage8 на квалифицированном объекте для №14; (5) завершить независимые реальные сценарии №15 memory, №16 accepted report, №17 DWG roundtrip и №18 local/optional provider receipts; (6) выполнить фактические Windows checks №9; (7) выполнить полный clean-release, backup/restore и документационный audit №19. Статусы всех пунктов — в `ENGINEER_OS_PROJECT_MAP.md` §66; историческая актуализация ниже не отражает newer state.
+
 ## Актуализация №13 — 10.10.2026, после §92 / PR108
 
 Источник истины по новейшему состоянию: `ENGINEER_OS_PROJECT_MAP.md` §92 и `docs/development/project-map-handoff.md`, ветка `docs/project-map-handoff-20261005`. Исторические показатели PR91–92 в начале этого плана не следует принимать за текущий candidate.
