@@ -51,10 +51,11 @@ class PdfSourcePreflightTests(unittest.TestCase):
 
     def test_wrong_source_digest_is_rejected_before_inspection(self):
         from scripts.pdf_source_preflight import inspect_source
-        with tempfile.NamedTemporaryFile() as handle:
-            handle.write(b'not a PDF'); handle.flush()
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'source.pdf'
+            source.write_bytes(b'not a PDF')
             with self.assertRaisesRegex(ValueError, 'source checksum mismatch'):
-                inspect_source(Path(handle.name), expected_sha256='0' * 64)
+                inspect_source(source, expected_sha256='0' * 64)
 
     def test_requested_pages_preserve_original_numbers_and_reject_bad_scope(self):
         import fitz
