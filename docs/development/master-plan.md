@@ -1,4 +1,4 @@
-> **Актуально на 14.10.2026, обновление §164:** PR145 draft exact head `17cab7e6485c5b4d206764cc35a505e3d4570acc`, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; Core run999 (1,060 tests, 7 skipped), Windows run201, Security Guard run794 passed. Source-bound review confirms OCR mismatches on V4 page506: `П3 δ=0,3`→`0=63`, `П1 δ=0,4`→`_д=0,4`; evidence is linked below. Corrected OCR diagnostic counts remain non-accuracy evidence. All43 app pages remain BLOCK; item13 OPEN. CodeQL #45 and Word/B3/physical-release gates remain open; no 100%/ACCEPTED claim.
+> **Зафиксировано 14.10.2026 / §165:** по решению пользователя пункт №13 временно отложен до завершения независимых работ и возвращается последним содержательным блоком перед зависимыми принятием и выпуском. Проверка №13 будет идти через реестр листов/значений, source-bound ручную сверку и пилот страниц 506/513; непроверенные значения остаются BLOCK, пункт не закрывать с открытыми блокерами. Последний candidate base: `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; PR145 head `4ae39ce567d12d9aca83fd0694869e5ef012873e`, Core run1003 / Windows run205 / Security run808 SUCCESS. PR146 head `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`, Core run1004 / Security run811 SUCCESS; PR remains draft. LIRA/SCAD/RES calculations remain deferred.
 
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
@@ -9,9 +9,17 @@
 Бесплатное локальное приложение Windows: ТЗ → документы → проверка извлечения → доказательства → профильные проверки → заключение → FINAL AUDIT. Чат, история, задачи, память, CAD и восстановление входят в выпуск. Обязательные платные API не вводятся; оригиналы неизменны.
 
 ## Текущая позиция
-**РАБОТАЕМ: №13 / B2 — полный source-bound graphics/OLE/Word physical check; затем B3 — семантический regression corpus.**
-Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, PR144 MERGED. PR145 remains open/draft at exact head `ec4a6545279245081110bad4984070efe7c158d0`; Core run995, Windows local runtime run197 and Security Guard run760 all SUCCESS on that exact head. The full CI includes HTTP/DOM, Chromium, vendored PDF.js and Windows browser/Ollama workflows. This does not close item13.
-§157 resolves bounds/scale for the three remaining OLE placements (unrotated; within 0.151 pt); §158 inventories source and rendered fonts without proving substitution. All43 V4 graphic appendix pages remain BLOCK under application OCR. Source-bound OCR semantics, OLE-to-appendix relation, complete Word layout/fonts, and B3 semantic corpus remain open. Item11 got a keyboard-focus accessibility fix and remains PARTIAL. Physical PC install, real ACCEPTED case, and user-deferred LIRA/SCAD/RES remain as documented.
+**Работаем по независимым от №13 пунктам; №13 отложен и поставлен последним содержательным блоком до зависимых acceptance/release gates.** Это порядок работ, а не изменение критериев и не закрытие №13.
+
+Следующие независимые шаги:
+1. №12 — завершить review CodeQL #45 и hardlink/recovery coverage PR146; затем отделить программные результаты от физического Windows restore.
+2. №17 — продолжить реальную DWG/DXF инвентаризацию/проверку потерь и roundtrip, сохраняя оригинал.
+3. №6 — только нормативная часть D1 с проверкой редакций и применимости; LIRA/SCAD/RES solver work остаётся отложен.
+4. №9/11/12/18 — завершить независимые локальные UI, backup/recovery и provider checks; физические действия на ПК обозначать NOT_RUN до фактической проверки.
+
+После этого вернуться к №13 как к последнему отдельному блоку по полноте документов, используя sheet/value registry и source-bound pilot 506/513, затем применить цикл к полному корпусу. Любая существенная неопределённость/BLOCK удерживает №13 открытым. Пункты №14–16 и №19, которые требуют принятого документального основания, не объявлять завершёнными до прохождения этих gates.
+
+Фактический статус GitHub на 14.10.2026: PR145 открыт как draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e`; Core run1003, Windows run205 и Security run808 прошли. PR146 открыт как draft на head `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`; Core run1004 и Security run811 прошли. Локальный повтор PR146 в этой sandbox не дал результата из-за ограничений доступа к временным каталогам; локальный PASS здесь не заявляется. Оба PR не объединены, пункт №12 остаётся PARTIAL, а №13 OPEN.
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
