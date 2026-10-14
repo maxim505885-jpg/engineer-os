@@ -22,6 +22,10 @@ class Stage11DesignSystemTests(unittest.TestCase):
         self.assertIn("prefers-reduced-motion",css)
         self.assertIn('body[data-ui-mode="normal"] #advanced-domain-packet-form',css)
 
+    def test_textarea_keeps_visible_keyboard_focus(self):
+        css=self.text("engineering/local_app/ui/styles.css")
+        self.assertNotRegex(css,r"textarea:focus\s*\{[^}]*outline\s*:\s*0(?:\s|;|})")
+
     def test_status_semantics_preserve_textual_decisions(self):
         js=self.text("engineering/local_app/ui/app.js")
         self.assertIn("function toneClass",js)

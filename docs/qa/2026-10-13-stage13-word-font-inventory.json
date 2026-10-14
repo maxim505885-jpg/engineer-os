@@ -1,0 +1,615 @@
+{
+  "qualification": "inventory_only; a font-name mismatch does not prove visible use, substitution, or physical-layout equivalence",
+  "source_docx": {
+    "name": "v4-original.docx",
+    "sha256": "c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685",
+    "size_bytes": 147560922
+  },
+  "source_embedded_font_parts": [],
+  "source_font_exact_registry_name_matches": 17,
+  "source_font_names": [
+    {
+      "name": "Arial",
+      "reference_count": 108
+    },
+    {
+      "name": "Arial Narrow",
+      "reference_count": 5
+    },
+    {
+      "name": "Arial Unicode MS",
+      "reference_count": 1
+    },
+    {
+      "name": "Book Antiqua",
+      "reference_count": 3
+    },
+    {
+      "name": "Bookman Old Style",
+      "reference_count": 11
+    },
+    {
+      "name": "Calibri",
+      "reference_count": 3809
+    },
+    {
+      "name": "Calibri Light",
+      "reference_count": 4
+    },
+    {
+      "name": "Cambria",
+      "reference_count": 4
+    },
+    {
+      "name": "Cambria Math",
+      "reference_count": 1491
+    },
+    {
+      "name": "Courier New",
+      "reference_count": 132
+    },
+    {
+      "name": "DINCondensedC",
+      "reference_count": 2
+    },
+    {
+      "name": "Franklin Gothic Medium Cond",
+      "reference_count": 2
+    },
+    {
+      "name": "Georgia",
+      "reference_count": 8
+    },
+    {
+      "name": "GOST type A",
+      "reference_count": 14
+    },
+    {
+      "name": "ISOCPEUR",
+      "reference_count": 80
+    },
+    {
+      "name": "ISOCTEUR",
+      "reference_count": 2
+    },
+    {
+      "name": "Lucida Sans Unicode",
+      "reference_count": 11
+    },
+    {
+      "name": "MS Mincho",
+      "reference_count": 2
+    },
+    {
+      "name": "OfficinaSansBoldC",
+      "reference_count": 3
+    },
+    {
+      "name": "Symbol",
+      "reference_count": 46
+    },
+    {
+      "name": "Tahoma",
+      "reference_count": 16
+    },
+    {
+      "name": "Times New Roman",
+      "reference_count": 462
+    },
+    {
+      "name": "Times New Roman CYR",
+      "reference_count": 2
+    },
+    {
+      "name": "Times New Roman \u041f\u043e\u043b\u0443\u0436\u0438\u0440\u043d\u044b\u0439",
+      "reference_count": 10
+    },
+    {
+      "name": "Tunga",
+      "reference_count": 2
+    },
+    {
+      "name": "Verdana",
+      "reference_count": 2
+    },
+    {
+      "name": "Wingdings",
+      "reference_count": 70
+    }
+  ],
+  "source_font_reference_count": 6302,
+  "source_font_registry_matches": {
+    "Arial": [
+      {
+        "file_name": "arial.ttf",
+        "registration": "Arial (TrueType)",
+        "sha256": "c9b76220a5be42ead4733611e417cd65c5fd8aeaa33eb56576ac378a37d130a1"
+      }
+    ],
+    "Arial Narrow": [
+      {
+        "file_name": "ARIALN.TTF",
+        "registration": "Arial Narrow (TrueType)",
+        "sha256": "cad552553cf2a75afca01955751aaa115e2a64fd6c6eea42e1fbd236630b7e0a"
+      }
+    ],
+    "Arial Unicode MS": [
+      {
+        "file_name": "ARIALUNI.ttf",
+        "registration": "Arial Unicode MS (TrueType)",
+        "sha256": "fe50313c37c2eca0bbf8cc3565b5ef32314753889afbe44cb275d65c3b58f0df"
+      }
+    ],
+    "Book Antiqua": [
+      {
+        "file_name": "BKANT.TTF",
+        "registration": "Book Antiqua (TrueType)",
+        "sha256": "c019f155a0004760f32079c22c29ef0ddd223d0c2c79e2487122e66d38a53b32"
+      }
+    ],
+    "Bookman Old Style": [
+      {
+        "file_name": "BOOKOS.TTF",
+        "registration": "Bookman Old Style (TrueType)",
+        "sha256": "8f2df7dbc1f2b790f6e6fdd24dbb6c2a96b6e554ba2031c3ab0fe34d322a1b3e"
+      }
+    ],
+    "Calibri": [
+      {
+        "file_name": "calibri.ttf",
+        "registration": "Calibri (TrueType)",
+        "sha256": "198e8dac512206f27c9bdbfeb3d5b3e55a33de9dcf58d801823ef8c5ef5a76dc"
+      }
+    ],
+    "Calibri Light": [
+      {
+        "file_name": "calibril.ttf",
+        "registration": "Calibri Light (TrueType)",
+        "sha256": "67374b8f4735eabfc7f173f28dc1789d7dbd4e2919532d173f6d697211cc3263"
+      }
+    ],
+    "Cambria": [],
+    "Cambria Math": [],
+    "Courier New": [
+      {
+        "file_name": "cour.ttf",
+        "registration": "Courier New (TrueType)",
+        "sha256": "93c3ff526c19d03496c01c6a1bfd1031f97af021a13e859a89dfc717a0b6b6ec"
+      }
+    ],
+    "DINCondensedC": [],
+    "Franklin Gothic Medium Cond": [],
+    "GOST type A": [],
+    "Georgia": [
+      {
+        "file_name": "georgia.ttf",
+        "registration": "Georgia (TrueType)",
+        "sha256": "38dffcaf1fac89492f7c56c600a14daf36ae42f7c21985cd4134ae113124a58f"
+      }
+    ],
+    "ISOCPEUR": [
+      {
+        "file_name": "isocpeur.ttf",
+        "registration": "ISOCPEUR (TrueType)",
+        "sha256": "17fec42d3617b10f3ed54b7bbfa39ae31a2fe34d65de43d0fdacb625088a14c6"
+      }
+    ],
+    "ISOCTEUR": [
+      {
+        "file_name": "isocteur.ttf",
+        "registration": "ISOCTEUR (TrueType)",
+        "sha256": "f48b8bbbcc4e623e4bd7e0d062adc89caaf2f505136cf3f41b8ad53c315a4a04"
+      }
+    ],
+    "Lucida Sans Unicode": [
+      {
+        "file_name": "l_10646.ttf",
+        "registration": "Lucida Sans Unicode (TrueType)",
+        "sha256": "97226e81f19eff8c8fb191745748bab920472c005d3ec4e23d9a50a12c471d92"
+      }
+    ],
+    "MS Mincho": [],
+    "OfficinaSansBoldC": [],
+    "Symbol": [
+      {
+        "file_name": "symbol.ttf",
+        "registration": "Symbol (TrueType)",
+        "sha256": "bbf1192965e5266fbf23370416337d2861fc1e8bd349def93f2994ba67382fc3"
+      }
+    ],
+    "Tahoma": [
+      {
+        "file_name": "tahoma.ttf",
+        "registration": "Tahoma (TrueType)",
+        "sha256": "b890858df485549d20fcb0a2c519dffe9c5c155d16b55e0b9252d6e66db555e5"
+      }
+    ],
+    "Times New Roman": [
+      {
+        "file_name": "times.ttf",
+        "registration": "Times New Roman (TrueType)",
+        "sha256": "2cff2a03d8034801979dd6d16f09b9a825c3d710fcf068f2ebfbf0e1425c87cf"
+      }
+    ],
+    "Times New Roman CYR": [],
+    "Times New Roman \u041f\u043e\u043b\u0443\u0436\u0438\u0440\u043d\u044b\u0439": [],
+    "Tunga": [],
+    "Verdana": [
+      {
+        "file_name": "verdana.ttf",
+        "registration": "Verdana (TrueType)",
+        "sha256": "6a8481fe107ee547893c018b13dba291c2020bec3de5da6525d9ac09f6bc2105"
+      }
+    ],
+    "Wingdings": [
+      {
+        "file_name": "wingding.ttf",
+        "registration": "Wingdings (TrueType)",
+        "sha256": "9bcd6064e3b52fa30a347edd6e82506e2ec8b1602930b423c629a82c10468a5b"
+      }
+    ]
+  },
+  "source_font_table": {
+    "Arial": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Arial Narrow": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Arial Unicode MS": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Book Antiqua": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Bookman Old Style": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Calibri": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Calibri Light": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Cambria": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Cambria Math": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Courier New": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "DINCondensedC": {
+      "alternate_name": "Cambria",
+      "embedded_variants": []
+    },
+    "Franklin Gothic Medium Cond": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "GOST type A": {
+      "alternate_name": "Calibri",
+      "embedded_variants": []
+    },
+    "Georgia": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "ISOCPEUR": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "ISOCTEUR": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Lucida Sans Unicode": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "MS Mincho": {
+      "alternate_name": "\uff2d\uff33 \u660e\u671d",
+      "embedded_variants": []
+    },
+    "OfficinaSansBoldC": {
+      "alternate_name": "OfficinaSansBoldC",
+      "embedded_variants": []
+    },
+    "Symbol": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Tahoma": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Times New Roman": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Times New Roman CYR": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Times New Roman \u041f\u043e\u043b\u0443\u0436\u0438\u0440\u043d\u044b\u0439": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Tunga": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Verdana": {
+      "alternate_name": null,
+      "embedded_variants": []
+    },
+    "Wingdings": {
+      "alternate_name": null,
+      "embedded_variants": []
+    }
+  },
+  "windows_font_registration_count": 325,
+  "word_pdf_font_xrefs": [
+    {
+      "base_font": "TimesNewRomanPSMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 491,
+      "type": "TrueType",
+      "xref": 5
+    },
+    {
+      "base_font": "BCDEEE+ISOCPEURItalic",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "593bc6be7c558b8ae6464a03e56d1498dabcc9738ddb543a21eef3778b053818",
+      "extension": "ttf",
+      "page_count": 491,
+      "type": "TrueType",
+      "xref": 11
+    },
+    {
+      "base_font": "BCDFEE+ISOCPEURItalic",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "593bc6be7c558b8ae6464a03e56d1498dabcc9738ddb543a21eef3778b053818",
+      "extension": "ttf",
+      "page_count": 491,
+      "type": "Type0",
+      "xref": 13
+    },
+    {
+      "base_font": "TimesNewRomanPS-BoldMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "f3ead7b17461b1af50c620eba61ab8258bb8f92af01c42c2b291b9fd949b5ac1",
+      "extension": "ttf",
+      "page_count": 491,
+      "type": "Type0",
+      "xref": 26
+    },
+    {
+      "base_font": "TimesNewRomanPS-BoldMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 491,
+      "type": "TrueType",
+      "xref": 31
+    },
+    {
+      "base_font": "TimesNewRomanPSMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "9fe8bc6029aa3eb81ce0df2e8fd865d86edb5bbf1007bd01800b9a22ec043eec",
+      "extension": "ttf",
+      "page_count": 465,
+      "type": "Type0",
+      "xref": 52
+    },
+    {
+      "base_font": "BCDGEE+TimesNewRomanPS-BoldMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "7b263df41a71a7ac42c9ca9c8f2efbf85c55df1d898aba235a12edfd1cc219a9",
+      "extension": "ttf",
+      "page_count": 2,
+      "type": "Type0",
+      "xref": 57
+    },
+    {
+      "base_font": "BCDHEE+TimesNewRomanPS-BoldMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "7b263df41a71a7ac42c9ca9c8f2efbf85c55df1d898aba235a12edfd1cc219a9",
+      "extension": "ttf",
+      "page_count": 2,
+      "type": "TrueType",
+      "xref": 62
+    },
+    {
+      "base_font": "TimesNewRomanPS-BoldItalicMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "ad8b169b7110e05d4e54dc036848e217de0dd80db5045600c1b3cd2866c3920a",
+      "extension": "ttf",
+      "page_count": 38,
+      "type": "Type0",
+      "xref": 66
+    },
+    {
+      "base_font": "TimesNewRomanPS-BoldItalicMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 57,
+      "type": "TrueType",
+      "xref": 71
+    },
+    {
+      "base_font": "TimesNewRomanPS-ItalicMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "02726f40e519c243a9ab9f7ba2fb7d86b106ae95b5d0b5506eb3eec5351e1aca",
+      "extension": "ttf",
+      "page_count": 5,
+      "type": "Type0",
+      "xref": 82
+    },
+    {
+      "base_font": "TimesNewRomanPS-ItalicMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 50,
+      "type": "TrueType",
+      "xref": 87
+    },
+    {
+      "base_font": "Arial-BoldItalicMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 34,
+      "type": "TrueType",
+      "xref": 644
+    },
+    {
+      "base_font": "Arial-BoldItalicMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "c5677e7ee1b9af4593e3c32ebd30fb85dc408f8558a6b0255590c9072e96f360",
+      "extension": "ttf",
+      "page_count": 15,
+      "type": "Type0",
+      "xref": 647
+    },
+    {
+      "base_font": "ArialMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 299,
+      "type": "TrueType",
+      "xref": 678
+    },
+    {
+      "base_font": "BCDIEE+CourierNewPSMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "8572ee27d0321b6997d69ea09509c890e9fd6bf7e11a72782f05d3145a127033",
+      "extension": "ttf",
+      "page_count": 42,
+      "type": "TrueType",
+      "xref": 693
+    },
+    {
+      "base_font": "SymbolMT",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "086b4c456dbe6f09f8c99517bcda6cd0f82646bc0cf77bf0a1e64dd9a7c38fd3",
+      "extension": "ttf",
+      "page_count": 4,
+      "type": "Type0",
+      "xref": 957
+    },
+    {
+      "base_font": "BCDJEE+Calibri",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "849da7d6f7cda562c89a3b8db1816e9730ab0b4ee252bba7000959d2f7159ea3",
+      "extension": "ttf",
+      "page_count": 14,
+      "type": "Type0",
+      "xref": 1099
+    },
+    {
+      "base_font": "TimesNewRomanPSMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 1,
+      "type": "TrueType",
+      "xref": 1109
+    },
+    {
+      "base_font": "BCDKEE+Calibri",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "849da7d6f7cda562c89a3b8db1816e9730ab0b4ee252bba7000959d2f7159ea3",
+      "extension": "ttf",
+      "page_count": 14,
+      "type": "TrueType",
+      "xref": 1113
+    },
+    {
+      "base_font": "Arial-BoldMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 17,
+      "type": "TrueType",
+      "xref": 1143
+    },
+    {
+      "base_font": "BCDLEE+CambriaMath",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "d4191fe73780c2daf0dbfd269a25b0feb895ed59c85c1970006f2dde52334697",
+      "extension": "ttf",
+      "page_count": 18,
+      "type": "Type0",
+      "xref": 1151
+    },
+    {
+      "base_font": "BCDMEE+MS Mincho",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "5f79fd94bd5cccbc2b1144c8a096bec1df1a1ecd455600040e696bce65ddf23a",
+      "extension": "ttf",
+      "page_count": 6,
+      "type": "Type0",
+      "xref": 1179
+    },
+    {
+      "base_font": "BCDNEE+Calibri",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "e2d490486bd85cd276bca7ba9f4ac1e33bd321a9acbff9b1cb31e31d8e3a7e60",
+      "extension": "ttf",
+      "page_count": 9,
+      "type": "Type0",
+      "xref": 1283
+    },
+    {
+      "base_font": "BCDOEE+Calibri",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "e2d490486bd85cd276bca7ba9f4ac1e33bd321a9acbff9b1cb31e31d8e3a7e60",
+      "extension": "ttf",
+      "page_count": 9,
+      "type": "TrueType",
+      "xref": 1288
+    },
+    {
+      "base_font": "Arial",
+      "embedded_in_pdf": true,
+      "embedded_sha256": "db9acee8659c07939debab6ebf622f5b35246aaa646f0c501717acd9323bd45d",
+      "extension": "ttf",
+      "page_count": 1,
+      "type": "Type0",
+      "xref": 1372
+    },
+    {
+      "base_font": "Arial-BoldMT",
+      "embedded_in_pdf": false,
+      "embedded_sha256": null,
+      "extension": "n/a",
+      "page_count": 41,
+      "type": "TrueType",
+      "xref": 1674
+    }
+  ],
+  "word_reference_pdf": {
+    "name": "word-after-explicit-field-update.pdf",
+    "page_count": 491,
+    "sha256": "6dc88d91e41070bc9353e4d2cc6b2236fe4be39678935d4665816e841b2a8a14",
+    "size_bytes": 44838874
+  }
+}
+

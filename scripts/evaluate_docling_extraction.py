@@ -164,7 +164,9 @@ def main() -> int:
                 except OSError as exc:
                     report["status"] = "BLOCK"
                     report["errors"].append(str(exc))
-    print(json.dumps(report, ensure_ascii=False, indent=2))
+    # ASCII JSON stays decodable even through a legacy Windows stdout pipe.
+    # The separately written report remains UTF-8 with its literal source text.
+    print(json.dumps(report, ensure_ascii=True, indent=2))
     return 0 if report["status"] == "PASS" else 2
 
 

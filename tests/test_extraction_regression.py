@@ -2,6 +2,7 @@
 
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -39,7 +40,7 @@ class ExtractionRegressionTests(unittest.TestCase):
             ],
         }
 
-    def run_cli(self, baseline=None, extraction=None, output_to_input=False):
+    def run_cli(self, baseline=None, extraction=None, output_to_input=False, stdout_encoding=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             baseline_path, extraction_path = root / "baseline.json", root / "extraction.json"
@@ -50,10 +51,12 @@ class ExtractionRegressionTests(unittest.TestCase):
             result = subprocess.run(
                 [sys.executable, str(SCRIPT), str(baseline_path), str(extraction_path), "--output", str(output)],
                 capture_output=True, text=True,
+                env={**os.environ, 'PYTHONIOENCODING': stdout_encoding} if stdout_encoding else None,
             )
             self.assertEqual(extraction_path.read_bytes(), before, "evaluation must not rewrite extraction")
             report = json.loads(result.stdout) if result.stdout else None
             if not output_to_input:
+                self.assertTrue(result.stdout, result.stderr)
                 self.assertEqual(json.loads(output.read_text(encoding="utf-8")), report)
             return result, report
 
@@ -66,6 +69,14 @@ class ExtractionRegressionTests(unittest.TestCase):
         self.assertEqual(report["evidentiary_status"], "NOT_EVIDENCE")
         self.assertEqual(report["checks_passed"], 2)
         self.assertEqual(len(report["extraction_sha256"]), 64)
+
+    def test_cyrillic_report_survives_ascii_stdout_without_changing_file_content(self):
+        result, report = self.run_cli(stdout_encoding='ascii')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.isascii())
+        self.assertEqual(report['status'], 'PASS')
+        self.assertFalse(report['acceptance_granted'])
+        self.assertIn('Фундамент', json.dumps(report, ensure_ascii=False))
 
     def test_changed_table_value_blocks(self):
         self.extraction["blocks"][1]["text"] = "Параметр: Нагрузка | Значение: 21 кПа | Обоснование: Тест"

@@ -1,0 +1,194 @@
+{
+  "objects": [
+    {
+      "association_basis": "prior source-page visual review; this script checks OOXML binding and matching PDF bounds",
+      "bounds_delta_pt": [
+        -0.15000000000000568,
+        0.0
+      ],
+      "bounds_within_0_2_pt": true,
+      "compressed_bytes_equal": false,
+      "image_relationship_id": "rId189",
+      "mae_rgb": 2.056524550718099,
+      "ncc_after_lanczos_resize": 0.9938262592460253,
+      "ole_part": "word/embeddings/oleObject15.bin",
+      "ole_progid": "PBrush",
+      "ole_sha256": "7300e28b211182c32c5cd948491969533cbce78967c564140489c938c80d1803",
+      "pdf_page_rect_pt": [
+        0.0,
+        0.0,
+        595.4400024414062,
+        842.0399780273438
+      ],
+      "pdf_xobject_axis_aligned": true,
+      "pdf_xobject_bbox_pt": [
+        379.45001220703125,
+        391.699951171875,
+        558.7000122070312,
+        579.949951171875
+      ],
+      "pdf_xobject_dimensions_pt": [
+        179.25,
+        188.25
+      ],
+      "pdf_xobject_dimensions_px": [
+        325,
+        341
+      ],
+      "pdf_xobject_format": "jpeg",
+      "pdf_xobject_sha256": "fd0a6e9b2361f3fdeab6e86fbd0a77f7cc9c9e473e32d533a7f9dfce1a496fd7",
+      "pdf_xobject_transform": [
+        179.25,
+        0.0,
+        -0.0,
+        188.25,
+        379.45001220703125,
+        391.699951171875
+      ],
+      "pdf_xobject_xref": 950,
+      "preview_dimensions_px": [
+        325,
+        341
+      ],
+      "preview_part": "word/media/image166.png",
+      "preview_sha256": "45ef16bd5833248a4dd746fafebed65ea56db5c34cb06b5ace01790622b44d79",
+      "rmse_rgb": 5.302888988696452,
+      "shape_id": "_x0000_i1039",
+      "vml_height_pt": 188.25,
+      "vml_width_pt": 179.4,
+      "word_pdf_page": 74
+    },
+    {
+      "association_basis": "prior source-page visual review; this script checks OOXML binding and matching PDF bounds",
+      "bounds_delta_pt": [
+        -0.09999999999999432,
+        0.100006103515625
+      ],
+      "bounds_within_0_2_pt": true,
+      "compressed_bytes_equal": false,
+      "image_relationship_id": "rId210",
+      "mae_rgb": 11.58004900097157,
+      "ncc_after_lanczos_resize": 0.9754102624150482,
+      "ole_part": "word/embeddings/oleObject16.bin",
+      "ole_progid": "PBrush",
+      "ole_sha256": "681aed3f9ec60312ca4cb641840d5c6d1265359eed095a7f6b9cc189a2da2ad0",
+      "pdf_page_rect_pt": [
+        0.0,
+        0.0,
+        595.4400024414062,
+        842.0399780273438
+      ],
+      "pdf_xobject_axis_aligned": true,
+      "pdf_xobject_bbox_pt": [
+        195.85000610351562,
+        32.39996337890625,
+        366.8500061035156,
+        474.4999694824219
+      ],
+      "pdf_xobject_dimensions_pt": [
+        171.0,
+        442.1000061035156
+      ],
+      "pdf_xobject_dimensions_px": [
+        234,
+        607
+      ],
+      "pdf_xobject_format": "jpeg",
+      "pdf_xobject_sha256": "f3505d4a4ec11522657e665c3dc40d46af4a2871908cf8b49a562ab4059462da",
+      "pdf_xobject_transform": [
+        171.0,
+        0.0,
+        -0.0,
+        442.1000061035156,
+        195.85000610351562,
+        32.39996337890625
+      ],
+      "pdf_xobject_xref": 979,
+      "preview_dimensions_px": [
+        234,
+        607
+      ],
+      "preview_part": "word/media/image180.png",
+      "preview_sha256": "7534da36c3450d7386ea4b79fcca50612250f6de9c74fee242cc99ea89245b1a",
+      "rmse_rgb": 22.129598273942342,
+      "shape_id": "_x0000_i1040",
+      "vml_height_pt": 442.0,
+      "vml_width_pt": 171.1,
+      "word_pdf_page": 84
+    },
+    {
+      "association_basis": "prior source-page visual review; this script checks OOXML binding and matching PDF bounds",
+      "bounds_delta_pt": [
+        1.2207031261368684e-05,
+        -0.15000305175780682
+      ],
+      "bounds_within_0_2_pt": true,
+      "compressed_bytes_equal": false,
+      "image_relationship_id": "rId236",
+      "mae_rgb": 0.2620030604915524,
+      "ncc_after_lanczos_resize": 0.9968117598450463,
+      "ole_part": "word/embeddings/oleObject20.bin",
+      "ole_progid": "PBrush",
+      "ole_sha256": "aa22fd5d33adb37bc19189a9475b11a04dd4e75c242ed4e13b90be1db453f5c7",
+      "pdf_page_rect_pt": [
+        0.0,
+        0.0,
+        595.4400024414062,
+        842.0399780273438
+      ],
+      "pdf_xobject_axis_aligned": true,
+      "pdf_xobject_bbox_pt": [
+        239.75,
+        235.7999725341797,
+        495.70001220703125,
+        398.4999694824219
+      ],
+      "pdf_xobject_dimensions_pt": [
+        255.95001220703125,
+        162.6999969482422
+      ],
+      "pdf_xobject_dimensions_px": [
+        710,
+        451
+      ],
+      "pdf_xobject_format": "png",
+      "pdf_xobject_sha256": "aea1fcf476ae20c64eced1211221ef02c3d0d4ac510b028cb4cd30c485e35490",
+      "pdf_xobject_transform": [
+        255.9499969482422,
+        0.0,
+        -0.0,
+        162.6999969482422,
+        239.75,
+        235.7999725341797
+      ],
+      "pdf_xobject_xref": 1015,
+      "preview_dimensions_px": [
+        1301,
+        749
+      ],
+      "preview_part": "word/media/image200.png",
+      "preview_sha256": "0444ef3b226bca2d0289796208495c522a2e82a7da79b1b8cb68f2314aa6a192",
+      "rmse_rgb": 1.9565217793616816,
+      "shape_id": "_x0000_i1044",
+      "vml_height_pt": 162.85,
+      "vml_width_pt": 255.95,
+      "word_pdf_page": 99
+    }
+  ],
+  "objects_checked": 3,
+  "pixel_equality_claimed": false,
+  "semantic_qualification": "NOT_PERFORMED",
+  "source_docx": {
+    "path": "v4-original.docx",
+    "sha256": "c0ca593f4dec5c101d01282523032e05b147e9169fb043a144af5fbd479a5685",
+    "size_bytes": 147560922
+  },
+  "status": "BOUNDS_SCALE_MATCHED",
+  "word_reference_pdf": {
+    "pages": 491,
+    "path": "word-after-explicit-field-update.pdf",
+    "sha256": "6dc88d91e41070bc9353e4d2cc6b2236fe4be39678935d4665816e841b2a8a14",
+    "size_bytes": 44838874
+  }
+}
+

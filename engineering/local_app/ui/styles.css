@@ -78,7 +78,6 @@ h2,h3{letter-spacing:-.015em}
 #composer{background:var(--surface);border:1px solid var(--line);padding:14px;border-radius:var(--radius-lg);margin-top:12px;box-shadow:var(--shadow)}
 #composer>textarea{min-height:82px;border:0;padding:2px;background:transparent}
 textarea{resize:vertical}
-textarea:focus{outline:0}
 .composer-footer{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px;margin-top:8px}
 .composer-footer label{font-size:11px;color:var(--muted)}
 .upload{cursor:pointer;color:var(--primary);font-weight:650}

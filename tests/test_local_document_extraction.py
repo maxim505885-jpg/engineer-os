@@ -28,6 +28,31 @@ class LocalDocumentExtractionTests(unittest.TestCase):
             data=d.tobytes()
         return preserve_file(self.store,self.session,'report.pdf',data)
 
+    def test_native_text_covered_by_later_opaque_image_is_flagged(self):
+        import fitz
+        from io import BytesIO
+        from PIL import Image
+        with fitz.open() as doc:
+            page=doc.new_page(width=600,height=800)
+            page.insert_text((30,50),'Stale residential title')
+            raster=BytesIO()
+            Image.new('RGB',(600,800),'white').save(raster,format='PNG')
+            page.insert_image(page.rect,stream=raster.getvalue())
+            page.insert_text((30,80),'Visible warehouse title')
+            data=doc.tobytes()
+        source=preserve_file(self.store,self.session,'overlay.pdf',data)
+        job=self.store.enqueue_extraction(self.session,source['id'],'native')
+        Worker(self.store,None).run_once()
+        record=self.store.extraction_page(self.session,job['id'],1)
+        self.assertEqual(record['status'],'BLOCK')
+        self.assertIn('NATIVE_TEXT_OCCLUDED_BY_LATER_IMAGE',record['limitations'])
+        spans=record['visual_components']['occluded_native_text']
+        self.assertEqual(len(spans),1)
+        self.assertEqual(spans[0]['text_sha256'],hashlib.sha256(b'Stale residential title').hexdigest())
+        self.assertEqual(spans[0]['text_chars'],23)
+        self.assertLess(spans[0]['bbox']['left'],spans[0]['bbox']['right'])
+        self.assertTrue(any('Stale residential title' in b['text'] for b in record['blocks']))
+
     def job(self):return self.store.snapshot(self.session)['jobs'][0]
 
     def test_native_all_23_pages_without_model_ocr_or_acceptance(self):
@@ -184,3 +209,4 @@ class LocalDocumentExtractionTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+

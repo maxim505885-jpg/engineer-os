@@ -1,5 +1,6 @@
 """Durable page extraction; observed parser output is never accepted evidence."""
 from dataclasses import asdict
+import hashlib
 import importlib.util
 import os
 from pathlib import Path
@@ -57,13 +58,43 @@ def native_page(pdf,page):
     return blocks
 
 
+def occluded_native_text(page,images):
+    """Identify native text painted before a later opaque image covering it."""
+    image_events=[]
+    for seqno,(operator,bbox) in enumerate(page.get_bboxlog()):
+        if operator!='fill-image':continue
+        for image in images:
+            if image.get('has-mask') or len(image.get('bbox',()))!=4:continue
+            if all(abs(float(image['bbox'][i])-float(bbox[i]))<=0.5 for i in range(4)):
+                image_events.append((seqno,bbox));break
+    if not image_events:return []
+    found=[]
+    for span in page.get_texttrace():
+        text=''.join(chr(char[0]) for char in span.get('chars',[]))
+        if not text.strip() or span.get('type')==3 or span.get('opacity',1)<=0:continue
+        bbox=span.get('bbox',())
+        if len(bbox)!=4:continue
+        for image_seqno,image_bbox in image_events:
+            if image_seqno<=span.get('seqno',-1):continue
+            if (image_bbox[0]<=bbox[0]+0.5 and image_bbox[1]<=bbox[1]+0.5 and
+                    image_bbox[2]>=bbox[2]-0.5 and image_bbox[3]>=bbox[3]-0.5):
+                found.append(dict(seqno=span['seqno'],bbox=dict(zip(('left','top','right','bottom'),bbox)),
+                                  text_chars=len(text),text_sha256=hashlib.sha256(text.encode('utf-8')).hexdigest()))
+                break
+    return found
+
+
 def visual_components(page):
     images=page.get_image_info();vectors=page.get_drawings()
+    occluded=occluded_native_text(page,images) if images else []
     reasons=[]
     if images:reasons.append('IMAGE_CONTENT_UNVERIFIED')
     if vectors:reasons.append('VECTOR_CONTENT_UNVERIFIED')
+    if occluded:reasons.append('NATIVE_TEXT_OCCLUDED_BY_LATER_IMAGE')
     return dict(images=len(images),vector_paths=len(vectors),tables='NOT_PARSED',
-                image_regions=[dict(zip(('left','top','right','bottom'),i['bbox'])) for i in images[:100]]),reasons
+                image_regions=[dict(zip(('left','top','right','bottom'),i['bbox'])) for i in images[:100]],
+                occluded_native_text=occluded[:100],occluded_native_text_count=len(occluded),
+                occluded_native_text_truncated=len(occluded)>100),reasons
 
 
 def retain_blocks(blocks,page,budget):
@@ -167,3 +198,4 @@ def execute(store,job,stop_event,*,progress=None):
         checkpoint()
         if run['budget_exhausted']:raise ExtractionFailure('Лимит сохранённого текста достигнут; часть страниц не обработана.')
         return result
+
