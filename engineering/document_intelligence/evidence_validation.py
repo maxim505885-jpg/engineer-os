@@ -31,6 +31,8 @@ def validate_evidence_candidate(
 ) -> EvidenceValidation:
     reasons: list[str] = []
 
+    if document.limitations:
+        reasons.append("DOCUMENT_PARSE_LIMITATIONS")
     if candidate.source_sha256 != document.source_sha256:
         reasons.append("SOURCE_HASH_MISMATCH")
     if not candidate.text.strip():

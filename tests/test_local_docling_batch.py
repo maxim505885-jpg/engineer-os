@@ -3,10 +3,64 @@ import json
 import tempfile
 from pathlib import Path
 
-from scripts.local_docling_batch import ranges, reusable_output
+from scripts.local_docling_batch import ranges, reusable_output, run_chunk
 
 
 class LocalDoclingBatchTests(unittest.TestCase):
+    def test_run_chunk_reports_partial_output_as_block(self):
+        import io
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from scripts.local_docling_batch import CHECK_VERSION
+        from scripts.run_v4_local import DOCUMENT_ID, PROJECT_ID, SOURCE_SHA256
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);args=SimpleNamespace(source=root/'source.pdf',output_dir=root,
+                sha256=SOURCE_SHA256,project_id=PROJECT_ID,document_id=DOCUMENT_ID)
+            def run(command,**_):
+                output=Path(command[command.index('--output-json')+1])
+                output.write_text(json.dumps(dict(source_sha256=SOURCE_SHA256,project_id=PROJECT_ID,
+                    document_id=DOCUMENT_ID,page_start=1,page_end=1,status='BLOCK',
+                    document_status='BLOCK',evidentiary_status='NOT_EVIDENCE',
+                    complete_document=False,acceptance_granted=False,
+                    limitations=['TABLE_CAPTION_WITHOUT_VERIFIED_ROWS'],
+                    blocks=[dict(text='Text',provenance=[dict(page_no=1)])])),encoding='utf-8')
+                return SimpleNamespace(returncode=0,stdout='',stderr='')
+            with patch('scripts.local_docling_batch.subprocess.run',side_effect=run),patch('sys.stdout',io.StringIO()) as output:
+                self.assertEqual(run_chunk(args,1,1),0)
+            self.assertIn('BLOCK (partial retained)',output.getvalue())
+            audit=json.loads((root/'pages-0001-0001.audit.json').read_text(encoding='utf-8'))
+            self.assertEqual(audit['check_version'],CHECK_VERSION)
+
+    def test_resumable_partial_block_is_reviewable_but_never_complete(self):
+        from scripts.local_docling_batch import CHECK_VERSION
+        from scripts.run_v4_local import DOCUMENT_ID, PROJECT_ID, SOURCE_SHA256
+        from scripts.v4_extraction_review import review
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);stem='pages-0001-0001'
+            output=dict(project_id=PROJECT_ID,document_id=DOCUMENT_ID,
+                source_sha256=SOURCE_SHA256,page_start=1,page_end=1,parser='docling',
+                status='BLOCK',document_status='BLOCK',evidentiary_status='NOT_EVIDENCE',
+                complete_document=False,acceptance_granted=False,
+                limitations=['TABLE_CAPTION_WITHOUT_VERIFIED_ROWS'],
+                blocks=[dict(block_id='text-1',kind='text',text='Observed text',provenance=[dict(page_no=1)])])
+            path=root/(stem+'.json');path.write_text(json.dumps(output),encoding='utf-8')
+            self.assertTrue(reusable_output(path,first=1,last=1,sha256=SOURCE_SHA256,
+                project_id=PROJECT_ID,document_id=DOCUMENT_ID))
+            for changes in (dict(acceptance_granted=True),dict(complete_document=True),dict(limitations=[])):
+                invalid=dict(output,**changes);path.write_text(json.dumps(invalid),encoding='utf-8')
+                self.assertFalse(reusable_output(path,first=1,last=1,sha256=SOURCE_SHA256,
+                    project_id=PROJECT_ID,document_id=DOCUMENT_ID))
+            path.write_text(json.dumps(output),encoding='utf-8')
+            (root/(stem+'.audit.json')).write_text(json.dumps(dict(
+                source_sha256=SOURCE_SHA256,project_id=PROJECT_ID,document_id=DOCUMENT_ID,
+                page_start=1,page_end=1,check_version=CHECK_VERSION,exit_code=0)),encoding='utf-8')
+            result=review(root,1)
+            self.assertEqual(result['partial_chunks'],1)
+            self.assertEqual(result['pages_with_partial_extraction'],[1])
+            self.assertEqual(result['review_queue'][0]['reason'],'EXTRACTION_BLOCKED')
+            self.assertEqual(result['status'],'BLOCK')
+            self.assertFalse(result['acceptance_granted'])
+
     def test_raw_recovery_outputs_cannot_alias_raw_input_or_docling_result(self):
         import sys
         from unittest.mock import patch

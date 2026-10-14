@@ -38,12 +38,17 @@ class NormalizedDocument:
     parser: str
     blocks: tuple[DocumentBlock, ...]
     source_sha256: str
+    limitations: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if len(self.source_sha256) != 64 or any(ch not in "0123456789abcdef" for ch in self.source_sha256):
             raise ValueError("source_sha256 must be 64 lowercase hex characters")
         if not self.blocks:
             raise ValueError("normalized document must contain at least one block")
+        if not isinstance(self.limitations, tuple) or any(
+            not isinstance(item, str) or not item or len(item) > 160 for item in self.limitations
+        ):
+            raise ValueError("document limitations must be a tuple of bounded strings")
 
 
 class DocumentParser(Protocol):

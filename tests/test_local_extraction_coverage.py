@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from engineering.local_app.files import preserve_file
+from engineering.local_app.extraction import visual_components
 from engineering.local_app.store import Store
 from engineering.local_app.worker import Worker
 
@@ -54,6 +55,28 @@ class LocalExtractionCoverageTests(unittest.TestCase):
         self.assertEqual(c['unattempted_pages'],0);self.assertEqual(c['pages_without_text'],[])
         self.assertEqual(c['stop_reasons'],[]);self.assertEqual(c['completeness'],'NOT_CHECKED')
         self.assertEqual(c['ocr'],'NOT_RUN');self.assertEqual(f['extraction_status'],'UNVERIFIED')
+
+    def test_vector_graphics_keep_bounded_page_regions_for_visual_review(self):
+        import fitz
+        with fitz.open() as doc:
+            page=doc.new_page(width=200,height=100)
+            page.draw_line((10,20),(40,20),color=(0,0,0))
+            page.draw_rect(fitz.Rect(80,30,120,60),color=(0,0,0))
+            components,limitations=visual_components(page)
+        self.assertEqual(components['vector_paths'],2)
+        self.assertEqual(components['vector_regions'],[[10.0,20.0,40.0,20.0],[80.0,30.0,120.0,60.0]])
+        self.assertEqual(components['vector_regions_omitted'],0)
+        self.assertIn('VECTOR_CONTENT_UNVERIFIED',limitations)
+
+    def test_vector_region_inventory_is_capped(self):
+        import fitz
+        with fitz.open() as doc:
+            page=doc.new_page(width=200,height=200)
+            for i in range(101):page.draw_line((1,i),(50,i),color=(0,0,0))
+            components,_=visual_components(page)
+        self.assertEqual(components['vector_paths'],101)
+        self.assertEqual(len(components['vector_regions']),100)
+        self.assertEqual(components['vector_regions_omitted'],1)
 
     def test_empty_native_pages_are_unavailable_not_successful_reading(self):
         f=preserve_file(self.store,self.session,'scan.pdf',self.pdf(['','']))

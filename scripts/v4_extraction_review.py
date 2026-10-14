@@ -37,6 +37,8 @@ def review(directory: Path, page_count: int) -> dict:
     missing_provenance_pages = set()
     successful_chunks = 0
     blocked_chunks = 0
+    partial_chunks = 0
+    partial_pages = set()
     total_blocks = 0
     page_counts = {page: {"blocks": 0, "table_rows": 0} for page in range(1, page_count + 1)}
     blocked_pages = set()
@@ -56,7 +58,14 @@ def review(directory: Path, page_count: int) -> dict:
                     blocked_pages.add(page)
                     issues.append({"chunk": f"pages-{page:04d}-{page:04d}", "reason": str(exc)})
         for chunk_first, chunk_last, output in chunks:
-            successful_chunks += 1
+            if output.get("status") == "BLOCK":
+                partial_chunks += 1
+                partial_pages.update(range(chunk_first, chunk_last + 1))
+                blocked_pages.update(range(chunk_first, chunk_last + 1))
+                issues.append({"chunk": f"pages-{chunk_first:04d}-{chunk_last:04d}",
+                               "reason": ",".join(output["limitations"])})
+            else:
+                successful_chunks += 1
             total_blocks += len(output["blocks"])
             located = {ref["page_no"] for block in output["blocks"]
                        for ref in block["provenance"]}
@@ -82,12 +91,14 @@ def review(directory: Path, page_count: int) -> dict:
     return {
         "source_sha256": SOURCE_SHA256, "project_id": PROJECT_ID,
         "document_id": DOCUMENT_ID, "page_count": page_count,
-        "successful_chunks": successful_chunks, "blocked_chunks": blocked_chunks,
+        "successful_chunks": successful_chunks, "partial_chunks": partial_chunks,
+        "blocked_chunks": blocked_chunks,
         "blocks": total_blocks, "pages_with_extracted_blocks": len(present_pages),
         "pages_without_extracted_blocks": sorted(missing_provenance_pages),
+        "pages_with_partial_extraction": sorted(partial_pages),
         "isolated_pages": isolated_pages,
         "review_queue": queue,
-        "issues": issues, "status": "BLOCK" if blocked_chunks or missing_provenance_pages else "UNCERTAINTY",
+        "issues": issues, "status": "BLOCK" if blocked_chunks or partial_chunks or missing_provenance_pages else "UNCERTAINTY",
         "complete_document": False, "acceptance_granted": False,
         "note": "Extraction inventory only; pages and engineering conclusions require review",
     }

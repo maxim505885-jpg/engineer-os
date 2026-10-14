@@ -146,19 +146,37 @@ class DocumentIntelligenceTests(unittest.TestCase):
             with self.assertRaises(DocumentParseError):
                 DoclingDocumentParser(lambda: _FakeConverter({"texts": [{"text": "Unlocated"}]})).parse(source)
 
-    def test_table_caption_without_verified_cells_blocks_chunk(self):
+    def test_table_caption_without_verified_cells_preserves_text_as_blocked_partial(self):
         source = self._source()
-        payload = {"texts": [{"label": "caption", "text": "Табл. П.2.1.", "prov": [{"page_no": 15}]}]}
+        payload = {"texts": [
+            {"label": "text", "text": "Описание обследования до таблицы", "prov": [{"page_no": 15}]},
+            {"label": "caption", "text": "Табл. П.2.1.", "prov": [{"page_no": 15}]},
+        ]}
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
-            with self.assertRaisesRegex(DocumentParseError, "table"):
-                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+            document=DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        self.assertEqual([block.text for block in document.blocks],
+                         ["Описание обследования до таблицы", "Табл. П.2.1."])
+        self.assertEqual(document.limitations, ("TABLE_CAPTION_WITHOUT_VERIFIED_ROWS",))
+
+    def test_text_from_blocked_partial_document_cannot_become_validated_evidence(self):
+        from engineering.document_intelligence.evidence_bridge import evidence_candidates
+        from engineering.document_intelligence.evidence_validation import validate_evidence_candidate
+        source=self._source()
+        payload={"texts":[{"label":"text","text":"Описание обследования", "prov":[{"page_no":15}]},
+                 {"label":"caption","text":"Табл. П.2.1.","prov":[{"page_no":15}]}]}
+        with patch.dict(os.environ,{"ENGINEER_OS_DOCUMENT_INTELLIGENCE":"true"}):
+            document=DoclingDocumentParser(lambda:_FakeConverter(payload)).parse(source)
+        result=validate_evidence_candidate(document,evidence_candidates(document)[0])
+        self.assertEqual(result.status.value,"BLOCK")
+        self.assertIn("DOCUMENT_PARSE_LIMITATIONS",result.reasons)
 
     def test_exported_table_with_empty_cells_blocks_chunk(self):
         source = self._source()
         payload = {"texts": [{"text": "Text", "prov": [{"page_no": 15}]}], "tables": [{"data": {"table_cells": []}}]}
         with patch.dict(os.environ, {"ENGINEER_OS_DOCUMENT_INTELLIGENCE": "true"}):
-            with self.assertRaisesRegex(DocumentParseError, "table"):
-                DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+            document=DoclingDocumentParser(lambda: _FakeConverter(payload)).parse(source)
+        self.assertEqual([block.text for block in document.blocks], ["Text"])
+        self.assertEqual(document.limitations, ("TABLE_STRUCTURE_UNVERIFIED",))
 
     def test_complete_table_uses_parent_page_and_preserves_row_meaning(self):
         source = self._source()

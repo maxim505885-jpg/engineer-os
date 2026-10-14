@@ -6,9 +6,9 @@
 
 ## 1. Новому чату: сначала прочитай это
 
-**Активный план:** Последний результат — раздел65. Каноническая нумерация19 с соответствием прежним17. В integration/engineering-streams-20261009 объединены официальный кандидат fce4367 и инженерный поток99ca7db;641 Python,4 Node,DOM и три настоящих Chromium сценария PASS. Свежий независимый обзор не нашёл Critical/Important. Подготовлен единый backup маршрут двух форматов и сохранён интерфейс кандидата с новыми инженерными controls. Main/кандидат ещё не перенесены; публикация/CI фиксируются в разделе65. Генератор№16 частично готов: черновик/история/DOCX/PDF,не принятый выпуск. Полнота№13,принятый кейс№14,CAD№17,память№15,release№19 открыты; расчёт№6 и physical Windows№9 отложены.
+**Активный план:** Последний результат — раздел66. Каноническая нумерация19. Текущая база `integration/release-candidate-v1` — `091edd1c2881b1f7c416034b45c1d6f48899bcdd`; PR150 открыт на ней, head `e2d848fabdacc182d63e48250a6e1faf766db283`, GitHub core-tests rerun PASS. В незапубликованной части PR добавлены ограниченные координаты векторных областей, без снятия `VECTOR_CONTENT_UNVERIFIED`/BLOCK; 20 focused tests PASS, exact-head CI ожидается. №13 и №14 открыты; №6 и physical Windows №9 ограничены решением пользователя/локальным исполнением. См. раздел66 для точных границ.
 
-**Историческая справка:** следующие ранние записи не заменяют результат раздела65.
+**Историческая справка:** следующие ранние записи не заменяют результат раздела66.
 
 Мы продолжаем существующий ENGINEER OS пользователя Максима. Проект не начинать заново. Цель — бесплатное локальное инженерное приложение, а не только проверка одного PDF. Фундамент и адаптеры уже есть; первый локальный сценарий чат → файл → фоновая задача → ответ → история реализован и опубликован в PR38. Реальный запуск на Windows с qwen3 и принятый инженерный кейс пока не подтверждены.
 
@@ -1182,7 +1182,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ✅ | validated data backup/restore, SHA256 manifest, migration safety, crash/restart/data-lock и real Chromium gate подтверждены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
-| 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
+| 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | 2026-10-14: по одному предоставленному реальному объекту выполнен свежий ограниченный Stage7/Stage8 run для трассировки одного дефекта; оба BLOCK, ACCEPTED=false. Подробный source manifest/hashes хранятся локально, не в публичном репозитории. №6/13 остаются открыты; этот отрицательный run не закрывает пункт. |
 | 15 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
 | 16 | Report Generator | ❌ | evidence-bound DOCX/PDF выпуск с таблицами/рисунками/выводами и FINAL AUDIT |
 | 17 | CAD/DWG Agent | ❌ | безопасный DWG/DXF workflow: import/read/review/edit/export/verification |
@@ -1391,6 +1391,8 @@ LIRA/SCAD:
 5. acceptance только если действительно нет BLOCK/ERROR/недопустимой UNCERTAINTY.
 
 Критерий ✅: существует минимум один **реальный** ACCEPTED engineering case с полной audit trail. Если реальный объект объективно не может быть ACCEPTED из-за недостатка исходных данных, использовать отдельный реальный полностью подтверждаемый case; нельзя искусственно снимать BLOCK.
+
+Обновление 2026-10-14: до устранения №6/13 на одном предоставленном реальном объекте проверен узкий вопрос трассировки отчётного дефекта к графическому листу и фотографии. Свежий Stage7 и Stage8 завершены решением BLOCK; ACCEPTED=false. Причины: PDF image/vector gates BLOCK, 112/553 DOCX logical units BLOCK и layout/auxiliary placement unverified, отсутствуют формальное ТЗ и требования/чек-лист, evidence candidates отсутствуют, обе локальные model specialist calls истекли по timeout, engineering verification gates не пройдены. Точные хеши исходников и подробная запись ограниченной проверки сохранены локально; пользовательские оригиналы и их идентифицирующие метаданные в публичный репозиторий не включены. Эта проверка не устанавливает состояние конструкции и не снимает №14.
 
 ---
 
@@ -2623,3 +2625,17 @@ QA:
 QA:docs/qa/2026-10-09-engineering-stream-integration.md. Следующий организационный шаг — exact-head CI/PR и перенос общего дерева в официальный candidate;следующий программный этап —№13 completeness с сохранением реальных BLOCK и координат.
 
 Опубликовано: draft PR91 https://github.com/maxim505885-jpg/engineer-os/pull/91,merge-code head52d6f0674467c1afe107370e3a3c005ca1e19cc8,tree6be0c738bd6981952602a4f0f74455c6c989f3db. Родители обоих потоков сохранены. Проверки641 относятся к этому объединённому коду. Exact-head CI проверяется после публикации;не выдавать локальные проверки за удалённый CI. Main/официальный candidate пока не перенесены.
+
+## 66. 14.10.2026 — PR150, extraction locator и повторная сверка V4
+
+База работ — официальный `integration/release-candidate-v1` на `091edd1c2881b1f7c416034b45c1d6f48899bcdd`; исходная рабочая копия пользователя не изменялась. PR150 открыт: https://github.com/maxim505885-jpg/engineer-os/pull/150; его начальный head был `e2d848fabdacc182d63e48250a6e1faf766db283`. Повторный GitHub job `core-tests` PASS, включая full Python suite и Chromium UI smoke; первый failure по SQLite `history.sqlite3-shm` не воспроизвёлся. Изменения PR150 ещё не слиты.
+
+Для локального PDF extraction добавлен bounded inventory векторной графики: до100 `bbox`-регионов на страницу плюс число пропущенных областей. Содержимое векторов остаётся `VECTOR_CONTENT_UNVERIFIED`; страницы сохраняют BLOCK и не становятся доказательством полноты. Проверено20 focused tests для extraction coverage/persistence и ещё33 для Docling parser/evidence/batch review. На точном head `9189a124af95af0cfbcfa4b9688b7731307dc7ea` все три GitHub проверки PASS: Core Tests, Windows local runtime и Repository Security Guard; PR150 остаётся открытым и не слитым.
+
+Повторно сверены два сохранённых V4 отчёта (оба BLOCK, originals read-only). Полная очередь extraction-review — 534/534 страниц: 137 `EXTRACTION_BLOCKED`, 19 требуют визуальной проверки таблиц, 378 — семантической проверки текста; 29 231 извлечённый блок; acceptance не выдавался. Старый triage содержит 143 ручные записи: 78 merged cells, 52 missing cells, 5 dropped cells и 8 other failures. Он создан раньше позднего per-page rerun: шесть страниц из старых `OTHER_EXTRACTION_FAILURE` имеют более поздний audit exit0, output и provenance; две (57,58) по-прежнему exit1 без output. Итого 143−6=137 неустранённых страниц совпадает с extraction-review, причины 78/52/5/2.
+
+На свежем version12 single-page run только для 57–58 source SHA совпал. Обе страницы вернули source-located текстовые блоки (23 и 33 соответственно), `TABLE_CAPTION_WITHOUT_VERIFIED_ROWS`, без проверенных table rows; JSON обеих страниц — `BLOCK`, `acceptance=false`. Это уменьшает потерю полезного частичного текста, но не снимает table/page block и не является полным corpus rerun. Оригинальный PDF и старые журналы не менялись; новые аудиты записаны отдельно под локальной папкой evidence. Перепроверенные графические/табличные страницы всё ещё содержат содержательные области; полный визуальный/семантический review всей очереди не выполнен, поэтому №13 остаётся BLOCK.
+
+Повторный локальный run4 выполнен по пяти копиям из read-only app intake: размеры и SHA-256 совпали с исходным приватным манифестом. Отдельная чистая app data directory использовалась; старый run2 и исходники не менялись. Документный intake завершился с `PARTIAL`: три PDF получили `IMAGE_CONTENT_UNVERIFIED` и `VECTOR_CONTENT_UNVERIFIED`, DOCX — 112/553 заблокированных логических units и непроверенную раскладку/auxiliary placement, DWG остался `UNAVAILABLE`. Оба локальных Qwen специалиста (`report-audit-agent`, `final-audit-agent`) завершились ERROR после тайм-аута 180 секунд; findings/evidence не выданы. Свежий Stage7 и завершённый Stage8 вернули `BLOCK`, `ACCEPTED=false`. Блокеры включают недоступность полной документной проверки, отсутствующие формальные ТЗ/чек-лист и evidence candidates, незавершённые specialist/engineering gates. Полная локальная трассировка и идентификаторы снимков находятся вне репозитория; повтор подтверждает BLOCK, но не является инженерной экспертизой.
+
+Свежие ограниченные Stage7/Stage8 одного объекта остаются BLOCK/BLOCK, `ACCEPTED=false` (локальные подробности и hashes не публиковались). №6: реальные нормативные/расчётные specialist gates не закрыты; расчёты LIRA/SCAD отложены пользователем. №9: physical Windows launch/restart остаётся не выполнен. После №13 и доступной части №6 требуется повторить №14; далее отдельно проверять №15/16/17/18, затем №9 и полный №19 release audit. Ни один закрытый программный маршрут не заменяет реальный положительный кейс.

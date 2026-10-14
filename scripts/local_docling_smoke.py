@@ -67,9 +67,9 @@ def main() -> int:
     if any(page < args.start or page > args.end for page in pages) or not pages:
         print("BLOCK: page provenance outside requested range", file=sys.stderr)
         return 2
+    limitations=list(document.limitations)
     if monitor.messages:
-        print("BLOCK: Docling dropped table cells; this chunk cannot be used as complete evidence", file=sys.stderr)
-        return 2
+        limitations.append("TABLE_CELLS_DROPPED_BY_LAYOUT_PARSER")
     if args.output_json:
         payload = {
             "project_id": args.project_id,
@@ -79,7 +79,12 @@ def main() -> int:
             "page_end": args.end,
             "parser": document.parser,
             "table_mode": args.table_mode,
-            "status": "UNCERTAINTY",
+            "status": "BLOCK" if limitations else "UNCERTAINTY",
+            "document_status": "BLOCK",
+            "evidentiary_status": "NOT_EVIDENCE",
+            "complete_document": False,
+            "acceptance_granted": False,
+            "limitations": list(dict.fromkeys(limitations)),
             "blocks": [
                 {"block_id": b.block_id, "kind": b.kind, "text": b.text,
                  "provenance": [
@@ -95,6 +100,10 @@ def main() -> int:
         temporary = args.output_json.with_suffix(args.output_json.suffix + ".tmp")
         temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         temporary.replace(args.output_json)
+    if limitations:
+        print("BLOCK: partial text retained for review; limitations=" + ",".join(dict.fromkeys(limitations)),
+              file=sys.stderr)
+        return 0 if args.output_json else 2
     print("UNCERTAINTY: OCR and tables require visual verification before evidence registration")
     return 0
 
