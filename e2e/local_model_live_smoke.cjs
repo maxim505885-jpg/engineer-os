@@ -20,7 +20,9 @@ const {spawn}=require('node:child_process');const {chromium}=require('playwright
   catch(error){console.error(JSON.stringify({stage:'missing-model-ui',diagnostic:await page.evaluate(async()=>({status:document.querySelector('#model-status').textContent,notice:document.querySelector('.model-panel p').textContent,error:document.querySelector('#error').textContent,health:await api('/api/status')})),page_errors:errors}));throw error;}
   await page.fill('#model-setting-MODEL',modelName);await page.click('#model-settings-form button');
   await page.waitForFunction(()=>document.querySelector('#model-status').textContent.includes('модель найдена'));
-  await page.getByRole('button',{name:'Проверить реальный ответ',exact:true}).click();
+  const liveCheck=page.getByRole('button',{name:'Проверить реальный ответ',exact:true});
+  await page.waitForFunction(()=>{const button=[...document.querySelectorAll('button')].find(item=>item.textContent.trim()==='Проверить реальный ответ');return button&&!button.disabled;});
+  await liveCheck.click();
   await page.waitForSelector('.message.assistant',{timeout:180000});
   const snap=await page.evaluate(()=>api(`/api/sessions/${current}`));
   assert.equal(snap.jobs[0].state,'SUCCEEDED');assert.ok(snap.jobs[0].result.text.trim());assert.equal(snap.jobs[0].result.acceptance_granted,false);assert.equal(snap.files.length,0);
@@ -37,3 +39,4 @@ const {spawn}=require('node:child_process');const {chromium}=require('playwright
   console.log(JSON.stringify({result:'PASS',real_ollama:true,synthetic_model:false,model:modelName,checks:['actual-model-list','missing-model-ui','saved-live-settings','real-inference-through-ui','separate-diagnostic-history','persisted-answer','attachment-through-real-model','source-coverage','no-engineering-acceptance'],response_chars:text.length}));
  }finally{if(browser)await browser.close();await stop(app);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});
+
