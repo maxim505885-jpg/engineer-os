@@ -8,19 +8,31 @@ import subprocess
 import sys
 from pathlib import Path
 
-CHECK_VERSION = 11  # Recheck the measured 2x8 stamp shape; invalidate prior normalization cache.
+CHECK_VERSION = 12  # Preserve located text as an explicit BLOCK when table structure is incomplete.
 
 
 def reusable_output(output: Path, *, first: int, last: int, sha256: str,
                     project_id: str, document_id: str) -> bool:
-    """Only reuse a complete, source-bound extraction for the exact page range."""
+    """Reuse a source-bound complete or explicitly blocked partial output."""
     try:
         data = json.loads(output.read_text(encoding="utf-8"))
         if not isinstance(data, dict) or any((data.get(key) != value) for key, value in (
             ("source_sha256", sha256.lower()), ("project_id", project_id),
             ("document_id", document_id), ("page_start", first),
-            ("page_end", last), ("status", "UNCERTAINTY"),
+            ("page_end", last),
         )):
+            return False
+        if data.get("status") == "BLOCK":
+            if (data.get("document_status") != "BLOCK"
+                    or data.get("evidentiary_status") != "NOT_EVIDENCE"
+                    or data.get("complete_document") is not False
+                    or data.get("acceptance_granted") is not False
+                    or not isinstance(data.get("limitations"), list)
+                    or not data["limitations"]
+                    or any(not isinstance(item, str) or not item or len(item) > 160
+                           for item in data["limitations"])):
+                return False
+        elif data.get("status") != "UNCERTAINTY":
             return False
         blocks = data.get("blocks")
         if not isinstance(blocks, list) or not blocks:
@@ -76,7 +88,17 @@ def run_chunk(args, first: int, last: int) -> int:
         "source_sha256": args.sha256.lower(), "page_start": first, "page_end": last,
         "exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr},
         ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"{stem}: {'UNCERTAINTY' if result.returncode == 0 else 'BLOCK'}")
+    if result.returncode == 0 and not reusable_output(
+            output, first=first, last=last, sha256=args.sha256,
+            project_id=args.project_id, document_id=args.document_id):
+        print(f"BLOCK {stem}: parser exited successfully but output is invalid", file=sys.stderr)
+        return 2
+    if result.returncode == 0:
+        data=json.loads(output.read_text(encoding="utf-8"))
+        label="BLOCK (partial retained)" if data.get("status")=="BLOCK" else "UNCERTAINTY"
+    else:
+        label="BLOCK"
+    print(f"{stem}: {label}")
     if result.returncode:
         print(result.stderr[-1000:], file=sys.stderr)
     return result.returncode
@@ -259,7 +281,14 @@ def main() -> int:
             print(f"ISOLATE {first}-{last}: checking each page separately")
             for page in range(first, last + 1):
                 run_chunk(args, page, page)
-        if result:
+        partial=False
+        if not result:
+            try:
+                payload=json.loads((args.output_dir/f"pages-{first:04d}-{last:04d}.json").read_text(encoding="utf-8"))
+                partial=payload.get("status")=="BLOCK"
+            except (OSError,UnicodeError,ValueError,TypeError):
+                partial=True
+        if result or partial:
             blocked = True
             blocked_ranges.append([first, last])
     if args.reviewed_manifest:

@@ -346,14 +346,23 @@ class DoclingDocumentParser:
                 block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
                 for block in blocks
             )
-            table_rows = self._table_rows(exported)
+            limitations=[]
+            table_error=None
+            try:
+                table_rows = self._table_rows(exported)
+            except DocumentParseError as exc:
+                # Preserve separately located text/captions for human review,
+                # but carry a document-level block so evidence cannot be validated.
+                table_rows=()
+                table_error=exc
+                limitations.append("TABLE_STRUCTURE_UNVERIFIED")
             table_pages = {ref.page_no for row in table_rows for ref in row.provenance}
             if has_table_caption and any(
                 ref.page_no not in table_pages for block in blocks
                 if block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
                 for ref in block.provenance
             ):
-                raise DocumentParseError("table caption lacks verified table rows")
+                limitations.append("TABLE_CAPTION_WITHOUT_VERIFIED_ROWS")
             blocks += table_rows
         except DocumentParseError:
             raise
@@ -361,6 +370,8 @@ class DoclingDocumentParser:
             raise DocumentParseError(f"Docling conversion failed: {type(exc).__name__}") from exc
 
         if not blocks:
+            if table_error is not None:
+                raise table_error
             raise DocumentParseError("Docling produced no evidence-bearing content")
 
         return NormalizedDocument(
@@ -368,4 +379,5 @@ class DoclingDocumentParser:
             parser="docling",
             blocks=blocks,
             source_sha256=self._sha256(path),
+            limitations=tuple(dict.fromkeys(limitations)),
         )
