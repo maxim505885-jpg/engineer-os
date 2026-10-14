@@ -1,4 +1,4 @@
-> **Актуально на 14.10.2026, §166:** №13 отложен по решению пользователя до окончания независимых работ и остаётся OPEN; он будет последним содержательным документным блоком перед зависящими acceptance/release gates. PR146 merged squash в `integration/release-candidate-v1`: merge/candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`. Exact PR-head `9808252fd7694c8b488c3ff3f5c0d4c6343d32d0`: Core1008 (1,057 tests, 7 skips), Windows209 (183 tests, 18 skips, including hardlink tests, live Ollama and browser workflows), Security818, CodeQL588 — SUCCESS. Candidate push Core1009/Windows210/Security819 — SUCCESS. PR-triggered Core1010/Windows211/Security820 and CodeQL run590 — SUCCESS. №12 remains PARTIAL due CodeQL alert #45 and unperformed physical-PC restore. №17 remains PARTIAL; source DWG/DXF is not in the accessible checkout, and the derived DXF inventory does not prove source geometry equivalence. №13 stays last and OPEN. Calculations in LIRA/SCAD/RES remain deferred. No ACCEPTED/100%/release-complete claim.
+> **Актуально на 14.10.2026, §169:** PR147 merged в candidate `091edd1c2881b1f7c416034b45c1d6f48899bcdd`; exact PR head `92a2396d441e2005712f85cd20f3e40693b618a4` passed Core, Windows Runtime, Repository Guard and CodeQL. Candidate push Core1012/1013, Windows213/214, Security829/830 and push workflow599 — SUCCESS. Windows Runtime включил новый end-to-end receipt/source-page тест и прошёл cold/restart, backup/security, offline PDF viewer, live Ollama и browser workflows. На ПК локальный Ollama qwen3:8b ответил PASS; Open WebUI UNAVAILABLE (8080 не слушает). №18 PARTIAL, E3 открыт до проверки Open WebUI/live optional-provider receipt. №12 PARTIAL: CodeQL alert #45 и физический перенос/restore открыты; candidate CodeQL status under PR74 reported 4 HIGH/1 MEDIUM requiring separate reconciliation. №17 PARTIAL: исходный DWG/DXF отсутствует в доступном checkout. №13 OPEN и остаётся последним; расчёты LIRA/SCAD/RES отложены. 8 DONE / 8 PARTIAL / 3 OPEN.
 > **Активный порядок работ:** выполнить независимые от №13 критерии; затем вернуться к №13 последним отдельным блоком. Положительный реальный кейс и выпускные gates, зависящие от полноты документов, остаются после него. Подробный порядок — [master-plan §165](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md).
 
 ## 1. Новому чату: сначала прочитай это
@@ -7,7 +7,7 @@
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
-Сверенная сводка на 13.10.2026. DONE означает только установленный программный результат; ACCEPTED объекта и release учитываются отдельно.
+Сверенная сводка на 14.10.2026. DONE означает только установленный программный результат; ACCEPTED объекта и release учитываются отдельно.
 
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
@@ -28,7 +28,7 @@
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
 |17|CAD/DWG|PARTIAL|Реальный DWG отдельно преобразован GNU LibreDWG0.14:15,906 объектов;1,304 предупреждения и210 ошибок конвертации; CAD_ENTITY_LIMIT=10,000. Геометрия, потери и roundtrip не подтверждены|
-|18|Несколько ИИ|PARTIAL|Полный локальный маршрут; выбранные optional providers квалифицируются отдельно|
+|18|Несколько ИИ|PARTIAL|§169: live Ollama и receipt/source-page provenance проверены; Open WebUI на ПК UNAVAILABLE; optional-provider receipt/gate не квалифицирован.|
 |19|Стабильный выпуск|OPEN|Все обязательные release gates, clean install, main/tag и воспроизводимые инструкции|
 
 Итого: 8 DONE в указанном объёме, 8 PARTIAL, 3 OPEN. Это счёт пунктов, не процент инженерной готовности.
