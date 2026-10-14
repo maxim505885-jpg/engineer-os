@@ -41,6 +41,17 @@ class Stage7OfflineTests(unittest.TestCase):
         self.assertIn("SOURCE_IDENTITY_OR_FORMAT_BLOCK",changed["block_reasons"])
     def test_missing_required_role_blocks(self):
         m=self.manifest();m["files"]=[x for x in m["files"] if x["role"]!="MODEL"]
-        r=run(m);self.assertIn("MODEL",r["missing_roles"]);self.assertEqual(r["source_identity_status"],"BLOCK")
+        r=run(m);self.assertIn("MODEL",r["missing_roles"])
+        self.assertEqual(r["source_identity_status"],"PASS")
+        self.assertIn("CASE_REQUIRED_ROLES_MISSING",r["block_reasons"])
+        self.assertFalse(r["acceptance_granted"])
+
+    def test_missing_required_role_does_not_misreport_valid_files_as_corrupt(self):
+        m=self.manifest();m["files"]=[x for x in m["files"] if x["role"]!="MODEL"]
+        r=run(m)
+        self.assertTrue(all(x["status"]=="PASS" for x in r["files"]))
+        self.assertEqual(r["source_identity_status"],"PASS")
+        self.assertIn("CASE_REQUIRED_ROLES_MISSING",r["block_reasons"])
+        self.assertEqual(r["stage7_completion"],"COMPLETE_WITH_OPEN_ENGINEERING_BLOCKS")
 
 if __name__=="__main__":unittest.main()

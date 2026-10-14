@@ -62,7 +62,10 @@ def run(manifest:dict)->dict:
         entries.append(row)
     missing_roles=sorted(REQUIRED_ROLES-roles)
     if missing_roles:reasons.append("CASE_REQUIRED_ROLES_MISSING")
-    all_sources_ok=all(x["status"]=="PASS" for x in entries) and not missing_roles
+    # Source identity is about the supplied files' bytes and readable envelope.
+    # Missing case roles remain explicit blockers, but do not mean that an
+    # otherwise hash/format-verified file is corrupt or has changed.
+    all_sources_ok=all(x["status"]=="PASS" for x in entries)
     external=manifest["external_gates"]
     for key,reason in (
         ("v4_document_completeness","V4_DOCUMENT_COMPLETENESS_BLOCK"),

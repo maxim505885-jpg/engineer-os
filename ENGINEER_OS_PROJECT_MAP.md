@@ -1182,7 +1182,7 @@ FINAL AUDIT сохранил upstream BLOCK и дополнительно не �
 | 11 | Product Design / UI/UX проработка | ✅ | дизайн-система, workflow UX, normal/advanced modes, responsive/accessibility и Chromium baseline подтверждены |
 | 12 | Reliability: Backup/Restore + browser release gate + recovery | ✅ | validated data backup/restore, SHA256 manifest, migration safety, crash/restart/data-lock и real Chromium gate подтверждены |
 | 13 | Document Intelligence production completeness | ❌ | OCR/on-demand Windows route, сложные таблицы/графика, completeness workflow доведены до универсального состояния |
-| 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | после №6/13 Stage7+Stage8 повторены; чистый кейс способен честно получить ACCEPTED |
+| 14 | Закрытие реального инженерного BLOCK и повторный accepted-case | ❌ | 2026-10-14: по одному предоставленному реальному объекту выполнен свежий ограниченный Stage7/Stage8 run для трассировки одного дефекта; оба BLOCK, ACCEPTED=false. Подробный source manifest/hashes хранятся локально, не в публичном репозитории. №6/13 остаются открыты; этот отрицательный run не закрывает пункт. |
 | 15 | Confirmed engineering memory | ❌ | только ACCEPTED cases → reusable memory → recall → обязательная re-verification в новой задаче |
 | 16 | Report Generator | ❌ | evidence-bound DOCX/PDF выпуск с таблицами/рисунками/выводами и FINAL AUDIT |
 | 17 | CAD/DWG Agent | ❌ | безопасный DWG/DXF workflow: import/read/review/edit/export/verification |
@@ -1391,6 +1391,8 @@ LIRA/SCAD:
 5. acceptance только если действительно нет BLOCK/ERROR/недопустимой UNCERTAINTY.
 
 Критерий ✅: существует минимум один **реальный** ACCEPTED engineering case с полной audit trail. Если реальный объект объективно не может быть ACCEPTED из-за недостатка исходных данных, использовать отдельный реальный полностью подтверждаемый case; нельзя искусственно снимать BLOCK.
+
+Обновление 2026-10-14: до устранения №6/13 на одном предоставленном реальном объекте проверен узкий вопрос трассировки отчётного дефекта к графическому листу и фотографии. Свежий Stage7 и Stage8 завершены решением BLOCK; ACCEPTED=false. Причины: PDF image/vector gates BLOCK, 112/553 DOCX logical units BLOCK и layout/auxiliary placement unverified, отсутствуют формальное ТЗ и требования/чек-лист, evidence candidates отсутствуют, обе локальные model specialist calls истекли по timeout, engineering verification gates не пройдены. Точные хеши исходников и подробная запись ограниченной проверки сохранены локально; пользовательские оригиналы и их идентифицирующие метаданные в публичный репозиторий не включены. Эта проверка не устанавливает состояние конструкции и не снимает №14.
 
 ---
 
