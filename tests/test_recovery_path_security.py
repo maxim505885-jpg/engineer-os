@@ -16,23 +16,32 @@ class RecoveryPathSecurityTests(unittest.TestCase):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.base=Path(self.tmp.name);self.root=self.base/'selected';self.root.mkdir()
 
-    def link(self,source,target,kind):
+    def link(self,source,target,kind,*,skip=True):
         try:
             if kind=='hard':os.link(source,target)
             else:target.symlink_to(source)
-        except (OSError,NotImplementedError):self.skipTest('Links unavailable on this platform')
+        except (OSError,NotImplementedError):
+            if skip:self.skipTest('Links unavailable on this platform')
+            return False
+        return True
 
     def test_linked_database_is_rejected_without_modifying_external_database(self):
+        checked=0
         for kind in ('symbolic','hard'):
             with self.subTest(kind=kind):
                 external=self.base/(kind+'.sqlite3')
-                with sqlite3.connect(external) as db:db.execute('PRAGMA user_version=1')
+                db=sqlite3.connect(external)
+                try:
+                    db.execute('PRAGMA user_version=1');db.commit()
+                finally:db.close()
                 before=external.read_bytes();path=self.root/'history.sqlite3'
-                self.link(external,path,kind)
+                if not self.link(external,path,kind,skip=False):continue
+                checked+=1
                 try:
                     with self.assertRaises(ValueError):Store(self.root)
                     self.assertEqual(external.read_bytes(),before)
                 finally:path.unlink()
+        if checked==0:self.skipTest('Links unavailable on this platform')
 
     def test_broken_database_link_is_rejected_without_creating_external_file(self):
         external=self.base/'missing.sqlite3';self.link(external,self.root/'history.sqlite3','symbolic')
@@ -40,15 +49,18 @@ class RecoveryPathSecurityTests(unittest.TestCase):
         self.assertFalse(external.exists())
 
     def test_linked_lock_is_rejected_without_writing_external_file(self):
+        checked=0
         for kind in ('symbolic','hard'):
             with self.subTest(kind=kind):
                 external=self.base/(kind+'-empty');external.touch();path=self.root/'app.lock'
-                self.link(external,path,kind)
+                if not self.link(external,path,kind,skip=False):continue
+                checked+=1
                 try:
                     with self.assertRaises(ValueError):
                         with DataLock(self.root):pass
                     self.assertEqual(external.read_bytes(),b'')
                 finally:path.unlink()
+        if checked==0:self.skipTest('Links unavailable on this platform')
 
     def test_broken_lock_is_rejected_without_creating_external_file(self):
         external=self.base/'missing-lock';self.link(external,self.root/'app.lock','symbolic')
