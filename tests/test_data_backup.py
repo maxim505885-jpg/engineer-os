@@ -1,4 +1,5 @@
 import json
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -48,21 +49,21 @@ class DataBackupTests(unittest.TestCase):
         self.assertFalse(self.archive.exists())
 
     def test_legacy_migration_has_recovery_copy_and_preserves_data(self):
-        with sqlite3.connect(self.store.path) as db:db.execute('PRAGMA user_version=0')
+        with closing(sqlite3.connect(self.store.path)) as db,db:db.execute('PRAGMA user_version=0')
         Store(self.root)
-        with sqlite3.connect(self.root/'history.pre-migration-v0.sqlite3') as db:
+        with closing(sqlite3.connect(self.root/'history.pre-migration-v0.sqlite3')) as db,db:
             self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],0)
             self.assertEqual(db.execute('SELECT title FROM sessions').fetchone()[0],'Тестовый проект')
 
     def test_invalid_existing_migration_copy_blocks_upgrade(self):
-        with sqlite3.connect(self.store.path) as db:db.execute('PRAGMA user_version=0')
+        with closing(sqlite3.connect(self.store.path)) as db,db:db.execute('PRAGMA user_version=0')
         (self.root/'history.pre-migration-v0.sqlite3').write_bytes(b'incomplete copy')
         with self.assertRaises((ValueError,sqlite3.DatabaseError)):Store(self.root)
-        with sqlite3.connect(self.store.path) as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],0)
+        with closing(sqlite3.connect(self.store.path)) as db,db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],0)
 
     def test_failed_migration_backup_can_retry_without_partial_copy(self):
         from unittest.mock import patch
-        with sqlite3.connect(self.store.path) as db:db.execute('PRAGMA user_version=0')
+        with closing(sqlite3.connect(self.store.path)) as db,db:db.execute('PRAGMA user_version=0')
         connect=sqlite3.connect
         class FailingBackup(sqlite3.Connection):
             def backup(self,target,*args,**kwargs):
@@ -73,7 +74,7 @@ class DataBackupTests(unittest.TestCase):
         self.assertFalse((self.root/'history.pre-migration-v0.sqlite3').exists())
         self.assertEqual(list(self.root.glob('migration-*.sqlite3')),[])
         Store(self.root)
-        with connect(self.root/'history.pre-migration-v0.sqlite3') as db:self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
+        with closing(connect(self.root/'history.pre-migration-v0.sqlite3')) as db,db:self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
 
     def test_racing_empty_target_is_not_replaced(self):
         from engineering.local_app.backup import create_backup,restore_backup,_publish_directory
@@ -90,9 +91,9 @@ class DataBackupTests(unittest.TestCase):
 
     def test_migration_failure_rolls_back_schema_changes(self):
         bad=self.base/'broken';bad.mkdir();path=bad/'history.sqlite3'
-        with sqlite3.connect(path) as db:db.execute('CREATE TABLE jobs(id TEXT PRIMARY KEY)')
+        with closing(sqlite3.connect(path)) as db,db:db.execute('CREATE TABLE jobs(id TEXT PRIMARY KEY)')
         with self.assertRaises(sqlite3.OperationalError):Store(bad)
-        with sqlite3.connect(path) as db:
+        with closing(sqlite3.connect(path)) as db,db:
             self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],0)
             self.assertIsNone(db.execute("SELECT name FROM sqlite_master WHERE name='sessions'").fetchone())
 
@@ -115,9 +116,9 @@ class DataBackupTests(unittest.TestCase):
         self.assertFalse((self.base/'escape').exists())
 
     def test_future_schema_is_not_changed(self):
-        with sqlite3.connect(self.store.path) as db:db.execute('PRAGMA user_version=999')
+        with closing(sqlite3.connect(self.store.path)) as db,db:db.execute('PRAGMA user_version=999')
         with self.assertRaises(RuntimeError):Store(self.root)
-        with sqlite3.connect(self.store.path) as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],999)
+        with closing(sqlite3.connect(self.store.path)) as db,db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],999)
 
     def test_launcher_reports_corrupt_database_without_traceback(self):
         from scripts.run_local_app import main
@@ -141,3 +142,4 @@ class DataBackupTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
