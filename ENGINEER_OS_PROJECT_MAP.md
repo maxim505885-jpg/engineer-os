@@ -1,10 +1,9 @@
-> **Актуально на 14.10.2026, §165:** по решению пользователя пункт №13 отложен до завершения независимых работ и будет последним отдельным блоком по полноте документов перед зависимыми acceptance/release gates. №13 остаётся OPEN; BLOCK не считается закрытием. Реестр листов/значений и пилот source-bound сверки 506/513 зафиксированы в master-plan §165. PR145 открыт draft на `4ae39ce567d12d9aca83fd0694869e5ef012873e`: Core1003, Windows205, Security808 SUCCESS. PR146 открыт draft на `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`: Core1004, Security811 SUCCESS; локальный sandbox rerun не подтверждён. Candidate base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Следом — независимые №12/17/D1 и локальные reliability/UI/provider checks. ЛИРА/SCAD/RES расчёты отложены. ACCEPTED/100%/release-complete не заявляются.
-
+> **Актуально на 14.10.2026, §166:** №13 отложен по решению пользователя до окончания независимых работ и остаётся OPEN; он будет последним содержательным документным блоком перед зависящими acceptance/release gates. PR146 merged squash в `integration/release-candidate-v1`: merge/candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`. Exact PR-head `9808252fd7694c8b488c3ff3f5c0d4c6343d32d0`: Core1008 (1,057 tests, 7 skips), Windows209 (183 tests, 18 skips, including hardlink tests, live Ollama and browser workflows), Security818, CodeQL588 — SUCCESS. Candidate push Core1009/Windows210 IN_PROGRESS; Security819 SUCCESS. №12 remains PARTIAL due CodeQL alert #45 and unperformed physical-PC restore. №17 remains PARTIAL; source DWG/DXF is not in the accessible checkout, and the derived DXF inventory does not prove source geometry equivalence. №13 stays last and OPEN. Calculations in LIRA/SCAD/RES remain deferred. No ACCEPTED/100%/release-complete claim.
 > **Активный порядок работ:** выполнить независимые от №13 критерии; затем вернуться к №13 последним отдельным блоком. Положительный реальный кейс и выпускные gates, зависящие от полноты документов, остаются после него. Подробный порядок — [master-plan §165](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md).
 
 ## 1. Новому чату: сначала прочитай это
 
-> **Актуальный handoff:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). PR145 draft exact head `101f8cbcca413689bb8de9808a9ce5eb5eb4eafe`; Core997 (1,060/7 skips), Windows199 and Security770 SUCCESS. Исправлены локальные диагностические OCR TXT-метрики; all43 vector appendix pages remain OCR BLOCK and №13 OPEN. Статус плана: 8 DONE, 8 PARTIAL, 3 OPEN.
+> **Актуальный handoff:** [master-plan §166](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). PR145 remains draft at exact head `4ae39ce567d12d9aca83fd0694869e5ef012873e` (Core1003/Windows205/Security808 SUCCESS). PR146 merged as `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`; PR-head Core1008/Windows209/Security818/CodeQL588 SUCCESS. Candidate push Core1009/Windows210 pending. №12 PARTIAL; №13 OPEN and deferred last; 8 DONE, 8 PARTIAL, 3 OPEN.
 
 ## Текущие 19 пунктов — что выполнено и что осталось
 
@@ -23,8 +22,8 @@
 |9|Windows один запуск|PARTIAL|Чистая установка/перезапуск/перезагрузка на реальном ПК|
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|§156: textarea keyboard focus fixed and tests pass; full real-user acceptance and physical release remain|
-|12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
-|13|Полнота документов|OPEN — текущий пункт|§157–158: bounds/scale and unrotated placement confirmed for three remaining OLE images; source font inventory recorded. All43 vector appendix pages remain OCR BLOCK; semantic OCR, OLE print-stream/appendix linkage, full Word layout and B3 corpus open|
+|12|Backup/recovery/security|PARTIAL|PR146 merged; Windows/Core/Security/CodeQL passed on PR head. CodeQL alert #45 and physical Windows transfer/restore remain open.|
+|13|Полнота документов|OPEN — отложен до завершения независимых работ|§157–158: bounds/scale and unrotated placement confirmed for three remaining OLE images; source font inventory recorded. All43 vector appendix pages remain OCR BLOCK; semantic OCR, OLE print-stream/appendix linkage, full Word layout and B3 corpus open|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
@@ -34,7 +33,7 @@
 
 Итого: 8 DONE в указанном объёме, 8 PARTIAL, 3 OPEN. Это счёт пунктов, не процент инженерной готовности.
 
-**Интеграция завершена:** PR91 merged в официальный кандидат. Текущий этап — №13: завершить B2/B3 по доказательствам ниже; после этого перейти к CAD, позитивному инженерному кейсу и выпускным gate.
+**Интеграция PR146 завершена:** Windows recovery/hardlink regression coverage включена в официальный candidate через PR146. Сейчас продолжаются независимые от №13 пункты; №13 отложен последним содержательным блоком. Candidate post-merge CI Core1009/Windows210 was still running at this update.
 
 Подробности прежнего объединения — §65; актуальная сводка и новый проход — §67.
 
