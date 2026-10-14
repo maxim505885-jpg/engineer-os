@@ -75,7 +75,7 @@ class DataBackupTests(unittest.TestCase):
         self.assertFalse((self.root/'history.pre-migration-v0.sqlite3').exists())
         self.assertEqual(list(self.root.glob('migration-*.sqlite3')),[])
         Store(self.root)
-        with connect(self.root/'history.pre-migration-v0.sqlite3')) as db, db:self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
+        with contextlib.closing(connect(self.root/'history.pre-migration-v0.sqlite3')) as db, db:self.assertEqual(db.execute('PRAGMA integrity_check').fetchone()[0],'ok')
 
     def test_racing_empty_target_is_not_replaced(self):
         from engineering.local_app.backup import create_backup,restore_backup,_publish_directory
