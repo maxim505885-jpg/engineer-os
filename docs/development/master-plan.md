@@ -40,17 +40,21 @@ No ACCEPTED, 100%, or release-complete claim is made.
 Бесплатное локальное приложение Windows: ТЗ → документы → проверка извлечения → доказательства → профильные проверки → заключение → FINAL AUDIT. Чат, история, задачи, память, CAD и восстановление входят в выпуск. Обязательные платные API не вводятся; оригиналы неизменны.
 
 ## Текущая позиция
-**Работаем по независимым от №13 пунктам; №13 отложен и поставлен последним содержательным блоком до зависимых acceptance/release gates.** Это порядок работ, а не изменение критериев и не закрытие №13.
+**На 14.10.2026 пункт 13 возобновлён по прямой просьбе пользователя и сейчас проверяется на предоставленном реальном комплекте.** Комплект целиком прошёл штатный attachment-preparation route без модели: DOCX 553/553 логических единиц (112 BLOCK, 441 UNCERTAINTY); PDF 1–3 native route BLOCK на векторном содержимом; OCR выполнен на всех трёх листах, но каждый остался BLOCK с OCR_TEXT_UNVERIFIED / OCR_LOW_CONFIDENCE; DWG BLOCK — DWG_CONVERTER_UNAVAILABLE. Это не закрывает №13 и не подтверждает инженерные выводы.
 
-Следующие независимые шаги:
-1. №12 — PR146 merged; Windows Core/security coverage прошла на PR head. Открыты CodeQL alert #45 и физический Windows перенос/restore. Не закрывать №12 по PR146 alone.
-2. №17 — исходный DWG/DXF не найден в доступном checkout; сохранить BLOCK до появления оригинала и проверяемого конвертационного результата/roundtrip.
-3. №6 — только нормативная часть D1 с проверкой редакций и применимости; LIRA/SCAD/RES solver work остаётся отложен.
-4. №9/11/12/18 — завершить независимые локальные UI, backup/recovery и provider checks; физические действия на ПК обозначать NOT_RUN до фактической проверки.
+### Свежая проверка всего плана
+GitHub candidate: `integration/release-candidate-v1` на `091edd1c2881b1f7c416034b45c1d6f48899bcdd`. PR148 остаётся открытым и не объединённым на `f53a6f45e6d46486e8d2103af610565591fef494`; exact-head Windows Runtime #217, Core #1016, Security Guard #837 и CodeQL PR #607 успешны. Общий реестр остаётся 8 DONE / 8 PARTIAL / 3 OPEN; изменения статусов по новому кейсу не доказаны.
 
-После этого вернуться к №13 как к последнему отдельному блоку по полноте документов, используя sheet/value registry и source-bound pilot 506/513, затем применить цикл к полному корпусу. Любая существенная неопределённость/BLOCK удерживает №13 открытым. Пункты №14–16 и №19, которые требуют принятого документального основания, не объявлять завершёнными до прохождения этих gates.
+### Следующие действия
+1. №13: сохранить приватные оригиналы; создать source-bound инвентарь листов и визуальных элементов; разобрать все DOCX drawing/field/merged-cell limitations и связь приложения PDF-листов с Word; квалифицировать OCR/vector fallback на каждой физической странице; определить ошибки против независимо размеченного эталона. До прохождения каждого полного критерия держать BLOCK/UNCERTAINTY.
+2. №9 и №12: завершить пользовательские физические reboot и перенос/restore evidence; отдельно сверить CodeQL alert #45.
+3. №17: применить проверяемый локальный DWG converter, сверить сущности/слои/геометрию и потери, затем roundtrip; не выводить геометрию из PDF вместо исходного CAD.
+4. №18: завершить provider receipt/performance и проверить выбранный Open WebUI путь на пользовательском ПК.
+5. №14–16: только после полного документального основания — инженерная проверка, положительный FINAL AUDIT/явная приёмка, трасса accepted knowledge recall/revoke и сверенный DOCX/PDF выпуск.
+6. №19: выполнить полный release checklist на чистой установке и подтвердить воспроизводимые инструкции. PR148 требует обычного ревью и candidate integration.
+7. №6 solver-расчёты LIRA/SCAD/RES остаются отложены по решению пользователя; не включать в автоматическое закрытие.
 
-Фактический статус GitHub на 14.10.2026 / §166: PR145 остаётся draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e` (Core1003/Windows205/Security808 SUCCESS). PR146 merged в candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`; exact PR-head Core1008, Windows209, Security818 и CodeQL588 SUCCESS. Candidate push Core1009/Windows210/Security819 — SUCCESS после merge. №12 PARTIAL, №13 OPEN и отложен последним.
+
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
@@ -66,7 +70,7 @@ No ACCEPTED, 100%, or release-complete claim is made.
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|§156: textarea keyboard focus fixed and tests pass; full real-user acceptance and physical release remain|
 |12|Backup/recovery/security|PARTIAL|PR146 merged; exact PR-head Core/Windows/Security/CodeQL PASS, включая 183 Windows tests и hardlink checks. Открыты CodeQL #45 и физический Windows перенос/restore.|
-|13|Полнота документов|OPEN — отложен до завершения независимых работ|§157–158: bounds/scale for the three remaining OLE placements resolved; font inventory recorded. All43 graphics still OCR BLOCK; appendix linkage, semantics, full layout and B3 corpus open|
+|13|Полнота документов|OPEN — новый реальный комплект проверен штатными маршрутами, критерии полноты не пройдены|§171: DOCX 553 logical units (112 BLOCK / 441 UNCERTAINTY; physical pages unknown); three vector PDFs BLOCK on native route and remain BLOCK after full-page OCR; separate DWG intake BLOCK because converter unavailable. Still need full visual/semantic comparison, attachment linkage, table/field/image verification and independent labelled accuracy corpus.|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
@@ -76,7 +80,7 @@ No ACCEPTED, 100%, or release-complete claim is made.
 
 Итого: 8 DONE в указанном объёме, 8 PARTIAL, 3 OPEN. Это счёт пунктов, не процент инженерной готовности.
 
-## Порядок работы и контрольные результаты
+## Исторические контрольные результаты прежних этапов (приоритет — текущая позиция §171)
 
 ### A. Стабилизировать новые инструменты — №13
 Файлы: engineering/local_app/word_formula_preview.py, table_worker.py, table_readback.py; tests/test_word_formula_preview.py, tests/test_table_readback.py; scripts/probe_formula_runtime.py на docs-ветке.
