@@ -1,5 +1,4 @@
-> **Зафиксировано 14.10.2026 / §165:** по решению пользователя пункт №13 временно отложен до завершения независимых работ и возвращается последним содержательным блоком перед зависимыми принятием и выпуском. Проверка №13 будет идти через реестр листов/значений, source-bound ручную сверку и пилот страниц 506/513; непроверенные значения остаются BLOCK, пункт не закрывать с открытыми блокерами. Последний candidate base: `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`; PR145 head `4ae39ce567d12d9aca83fd0694869e5ef012873e`, Core run1003 / Windows run205 / Security run808 SUCCESS. PR146 head `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`, Core run1004 / Security run811 SUCCESS; PR remains draft. LIRA/SCAD/RES calculations remain deferred.
-
+> **Актуально 14.10.2026 / §166:** порядок №13 зафиксирован по решению пользователя: сначала независимые пункты, №13 последним содержательным блоком перед зависящими acceptance/release gates; это не меняет критерии и №13 остаётся OPEN. PR146 объединён squash в кандидат: merge commit / candidate HEAD `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`. На точном PR head `9808252fd7694c8b488c3ff3f5c0d4c6343d32d0` прошли Core run1008 (1,057 тестов/7 skips), Windows run209 (183/18 skips, включая recovery/security, cold/restart, Ollama и browser workflows), Security Guard run818 и CodeQL run588. После merge Core run1009 и Windows run210 выполняются; Security Guard run819 прошёл. №12 остаётся PARTIAL из-за CodeQL alert #45 и отсутствия проверки переноса/restore на физическом ПК. №13 OPEN. №17 частичен: в checkout нет оригинального DWG/DXF; данные инвентаризации относятся к производной DXF и не доказывают геометрическую эквивалентность. ЛИРА/SCAD/RES расчёты остаются отложенными.
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 13.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
 Исполнение: самостоятельно по шагам через superpowers:executing-plans; этот документ является дорожной картой, конкретный implementation plan составляется для изменяемого подсистемного блока перед кодом.
@@ -12,14 +11,14 @@
 **Работаем по независимым от №13 пунктам; №13 отложен и поставлен последним содержательным блоком до зависимых acceptance/release gates.** Это порядок работ, а не изменение критериев и не закрытие №13.
 
 Следующие независимые шаги:
-1. №12 — завершить review CodeQL #45 и hardlink/recovery coverage PR146; затем отделить программные результаты от физического Windows restore.
-2. №17 — продолжить реальную DWG/DXF инвентаризацию/проверку потерь и roundtrip, сохраняя оригинал.
+1. №12 — PR146 merged; Windows Core/security coverage прошла на PR head. Открыты CodeQL alert #45 и физический Windows перенос/restore. Не закрывать №12 по PR146 alone.
+2. №17 — исходный DWG/DXF не найден в доступном checkout; сохранить BLOCK до появления оригинала и проверяемого конвертационного результата/roundtrip.
 3. №6 — только нормативная часть D1 с проверкой редакций и применимости; LIRA/SCAD/RES solver work остаётся отложен.
 4. №9/11/12/18 — завершить независимые локальные UI, backup/recovery и provider checks; физические действия на ПК обозначать NOT_RUN до фактической проверки.
 
 После этого вернуться к №13 как к последнему отдельному блоку по полноте документов, используя sheet/value registry и source-bound pilot 506/513, затем применить цикл к полному корпусу. Любая существенная неопределённость/BLOCK удерживает №13 открытым. Пункты №14–16 и №19, которые требуют принятого документального основания, не объявлять завершёнными до прохождения этих gates.
 
-Фактический статус GitHub на 14.10.2026: PR145 открыт как draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e`; Core run1003, Windows run205 и Security run808 прошли. PR146 открыт как draft на head `4735aaedbc2257ccf7ef87fe7192e5de0d58633c`; Core run1004 и Security run811 прошли. Локальный повтор PR146 в этой sandbox не дал результата из-за ограничений доступа к временным каталогам; локальный PASS здесь не заявляется. Оба PR не объединены, пункт №12 остаётся PARTIAL, а №13 OPEN.
+Фактический статус GitHub на 14.10.2026 / §166: PR145 остаётся draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e` (Core1003/Windows205/Security808 SUCCESS). PR146 merged в candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`; exact PR-head Core1008, Windows209, Security818 и CodeQL588 SUCCESS. Candidate push runs Core1009/Windows210 были IN_PROGRESS при записи этого раздела; Security819 SUCCESS. №12 PARTIAL, №13 OPEN и отложен последним.
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
@@ -34,8 +33,8 @@
 |9|Windows один запуск|PARTIAL|Чистая установка/перезапуск/перезагрузка на реальном ПК|
 |10|Консолидация|DONE в объёме кандидата|Новые изменения только после проверки|
 |11|Интерфейс|PARTIAL|§156: textarea keyboard focus fixed and tests pass; full real-user acceptance and physical release remain|
-|12|Backup/recovery/security|PARTIAL|Физический перенос/restore Windows, согласованные границы защиты|
-|13|Полнота документов|OPEN — текущий пункт|§157–158: bounds/scale for the three remaining OLE placements resolved; font inventory recorded. All43 graphics still OCR BLOCK; appendix linkage, semantics, full layout and B3 corpus open|
+|12|Backup/recovery/security|PARTIAL|PR146 merged; exact PR-head Core/Windows/Security/CodeQL PASS, включая 183 Windows tests и hardlink checks. Открыты CodeQL #45 и физический Windows перенос/restore.|
+|13|Полнота документов|OPEN — отложен до завершения независимых работ|§157–158: bounds/scale for the three remaining OLE placements resolved; font inventory recorded. All43 graphics still OCR BLOCK; appendix linkage, semantics, full layout and B3 corpus open|
 |14|Реальный ACCEPTED|OPEN|Полное ТЗ, проверенные основания, положительный FINAL AUDIT|
 |15|Подтверждённая память|PARTIAL|ACCEPTED→knowledge→recall/revoke на реальном кейсе|
 |16|Заключения/отчёты|PARTIAL|Проверенный инженерный выпуск DOCX/PDF|
