@@ -1,3 +1,35 @@
+## §170 — 2026-10-14: Windows launcher recovery, real .cmd path, and current gates
+
+PR148 is ready for review and remains unmerged. It targets the unchanged candidate `integration/release-candidate-v1` at `091edd1c2881b1f7c416034b45c1d6f48899bcdd`. Exact PR head: `f53a6f45e6d46486e8d2103af610565591fef494`.
+
+### Completed in this pass
+- Reproduced and fixed Windows one-click failures: repair a pre-existing venv with missing pip; detect failed venv creation accurately; put Windows' native PowerShell module directory before inherited reduced modules; support a selected loopback port through both start and stop commands.
+- Added Windows regression coverage for missing pip recovery and alternate-port start/stop; the workflow now executes the real `Start_ENGINEER_OS.cmd`. Added timeout diagnostics for the synthetic Drive DOM smoke. Fixed a Windows tempfile test by closing the source before reopening it.
+- Actual local `Start_ENGINEER_OS.cmd -Port 18768` startup receipt and matching stop passed. The unrelated service on 8765 was not stopped.
+- Exact PR-head CI: Windows Runtime #217, Core Tests #1016, Repository Security Guard #837, and CodeQL PR workflow #607 all SUCCESS. Core includes full Python regression and browser UI/HTTP tests. Windows includes cold/repeat/restart, pip repair, alternate-port CMD start/stop, backup/security, offline PDF viewer, qwen3:0.6b browser inference, and four browser workflows.
+- Local browser route suite (7 routes), full HTTP/DOM E2E, and offline PDF viewer passed. Local qwen3:8b browser inference exceeded the bounded timeout; Open WebUI was not listening on port 8080. No local inference performance claim is made.
+- A full local Windows Python run enumerated 1,058 tests, with 47 skips and 7 errors caused by six symlink-privilege cases and a Windows open-file fixture. The open-file fixture is fixed and its four-test module passes. The full Core regression passed on GitHub CI; local symlink tests remain limited by this account's Windows permissions.
+
+### Current 19-point status
+No point is promoted to DONE on this evidence alone. The project remains 8 DONE / 8 PARTIAL / 3 OPEN.
+- №9 PARTIAL: launcher defects and CI lifecycle are covered; physical reboot and install continuity on the user's PC remain.
+- №11 PARTIAL: browser workflows pass; full real-user acceptance remains.
+- №12 PARTIAL: CI security and backup tests pass; CodeQL alert #45 status reconciliation and physical cross-machine transfer/restore remain.
+- №17 PARTIAL: DWG source and conversion history exist; source-specific geometry, loss accounting and roundtrip remain.
+- №18 PARTIAL: CI local inference passed with qwen3:0.6b; user-PC qwen3:8b timed out and live Open WebUI/optional provider receipt remains unqualified.
+- №14, №15, №16 and №19 remain OPEN/PARTIAL pending a real accepted engineering case and its traced knowledge/report/release evidence.
+- №13 remains OPEN and deferred last. LIRA/SCAD/RES calculations remain deferred under the user's instruction.
+
+### Next execution order
+1. Review PR148, then integrate it into the candidate only through the repository's normal review/merge gate.
+2. Reconcile CodeQL alert #45 and complete physical backup transfer/restore and reboot evidence.
+3. Verify DWG geometry, conversion losses, supported editing scope and roundtrip.
+4. Qualify the local provider receipt, qwen3:8b performance on the user's PC, and Open WebUI only if it remains part of the selected local setup.
+5. Use a real positive case to complete acceptance, memory recall/revoke and DOCX/PDF review; rerun release audit.
+6. Resume №13 last; calculations stay deferred.
+
+No ACCEPTED, 100%, or release-complete claim is made.
+
 > **Актуально 14.10.2026 / §169:** порядок №13 не меняется; он остаётся OPEN и последним содержательным документным блоком. PR147 squash merged: candidate 091edd1c2881b1f7c416034b45c1d6f48899bcdd. PR head 92a2396d441e2005712f85cd20f3e40693b618a4 passed Core, Windows Runtime, Repository Guard and CodeQL. Candidate push Core1012/1013, Windows213/214, Security829/830 and push workflow599 passed. Windows Runtime included the end-to-end receipt/source-page test plus cold/restart, backup/security, offline PDF viewer, live Ollama and browser workflows. Local Ollama qwen3:8b returned PASS; Open WebUI port8080 was not listening. #18 remains PARTIAL and E3 open until live Open WebUI/optional-provider receipt is verified. #12 remains PARTIAL: CodeQL alert #45 and physical transfer/restore remain open; candidate CodeQL status associated with PR74 reported 4 HIGH/1 MEDIUM alerts needing separate reconciliation. #17 PARTIAL (source DWG/DXF absent). #13 OPEN and last. LIRA/SCAD/RES calculations deferred; no 100%, ACCEPTED or release-complete claim.
 # ENGINEER OS — план доведения до стабильного выпуска
 Обновлено: 14.10.2026, Europe/Moscow. Активный план заменяет противоречащие ему ранние сводки, но не уничтожает историю.
