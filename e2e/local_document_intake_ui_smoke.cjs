@@ -17,6 +17,24 @@ const {spawn,spawnSync}=require('node:child_process');const {chromium}=require('
   await page.setInputFiles('#upload',{name:'model.lir',mimeType:'application/octet-stream',buffer:Buffer.from('ULIRA-SAPR synthetic container')});await page.waitForFunction(()=>document.querySelectorAll('.file').length===2);assert.ok((await page.locator('#files').textContent()).includes('Декодер не подключён'));
   await page.reload();await page.waitForFunction(()=>document.querySelectorAll('.file').length===2);assert.ok((await page.locator('#files').textContent()).includes('MODEL_DECODER_UNAVAILABLE'));await page.setInputFiles('#upload',{name:'model.txt',mimeType:'text/plain',buffer:Buffer.from('(0/1; TEST/)(1/10 1 1 2/)(3/1 100/)(4/0 0 0/1 0 0/)')});await page.waitForFunction(()=>document.querySelectorAll('.file').length===3);assert.ok((await page.locator('#files').textContent()).includes('Узлов: 2; КЭ: 1'));assert.ok((await page.locator('#files').textContent()).includes('RESULTS_REQUIRED'));
   await page.setInputFiles('#upload',{name:'run.log',mimeType:'text/plain',buffer:Buffer.from('Протокол расчета\nРасчет прерван пользователем')});await page.waitForFunction(()=>document.querySelectorAll('.file').length===4);assert.ok((await page.locator('#files').textContent()).includes('Расчёт прерван пользователем.'));await page.reload();await page.waitForFunction(()=>document.querySelectorAll('.file').length===4);assert.ok((await page.locator('#files').textContent()).includes('INTERRUPTED_BY_USER'));assert.equal(errors.length,0,errors.join('\n'));
-  console.log(JSON.stringify({result:'PASS',real_chromium:true,checks:['original-page-preview-without-candidate','visible-viewer','local-ocr-action','lir-intake-no-decoder-claim','reload-originals','lira-full-model-observations','interrupted-log-upload-persisted'],engineering_acceptance:false}));
+  // Stage13: real Chromium PDF + DOCX upload/reload and source isolation.
+  const docxFixture=spawnSync(process.env.PYTHON||'python3',['-c',`import io,sys,zipfile
+b=io.BytesIO()
+with zipfile.ZipFile(b,'w') as z:
+ z.writestr('[Content_Types].xml','<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+ z.writestr('_rels/.rels','<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+ z.writestr('word/document.xml','<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Source inspection DOCX</w:t></w:r></w:p></w:body></w:document>')
+sys.stdout.buffer.write(b.getvalue())`],{cwd:root});
+  assert.equal(docxFixture.status,0,docxFixture.stderr?.toString());
+  await page.setInputFiles('#upload',{name:'inspection.docx',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',buffer:docxFixture.stdout});
+  await page.waitForFunction(()=>document.querySelectorAll('.file').length===5);
+  assert.ok((await page.locator('#files').textContent()).includes('inspection.docx'));
+  await page.reload();
+  await page.waitForFunction(()=>document.querySelectorAll('.file').length===5);
+  const fileList=await page.locator('#files').textContent();
+  assert.ok(fileList.includes('original.pdf')&&fileList.includes('inspection.docx'),'Both original files persist through reload');
+  assert.equal(await page.locator('#evidence-list').textContent(),'','Upload alone must not validate engineering evidence');
+  assert.equal(errors.length,0,errors.join('\\n'));
+  console.log(JSON.stringify({result:'PASS',real_chromium:true,checks:['original-page-preview-without-candidate','visible-viewer','local-ocr-action','lir-intake-no-decoder-claim','reload-originals','lira-full-model-observations','interrupted-log-upload-persisted','pdf-docx-user-upload-and-reopen','upload-does-not-validate-engineering-evidence'],engineering_acceptance:false}));
  }finally{if(browser)await browser.close();await stopChild(child);fs.rmSync(temp,{recursive:true,force:true,maxRetries:5,retryDelay:100});}
 })().catch(error=>{console.error(error);process.exitCode=1;});
