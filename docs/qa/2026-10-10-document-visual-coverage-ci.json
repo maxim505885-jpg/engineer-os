@@ -1,0 +1,76 @@
+{
+  "candidate": "e0754b2a3dcfb24a55e68af9333ec9d35a67618f",
+  "tested_head": "70db597b178e419428588ab63aa6dec4b71af157",
+  "tree": "5dd2b66194be961a73dd68a2601b48ac6c778611",
+  "pr": 108,
+  "ci": {
+    "core": {
+      "run": 38002094577,
+      "tests": 857,
+      "skips": 2,
+      "status": "SUCCESS"
+    },
+    "windows": {
+      "run": 38002094533,
+      "tests": 55,
+      "status": "SUCCESS",
+      "live_ollama": true
+    },
+    "security": {
+      "run": 38002094570,
+      "status": "SUCCESS"
+    }
+  },
+  "real_docx": {
+    "status": "SUCCEEDED",
+    "original_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+    "reload_verified": true,
+    "processed_units": 14684,
+    "total_units": 14684,
+    "logical_blocked_units": 7031,
+    "batches_completed": 749,
+    "batches_total": 749,
+    "all_batches_completed": true,
+    "model_provider": "controlled office-test-1; not live Ollama",
+    "model_calls": 1496,
+    "receipts": 1492,
+    "summary_compressed": true,
+    "summary_input_clipped": false,
+    "text_omitted": false,
+    "budget_exhausted": false,
+    "acceptance_granted": false,
+    "initial_attempt": {
+      "state": "FAILED",
+      "processed_units": 14505,
+      "cause": "not determined"
+    },
+    "resume_count": 1,
+    "extraction_rows": 14684,
+    "text_truncated_units": 0,
+    "receipt_status_counts": {
+      "COMPLETED": 1491,
+      "RUNNING": 1
+    },
+    "receipt_completeness_verified": false,
+    "receipt_limitation": "Completed job report has749 batches and1496 calls; persisted1492 receipt records includeone RUNNING. Cause not established; full receipt completeness not certified."
+  },
+  "v4": {
+    "pages": 534,
+    "render_complete": true,
+    "ocr_pages": 40,
+    "ocr_chars": 62189,
+    "low_confidence_blocks": 1682
+  },
+  "point_13_closed": false,
+  "remaining": [
+    "qualified mixed/raster cell and graphic-label correspondence",
+    "formula source visual correspondence",
+    "OCR exactness/conflict adjudication",
+    "full Word layout and auxiliary placement",
+    "qualified representative multi-document corpus",
+    "full real receipt reconciliation:1491 completed/one RUNNING versus1496 calls"
+  ],
+  "installed_on_user_pc": false,
+  "engineering_accepted": false,
+  "calculations": "DEFERRED"
+}

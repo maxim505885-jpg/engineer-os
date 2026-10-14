@@ -1,0 +1,616 @@
+{
+  "scope": "source-linked arithmetic/topology review only; not vendor-qualified grammar, solver or engineering acceptance",
+  "model_observations": [
+    {
+      "filename": "Секция 3  грунт (1).txt",
+      "sha256": "9681a38303d5bc7f0a78904d5aeed80f41810168c67b2d4ac1bd5b9e57c7d926",
+      "node_records": 83152,
+      "element_records": 94775,
+      "used_node_ordinals": 83152,
+      "unused_node_ordinals": 0,
+      "connectivity_component_sizes": [
+        83152
+      ],
+      "repeated_node_ids_element_count": 0,
+      "zero_coordinate_distance_type10_count": 0,
+      "duplicate_type_and_sorted_nodes_groups": 0,
+      "doc3_positive_id_count": 3008,
+      "doc3_positive_id_duplicate_count": 0,
+      "type57_records": 2989,
+      "type57_all_six_stiffness_values_zero_count": 0,
+      "type57_zero_element_examples": [],
+      "type10_raw_length_range": [
+        0.061900000000000066,
+        5.4
+      ],
+      "GEI_records": [
+        {
+          "id": 10,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 32440
+        },
+        {
+          "id": 11,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.3",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 1400
+        },
+        {
+          "id": 12,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.5",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 355
+        },
+        {
+          "id": 13,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.5",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 150
+        },
+        {
+          "id": 14,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 13047
+        },
+        {
+          "id": 15,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.18",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 1116
+        },
+        {
+          "id": 16,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.1",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 15198
+        },
+        {
+          "id": 17,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.5",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 12969
+        },
+        {
+          "id": 19,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.25",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 10346
+        }
+      ],
+      "doc6_records": 213086,
+      "doc7_ids": 1677,
+      "doc7_duplicate_ids": 0,
+      "doc6_col4_missing_doc7_count": 0,
+      "doc6_col5_without_named_loads": [],
+      "doc8_record_count": 13,
+      "named_load_count": 13,
+      "doc5_present": false,
+      "doc5_records": 0,
+      "zero57_coordinate_z_counts": {},
+      "zero57_examples": []
+    },
+    {
+      "filename": "секция 1 сейсм 16 08 2026 (1).txt",
+      "sha256": "05c6f440f2ae240f29bba7eecc04c70044cf905ce9b11a0edba6ddd36396c38e",
+      "node_records": 119779,
+      "element_records": 127776,
+      "used_node_ordinals": 119779,
+      "unused_node_ordinals": 0,
+      "connectivity_component_sizes": [
+        119779
+      ],
+      "repeated_node_ids_element_count": 0,
+      "zero_coordinate_distance_type10_count": 0,
+      "duplicate_type_and_sorted_nodes_groups": 0,
+      "doc3_positive_id_count": 4329,
+      "doc3_positive_id_duplicate_count": 0,
+      "type57_records": 4312,
+      "type57_all_six_stiffness_values_zero_count": 840,
+      "type57_zero_element_examples": [
+        114927,
+        114928,
+        114929,
+        114930,
+        115024,
+        115025,
+        115026,
+        115027,
+        115028,
+        115029,
+        115030,
+        115121
+      ],
+      "type10_raw_length_range": [
+        0.19999999999999574,
+        5.4
+      ],
+      "GEI_records": [
+        {
+          "id": 7,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 27831
+        },
+        {
+          "id": 8,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.7",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 230
+        },
+        {
+          "id": 9,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.3",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 4107
+        },
+        {
+          "id": 10,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.45",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 240
+        },
+        {
+          "id": 11,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.25",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 10080
+        },
+        {
+          "id": 12,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 56299
+        },
+        {
+          "id": 13,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 3768
+        },
+        {
+          "id": 14,
+          "tokens": [
+            "GEI",
+            "3.06e+006",
+            "0.2",
+            "0.8",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 13259
+        }
+      ],
+      "doc6_records": 756246,
+      "doc7_ids": 35452,
+      "doc7_duplicate_ids": 0,
+      "doc6_col4_missing_doc7_count": 0,
+      "doc6_col5_without_named_loads": [],
+      "doc8_record_count": 16,
+      "named_load_count": 16,
+      "doc5_present": true,
+      "doc5_records": 208,
+      "zero57_coordinate_z_counts": {
+        "-0.0": 82,
+        "-0.64167": 82,
+        "-0.88333": 82,
+        "-1.125": 82,
+        "-1.36667": 81,
+        "-1.60833": 81,
+        "-1.85": 77,
+        "-2.09167": 76,
+        "-2.33333": 69,
+        "-2.575": 58,
+        "-1.35": 6,
+        "-1.99167": 6,
+        "-2.23333": 6,
+        "-2.475": 6,
+        "-2.71667": 6,
+        "-2.95833": 6,
+        "-3.2": 6,
+        "-2.81667": 25,
+        "-3.05833": 3
+      },
+      "zero57_examples": [
+        {
+          "element_ordinal": 114927,
+          "stiffness_id": 18,
+          "node_ordinal": 11770,
+          "raw_xyz": [
+            -0.00038,
+            35.2,
+            -0.0
+          ]
+        },
+        {
+          "element_ordinal": 114928,
+          "stiffness_id": 19,
+          "node_ordinal": 111479,
+          "raw_xyz": [
+            -0.00038,
+            35.2,
+            -0.64167
+          ]
+        }
+      ]
+    },
+    {
+      "filename": "секция 2 прогибы.txt",
+      "sha256": "880410cbb166561fa2867f626084b62a7b926cb3daba561180d9338465307c34",
+      "node_records": 37083,
+      "element_records": 44086,
+      "used_node_ordinals": 37083,
+      "unused_node_ordinals": 0,
+      "connectivity_component_sizes": [
+        37083
+      ],
+      "repeated_node_ids_element_count": 0,
+      "zero_coordinate_distance_type10_count": 0,
+      "duplicate_type_and_sorted_nodes_groups": 0,
+      "doc3_positive_id_count": 3337,
+      "doc3_positive_id_duplicate_count": 0,
+      "type57_records": 3315,
+      "type57_all_six_stiffness_values_zero_count": 65,
+      "type57_zero_element_examples": [
+        37497,
+        37598,
+        37699,
+        37800,
+        37901,
+        38002,
+        38103,
+        38204,
+        38305,
+        38406,
+        38507,
+        38608
+      ],
+      "type10_raw_length_range": [
+        0.09999999999999964,
+        5.4
+      ],
+      "GEI_records": [
+        {
+          "id": 1,
+          "tokens": [
+            "GEI",
+            "612000",
+            "0.2",
+            "0.5",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 10890
+        },
+        {
+          "id": 2,
+          "tokens": [
+            "GEI",
+            "1.836e+006",
+            "0.2",
+            "0.3",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 2325
+        },
+        {
+          "id": 3,
+          "tokens": [
+            "GEI",
+            "1.836e+006",
+            "0.2",
+            "0.5",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 78
+        },
+        {
+          "id": 4,
+          "tokens": [
+            "GEI",
+            "1.836e+006",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 4530
+        },
+        {
+          "id": 9,
+          "tokens": [
+            "GEI",
+            "1.836e+006",
+            "0.2",
+            "0.22",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 85
+        },
+        {
+          "id": 10,
+          "tokens": [
+            "GEI",
+            "612000",
+            "0.2",
+            "0.45",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 196
+        },
+        {
+          "id": 11,
+          "tokens": [
+            "GEI",
+            "612000",
+            "0.2",
+            "0.25",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 7527
+        },
+        {
+          "id": 18,
+          "tokens": [
+            "GEI",
+            "1.836e+006",
+            "0.2",
+            "0.25",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 278
+        },
+        {
+          "id": 19,
+          "tokens": [
+            "GEI",
+            "612000",
+            "0.2",
+            "0.2",
+            "RO",
+            "2.5"
+          ],
+          "assigned_elements": 10268
+        }
+      ],
+      "doc6_records": 125245,
+      "doc7_ids": 4878,
+      "doc7_duplicate_ids": 0,
+      "doc6_col4_missing_doc7_count": 0,
+      "doc6_col5_without_named_loads": [],
+      "doc8_record_count": 16,
+      "named_load_count": 16,
+      "doc5_present": true,
+      "doc5_records": 75,
+      "zero57_coordinate_z_counts": {
+        "-4.0": 63,
+        "-5.3": 2
+      },
+      "zero57_examples": [
+        {
+          "element_ordinal": 37497,
+          "stiffness_id": 23,
+          "node_ordinal": 14826,
+          "raw_xyz": [
+            0.82,
+            0.0,
+            -4.0
+          ]
+        },
+        {
+          "element_ordinal": 37598,
+          "stiffness_id": 74,
+          "node_ordinal": 14825,
+          "raw_xyz": [
+            0.82,
+            5.2,
+            -4.0
+          ]
+        }
+      ]
+    }
+  ],
+  "report_arithmetic": {
+    "locator": "direct w:body/w:p ordinal, not rendered page",
+    "sources": [
+      {
+        "source": "lira-sections/1/_Отчет по расчету секция 1 16.08.2026 (1).docx",
+        "sha256": "d4d15a16a79dd9d9f2a66e276fa7096c8f5fd32ce2c693c97857c42fcbfe14f0",
+        "quotes": [
+          {
+            "body_paragraph_ordinal": 267,
+            "text": "Для бетона класса В25: 3060000*0,6= 1836000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 268,
+            "text": "Для бетона класса В20: 2750000*0,6= 1650000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 270,
+            "text": "Для бетона класса В25: 3060000*0,2= 612000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 271,
+            "text": "Для бетона класса В20: 2750000*0,2= 550000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 279,
+            "text": "Прогиб составил = 23,8 мм;"
+          },
+          {
+            "body_paragraph_ordinal": 280,
+            "text": "Величина предельного прогиба: 8490/207 = 41 мм, в соответствии с таблицей Д.1 СП 20.13330.2016."
+          },
+          {
+            "body_paragraph_ordinal": 291,
+            "text": "Величина предельного прогиба: 43050/150 = 287мм, в соответствии с п. Д.2.4 СП 20.13330.2016."
+          }
+        ]
+      },
+      {
+        "source": "lira-sections/2/_Отчет по расчету секция 2 20.08.2026.docx",
+        "sha256": "875ca43e40c0ed600ed33a05c13d87bedfa98a7fe32a6f30be9f5281b75706ba",
+        "quotes": [
+          {
+            "body_paragraph_ordinal": 276,
+            "text": "Для бетона класса В25: 3060000*0,6= 1836000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 277,
+            "text": "Для бетона класса В25: 3060000*0,2= 612000 т/м2."
+          },
+          {
+            "body_paragraph_ordinal": 290,
+            "text": "Максимальный расчетный прогиб = 14,1 мм. Величина предельного прогиба: 8490/207 = 41,0 мм, в соответствии с таблицей Д.1 СП 20.13330.2016."
+          }
+        ]
+      },
+      {
+        "source": "lira-sections/3/_Отчет по расчету секция 3  (1).docx",
+        "sha256": "a26f179505840e4c0a94ab73286396cc840af2e0e2bea8db91177db87f660b7a",
+        "quotes": [
+          {
+            "body_paragraph_ordinal": 264,
+            "text": "Максимальный расчетный прогиб = 25,9 мм. Величина предельного прогиба: 7560/203 = 37,2 мм, в соответствии с таблицей Д.1 СП 20.13330.2016."
+          }
+        ]
+      }
+    ],
+    "checks": [
+      {
+        "expression": "3060000*0.6",
+        "result": 1836000
+      },
+      {
+        "expression": "3060000*0.2",
+        "result": 612000
+      },
+      {
+        "expression": "2750000*0.6",
+        "result": 1650000
+      },
+      {
+        "expression": "2750000*0.2",
+        "result": 550000
+      },
+      {
+        "expression": "8490/207",
+        "result": 41.01449275362319
+      },
+      {
+        "expression": "7560/203",
+        "result": 37.241379310344826
+      },
+      {
+        "expression": "43050/150",
+        "result": 287.0
+      }
+    ],
+    "limit": "arithmetic only, code applicability and denominator validity NOT_VERIFIED"
+  },
+  "solver_run": "NOT_RUN",
+  "acceptance": false
+}

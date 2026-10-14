@@ -1,0 +1,23 @@
+# DOCX graphics source association — verification scope
+
+## 88. №13: source-linked изображения DOCX и безопасный просмотр — 09.10.2026
+
+Расчёты/ЛИРА/RES остаются отложенными. Ветка feat/docx-image-sources-20261009 от кандидата3bfba1ed, PR104 https://github.com/maxim505885-jpg/engineer-os/pull/104; опубликованный head6fc1e34de36abe969a35e41255d640b768e53941, tree d279258eff146113934f2dd538ce266b139cd381 точно совпадает с проверенным локальным деревом. На момент записи PR OPEN, кандидат не изменён; Security37968999726 SUCCESS, Core37968999520/Windows37968999638 выполняются.
+
+Reader связывает DrawingML blip и VML r:id/o:relid с содержащим абзацем/ячейкой и точной частью DOCX, включая auxiliary parts и нестандартные пути. Сохраняются relationship ID, image ordinal, asset part/bytes/SHA256, native declared labels; существующие номера логических элементов не сдвигаются. Внешние/отсутствующие/не-image связи явно UNAVAILABLE; сеть не вызывается. Неоднозначные ID/unsafe URI/конфликт VML identities отвергаются. Поддерживаемый ID — bounded ASCII NCName subset; необычные Unicode IDs fail-closed. Лимиты4096 refs,32MiB/asset,256MiB unique assets и прежние package/XML/text budgets входят в parser identity вместе с hash нового word_images.py.
+
+В результатах по частям доступны кнопки изображений. Authenticated preview перепроверяет session/job/original/parser/exact checkpoint/asset hash, выдаёт bounded PNG<=1600px/10MiB; прозрачность сохраняется. Показывается исходный raster payload, НЕ отрисованная страница Word: crop/rotation/placement/effects не применены, page/note placement и содержимое не подтверждены. EMF/vector/invalid/oversized previews явно недоступны. DRAWING_NOT_READ/FIELD_NOT_EVALUATED/EQUATION_NOT_READ и запреты completeness/acceptance сохранены. Метаданные ссылок не выдаются за OCR или изображение, рассмотренное моделью.
+
+Реальный исходник147210288 bytes/SHAb253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5 неизменён.14684 logical units сохранены;510 units содержат671 refs к631 distinct assets. Независимый XML count —671. По ссылкам397 PNG+116 JPEG+9 JPG+149 EMF; это подсчёт форматов/связей, не полнота графики. На текущем коде первые2 элемента реального оригинала прошли Store extraction/checkpoint/revalidation/PNG preview; processed2/14684,cycle_complete=false,model NOT_RUN. Полный новый Store/model run большого отчёта не выполнялся.
+
+RED→GREEN воспроизвёл прежнюю потерю refs/HTTP404/отсутствие UI; review findings malformed IDs/URI,legacy VML,equation sibling association и alpha loss устранены отдельными воспроизведениями. Independent review: Critical/Important нет; minor Unicode-ID исправлен explicit supported subset. Финальный локальный suite825 tests/64.290s OK,17 environment skips;12 новых focused,9 Node,2 HTTP/DOM и5 Chromium routes PASS;architecture/compile/JS/diff PASS. Публичное дерево получено обратно git fetch и совпало по полному tree SHA. Это не обновление приложения на ПК пользователя.
+
+№13 остаётся❌; общий план8✅/8🟡/3❌. Следующий конкретный шаг — source-bound чтение/отрисовка EMF и проверка визуального соответствия графики/формул, затем raster/mixed tables/OCR-conflicts, V4 и qualified corpus. Расчёты сейчас не требуются. QA:docs/qa/2026-10-09-docx-image-sources.md.
+
+### Итог §88 — включено в кандидат
+
+PR104 MERGED squash с expected_head guard; кандидат8274587137754a4df56dd537fd148d90ade8f40f. Полное дерево d279258eff146113934f2dd538ce266b139cd381 совпало с проверенным локальным и опубликованным head6fc1e34d. Все три final-head CI SUCCESS: Core37968999520/job113950507929 —825 tests/94.369s OK,2 Windows-only skips,9 Node,2 HTTP/DOM и5 Chromium маршрутов; Windows37968999638/job113950508285 —23 tests/8.002s OK,cold/repeat/restart,real Ollama qwen3:0.6b и5 browser маршрутов,включая DOCX source image; Security37968999726 SUCCESS. Программный CI не заменяет physical PC/qualified engineering review.
+
+Финальная ограниченная Store/checkpoint/preview проверка первых2 элементов реального DOCX повторена именно финальным parser:2/14684,cycle_complete=false,model NOT_RUN;SHA оригинала неизменён. PNG1:658216 bytes/SHAea20aba0fb422ae21f68d36637d19716e0cfeb9fa004c1d493cbd8fcd0ae283a;PNG2:6823 bytes/SHA44b5bc8048dfea1843f6a9abcf7771bb9665d39ee1481c408ae6d4062a5b4a17. Alpha сохранён. Новый полный Store/model run большого отчёта не заявляется. Физические страницы/crops/transforms/содержание/EMF/V4/полный корпус не подтверждены.
+
+Закрыт только подэтап source association+raster preview; №13 остаётся❌,план8✅/8🟡/3❌. На ПК пользователя версия не обновлялась. Следующий шаг — проверенное чтение/отрисовка EMF и визуальная сверка формул/графики, без возвращения к расчётам.

@@ -1,0 +1,104 @@
+{
+  "scope": "SOFTWARE_CI_AND_DECLARED_SOURCE_STRUCTURE_NOT_ENGINEERING_ACCEPTANCE",
+  "head": "1230aa3a24c1bb46fe4dbacb30d86b1777927388",
+  "candidate": "f2a58399384dacaff600714cc79e7b85ad3e03a9",
+  "tree": "2ab64d8c8db402ed3146327162ab19356c9809ea",
+  "local_commit": "10d58f3",
+  "exact_tree_verified": true,
+  "checks": [
+    {
+      "id": 113761668499,
+      "name": "CodeQL",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/runs/113761668499"
+    },
+    {
+      "id": 113761498490,
+      "name": "windows-runtime",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912730535/job/113761498490"
+    },
+    {
+      "id": 113761498015,
+      "name": "core-tests",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912730500/job/113761498015"
+    },
+    {
+      "id": 113761497878,
+      "name": "repository-guard",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912730504/job/113761497878"
+    },
+    {
+      "id": 113761490486,
+      "name": "Analyze (python)",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912726730/job/113761490486"
+    },
+    {
+      "id": 113761490305,
+      "name": "Analyze (actions)",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912726730/job/113761490305"
+    },
+    {
+      "id": 113761490080,
+      "name": "Analyze (javascript-typescript)",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912726730/job/113761490080"
+    },
+    {
+      "id": 113761482545,
+      "name": "core-tests",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912725641/job/113761482545"
+    },
+    {
+      "id": 113761482230,
+      "name": "repository-guard",
+      "conclusion": "success",
+      "url": "https://github.com/maxim505885-jpg/engineer-os/actions/runs/37912725653/job/113761482230"
+    }
+  ],
+  "linux": {
+    "pr_run": 37912730500,
+    "push_run": 37912725641,
+    "tests": 755,
+    "passed": 753,
+    "windows_only_skips": 2,
+    "node": 4,
+    "http_dom": 2,
+    "chromium": 4
+  },
+  "windows": {
+    "run": 37912730535,
+    "tests": 23,
+    "chromium": 4,
+    "real_inference_through_ui": true,
+    "model": "qwen3:0.6b",
+    "physical_windows_verified": false
+  },
+  "real_office": {
+    "sources": 3,
+    "processed_units": 665,
+    "failed_units": 0,
+    "truncated_units": 0,
+    "word_equations": 2,
+    "word_merge_declarations": 14,
+    "xlsx_merged_ranges": 3,
+    "xlsx_formula_cells": 4,
+    "source_xml_counts_and_tokens_matched": true,
+    "original_hashes_unchanged": true
+  },
+  "quality_verified": false,
+  "formulas_evaluated": false,
+  "layout_verified": false,
+  "document_complete": false,
+  "acceptance_granted": false,
+  "readiness": {
+    "done": 8,
+    "partial": 8,
+    "open": 3
+  }
+}

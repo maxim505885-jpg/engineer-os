@@ -1,0 +1,64 @@
+{
+  "scope": "REAL_ORIGINAL_CONTROLLED_DRAFT_NOT_ENGINEERING_ACCEPTANCE",
+  "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+  "source_bytes": 74522583,
+  "native_quote_page": 13,
+  "native_match": "MATCH",
+  "native_region": "AMBIGUOUS",
+  "tor_page": 5,
+  "tor_transcription": "USER_AUTHORED_VISUAL_UNVERIFIED",
+  "tor_total": 12,
+  "tor_assessed": 0,
+  "blocked_requirements": 12,
+  "roles_completed": 4,
+  "core_status": "BLOCK",
+  "review_digest": "b0e6c5870fc430b8301dad554a1582a6da27ffabec785194af3a8e362edb24c3",
+  "engineering_verified": false,
+  "acceptance_granted": false,
+  "final_audit": "NOT_RUN",
+  "real_model": false,
+  "automatic_full_document_analysis": false,
+  "case_stages": {
+    "source_identity": {
+      "status": "READY",
+      "reasons": []
+    },
+    "requirements": {
+      "status": "BLOCK",
+      "reasons": [
+        "TZ_REQUIREMENT_NOT_SOURCE_LINKED",
+        "TZ_REQUIREMENT_BLOCKED"
+      ]
+    },
+    "evidence": {
+      "status": "BLOCK",
+      "reasons": [
+        "SOURCE_REVIEW_PREREQUISITES_OPEN"
+      ]
+    },
+    "specialists": {
+      "status": "BLOCK",
+      "reasons": [
+        "ENGINEERING_REVIEW_BLOCKED"
+      ]
+    },
+    "domain_prerequisites": {
+      "status": "BLOCK",
+      "reasons": [
+        "NORMATIVE_DOMAIN_PACKET_MISSING",
+        "CALCULATION_DOMAIN_PACKET_MISSING"
+      ]
+    },
+    "qc": {
+      "status": "BLOCK",
+      "reasons": [
+        "TZ_REQUIREMENT_NOT_SOURCE_LINKED",
+        "TZ_REQUIREMENT_BLOCKED",
+        "SOURCE_REVIEW_PREREQUISITES_OPEN",
+        "ENGINEERING_REVIEW_BLOCKED",
+        "NORMATIVE_DOMAIN_PACKET_MISSING",
+        "CALCULATION_DOMAIN_PACKET_MISSING"
+      ]
+    }
+  }
+}

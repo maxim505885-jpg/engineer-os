@@ -1,0 +1,91 @@
+{
+  "source_head": "ff586382874774838d584339bfbfa136c26dd351",
+  "source_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
+  "candidate_head": "8beb55924a8e5a82029636b235c3cac64c565488",
+  "candidate_tree": "f5f78d4fa1504259b02a2d323dd2143dd690c6c4",
+  "exact_tree_match": true,
+  "pr": 92,
+  "all_10_checks_success": true,
+  "checks": [
+    {
+      "name": "CodeQL",
+      "id": 113698559586,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "core-tests",
+      "id": 113698517587,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "core-tests",
+      "id": 113698497029,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "windows-runtime",
+      "id": 113698441038,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "repository-guard",
+      "id": 113698440554,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Analyze (actions)",
+      "id": 113698432520,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Analyze (javascript-typescript)",
+      "id": 113698432389,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Analyze (python)",
+      "id": 113698432229,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "windows-runtime",
+      "id": 113698420801,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "repository-guard",
+      "id": 113698419415,
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "linux": {
+    "pr_run": 37893170818,
+    "push_run": 37893164515,
+    "tests_total": 728,
+    "passed": 726,
+    "skipped_native_windows": 2,
+    "node_tests": 4,
+    "http_dom_workflows": 2,
+    "chromium_workflows": 4
+  },
+  "windows": {
+    "pr_run": 37893170912,
+    "push_run": 37893164417,
+    "tests_passed": 23,
+    "real_ollama": true,
+    "model": "qwen3:0.6b",
+    "chromium_workflows": 4,
+    "physical_pc_verified": false
+  },
+  "engineering_acceptance_granted": false
+}
