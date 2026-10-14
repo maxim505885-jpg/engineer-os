@@ -18,7 +18,7 @@
 
 После этого вернуться к №13 как к последнему отдельному блоку по полноте документов, используя sheet/value registry и source-bound pilot 506/513, затем применить цикл к полному корпусу. Любая существенная неопределённость/BLOCK удерживает №13 открытым. Пункты №14–16 и №19, которые требуют принятого документального основания, не объявлять завершёнными до прохождения этих gates.
 
-Фактический статус GitHub на 14.10.2026 / §166: PR145 остаётся draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e` (Core1003/Windows205/Security808 SUCCESS). PR146 merged в candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`; exact PR-head Core1008, Windows209, Security818 и CodeQL588 SUCCESS. Candidate push runs Core1009/Windows210 были IN_PROGRESS при записи этого раздела; Security819 SUCCESS. №12 PARTIAL, №13 OPEN и отложен последним.
+Фактический статус GitHub на 14.10.2026 / §166: PR145 остаётся draft на head `4ae39ce567d12d9aca83fd0694869e5ef012873e` (Core1003/Windows205/Security808 SUCCESS). PR146 merged в candidate commit `3e93ebf63d6e12247e29000e5f8efa1f34bb29ff`; exact PR-head Core1008, Windows209, Security818 и CodeQL588 SUCCESS. Candidate push Core1009/Windows210/Security819 — SUCCESS после merge. №12 PARTIAL, №13 OPEN и отложен последним.
 ## Единый реестр 19 пунктов
 | № | Направление | Статус на 13.10.2026 | Оставшийся критерий |
 |---|---|---|---|
