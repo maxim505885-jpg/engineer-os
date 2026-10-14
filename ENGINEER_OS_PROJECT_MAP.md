@@ -1,6 +1,6 @@
-> **Актуально на 13.10.2026, обновление §163:** PR145 draft exact head `143dd4a21ee6c101ce52359e1f34caa3aefedbec` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run998 (1,060 tests, 7 skips), Windows run200 and Security Guard run790 passed on that exact head. README now documents deferred LIRA/SCAD/RES calculations and unverified physical-PC clean install. Corrected OCR diagnostics are not accuracy proof; all43 application pages remain BLOCK, item13 OPEN. CodeQL #45, Word physical semantics/layout, renderer mismatch, appendix linkage and B3 remain open. No ACCEPTED/100% claim.
+> **Актуально на 14.10.2026, обновление §164:** PR145 draft exact head `17cab7e6485c5b4d206764cc35a505e3d4570acc` (base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`). Core run999, Windows run201, Security Guard run794 passed. Page506 source-bound evidence confirms two OCR marker errors; full document remains blocked pending exhaustive source reconciliation. All43 application pages remain BLOCK and item13 OPEN. CodeQL #45, Word/B3 and physical release gates remain unresolved. No ACCEPTED/100% claim.
 
-> **Активный план на 13.10.2026 / §163:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Работаем №13: corrected transcript verified, but exhaustive source-ground-truth and Word/B3 qualification remain outstanding.
+> **Активный план на 14.10.2026 / §164:** [master-plan](https://github.com/maxim505885-jpg/engineer-os/blob/docs/project-map-handoff-20261005/docs/development/master-plan.md). Продолжать №13 / B2–B3; затем обязательные положительный кейс №14 и release gates №9/12/19.
 
 
 Обновлено: 13.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
@@ -3771,3 +3771,12 @@ CodeQL alert #45 (`py/path-injection`, `engineering/local_app/lock.py:52`) remai
 Next work: (1) reconcile every earlier TXT-derived source observation against corrected TSV/text and page crops; (2) complete the source-ground-truth ledger for pages492–534; (3) finish Word layout, fonts, OLE/print-stream and appendix-link qualification; (4) build and run the B3 source-bound corpus; (5) inspect and resolve CodeQL #45 from exact SARIF data; (6) continue items14–19 within the user's deferred-calculation boundary and record physical-PC/release evidence. Keep unresolved content BLOCK and preserve originals.
 
 No item13 closure, ACCEPTED, 100%, or release-complete claim is made. LIRA/SCAD/RES calculations remain user-deferred.
+
+
+## §164 — подтверждённые OCR-ошибки страницы 506 и exact-head CI (14.10.2026)
+
+PR145 остаётся draft на голове `17cab7e6485c5b4d206764cc35a505e3d4570acc`, база — `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`. Exact-head проверки завершились успешно: Core run999 — 1,060 тестов, 7 пропусков, включая HTTP/DOM, Chromium и vendored PDF.js; Windows runtime run201 — cold/repeat startup, restart/persistence, backup/locks, CLI, offline PDF viewer, local Ollama и четыре browser workflow; Security Guard run794. Они подтверждают указанные программные пути в CI, но не полноту OCR и не установку на физическом ПК.
+
+На hash-verified V4 PDF page506 при source-bound сверке corrected Tesseract TSV подтверждены две ошибки меток: source `П3 δ=0,3` → OCR `0=63` (confidence 0.0; bbox px `[6293,2258,80,30]`) и source `П1 δ=0,4` → OCR `_д=0,4` (confidence 23.882; bbox `[5012,3706,97,38]`). Во второй записи прежнее повреждённое наблюдение `_�=0,4` уточнено по исправленному transcript; OCR остаётся неверным. Протокол: `docs/qa/2026-10-13-stage13-page-506-source-bound-ocr.json`; source PDF SHA не менялся. Это два примера одной страницы, не оценка полноты всех43 листов.
+
+Пункт13 остаётся OPEN: все43 страницы всё ещё BLOCK в приложении; полная сверка исходного текста, символов, размеров, единиц и связей с элементами, физическая эквивалентность Word, OLE/vector/print semantics и полный B3 regression corpus не завершены. Также остаются открытыми CodeQL #45 (точный SARIF недоступен через текущий connector), renderer hash discrepancy, №14 положительный ACCEPTED кейс, №9/12 физические Windows gates и выпуск №19. Счёт плана: 8 DONE в ограниченном объёме / 8 PARTIAL / 3 OPEN. Никаких 100%, ACCEPTED или закрытия №13 не заявляется.
