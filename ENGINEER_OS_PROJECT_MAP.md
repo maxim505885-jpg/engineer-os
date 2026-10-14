@@ -3782,7 +3782,7 @@ PR145 остаётся draft на голове `17cab7e6485c5b4d206764cc35a505e3
 Пункт13 остаётся OPEN: все43 страницы всё ещё BLOCK в приложении; полная сверка исходного текста, символов, размеров, единиц и связей с элементами, физическая эквивалентность Word, OLE/vector/print semantics и полный B3 regression corpus не завершены. Также остаются открытыми CodeQL #45 (точный SARIF недоступен через текущий connector), renderer hash discrepancy, №14 положительный ACCEPTED кейс, №9/12 физические Windows gates и выпуск №19. Счёт плана: 8 DONE в ограниченном объёме / 8 PARTIAL / 3 OPEN. Никаких 100%, ACCEPTED или закрытия №13 не заявляется.
 
 
-## §93. 14.10.2026 — opaque-image text conflict and test-harness cleanup
+## §165 — opaque-image text conflict and test-harness cleanup (14.10.2026)
 
 On PR145, base `b2c29604d3a8a2a8079a670a7affca4f55b2b9c6`, head `fe76ee07273179e4ab694668654b39cd1cf76031`, the PDF native extractor now flags text spans painted before and fully covered by a later opaque image as `NATIVE_TEXT_OCCLUDED_BY_LATER_IMAGE`. It retains candidate text and emits bounded coordinate/hash metadata; the page remains BLOCK. The synthetic regression passes. A read-only review of one private user-provided report page reproduced 57 covered spans; its content and identity remain in private local QA, and both originals' SHA-256 values remained unchanged. OCR on the visible cover is only an unverified candidate.
 
