@@ -11,6 +11,8 @@ on:
       - "engineering/local_app/**"
       - "requirements-*.txt"
       - "e2e/**"
+      - "tests/test_data_backup.py"
+      - "tests/test_recovery_path_security.py"
   workflow_dispatch:
 
 permissions:
@@ -76,7 +78,7 @@ jobs:
       - name: Check Windows backup, locks and persisted restart
         shell: pwsh
         run: |
-          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat tests.test_emf_native_text tests.test_emf_bitmap tests.test_emf_bitfields tests.test_office_image_text_budget tests.test_pdf_visual_coverage_audit tests.test_region_readback_http tests.test_region_process_safety tests.test_single_line_ocr tests.test_printed_label_ocr tests.test_ocr_language_profile tests.test_pdf_readback_noop_rotation tests.test_word_field_context tests.test_document_tooling_http tests.test_word_formula_preview tests.test_table_readback tests.test_table_native_comparison tests.test_word_layer_pairs tests.test_emfplus_inventory tests.test_lira_native_results -v
+          & ./.venv/Scripts/python.exe -m unittest tests.test_local_backup_restore tests.test_backup_stream_compatibility tests.test_recovery_ui tests.test_windows_poststart_smoke tests.test_windows_shared_stat tests.test_data_backup tests.test_recovery_path_security tests.test_emf_native_text tests.test_emf_bitmap tests.test_emf_bitfields tests.test_office_image_text_budget tests.test_pdf_visual_coverage_audit tests.test_region_readback_http tests.test_region_process_safety tests.test_single_line_ocr tests.test_printed_label_ocr tests.test_ocr_language_profile tests.test_pdf_readback_noop_rotation tests.test_word_field_context tests.test_document_tooling_http tests.test_word_formula_preview tests.test_table_readback tests.test_table_native_comparison tests.test_word_layer_pairs tests.test_emfplus_inventory tests.test_lira_native_results -v
           if ($LASTEXITCODE -ne 0) { throw 'Windows regression failed' }
           ./.venv/Scripts/python.exe -m pip check
           if ($LASTEXITCODE -ne 0) { throw 'Windows dependencies inconsistent' }
