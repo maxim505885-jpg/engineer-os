@@ -2,8 +2,11 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from engineering.local_app.files import preserve_file
+from engineering.local_app.model import LocalModel
 from engineering.local_app.store import Store
 from engineering.local_app.worker import Worker
 
@@ -75,6 +78,47 @@ class AutomaticDocumentAnalysisTests(unittest.TestCase):
         self.assertGreater(receipts['total'],1)
         self.assertEqual(Store(self.store.root).analysis_receipts(self.session,job['id']),receipts)
         self.assertTrue(all(r['acceptance_granted'] is False for r in receipts['records']))
+
+    def test_loopback_ollama_response_is_bound_to_analysis_receipt_without_acceptance(self):
+        seen=[]
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self,*args):pass
+            def do_GET(self):
+                self.send_response(200);self.end_headers()
+                self.wfile.write(b'{"models":[{"name":"qwen3:8b","digest":"sha256:test-model"}]}')
+            def do_POST(self):
+                payload=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                seen.append((self.path,payload))
+                self.send_response(200);self.end_headers()
+                if self.path=='/api/show':
+                    body={'parameters':'temperature 0','template':'local test','system':'local test','model_info':{'family':'test'}}
+                else:
+                    body={'choices':[{'finish_reason':'stop','message':{'content':'Draft summary'}}]}
+                self.wfile.write(json.dumps(body).encode())
+        server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        self.addCleanup(lambda:(server.shutdown(),server.server_close(),thread.join()))
+        file=self.pdf(['local source page'])
+        self.store.enqueue(self.session,'Review this source',[file['id']])
+        model=LocalModel(f'http://127.0.0.1:{server.server_port}','qwen3:8b')
+        Worker(self.store,model).run_once()
+
+        job=self.result();report=job['result']['document_analysis']
+        receipt=self.store.analysis_receipts(self.session,job['id'])['records'][0]
+        self.assertEqual(job['state'],'SUCCEEDED')
+        self.assertEqual(receipt['status'],'COMPLETED')
+        self.assertEqual(receipt['text'],'Draft summary')
+        from engineering.local_app.analysis_identity import digest
+        self.assertEqual(receipt['response_sha256'],digest('Draft summary'))
+        self.assertEqual(receipt['refs'][0]['file_id'],file['id'])
+        self.assertEqual(receipt['refs'][0]['page'],1)
+        self.assertFalse(receipt['acceptance_granted'])
+        self.assertEqual(report['identity']['model']['provider'],'ollama')
+        self.assertEqual(report['identity']['model']['model_digest'],'sha256:test-model')
+        self.assertEqual(seen[0][0],'/api/show')
+        self.assertIn('/v1/chat/completions',[path for path,_ in seen])
+        self.assertFalse(job['result']['acceptance_granted'])
+        self.assertEqual(job['result']['final_audit'],'NOT_RUN')
 
     def test_core_roles_get_late_pages_automatically(self):
         f=self.pdf(['native']*20+['CORE_TAIL21'])
