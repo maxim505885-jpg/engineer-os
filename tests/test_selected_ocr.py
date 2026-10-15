@@ -1,3 +1,4 @@
+from tests.platform_capabilities import symlink_or_skip
 import unittest
 import hashlib
 import tempfile
@@ -78,11 +79,14 @@ class SelectedOCRTests(unittest.TestCase):
         from scripts.local_ocr_region import main
         with tempfile.TemporaryDirectory() as root:
             source=Path(root)/'source.pdf';source.write_bytes(b'original')
-            linked=Path(root)/'linked.json';linked.symlink_to(source)
             hard=Path(root)/'hard.json';hard.hardlink_to(source)
-            for target in (source,linked,hard):
-                argv=['ocr',str(source),'--page','1','--bbox','0','0','1','1','--sha256','unused','--output',str(target)]
-                with patch.object(sys,'argv',argv),patch('scripts.local_ocr_region.recognize_region') as recognize:
-                    with self.assertRaisesRegex(ValueError,'OUTPUT_ALREADY_EXISTS'):main()
-                    recognize.assert_not_called()
+            for kind in ('source','hardlink','symlink'):
+                with self.subTest(alias=kind):
+                    target=source if kind=='source' else hard
+                    if kind=='symlink':
+                        target=Path(root)/'linked.json';symlink_or_skip(target,source)
+                    argv=['ocr',str(source),'--page','1','--bbox','0','0','1','1','--sha256','unused','--output',str(target)]
+                    with patch.object(sys,'argv',argv),patch('scripts.local_ocr_region.recognize_region') as recognize:
+                        with self.assertRaisesRegex(ValueError,'OUTPUT_ALREADY_EXISTS'):main()
+                        recognize.assert_not_called()
             self.assertEqual(source.read_bytes(),b'original')

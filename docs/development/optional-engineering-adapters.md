@@ -1,3 +1,7 @@
+Актуальное расширение: [матрица восьми направлений](../qa/2026-10-15-eight-direction-completion.md).
+CLI теперь также предоставляет `ifc-geometry`, `ifc-requirements`, `dwg-convert`,
+`planar`, `rectangle`; они сохраняют optional dependencies и fail-closed acceptance.
+
 # Optional IFC, DXF comparison и контрольная балка
 
 Все инструменты локальные, бесплатные, без AI API. Они не являются автоматическим

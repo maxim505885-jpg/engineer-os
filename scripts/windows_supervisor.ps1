@@ -1,4 +1,4 @@
-param([switch]$NoBrowser,[switch]$SkipOpenWebUI,[switch]$ForceDependencyCheck)
+param([switch]$NoBrowser,[switch]$SkipOpenWebUI,[switch]$ForceDependencyCheck,[ValidateRange(1,65535)][int]$Port=8765)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 [Console]::OutputEncoding=[System.Text.UTF8Encoding]::new($false)
@@ -8,7 +8,7 @@ Set-Location $RepoRoot
 $RuntimeDir=Join-Path $RepoRoot '.engineer-os\runtime\windows'
 $LogDir=Join-Path $RepoRoot '.engineer-os\logs'
 $VenvPython=Join-Path $RepoRoot '.venv\Scripts\python.exe'
-$AppUrl='http://127.0.0.1:8765'
+$AppUrl="http://127.0.0.1:$Port"
 $OllamaUrl='http://127.0.0.1:11434'
 $OpenWebUIUrl='http://127.0.0.1:8080'
 $Model=if($env:ENGINEER_OS_LOCAL_MODEL){$env:ENGINEER_OS_LOCAL_MODEL}else{'qwen3:8b'}
@@ -23,16 +23,38 @@ function Wait-EngineerOS([int]$t){$d=(Get-Date).AddSeconds($t);do{if(Test-Engine
 function Import-EnvFile([string]$p){if(!(Test-Path $p)){return};foreach($line in Get-Content -LiteralPath $p -Encoding UTF8){$x=$line.Trim();if(!$x -or $x.StartsWith('#') -or !$x.Contains('=')){continue};$a=$x.Split('=',2);$n=$a[0].Trim();$v=$a[1].Trim();if($n -match '^[A-Za-z_][A-Za-z0-9_]*$'){[Environment]::SetEnvironmentVariable($n,$v,'Process')}};Log ('Loaded '+(Split-Path -Leaf $p))}
 
 function Ensure-Venv{
- if(Test-Path $VenvPython){& $VenvPython -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)";if($LASTEXITCODE-eq 0){return};throw 'Existing .venv uses unsupported Python'}
+ if(Test-Path $VenvPython){
+  & $VenvPython -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null
+  if($LASTEXITCODE-ne 0){throw 'Existing .venv uses unsupported Python'}
+  Ensure-VenvPip
+  return
+ }
  Log 'Creating .venv'
  $ok=$false
  if(Get-Command py -ErrorAction SilentlyContinue){
   & py -3.13 -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null
-  if($LASTEXITCODE-eq 0){& py -3.13 -m venv .venv;$ok=$true}
-  if(!$ok){& py -3 -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null;if($LASTEXITCODE-eq 0){& py -3 -m venv .venv;$ok=$true}}
+  if($LASTEXITCODE-eq 0){& py -3.13 -m venv .venv;if($LASTEXITCODE-ne 0){throw 'Python 3.13 was found but virtual-environment creation failed'};$ok=$true}
+  if(!$ok){& py -3 -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null;if($LASTEXITCODE-eq 0){& py -3 -m venv .venv;if($LASTEXITCODE-ne 0){throw 'Python 3 was found but virtual-environment creation failed'};$ok=$true}}
  }
- if(!$ok -and (Get-Command python -ErrorAction SilentlyContinue)){& python -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null;if($LASTEXITCODE-eq 0){& python -m venv .venv;$ok=$true}}
+ if(!$ok -and (Get-Command python -ErrorAction SilentlyContinue)){& python -c "import sys;raise SystemExit(0 if sys.version_info>=(3,12) else 2)" 2>$null;if($LASTEXITCODE-eq 0){& python -m venv .venv;if($LASTEXITCODE-ne 0){throw 'Python 3.12+ was found but virtual-environment creation failed'};$ok=$true}}
  if(!$ok -or !(Test-Path $VenvPython)){throw 'Python 3.12+ was not found. Install Python 3.13 x64 and run again.'}
+ Ensure-VenvPip
+}
+
+function Ensure-VenvPip{
+ $savedActionPreference=$ErrorActionPreference
+ $ErrorActionPreference='Continue'
+ try{& $VenvPython -m pip --version 2>$null;$pipStatus=$LASTEXITCODE}
+ finally{$ErrorActionPreference=$savedActionPreference}
+ if($pipStatus-eq 0){return}
+ Log 'Repairing missing Python venv pip with ensurepip'
+ & $VenvPython -m ensurepip --upgrade --default-pip
+ if($LASTEXITCODE-ne 0){throw 'Python venv has no working pip and ensurepip repair failed'}
+ $savedActionPreference=$ErrorActionPreference
+ $ErrorActionPreference='Continue'
+ try{& $VenvPython -m pip --version 2>$null;$pipStatus=$LASTEXITCODE}
+ finally{$ErrorActionPreference=$savedActionPreference}
+ if($pipStatus-ne 0){throw 'Python venv pip is still unavailable after ensurepip repair'}
 }
 
 function Ensure-Dependencies{
@@ -95,13 +117,13 @@ function Ensure-OpenWebUI{
 
 function Ensure-EngineerOS{
  if(Test-EngineerOS){Log 'ENGINEER OS already running';return}
- $listener=Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort 8765 -State Listen -ErrorAction SilentlyContinue
- if($listener){throw 'Port 8765 is occupied by another application'}
+ $listener=Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+ if($listener){throw "Port $Port is occupied by another application"}
  $env:ENGINEER_OS_LOCAL_PROVIDER='ollama'
  $env:ENGINEER_OS_LOCAL_MODEL_URL=$OllamaUrl
  $env:ENGINEER_OS_LOCAL_MODEL=$Model
  Log 'Starting ENGINEER OS server + built-in worker'
- Start-Process -FilePath $VenvPython -ArgumentList @('scripts\run_local_app.py','--port','8765','--no-browser') -WorkingDirectory $RepoRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'engineer-os.out.log') -RedirectStandardError (Join-Path $LogDir 'engineer-os.err.log')|Out-Null
+ Start-Process -FilePath $VenvPython -ArgumentList @('scripts\run_local_app.py','--port',"$Port",'--no-browser') -WorkingDirectory $RepoRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'engineer-os.out.log') -RedirectStandardError (Join-Path $LogDir 'engineer-os.err.log')|Out-Null
  Wait-EngineerOS 60
 }
 

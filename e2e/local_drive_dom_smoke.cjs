@@ -34,7 +34,12 @@ server.serve_forever()
     return response;
    });
   };}});}
-  dom=await open();let doc=dom.window.document;await until(()=>!doc.querySelector('#drive-import').disabled);
+  dom=await open();let doc=dom.window.document;try{await until(()=>!doc.querySelector('#drive-import').disabled);}catch(error){
+   console.error(JSON.stringify({stage:'drive-import-ready',buttonDisabled:doc.querySelector('#drive-import')?.disabled,
+    driveStatus:doc.querySelector('#drive-status')?.textContent,error:doc.querySelector('#error')?.textContent,
+    sessions:doc.querySelector('#sessions')?.textContent,serverStatus:await(await fetch(origin+'/api/status')).json(),
+    sessionsApi:await(await fetch(origin+'/api/sessions')).json(),jsdomErrors:errors}));throw error;
+  }
   assert.ok(doc.querySelector('#drive-status').textContent.includes('доступ проверяется при импорте'));
   doc.querySelector('#drive-source').value='https://drive.google.com/file/d/drive_original_123/view';
   doc.querySelector('#drive-sha').value=require('node:crypto').createHash('sha256').update('Original height 4m').digest('hex');

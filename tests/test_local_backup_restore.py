@@ -19,6 +19,24 @@ from engineering.local_app.lock import DataLock
 from engineering.local_app.store import Store
 
 
+def _stop_owned_process(child):
+    """Stop this fixture's Windows redirector and descendants; release pipe handles."""
+    try:
+        if child.poll() is None:
+            if sys.platform == 'win32':
+                result=subprocess.run(['taskkill','/PID',str(child.pid),'/T','/F'],
+                                      capture_output=True,timeout=10,check=False)
+                if result.returncode and child.poll() is None:
+                    raise RuntimeError('Owned fixture process tree could not be stopped')
+            else:
+                child.kill()
+        child.wait(timeout=10)
+        child.communicate(timeout=10)
+    finally:
+        for stream in (child.stdout,child.stderr):
+            if stream is not None:stream.close()
+
+
 class LocalDataBackupRestoreTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
@@ -177,7 +195,7 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
                 with DataLock(lock_root):
                     pass
         finally:
-            child.kill();child.wait(timeout=5)
+            _stop_owned_process(child)
         self.assertTrue((lock_root/"app.lock").exists(),"lock file is intentionally persistent")
         with DataLock(lock_root):
             pass
@@ -204,7 +222,7 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
                     break
             self.assertIn("ENGINEER OS: http://127.0.0.1:",line)
         finally:
-            first.kill();first.wait(timeout=5)
+            _stop_owned_process(first)
         second=start()
         try:
             line=""
@@ -219,7 +237,24 @@ class LocalDataBackupRestoreTests(unittest.TestCase):
                     break
             self.assertIn("ENGINEER OS: http://127.0.0.1:",line)
         finally:
-            second.kill();second.wait(timeout=5)
+            _stop_owned_process(second)
+
+class OwnedProcessCleanupTests(unittest.TestCase):
+    def test_windows_cleanup_kills_only_owned_tree_waits_and_closes_pipes(self):
+        child=mock.Mock(pid=12345);child.poll.return_value=None
+        with mock.patch('sys.platform','win32'),mock.patch('subprocess.run') as run:
+            run.return_value.returncode=0
+            _stop_owned_process(child)
+        self.assertEqual(run.call_args.args[0],['taskkill','/PID','12345','/T','/F'])
+        child.wait.assert_called_once_with(timeout=10)
+        child.communicate.assert_called_once_with(timeout=10)
+        child.stdout.close.assert_called_once();child.stderr.close.assert_called_once()
+    def test_tree_kill_failure_is_not_hidden(self):
+        child=mock.Mock(pid=12345);child.poll.return_value=None
+        with mock.patch('sys.platform','win32'),mock.patch('subprocess.run') as run:
+            run.return_value.returncode=1
+            with self.assertRaises(RuntimeError):_stop_owned_process(child)
+        child.stdout.close.assert_called_once();child.stderr.close.assert_called_once()
 
 
 if __name__=="__main__":
