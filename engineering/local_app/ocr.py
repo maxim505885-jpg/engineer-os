@@ -31,7 +31,8 @@ def _layout():
 
 def _paths():
     configured=os.environ.get('ENGINEER_OS_TESSERACT_BIN')
-    executable=Path(configured or shutil.which('tesseract') or '')
+    from .capability_receipts import find_tesseract
+    executable=find_tesseract() or Path()
     if not executable.is_absolute() or not executable.is_file():raise OCRError('OCR_ENGINE_UNAVAILABLE')
     configured_data=os.environ.get('ENGINEER_OS_TESSDATA_DIR') or os.environ.get('TESSDATA_PREFIX')
     if configured_data:
