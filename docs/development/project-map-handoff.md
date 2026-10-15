@@ -1,3 +1,9 @@
+# Текущая адресная сверка ТЗ — 16.10.2026
+
+Продолжение послеc3c814d без BIOS/WSL/Docker и без нового кода. [QA адресного чтения](../qa/2026-10-16-tor-addressed-review.md). В исходных PNG ТЗ вручную уточнены7.1/19.1(повторяющийся шифр раздела) и11.9(исключение заделки вскрытий).3UNCERTAINTY→RECORDED_FOR_REVIEW, не PASS: теперь45recorded/4uncertain из49, всеINTERPRETED/complianceNOT_VERIFIED/acceptancefalse. Новый private реестр: `.engineer-os/v1-completion/document-qualification/tor-addressed-20261016/requirements-register-revised.json`; старый сохранён.29оригиналов заново SHAchecked unchanged.
+
+Остаются7.2/8.1/11.6/13.3, полнота визуального/семантического чтения и source-bound reference. Пользователь пока продолжает без изменения BIOS; способ квалификации renderer не зафиксирован как исключительно WSL. Этап2OPEN. Новую регрессию не запускали:1288/34skips относятся к предыдущемуc3c814d. Предыдущие записи ниже — история.
+
 # Дополнение этапа2 — визуальные инструменты, 16.10.2026
 
 Продолжение той же codex/v1-completion-20261015 послеf4a8b24; разработка не начиналась заново. Добавлены source-bound diff-pdf CLI и offline Gotenberg pilot, без замены reader/acceptance или пользовательского server8765. [QA и ограничения](../qa/2026-10-16-document-visual-tooling.md), [команды](document-visual-tools.md).
