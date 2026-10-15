@@ -105,7 +105,7 @@ def _validate(result,file,request):
             if derived is not None or region.get('preprocessing','none')!='none':raise ValueError('Unexpected processed raster')
         else:
             from .ocr_label_preprocessing import prepare
-            expected,metadata=prepare(png,profile)
+            expected,metadata=prepare(png,profile,version=derived.get('transform_version') if isinstance(derived,dict) else None)
             if not isinstance(derived,dict) or region.get('preprocessing')!=profile or derived.get('source_png_sha256')!=raster['png_sha256'] or any(derived.get(k)!=v for k,v in metadata.items()):raise ValueError('OCR processed raster identity mismatch')
             if derived.get('png_sha256')!=hashlib.sha256(expected).hexdigest() or derived.get('png_base64')!=base64.b64encode(expected).decode('ascii'):raise ValueError('OCR processed raster content mismatch')
 

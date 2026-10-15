@@ -57,5 +57,12 @@ class PrintedLabelHTTPTests(unittest.TestCase):
   self.assertEqual(''.join(' '.join(b['text']for b in r['ocr_blocks']).split()),'Прогиб27мм');self.assertEqual(r['request_binding'],req)
   status,_,data=self.request('GET',route+'/'+item['id']);self.assertEqual(status,200);self.assertEqual(json.loads(data),item)
   self.assertEqual(self.store.snapshot(sid)['evidence'],[]);self.assertEqual(Path(self.store.get_file(f['id'])['path']).read_bytes(),raw)
+  # Persisted version-one derivatives remain verifiable after a profile upgrade.
+  from engineering.local_app.ocr_label_preprocessing import prepare
+  raster=r['ocr_dossier']['regions'][0]['input_raster']
+  png=base64.b64decode(c['png_base64'])
+  old,metadata=prepare(png,'italic',version=1)
+  r['ocr_dossier']['regions'][0]['processed_raster']=dict(metadata,source_png_sha256=raster['png_sha256'],png_sha256=hashlib.sha256(old).hexdigest(),png_base64=base64.b64encode(old).decode('ascii'))
+  _validate(r,f,req)
   r['ocr_dossier']['regions'][0]['processed_raster']['source_png_sha256']='0'*64
   with self.assertRaisesRegex(ValueError,'processed raster'):_validate(r,f,req)
