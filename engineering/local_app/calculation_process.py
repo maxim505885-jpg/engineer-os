@@ -1,6 +1,6 @@
 """Disposable calculator with wall time, output and native memory limits.
 
-Receives fixed calculation JSON only, never paths to original project files.
+Receives fixed calculation JSON or staged IFC copies, never original project paths.
 This is a resource boundary, not a network or hostile-code sandbox.
 """
 import json
@@ -18,11 +18,17 @@ TIMEOUT=120
 
 def run_calculation(tool,data,stop):
     if tool not in ('BEAM','PLANAR'):raise ValueError('CALCULATOR_NOT_SUPPORTED')
+    return _run_request(tool,data,stop)
+
+
+def _run_request(tool,data,stop):
+    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
+    if stop.is_set():raise ValueError('CALCULATION_CANCELLED')
     root=Path(__file__).resolve().parents[2]
     with tempfile.TemporaryDirectory(prefix='engineer-calculation-') as tmp:
         folder=Path(tmp);source=folder/'request.json';target=folder/'result.json'
         source.write_text(json.dumps(dict(tool=tool,data=data),allow_nan=False),encoding='utf-8')
-        command=[sys.executable,'-m','engineering.local_app.calculation_process',str(source),str(target)]
+        command=[sys.executable,'-m','engineering.local_app.calculation_process',str(source),str(target),str(MEMORY_BYTES),str(TIMEOUT)]
         environment=dict(os.environ,PYTHONPATH=str(root),OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
         started=time.monotonic();process=None;job=None;thread=None;child=None
         try:
@@ -53,7 +59,8 @@ def run_calculation(tool,data,stop):
                 if target.exists() and target.stat().st_size>MAX_OUTPUT:raise ValueError('CALCULATION_OUTPUT_LIMIT')
                 time.sleep(.02)
             if exitcode()!=0 or not target.is_file() or target.stat().st_size>MAX_OUTPUT:raise ValueError('CALCULATION_CHILD_FAILED')
-            value=json.loads(target.read_text(encoding='utf-8'))
+            def reject_constant(value):raise ValueError('CALCULATION_NONFINITE_OUTPUT')
+            value=json.loads(target.read_text(encoding='utf-8'),parse_constant=reject_constant)
             if not isinstance(value,dict) or value.get('acceptance_granted') is not False:raise ValueError('CALCULATION_RECEIPT_INVALID')
             value['resource_boundary']=dict(memory_bytes=MEMORY_BYTES,timeout_seconds=TIMEOUT,output_bytes=MAX_OUTPUT,
                 child_isolated=True,network_isolation_verified=False)
@@ -73,14 +80,16 @@ def run_calculation(tool,data,stop):
 
 
 def main():
+    source,target=map(Path,sys.argv[1:3])
+    memory,seconds=map(int,sys.argv[3:5])
+    if not 1<=memory<=MEMORY_BYTES or not 1<=seconds<=TIMEOUT:raise ValueError('RESOURCE_LIMIT_INVALID')
     if os.name!='nt':
         import resource
-        resource.setrlimit(resource.RLIMIT_AS,(MEMORY_BYTES,MEMORY_BYTES))
-        resource.setrlimit(resource.RLIMIT_CPU,(TIMEOUT,TIMEOUT))
-    source,target=map(Path,sys.argv[1:])
+        resource.setrlimit(resource.RLIMIT_AS,(memory,memory))
+        resource.setrlimit(resource.RLIMIT_CPU,(seconds,seconds))
     if source.stat().st_size>70000:raise ValueError('CALCULATION_REQUEST_LIMIT')
     request=json.loads(source.read_text(encoding='utf-8'));tool=request['tool'];data=request['data']
-    data['evidence_ids']=tuple(data['evidence_ids'])
+    if tool in ('BEAM','PLANAR'):data['evidence_ids']=tuple(data['evidence_ids'])
     if tool=='BEAM':
         from engineering.calculation.control_beam import BeamInput,calculate_beam
         result=calculate_beam(BeamInput(**data))
@@ -88,6 +97,9 @@ def main():
         from engineering.calculation.planar_control import PlanarInput,Node,Member,calculate_planar
         data.update(nodes=tuple(Node(**n) for n in data['nodes']),members=tuple(Member(**m) for m in data['members']),loads=tuple(tuple(load) for load in data['loads']))
         result=calculate_planar(PlanarInput(**data))
+    elif tool in ('IFC_INVENTORY','IFC_DIFF'):
+        from .ifc_process import evaluate_staged
+        result=evaluate_staged(tool,data)
     else:raise ValueError('CALCULATOR_NOT_SUPPORTED')
     raw=json.dumps(result,ensure_ascii=False,allow_nan=False)
     if len(raw.encode('utf-8'))>MAX_OUTPUT:raise ValueError('CALCULATION_OUTPUT_LIMIT')

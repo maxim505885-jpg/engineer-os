@@ -9,7 +9,7 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 |1. Сборка и окружение|T01: manifest/API/UI/worker identity; Windows Start/Start/Stop на18768; старый8765 правильно отклонён без остановки. T02: explicit offline probes PDF/OCR/IFC/beam|T02: воспроизводимый wheel/model profile, защищённый Office renderer, offline tables; T12: поставка именно этой сборки|
 |2. Документы и ТЗ|Повторно сверены все29исходников,828577307байт: SHA-256 совпали с corpus manifest,0добавлений/удалений|T03/T04: source-bound Windows layout, все объекты/формулы/ячейки и критические числа; image-only ТЗ и полнота V4. Наличие текста не закрывает эти проверки|
 |3. Приёмка и нормы|T05: явный локальный issuer, типизированные подписи, отзыв и freshness; UI; узкий положительный цикл PROJECT/plaintext через production issuer|Полная предметная приёмка T05 после T04/T06; T06 квалифицированный каталог полных нормативных источников и предметные сравнения|
-|4. Расчёты/CAD/IFC в приложении|Новая ENGINEERING_RUN в существующей очереди, immutable bounded input records, typed SI calculations; Chromium rectangle/beam; Windows bounded beam/frame child; схема/цифры/полная квитанция; cross-project isolation fix|Полная квалификация T07, bounded CAD/IFC jobs и GUID Evidence T08/T09; исходы обоих DWG; независимый реальный IFC|
+|4. Расчёты/CAD/IFC в приложении|ENGINEERING_RUN, immutable bounded inputs, SI calculations; Chromium rectangle/beam; Windows bounded child; IFC upload→bounded inventory→элементы/GUID/receipt; cross-project isolation|Полная квалификация T07; CAD T08; IFC geometry/requirements/diff/GUID Evidence T09; исходы обоих DWG; независимый реальный IFC|
 |5. Реальная приёмка, память, итог|Предварительные выводы сохранены; controlled production issuer→case→FINAL_AUDIT→memory проходит с сохранением PROJECT scope, source change/revocation снимают доверие|T10 положительный source-backed realcase; T11 FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
 |6. Windows и выпуск|Schema3 migration recovery, backup/restore журнала проверок и engineering inputs проверены; пользовательский8765 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
 
@@ -54,6 +54,29 @@ Assert и эталон не ослаблены. Общий suite не PASS, вы
 Пользователь подтвердил, что папка «ДЛЯ ИИ» содержит весь предоставленный
 комплект; отсутствующие IFC/SCAD и недоступные vendor results учитываются
 как ограничения этого комплекта, а не как обещанные дополнительные файлы.
+
+## Дополнение T09: декларации IFC в приложении
+
+Включён только IFC_INVENTORY. Оригинал до50MiB сохраняется без автоматического
+разбора. Явная задача копирует проверенные байты во временную папку; native
+parser запускается после применения того же Job Object/RLIMIT boundary,
+что используется расчётами. Рост исходника ограничен при хешировании и
+копировании; SHA перепроверяется после задачи. В UI показаны типы/GUID и
+полная квитанция; данные PROJECT, acceptance=false, Evidence автоматически
+не регистрируется. Geometry/requirements/diff и GUID Evidence не включены.
+
+104 интеграционных теста PASS, включая реальный Windows child, отказ при16MiB,
+отмену до запуска, source-change negative, source growth и backup/build/HTTP.
+Chromium: rectangle+actual beam, IFC inventory desktop/mobile, scoped review
+PASS; смена проекта очищает результаты. Независимое чтение кода без actionable
+замечаний; независимые tests недоступны из-за sandbox temp permissions.
+Добавлены optional Windows/Linux CI checks; пока это настройка, не receipt CI.
+Общая регрессия нового пакета записывается в ledger после завершения.
+
+Свежая общая Windows-регрессия после IFC-пакета: 1223tests,34skipped,
+1failure за346.688s. Единственный сбой — прежнее OCR «Прогиб20мм»→«Прогид20мм».
+Новых сбоев в этом проходе нет; общий suite не объявляется PASS. Новый код
+испытан в изолированной ветке, пользовательская работающая сборка не заменена.
 
 Отдельный V01 остаётся открытым: сохранённые результаты9ЛИРА-моделей ранее
 недоступны через vendor API (0x8000FFFF); наличие `.lir` не доказывает расчёт.

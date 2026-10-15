@@ -1,0 +1,2 @@
+# Optional disposable engineering worker; required for hard Windows Job limits.
+pywin32==312; sys_platform == "win32"

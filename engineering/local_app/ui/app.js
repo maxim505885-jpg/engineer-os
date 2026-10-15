@@ -388,10 +388,10 @@ modelCheck.onclick=async()=>{if(!current||pending||busy||uploading)return;pendin
 
 // Reuse the current project, durable queue and domain form components.
 const engineeringPanel=node('details');engineeringPanel.id='engineering-tools-panel';
-engineeringPanel.append(node('summary','Контрольные расчёты'),node('p','Введённые значения считаются предположениями (ASSUMED). Связь с файлом сохраняется, но не подтверждает измерения, материал или фактическую конструкцию. Единицы: Н, м, Па.'));
+engineeringPanel.append(node('summary','Расчёты и модель IFC'),node('p','Введённые значения считаются предположениями (ASSUMED), декларации IFC — проектными данными (PROJECT). Связь с файлом не подтверждает фактическую конструкцию. Единицы расчётов: Н, м, Па.'));
 const engineeringForm=node('form');engineeringForm.id='engineering-tools-form';
 const engineeringTool=domainSelect(engineeringForm,'Расчёт','engineering-tool');engineeringTool.id='engineering-tool';engineeringTool.className='';
-for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
+for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки'],['IFC_INVENTORY','IFC · декларации элементов, этажей и свойств']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
 const engineeringSource=domainSelect(engineeringForm,'Связанный исходник','engineering-source');engineeringSource.id='engineering-source';engineeringSource.className='';engineeringSource.required=true;
 const engineeringFields={};
 for(const [name,label] of Object.entries({width_m:'Ширина b, м',height_m:'Высота h, м',length_m:'Пролёт L, м',elastic_modulus_pa:'Модуль E, Па',inertia_m4:'Момент инерции Iz, м⁴',area_m2:'Площадь A, м²',load_n_m:'Равномерная нагрузка вниз q, Н/м'})){
@@ -415,6 +415,7 @@ function engineeringFieldState(){
  const names=engineeringTool.value==='RECTANGLE'?['width_m','height_m']:engineeringTool.value==='BEAM'?['length_m','elastic_modulus_pa','inertia_m4','area_m2','load_n_m']:[];
  for(const [name,input] of Object.entries(engineeringFields)){input.disabled=!names.includes(name);input.required=names.includes(name);input.parentElement.hidden=input.disabled;}
  planarLabel.hidden=engineeringTool.value!=='PLANAR';planarInput.disabled=planarLabel.hidden;planarInput.required=!planarLabel.hidden;
+ engineeringSubmit.textContent=engineeringTool.value==='IFC_INVENTORY'?'Прочитать декларации IFC':'Выполнить контрольный расчёт';
 }
 engineeringTool.onchange=engineeringFieldState;engineeringFieldState();
 async function loadEngineeringTools(){
@@ -425,7 +426,8 @@ async function loadEngineeringTools(){
   engineeringSubmit.disabled=!snap.files.length;engineeringResults.replaceChildren();
   const latest=snap.jobs.find(j=>j.mode==='ENGINEERING_RUN');
   engineeringNotice.textContent=latest?`Последняя задача: ${latest.state}. Инженерное принятие отсутствует.`:snap.files.length?'Исходники обновлены. Введите значения и проверьте единицы.':'Сначала прикрепите исходник в этом проекте.';
-  if(latest?.result?.engineering_run){const run=latest.result.engineering_run;engineeringResults.append(node('strong',run.tool+' · '+(run.result?.status||'НЕ ЗАВЕРШЕНО')),node('p','Входные значения: ASSUMED. Нормативная проверка: NOT_RUN.'),node('p',latest.result.text));
+  if(latest?.result?.engineering_run){const run=latest.result.engineering_run;engineeringResults.append(node('strong',run.tool+' · '+(run.result?.status||'НЕ ЗАВЕРШЕНО')),node('p','Входные данные: '+run.input_data_class+'. Нормативная проверка: NOT_RUN.'),node('p',latest.result.text));
+   if(run.tool==='IFC_INVENTORY'){const elements=run.result?.elements||[];for(const element of elements.slice(0,200))engineeringResults.append(node('p',element.type+' · GUID '+element.guid));if(elements.length>200)engineeringResults.append(node('p','Показаны первые 200 из '+elements.length+' элементов; весь список находится в квитанции.'));}
    engineeringDiagram(run,engineeringResults);const details=node('details');details.append(node('summary','Исходные значения, единицы и полная квитанция расчёта'),node('pre',JSON.stringify(run,null,2),'extraction-text'));engineeringResults.append(details);}
  }catch(e){error(e);}
 }
@@ -434,7 +436,7 @@ engineeringForm.onsubmit=async event=>{
  event.preventDefault();if(!current||pending||busy||uploading)return;
  if(engineeringSession!==current||!engineeringRevision){await loadEngineeringTools();return;}
  let options;
- try{options=engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON узлов и нагрузок.'));return;}
+ try{options=engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));if(engineeringTool.value!=='IFC_INVENTORY')options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON узлов и нагрузок.'));return;}
  pending=true;engineeringSubmit.disabled=true;controls();error(null);
  try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Расчёт поставлен в очередь. Результат появится в истории; обновите результаты после завершения.';await refresh();}
  catch(e){error(e);}finally{pending=false;engineeringSubmit.disabled=false;controls();}

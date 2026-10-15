@@ -11,7 +11,7 @@ from .store import identifier,ReviewConflict
 
 TOOLS=('BEAM','PLANAR','RECTANGLE','CAD_INVENTORY','CAD_DIFF','CAD_ANNOTATE',
        'DWG_CONVERT','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
-ENABLED=('BEAM','PLANAR','RECTANGLE')
+ENABLED=('BEAM','PLANAR','RECTANGLE','IFC_INVENTORY')
 MAX_REQUEST=65536
 
 
@@ -25,7 +25,7 @@ def revision(store,session_id):
 
 def catalog(store,session_id):
     return dict(schema='ENGINEER_OS_ENGINEERING_TOOLS_V1',expected_revision=revision(store,session_id),
-        tools=[dict(tool=tool,available=tool in ENABLED,reason=None if tool in ENABLED else 'BOUNDED_WORKER_OR_SOURCE_REVIEW_NOT_QUALIFIED') for tool in TOOLS],
+        tools=[dict(tool=tool,input_data_class='PROJECT' if tool.startswith('IFC_') else 'ASSUMED',available=tool in ENABLED,reason=None if tool in ENABLED else 'BOUNDED_WORKER_OR_SOURCE_REVIEW_NOT_QUALIFIED') for tool in TOOLS],
         input_data_class='ASSUMED',acceptance_granted=False)
 
 
@@ -81,7 +81,7 @@ def execute_engineering(store,job,stop):
     files=validate_request(store,job['session_id'],request,job['file_ids'])
     run=dict(schema='ENGINEER_OS_ENGINEERING_RUN_V1',tool=request['tool'],
         request_sha256=request['request_sha256'],sources=request['sources'],
-        input_data_class='ASSUMED',acceptance_granted=False,actual_structure_verified=False,
+        input_data_class='PROJECT' if request['tool'].startswith('IFC_') else 'ASSUMED',acceptance_granted=False,actual_structure_verified=False,
         normative_verification='NOT_RUN',result=None)
     envelope=dict(text='Инженерная задача: исходники связаны; расчёт ещё не завершён.',engineering_run=run,acceptance_granted=False)
     store.checkpoint(job['id'],envelope)
@@ -108,8 +108,8 @@ def execute_engineering(store,job,stop):
         from engineering.cad.roundtrip import compare_dxf
         result=compare_dxf(path,Path(files[1]['path']),source_sha256=sha)
     elif tool=='IFC_INVENTORY':
-        from engineering.bim.ifc_adapter import inspect_ifc
-        result=inspect_ifc(path,expected_sha256=sha)
+        from .ifc_process import run_ifc
+        result=run_ifc(tool=tool,sources=[(path,sha)],stop=stop)
     else:
         from engineering.bim.ifc_adapter import compare_ifc
         result=compare_ifc(path,Path(files[1]['path']),source_sha256=sha)
@@ -120,7 +120,8 @@ def execute_engineering(store,job,stop):
     numbers=result.get('results') or {}
     readable='\n'.join(labels[key]+': '+format(value,'.9g') for key,value in numbers.items() if key in labels and type(value) in (int,float))
     if not readable:readable='Подробные результаты и ограничения сохранены в квитанции задачи.'
-    envelope['text']='Инженерная задача '+tool+': '+result['status']+'. Введённые значения — ASSUMED; фактическая конструкция и нормы не приняты.\n'+readable
+    classification='Декларации модели — PROJECT' if tool.startswith('IFC_') else 'Введённые значения — ASSUMED'
+    envelope['text']='Инженерная задача '+tool+': '+result['status']+'. '+classification+'; фактическая конструкция и нормы не приняты.\n'+readable
     if len(envelope['text'])>24000:envelope['text']=envelope['text'][:24000]+'\n[Показана часть результата; полный receipt в задаче.]'
     if len(json.dumps(envelope,ensure_ascii=False,allow_nan=False).encode('utf-8'))>2*1024*1024:raise ValueError('ENGINEERING_RESULT_LIMIT')
     store.checkpoint(job['id'],envelope)

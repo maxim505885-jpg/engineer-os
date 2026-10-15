@@ -1,2 +1,3 @@
 # Optional independent benchmark adapter; no LIRA/SCAD execution implied.
+-r requirements-engineering-process.txt
 PyniteFEA==3.2.0

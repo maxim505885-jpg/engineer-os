@@ -33,14 +33,29 @@ tree. Linux applies RLIMIT_AS/RLIMIT_CPU before solver imports. Missing boundary
 support fails closed; this is not network isolation or an Office sandbox.
 Rectangle arithmetic is constant-size and executes directly.
 
-Database schema 2 adds `engineering_inputs`. Upgrading a version-0/1 database first
+Database schema 2 adds `engineering_inputs`; schema 3 adds the responsible-review
+journal. Upgrading an older supported database first
 makes and verifies its version-specific SQLite recovery copy. Previous schema-1
 applications reject schema 2, preventing an older worker from treating a new
 pending engineering job as chat. Backup/restore accepts both old versions and
-schema 2 and preserves input records and original IDs. Restore is always into a
+schemas 2/3 and preserves input records and original IDs. Restore is always into a
 new directory. User-owned data/server8765 are not migrated during development.
 
-CAD/IFC inventory/diff adapter code is present but not enabled by this package;
-DWG conversion, annotations, IFC geometry/requirements and GUID Evidence still
+IFC inventory now runs through the same disposable resource boundary. Upload
+preserves the original without parsing it; explicit execution stages a hashed
+copy up to 50 MiB. Hash reads and copies are bounded even if a source grows
+during reading. Source hashes are rechecked after the child. Native parsing
+starts only after the Windows Job/RLIMIT boundary is applied. Declared elements,
+storeys, properties and GUIDs remain PROJECT; no accepted Evidence is created.
+The UI lists at most 200 elements and retains the complete bounded receipt.
+The resource boundary does not claim network isolation or hostile-code safety.
+
+CAD and IFC diff adapter code remains disabled in the queue. DWG conversion,
+annotations, IFC geometry/requirements and GUID Evidence still
 need their own bounded worker/source review qualifications (T08/T09). Catalog
 entries explicitly show that boundary. The whole six-stage plan is not complete.
+
+Optional calculation/BIM requirements include the pinned Windows pywin32 worker
+dependency. The optional Linux/Windows workflow exercises these workers and
+the calculation/IFC/review Chromium scenarios; configured CI is not a CI PASS
+until a run on the published exact head actually succeeds.
