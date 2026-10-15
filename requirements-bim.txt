@@ -1,0 +1,2 @@
+# Optional read-only IFC intake. Never required for the base local application.
+ifcopenshell==0.8.5

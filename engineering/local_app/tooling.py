@@ -7,7 +7,7 @@ import shutil
 
 def report():
     packages={}
-    for name in ('docling','PyMuPDF','Pillow','ezdxf','olefile','img2table','paddleocr','pywebview','pyvista','pywin32'):
+    for name in ('docling','PyMuPDF','Pillow','ezdxf','olefile','img2table','paddleocr','pywebview','pyvista','pywin32','ifcopenshell','PyniteFEA'):
         try:packages[name]=importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:packages[name]='NOT_INSTALLED'
     from .doc_conversion import converter_identity
