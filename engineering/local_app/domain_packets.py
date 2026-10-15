@@ -60,7 +60,7 @@ def save(store,session_id,*,packet,expected_revision):
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']}
     kind=packet.get('kind');refs=[];files=[]
     if kind=='NORMATIVE':
-        if not {'kind','chain','norm_ids','actual_ids','quantities'}<=set(packet) or not set(packet)<= {'kind','chain','norm_ids','actual_ids','quantities','authority_review','authority_source','data_class_reviews','substantive_review'}:
+        if not {'kind','chain','norm_ids','actual_ids','quantities'}<=set(packet) or not set(packet)<= {'kind','chain','norm_ids','actual_ids','quantities','authority_review','authority_source','data_class_reviews','substantive_review','catalog_rule'}:
             raise ValueError('Invalid normative packet fields')
         chain=packet['chain']
         if not isinstance(chain,dict) or set(chain)!=set(CHAIN) or any(not isinstance(v,str) or not v.strip() or len(v)>1000 for v in chain.values()):raise ValueError('Complete bounded normative chain required')
@@ -74,6 +74,9 @@ def save(store,session_id,*,packet,expected_revision):
             numeric=compare_quantity(actual=q['actual']['value'].replace(',','.'),actual_unit=ALIASES.get(q['actual']['unit'],q['actual']['unit']),limit=q['limit']['value'].replace(',','.'),limit_unit=ALIASES.get(q['limit']['unit'],q['limit']['unit']),operator=q['operator'])
             if numeric['status']=='BLOCK':raise ValueError('Invalid numeric comparison: '+','.join(numeric['reasons']))
         gate_normative_verification(NormativeVerificationRecord(**chain,evidence_ids=tuple(dict.fromkeys(refs))))
+        if 'catalog_rule' in packet:
+            from .normative_catalog_binding import validate
+            validate(store,session_id,packet,candidates)
         if 'substantive_review' in packet:
             if not isinstance(packet['substantive_review'],dict):raise ValueError('Invalid substantive review')
             try:NormativeSubstantiveReview(**packet['substantive_review'])
@@ -199,8 +202,14 @@ def report(store,session_id,*,selected_files=None):
             r=candidates.get(expected['candidate_id'])
             if not r:reasons.append('CANDIDATE_MISSING');continue
             checked=source_check(store,session_id,r,expected,selected_files);sources.append(checked);reasons.extend(checked['reasons'])
-        linked=bool(sources and not reasons);numeric=None;intake=None
+        linked=bool(sources and not reasons);numeric=None;intake=None;catalog_rule=None
         if p['kind']=='NORMATIVE':
+            if 'catalog_rule' in p:
+                try:
+                    from .normative_catalog_binding import validate
+                    catalog_rule=validate(store,session_id,p,candidates)
+                except (ValueError,TypeError,KeyError,OSError):
+                    reasons.append('CATALOG_RULE_BINDING_INVALID');linked=False
             normative_text='\n'.join(candidates[e]['quote'] for e in p['norm_ids'] if e in candidates)
             actual_text='\n'.join(candidates[e]['quote'] for e in p['actual_ids'] if e in candidates)
             if any(p['chain'][k] not in normative_text for k in ('document','edition','clause','requirement')) or p['chain']['actual_condition'] not in actual_text:
@@ -346,7 +355,7 @@ def report(store,session_id,*,selected_files=None):
         if software_ready:reasons.append('ENGINEERING_DECISION_NOT_RUN')
         rows.append(dict(id=event['id'],kind=p['kind'],revision=event['revision'],packet=p,sources=sources,
             status='BLOCK',traceability='SOURCE_LINKED' if linked else 'NOT_ESTABLISHED',
-            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,
+            reasons=list(dict.fromkeys(reasons)),arithmetic=numeric,intake=intake,catalog_rule=catalog_rule,
             authority_review=authority_review,authority_source=authority_source,data_class_review=data_class_review,
             substantive_decision=substantive_decision,
             semantic_review=semantic_review,exchange_review=exchange_review,solver_review=solver_review,

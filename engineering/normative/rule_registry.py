@@ -27,6 +27,9 @@ class Rule:
     operator: str
     limit: str
     limit_unit: str
+    clause_text: str = ''
+    source_locator: str = ''
+    accepted_data_classes: tuple[str,...] = ('PROJECT','ACTUAL','MEASURED','TESTED','CALCULATED')
 
 @dataclass(frozen=True)
 class RuleRegistry:
@@ -85,6 +88,7 @@ def assess_rule(registry, receipt):
             if not isinstance(rule,Rule):return stop('TYPED_RULE_REQUIRED')
             if not all(_text(getattr(rule,key)) for key in ('rule_id','rule_version','document','edition','scope','clause','requirement')):return stop('RULE_IDENTITY_SCOPE_AND_REQUIREMENT_REQUIRED')
             if not _sha(rule.normative_source_sha256):return stop('NORMATIVE_SOURCE_SHA256_REQUIRED')
+            if (not isinstance(rule.accepted_data_classes,tuple) or not rule.accepted_data_classes or len(set(rule.accepted_data_classes))!=len(rule.accepted_data_classes) or any(c not in ('PROJECT','ACTUAL','MEASURED','TESTED','CALCULATED') for c in rule.accepted_data_classes)):return stop('INVALID_RULE_DATA_CLASSES')
             key=(rule.rule_id,rule.rule_version)
             if key in seen:return stop('DUPLICATE_RULE_VERSION')
             seen.add(key)
@@ -125,6 +129,7 @@ def assess_rule(registry, receipt):
         not all(_text(value) for value in actual.evidence_ids) or len(set(actual.evidence_ids))!=len(actual.evidence_ids)):
         return stop('ACTUAL_EVIDENCE_IDS_REQUIRED')
     if actual.data_class not in ('PROJECT','ACTUAL','MEASURED','TESTED','CALCULATED'):return stop('ACTUAL_INPUT_DATA_CLASS_NOT_SUPPORTED')
+    if actual.data_class not in rule.accepted_data_classes:return stop('ACTUAL_INPUT_DATA_CLASS_NOT_ALLOWED_BY_RULE')
     comparison=compare_quantity(actual=actual.value,actual_unit=actual.unit,limit=rule.limit,limit_unit=rule.limit_unit,operator=rule.operator)
     if comparison['status']=='BLOCK':return dict(base,comparison=comparison,reasons=['QUANTITY_COMPARISON_BLOCKED'])
     recorded=asdict(receipt)

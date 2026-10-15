@@ -25,7 +25,7 @@ jobs:
       - name: Validate dependencies
         run: python -m pip check
       - name: Check IFC, CAD roundtrip and analytical benchmark
-        run: python -m unittest tests.test_ifc_worker_limits tests.test_ifc_jobs_complete tests.test_ifc_evidence_ui tests.test_ifc_spatial_containment tests.test_engineering_jobs tests.test_engineering_verification tests.test_engineering_verification_http tests.test_ifc_adapter tests.test_ifc_geometry_completion tests.test_control_beam tests.test_planar_control tests.test_section_control tests.test_engineering_tools_cli tests.test_cad_roundtrip_comparison tests.test_cad_conversion_route tests.test_docling_runtime_losses tests.test_normative_rule_registry tests.test_source_corpus_audit -v
+        run: python -m unittest tests.test_ifc_worker_limits tests.test_ifc_jobs_complete tests.test_ifc_evidence_ui tests.test_ifc_spatial_containment tests.test_engineering_jobs tests.test_engineering_verification tests.test_engineering_verification_http tests.test_ifc_adapter tests.test_ifc_geometry_completion tests.test_control_beam tests.test_planar_control tests.test_section_control tests.test_engineering_tools_cli tests.test_cad_roundtrip_comparison tests.test_cad_conversion_route tests.test_docling_runtime_losses tests.test_normative_rule_registry tests.test_normative_catalog tests.test_source_corpus_audit -v
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
