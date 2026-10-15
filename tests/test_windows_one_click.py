@@ -10,6 +10,8 @@ class WindowsOneClickContractTests(unittest.TestCase):
     def test_cmd_is_only_one_click_entrypoint(self):
         cmd=self.text('Start_ENGINEER_OS.cmd')
         self.assertIn('scripts\\windows_supervisor.ps1',cmd)
+        self.assertIn('windows_supervisor.ps1" %*',cmd)
+        self.assertIn('set "PSModulePath=%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\Modules;%PSModulePath%"',cmd)
         self.assertNotIn('run_local_app.py',cmd)
         self.assertIn('ExecutionPolicy Bypass',cmd)
         self.assertIn('windows-supervisor.log',cmd)
@@ -53,7 +55,10 @@ class WindowsOneClickContractTests(unittest.TestCase):
 
     def test_stop_does_not_kill_reusable_model_services(self):
         stop=self.text('scripts/windows_stop.ps1')
-        self.assertIn('LocalPort 8765',stop)
+        stop_cmd=self.text('Stop_ENGINEER_OS.cmd')
+        self.assertIn('set "PSModulePath=%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\Modules;%PSModulePath%"',stop_cmd)
+        self.assertIn('[int]$Port=8765',stop)
+        self.assertIn('LocalPort $Port',stop)
         self.assertNotIn('11434',stop)
         self.assertNotIn('8080',stop)
 

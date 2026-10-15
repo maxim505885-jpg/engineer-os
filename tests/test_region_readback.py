@@ -1,3 +1,4 @@
+from tests.platform_capabilities import symlink_or_skip
 """Independent PDF fixtures for selected-region candidate readback."""
 import base64
 import hashlib
@@ -60,8 +61,9 @@ class RegionReadbackTests(unittest.TestCase):
         for number in (True,0,2,1.5):
             with self.assertRaisesRegex(ValueError,'INVALID_PAGE'):reader.recognize(self.source,number,[0,0,10,10],sha)
         with self.assertRaisesRegex(ValueError,'SHA256'):reader.recognize(self.source,1,[0,0,10,10],'0'*64)
-        link=self.source.with_name('alias.pdf');link.symlink_to(self.source)
-        with self.assertRaisesRegex(ValueError,'UNSAFE_SOURCE'):reader.recognize(link,1,[0,0,10,10],sha)
+        with self.subTest(fixture='symlink'):
+            link=self.source.with_name('alias.pdf');symlink_or_skip(link,self.source)
+            with self.assertRaisesRegex(ValueError,'UNSAFE_SOURCE'):reader.recognize(link,1,[0,0,10,10],sha)
 
     def test_limits_checked_and_source_change_detected(self):
         with fitz.open() as doc:
