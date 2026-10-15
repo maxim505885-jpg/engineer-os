@@ -1,6 +1,16 @@
-# Текущий результат — §92: PR108 merged; мастер-план синхронизирован с незакрытой аномалией receipts (документация, без изменения reader)
+# Текущий результат — 15.10.2026: PR150 merged, полный V4 rerun BLOCK
 
 # Передача состояния ENGINEER OS
+
+Официальный candidate `integration/release-candidate-v1` — `db29e4c946e4db5e088e8fdd727c6165365dcc4d`. PR150 слит; Core Tests, Windows local runtime и Repository Security Guard PASS на merged commit. Последнее состояние и полный критерий пунктов — `ENGINEER_OS_PROJECT_MAP.md` §67 и `docs/development/master-plan.md`.
+
+V4 Docling v12 rerun охватил 534/534 страниц и 31 268 source-located blocks, но завершился 52 BLOCK / 55 UNCERTAINTY; 31 table-loss warning, а независимое сравнение нативного текста дало 74,8% weighted unique-token recall. DOCX intake совпал с приватным манифестом; Stage7 обработал 553/553 logical units, 112 BLOCK, auxiliary layout не верифицирован. Полнота PDF/Word остаётся BLOCK; private source identities/hashes не публиковать.
+
+Свежий Stage7/8 одного реального объекта — BLOCK/BLOCK, `ACCEPTED=false`. №6 нормативные gates открыты, LIRA/SCAD расчёты отложены. №15/16 ждут квалифицированного ACCEPTED case; №17 roundtrip не подтверждён; №18 provider receipt/live specialist run не подтверждён; №9 физический Windows cold-start/reboot и №19 release audit остаются незавершёнными. Ни одна программная проверка не заменяет engineering acceptance.
+
+Исторические записи ниже описывают состояния на дату соответствующего PR и не должны использоваться как текущий статус.
+
+## Историческое состояние — §92: PR108 merged; мастер-план синхронизирован с незакрытой аномалией receipts
 
 Активная задача: выполнение пяти критериев, раздел68 живой карты. Единый план содержит19 пунктов:8✅/8🟡/3❌.
 
