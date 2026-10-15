@@ -37,6 +37,9 @@ def main(argv=None):
                          timeout=int(settings.get('ENGINEER_OS_LOCAL_MODEL_TIMEOUT','180')))
         with DataLock(args.data_dir):
             store=Store(args.data_dir)
+            from engineering.local_app.build_identity import BuildIdentity
+            store.runtime_build=BuildIdentity(ROOT,manifest_path=os.environ.get('ENGINEER_OS_BUILD_MANIFEST'),
+                                             profile=os.environ.get('ENGINEER_OS_PROFILE','native'),discover_git=True)
             server=make_server(store,model,port=args.port)
             store.interrupt_running()
             worker=Worker(store,model)

@@ -24,6 +24,8 @@ class LocalServer(ThreadingHTTPServer):
 
 def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT,recovery_only=False,selection_path=None):
     if host!='127.0.0.1':raise ValueError('Application must bind to 127.0.0.1 only')
+    from .build_identity import runtime_build,runtime_report
+    runtime_build(store)
     from .drive_import import DriveImportError,configured_client,import_original
     if drive_client is _DRIVE_DEFAULT:drive_client=configured_client()
     class Handler(BaseHTTPRequestHandler):
@@ -105,6 +107,8 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     except OSError as exc:raise RequestProblem(400,str(exc)) from None
                     finally:self.server.data_slots.release()
                 if recovery_only:raise RequestProblem(409,'Режим обслуживания: чат и модель не запускаются.')
+                if route=='/api/build' and not post:
+                    return self.respond(200,runtime_report(store))
                 if route=='/api/tooling' and not post:
                     from .tooling import report
                     return self.respond(200,report())
@@ -113,7 +117,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                         if time.monotonic()-self.server.health_at>15:
                             self.server.health_cache=model.health();self.server.health_at=time.monotonic()
                         health=self.server.health_cache
-                    return self.respond(200,dict(model=health,engineering_status='UNCERTAINTY',acceptance_granted=False))
+                    return self.respond(200,dict(model=health,build=runtime_report(store),engineering_status='UNCERTAINTY',acceptance_granted=False))
                 if route=='/api/drive/status' and not post:
                     configured=self.server.drive_client is not None
                     return self.respond(200,dict(configured=configured,connection_verified=False,note='Настройки Drive есть; доступ проверяется при импорте.' if configured else 'Drive не настроен на локальном сервере. Можно загрузить файл вручную.'))

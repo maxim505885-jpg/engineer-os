@@ -116,7 +116,11 @@ function Ensure-OpenWebUI{
 }
 
 function Ensure-EngineerOS{
- if(Test-EngineerOS){Log 'ENGINEER OS already running';return}
+ if(Test-EngineerOS){
+  & $VenvPython (Join-Path $RepoRoot 'scripts\check_running_build.py') --app-url $AppUrl
+  if($LASTEXITCODE-ne 0){throw 'Port has another or changed ENGINEER OS build. Keep it running; choose another port or stop that instance explicitly.'}
+  Log 'ENGINEER OS already running';return
+ }
  $listener=Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
  if($listener){throw "Port $Port is occupied by another application"}
  $env:ENGINEER_OS_LOCAL_PROVIDER='ollama'
@@ -125,6 +129,8 @@ function Ensure-EngineerOS{
  Log 'Starting ENGINEER OS server + built-in worker'
  Start-Process -FilePath $VenvPython -ArgumentList @('scripts\run_local_app.py','--port',"$Port",'--no-browser') -WorkingDirectory $RepoRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $LogDir 'engineer-os.out.log') -RedirectStandardError (Join-Path $LogDir 'engineer-os.err.log')|Out-Null
  Wait-EngineerOS 60
+ & $VenvPython (Join-Path $RepoRoot 'scripts\check_running_build.py') --app-url $AppUrl
+ if($LASTEXITCODE-ne 0){throw 'Started ENGINEER OS build does not match the selected source/profile'}
 }
 
 try{
