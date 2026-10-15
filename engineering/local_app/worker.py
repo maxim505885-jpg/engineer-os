@@ -29,6 +29,12 @@ class Worker:
         try:
             if stop.is_set():
                 self.store.fail(job['id'],'Execution interrupted.');return True
+            if job['mode']=='ENGINEERING_RUN':
+                from .engineering_jobs import execute_engineering
+                result=execute_engineering(self.store,job,stop)
+                if stop.is_set():self.store.fail(job['id'],'Engineering run interrupted; inputs and completed receipt preserved.')
+                else:self.finish(job['id'],result)
+                return True
             if job['mode'].startswith('EXTRACT_'):
                 from .extraction import execute
                 result=execute(self.store,job,stop)

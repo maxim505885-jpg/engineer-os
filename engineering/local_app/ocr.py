@@ -6,7 +6,6 @@ import io
 import math
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 import time
@@ -30,7 +29,6 @@ def _layout():
 
 
 def _paths():
-    configured=os.environ.get('ENGINEER_OS_TESSERACT_BIN')
     from .capability_receipts import find_tesseract
     executable=find_tesseract() or Path()
     if not executable.is_absolute() or not executable.is_file():raise OCRError('OCR_ENGINE_UNAVAILABLE')

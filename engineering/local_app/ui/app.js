@@ -383,3 +383,76 @@ async function loadModelForm(){if(modelFormLoaded)return;try{const {model}=await
 modelPanel.addEventListener('toggle',()=>{if(modelPanel.open)loadModelForm();});
 modelForm.onsubmit=async event=>{event.preventDefault();if(pending||uploading)return;pending=true;modelSave.disabled=true;controls();error(null);try{await api('/api/model/settings',{method:'POST',body:{ENGINEER_OS_LOCAL_MODEL_URL:modelFields.URL.value.trim(),ENGINEER_OS_LOCAL_MODEL:modelFields.MODEL.value.trim(),ENGINEER_OS_LOCAL_MODEL_TIMEOUT:modelFields.TIMEOUT.value,ENGINEER_OS_LOCAL_PROVIDER:provider.value,ENGINEER_OS_LOCAL_THINK:thinking.value}});modelNotice.textContent='Настройки сохранены и применены. Проверка ответа создаст отдельный диалог без файлов и прежней истории.';await status();}catch(e){error(e);}finally{pending=false;modelSave.disabled=false;controls();}};
 modelCheck.onclick=async()=>{if(!current||pending||busy||uploading)return;pending=true;modelCheck.disabled=true;controls();error(null);try{const session=await api('/api/sessions',{method:'POST',body:{title:'Диагностика локальной модели'}});await switchSession(session.id,{internal:true});await api(`/api/sessions/${session.id}/jobs`,{method:'POST',body:{prompt:'Диагностика локальной модели: ответь коротко на русском, что запрос получен.',file_ids:[],mode:'CHAT'}});modelNotice.textContent='Проверка поставлена в очередь. Фактический результат и ошибки появятся в задачах и истории.';await refresh();}catch(e){error(e);}finally{pending=false;modelCheck.disabled=false;controls();}};
+
+// Reuse the current project, durable queue and domain form components.
+const engineeringPanel=node('details');engineeringPanel.id='engineering-tools-panel';
+engineeringPanel.append(node('summary','Контрольные расчёты'),node('p','Введённые значения считаются предположениями (ASSUMED). Связь с файлом сохраняется, но не подтверждает измерения, материал или фактическую конструкцию. Единицы: Н, м, Па.'));
+const engineeringForm=node('form');engineeringForm.id='engineering-tools-form';
+const engineeringTool=domainSelect(engineeringForm,'Расчёт','engineering-tool');engineeringTool.id='engineering-tool';engineeringTool.className='';
+for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
+const engineeringSource=domainSelect(engineeringForm,'Связанный исходник','engineering-source');engineeringSource.id='engineering-source';engineeringSource.className='';engineeringSource.required=true;
+const engineeringFields={};
+for(const [name,label] of Object.entries({width_m:'Ширина b, м',height_m:'Высота h, м',length_m:'Пролёт L, м',elastic_modulus_pa:'Модуль E, Па',inertia_m4:'Момент инерции Iz, м⁴',area_m2:'Площадь A, м²',load_n_m:'Равномерная нагрузка вниз q, Н/м'})){
+ const input=domainInput(engineeringForm,label,name);input.id='engineering-'+name;input.type='number';input.step='any';input.min=name==='load_n_m'?'0':'0.000000000000001';engineeringFields[name]=input;
+}
+const planarLabel=node('label','Узлы, стержни, закрепления и узловые нагрузки · JSON в единицах Н, м, Па');
+const planarInput=node('textarea');planarInput.id='engineering-planar';planarInput.maxLength=60000;planarInput.rows=12;planarLabel.append(planarInput);engineeringForm.append(planarLabel);
+const engineeringNotice=node('p','Откройте проект и выберите исходник.');engineeringNotice.setAttribute('role','status');
+const engineeringSubmit=node('button','Выполнить контрольный расчёт');engineeringSubmit.type='submit';engineeringSubmit.id='engineering-submit';engineeringForm.append(engineeringSubmit);
+const engineeringReload=node('button','Обновить исходники и результаты');engineeringReload.type='button';
+const engineeringResults=node('div');engineeringResults.id='engineering-results';
+engineeringPanel.append(engineeringForm,engineeringNotice,engineeringReload,engineeringResults);domainPanel.insertBefore(engineeringPanel,normativeForm);
+let engineeringRevision=null,engineeringSession=null;
+document.addEventListener('engineer-session-change',()=>{
+ engineeringRevision=null;engineeringSession=null;engineeringResults.replaceChildren();engineeringSource.replaceChildren();
+ for(const input of Object.values(engineeringFields))input.value='';planarInput.value='';engineeringTool.value='RECTANGLE';engineeringFieldState();
+ engineeringNotice.textContent='Выбран другой проект. Загрузите его исходники.';engineeringSubmit.disabled=true;
+ if(engineeringPanel.open)loadEngineeringTools();
+});
+function engineeringFieldState(){
+ const names=engineeringTool.value==='RECTANGLE'?['width_m','height_m']:engineeringTool.value==='BEAM'?['length_m','elastic_modulus_pa','inertia_m4','area_m2','load_n_m']:[];
+ for(const [name,input] of Object.entries(engineeringFields)){input.disabled=!names.includes(name);input.required=names.includes(name);input.parentElement.hidden=input.disabled;}
+ planarLabel.hidden=engineeringTool.value!=='PLANAR';planarInput.disabled=planarLabel.hidden;planarInput.required=!planarLabel.hidden;
+}
+engineeringTool.onchange=engineeringFieldState;engineeringFieldState();
+async function loadEngineeringTools(){
+ if(!current)return;const session=current;
+ try{const [catalog,snap]=await Promise.all([api(`/api/sessions/${session}/engineering-runs`),api(`/api/sessions/${session}`)]);if(current!==session)return;
+  engineeringRevision=catalog.expected_revision;engineeringSession=session;const prior=engineeringSource.value;engineeringSource.replaceChildren();
+  for(const file of snap.files){const option=node('option',file.name);option.value=file.id;engineeringSource.append(option);}if(snap.files.some(f=>f.id===prior))engineeringSource.value=prior;
+  engineeringSubmit.disabled=!snap.files.length;engineeringResults.replaceChildren();
+  const latest=snap.jobs.find(j=>j.mode==='ENGINEERING_RUN');
+  engineeringNotice.textContent=latest?`Последняя задача: ${latest.state}. Инженерное принятие отсутствует.`:snap.files.length?'Исходники обновлены. Введите значения и проверьте единицы.':'Сначала прикрепите исходник в этом проекте.';
+  if(latest?.result?.engineering_run){const run=latest.result.engineering_run;engineeringResults.append(node('strong',run.tool+' · '+(run.result?.status||'НЕ ЗАВЕРШЕНО')),node('p','Входные значения: ASSUMED. Нормативная проверка: NOT_RUN.'),node('p',latest.result.text));
+   engineeringDiagram(run,engineeringResults);const details=node('details');details.append(node('summary','Исходные значения, единицы и полная квитанция расчёта'),node('pre',JSON.stringify(run,null,2),'extraction-text'));engineeringResults.append(details);}
+ }catch(e){error(e);}
+}
+engineeringPanel.addEventListener('toggle',()=>{if(engineeringPanel.open)loadEngineeringTools();});engineeringReload.onclick=loadEngineeringTools;
+engineeringForm.onsubmit=async event=>{
+ event.preventDefault();if(!current||pending||busy||uploading)return;
+ if(engineeringSession!==current||!engineeringRevision){await loadEngineeringTools();return;}
+ let options;
+ try{options=engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON узлов и нагрузок.'));return;}
+ pending=true;engineeringSubmit.disabled=true;controls();error(null);
+ try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Расчёт поставлен в очередь. Результат появится в истории; обновите результаты после завершения.';await refresh();}
+ catch(e){error(e);}finally{pending=false;engineeringSubmit.disabled=false;controls();}
+};
+function engineeringDiagram(run,container){
+ const data=run.result?.inputs;if(!data)return;
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 300 170');svg.setAttribute('role','img');svg.setAttribute('aria-label','Условная схема введённых данных');svg.style.width='100%';svg.style.maxHeight='170px';
+ function shape(tag,attributes,text){const element=document.createElementNS(svg.namespaceURI,tag);for(const [key,value] of Object.entries(attributes))element.setAttribute(key,String(value));if(text!==undefined)element.textContent=text;svg.append(element);}
+ const line=(x1,y1,x2,y2)=>shape('line',{x1,y1,x2,y2,stroke:'currentColor','stroke-width':2});
+ if(run.tool==='RECTANGLE'){
+  const scale=110/Math.max(data.width_m,data.height_m),w=Math.max(1,data.width_m*scale),h=Math.max(1,data.height_m*scale);
+  shape('rect',{x:145-w/2,y:80-h/2,width:w,height:h,fill:'none',stroke:'currentColor','stroke-width':2});shape('text',{x:10,y:150},`b = ${data.width_m} м; h = ${data.height_m} м`);
+ }else if(run.tool==='BEAM'){
+  line(30,90,270,90);shape('polygon',{points:'30,90 20,108 40,108',fill:'none',stroke:'currentColor'});shape('polygon',{points:'270,90 260,108 280,108',fill:'none',stroke:'currentColor'});
+  for(let x=40;x<270;x+=30){line(x,45,x,80);line(x,80,x-4,74);line(x,80,x+4,74);}shape('text',{x:20,y:30},`q = ${data.load_n_m} Н/м`);shape('text',{x:20,y:145},`L = ${data.length_m} м`);
+ }else if(run.tool==='PLANAR'&&Array.isArray(data.nodes)&&Array.isArray(data.members)){
+  const xs=data.nodes.map(n=>n.x_m),ys=data.nodes.map(n=>n.y_m);const minX=Math.min(...xs),minY=Math.min(...ys),spanX=Math.max(...xs)-minX,spanY=Math.max(...ys)-minY;
+  const scale=Math.min(240/(spanX||1),110/(spanY||1));const points=new Map(data.nodes.map(n=>[n.name,[30+(n.x_m-minX)*scale,140-(n.y_m-minY)*scale]]));
+  for(const member of data.members){const a=points.get(member.start),b=points.get(member.end);if(a&&b)line(...a,...b);}
+  for(const n of data.nodes){const [x,y]=points.get(n.name);shape('circle',{cx:x,cy:y,r:3,fill:'currentColor'});shape('text',{x:x+4,y:y-5,'font-size':9},n.name.slice(0,24)+(n.fix_x||n.fix_y||n.fix_rz?' [закр.]':''));}
+ }else{return;}
+ container.append(node('p','Условная схема введённых данных'),svg);
+}

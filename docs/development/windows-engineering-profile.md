@@ -40,3 +40,16 @@ was found in standard ProgramFiles locations or registered application paths;
 that is not an exhaustive disk-wide absence claim. T02 remains open until
 offline models, wheel/model provenance, Office isolation and reproducible
 preparation are qualified.
+
+The full native test pass with the installed fast models exposed one genuine
+unresolved glyph mismatch in the real printed-label corpus (`Прогиб20мм` became
+`Прогид20мм`). Parent-to-child executable propagation and UTF-8 fixture decoding
+were corrected separately; the recognition assertion remains unchanged. Official
+`tessdata_best` rus/eng models at revision
+`e12c65a915945e4c28e237a9b52bc4a8f39a0cec` were evaluated in a separate profile and
+rejected: five fixture mismatches, including Latin reinforcement notation. They
+were not promoted or installed over system models. Their private provenance
+receipt retains the upstream URLs, SHA-256, byte counts and Apache-2.0 license.
+The model source is the official [Tesseract repository](https://github.com/tesseract-ocr/tessdata_best).
+This reinforces the distinction between passing a simple OCR probe and qualifying
+the real engineering corpus.

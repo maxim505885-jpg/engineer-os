@@ -140,6 +140,12 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if not post:return self.respond(200,report(store,parts[2]))
                     body=self.json_body()
                     return self.respond(201,save(store,parts[2],packet=body.get('packet'),expected_revision=body.get('expected_revision')))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='engineering-runs':
+                    from .engineering_jobs import enqueue_engineering,catalog
+                    if not post:return self.respond(200,catalog(store,parts[2]))
+                    body=self.json_body()
+                    if set(body)!={'tool','input_file_ids','options','expected_revision'}:raise ValueError('Exact engineering request fields required')
+                    return self.respond(202,enqueue_engineering(store,parts[2],**body))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='real-case':
                     from .real_case import build,report
                     if not post:return self.respond(200,report(store,parts[2]))

@@ -8,7 +8,7 @@ FIXTURE=Path(__file__).parent/'fixtures/ocr/printed-labels.json'
 class PrintedLabelTests(unittest.TestCase):
  def test_real_three_source_labels_preserve_source_and_transform_locator(self):
   if not ocr.identity()['available']:self.skipTest('Local rus+eng models unavailable')
-  for c in json.loads(FIXTURE.read_text()):
+  for c in json.loads(FIXTURE.read_text(encoding='utf-8')):
    with self.subTest(c['id']),fitz.open()as doc:
     raw=base64.b64decode(c['png_base64']);self.assertEqual(hashlib.sha256(raw).hexdigest(),c['png_sha256'])
     box=c['bbox'];w,h=box[2]-box[0],box[3]-box[1];p=doc.new_page(width=w,height=h);p.insert_image(p.rect,stream=raw);parser=ocr.TesseractOCR()

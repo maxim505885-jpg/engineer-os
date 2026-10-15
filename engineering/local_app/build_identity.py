@@ -165,4 +165,5 @@ def data_identity(root):
 
 
 def runtime_report(store):
-    return dict(runtime_build(store).report(),data_root_sha256=data_identity(store.root))
+    from .store import SCHEMA_VERSION
+    return dict(runtime_build(store).report(),data_root_sha256=data_identity(store.root),database_schema_version=SCHEMA_VERSION)
