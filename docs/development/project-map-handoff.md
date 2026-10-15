@@ -1,3 +1,21 @@
+# Текущий проход этапа2 — адресная сверка документов, 15.10.2026
+
+База225ee83, локальный пакет на codex/v1-completion-20261015. Новый comparator/CLI и native-cell identity реализованы; продуктовый код не развёрнут в пользовательский dirty checkout/server8765. Свежая Windows регрессия1275tests,380.576s,34skipped,OK; guards/diffPASS. GitHub CI и release этого нового пакета не заявлены.
+
+Четыре DOCX:14940native cells(6972с цифровыми фрагментами),82OMML trees,1090media/embedded payloads совпали с независимым ZIP/lxml reference. Пропусков/несовпадений в этих узких областях0;29/29оригиналов unchanged. Это не визуальная/инженерная приёмка. ТЗ:49INTERPRETED conditions,7UNCERTAINTY; подписи/редакции норм не проверены.
+
+Сначала читать [QA этапа2](../qa/2026-10-15-stage2-document-pass.md) и [контракт адресной сверки](document-qualification.md). Windows AppContainer source renderer не квалифицирован: CLI IPC отказал, встроенный LibreOfficeKit не завершил user-profile init. Доступ к данным/сети не расширен; собственные профили/ancestor-engine grants удалены. Следующая задача — совместимый защищённый renderer, затем source-bound visual/semantic review; этап2 и весь выпуск ещё OPEN. Предыдущие записи ниже — история.
+
+# Возобновление разработки — 15.10.2026, после настройки MiMo
+
+Актуальная рабочая ветка `codex/v1-completion-20261015`, код `225ee83995e9cf9527d5768247a6f4eda3d3ade2`, PR155 draft. Основной dirty checkout `architecture/openwebui-integration` и работающий сервер не заменены. Настройка MiMo — отдельная задача, не реализация функций ENGINEER OS.
+
+Сначала читать [текущие шесть этапов](../qa/2026-10-15-v1-execution-status.md) и [план завершения](resume-plan-20261015.md). Записи о PR153 и более ранних пакетах ниже являются историей. Прежняя первая сводка отставала от последнего пакета; наличие этой записи не означает выпуск или объединение PR155.
+
+Свежий повторный локальный Windows suite на коде225ee83:1255tests,369.215s,34skipped,OK,exit0. Контрольные собственные TXT/DOCX→PDF через подготовленный LibreOffice успешны; isolation и полнота реальных документов остаются OPEN. См. [QA возобновления](../qa/2026-10-15-resumed-development.md).
+
+Сохранённая private квитанция `.engineer-os/v1-completion/completion-checkpoint.md` сообщает 1255 tests PASS / 34 skipped и четыре exact-head CI PASS на 225ee83. Это ранее выполненные проверки; новый прогон фиксируется отдельно. Реальная приёмка объекта и FINAL_RELEASE_AUDIT не заявлены.
+
 # Актуальная передача: полный аудит и план1.0 — 15.10.2026
 
 Проверенный candidate: `3f87eed93f1460715a35df0a6cbf0d8550d380e3`, PR153 merged;

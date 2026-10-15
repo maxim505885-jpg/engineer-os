@@ -257,6 +257,7 @@ def word_container_units(body,part,package=None):
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
+                    native_text=text
                     # Nested Word tables were previously omitted entirely. Preserve
                     # native text as unverified content, without inventing inner cells.
                     nested=cell.findall('.//'+W+'tbl')
@@ -265,6 +266,8 @@ def word_container_units(body,part,package=None):
                         if nested_text:
                             text+='\n[NESTED_TABLE_TEXT_UNVERIFIED]\n'+nested_text
                     locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
+                    locator['native_text_identity']=dict(scope='XML_CELL_NATIVE_TEXT_BEFORE_ANNOTATIONS',
+                        sha256=hashlib.sha256(native_text.encode('utf-8')).hexdigest(),chars=len(native_text),layout_verified=False)
                     if nested:
                         # Record exact XML cell ordinals and content identity; do not
                         # equate those ordinals with rendered grid positions.

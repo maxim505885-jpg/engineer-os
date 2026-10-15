@@ -165,3 +165,17 @@ CAD routes, положительная предметная приёмка, FINA
 Windows поставка/update/reboot/rollback/release. ЛИРА saved results остаются
 недоступны через проверенный vendor API; IFC/SCAD в переданном комплекте нет.
 Эти ограничения не закрываются количеством тестов или существованием файла.
+
+
+## Возобновление: актуальный код и Office normal control
+
+На 225ee83 повторный локальный Windows suite:1255tests,369.215s,34skipped,OK,exit0. В этом проходе продуктовый код не изменялся. Сохранённые четыре exact-headCI относятся к предшествующему пакету и отдельно не перепроверялись через GitHub.
+
+Новый normal control подготовленного LibreOffice26.8.1 через soffice.com создал читаемые PDF из собственного TXT и DOCX с таблицей; DOCX SHA неизменён. Это обновляет прежнее наблюдение «normal control без PDF», но не квалифицирует Windows isolation/source-layout/formulas/OLE. T03 остаётся OPEN. Подробности: [QA возобновления](2026-10-15-resumed-development.md); [порядок дальнейшей работы](../development/resume-plan-20261015.md).
+
+
+## Новый проход T04: source payload identities
+
+Выполнены bounded per-object comparison/CLI и native-cell source identity. Реальные четыре DOCX:14940cells,82OMML,1090payloads,0missing/0mismatch в заявленной области;29original SHA unchanged. Финальные1275tests380.576sOK/34skipped;58focused/guardsPASS. Это новый локальный пакет, не CI или обновление работающего приложения. [Детальный QA](2026-10-15-stage2-document-pass.md).
+
+T03 остаётся BLOCK: собственный DOCX в AppContainer через CLI и LibreOfficeKit не получилPDF. Network/canary restrictions и LOCAL pipe подтверждены, но source renderer не квалифицирован; нет разрешения на открытие произвольных Office пакетов этим маршрутом. T04 visual/semantic review и точное image-onlyТЗ не завершены. Сохранность исходных payloads не закрывает весь этап2.
