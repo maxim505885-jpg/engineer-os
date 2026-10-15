@@ -88,6 +88,14 @@ security guard PASS. Windows optional CI выявил два неверных о
 отдельно. Изолированный jsdom workflow PASS; concurrent Drive-status timeout
 при общей регрессии сохранён как наблюдение, а не скрыт повтором.
 
+После исправления на90b0d26: Core Tests, Security Guard и optional engineering
+workflow на Windows/Linux PASS, включая фиксированную память и3browser flows.
+Полный Windows runtime workflow оценивается отдельно. Дополнительно локальный
+Chromium теперь проверяет PLANAR: JSON схемы/закреплений/нагрузок, видимый SVG,
+SI inputs и перемещение консоли по независимой аналитической формуле. PASS;
+новый browser test не меняет production calculation code. Последующий exact-head
+CI относится к новому коммиту теста, а не автоматически наследует90b0d26 PASS.
+
 Отдельный V01 остаётся открытым: сохранённые результаты9ЛИРА-моделей ранее
 недоступны через vendor API (0x8000FFFF); наличие `.lir` не доказывает расчёт.
 В текущей папке нет IFC/SCAD. Требуются достаточные реальные источники, полные

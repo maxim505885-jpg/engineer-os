@@ -33,6 +33,16 @@ const root=path.resolve(__dirname,'..');
    await page.getByRole('button',{name:'Обновить исходники и результаты',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#engineering-results').textContent.includes('reaction_left_n'));
    const beam=await page.evaluate(async()=>{const snap=await api(`/api/sessions/${current}`);return snap.jobs.find(j=>j.mode==='ENGINEERING_RUN').result.engineering_run.result;});
    assert.equal(beam.status,'PASS');assert.ok(Math.abs(beam.results.reaction_left_n-3000)<1e-5);assert.equal(beam.resource_boundary.child_isolated,true);
+   await page.selectOption('#engineering-tool','PLANAR');
+   const planar={kind:'frame',nodes:[{name:'a',x_m:0,y_m:0,fix_x:true,fix_y:true,fix_rz:true},{name:'b',x_m:2,y_m:0}],members:[{name:'ab',start:'a',end:'b',elastic_modulus_pa:200e9,area_m2:.01,iz_m4:1e-5}],loads:[['b',0,-1000,0]]};
+   await page.fill('#engineering-planar',JSON.stringify(planar));await page.click('#engineering-submit');
+   await page.waitForFunction(()=>document.querySelector('#messages').textContent.includes('PLANAR: PASS')&&!document.querySelector('#send').disabled);
+   await page.getByRole('button',{name:'Обновить исходники и результаты',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('#engineering-results').textContent.includes('dy_m'));
+   assert.equal(await page.locator('#engineering-results svg').count(),1,'Valid control inputs must have a visible planar scheme');
+   const frame=await page.evaluate(async()=>{const snap=await api(`/api/sessions/${current}`);return snap.jobs.find(j=>j.mode==='ENGINEERING_RUN').result.engineering_run;});
+   assert.equal(frame.result.inputs.nodes[0].name,'a');assert.equal(frame.result.inputs.units,'N_m_Pa');
+   assert.ok(Math.abs(frame.result.results.nodes.b.dy_m+1000*8/(3*200e9*1e-5))<1e-10);
   }
   for(const [name,viewport] of [['desktop',{width:1366,height:950}],['mobile',{width:390,height:844}]]){
    await page.setViewportSize(viewport);await page.locator('#engineering-tools-panel').scrollIntoViewIfNeeded();
@@ -44,7 +54,7 @@ const root=path.resolve(__dirname,'..');
   assert.equal(await page.locator('#engineering-width_m').inputValue(),'','Dimensions must not carry into another project');
   assert.equal(await page.locator('#engineering-planar').inputValue(),'');
   assert.equal(await page.locator('#engineering-source option').count(),0);
-  assert.deepEqual(errors,[]);console.log(JSON.stringify({status:'PASS',scope:process.env.ENGINEER_OS_CALCULATION_CHILD_SMOKE==='1'?'CONTROLLED_RECTANGLE_AND_BEAM_HTTP_UI':'CONTROLLED_RECTANGLE_HTTP_UI_ONLY',screenshots:temp}));
+  assert.deepEqual(errors,[]);console.log(JSON.stringify({status:'PASS',scope:process.env.ENGINEER_OS_CALCULATION_CHILD_SMOKE==='1'?'CONTROLLED_RECTANGLE_BEAM_AND_PLANAR_HTTP_UI':'CONTROLLED_RECTANGLE_HTTP_UI_ONLY',screenshots:temp}));
  }finally{
   if(browser)await browser.close();
   if(child){if(process.platform==='win32')await new Promise(resolve=>{const killer=spawn('taskkill',['/PID',String(child.pid),'/T','/F'],{stdio:'ignore'});killer.on('exit',resolve);});else child.kill('SIGTERM');}
