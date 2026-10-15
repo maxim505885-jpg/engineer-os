@@ -1,0 +1,23 @@
+name: Optional engineering adapters
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install optional isolated-job dependencies
+        run: python -m pip install -r requirements-dev.txt -r requirements-bim.txt -r requirements-calculation.txt
+      - name: Validate dependencies
+        run: python -m pip check
+      - name: Check IFC, CAD roundtrip and analytical benchmark
+        run: python -m unittest tests.test_ifc_adapter tests.test_control_beam tests.test_engineering_tools_cli tests.test_cad_roundtrip_comparison tests.test_docling_runtime_losses -v
