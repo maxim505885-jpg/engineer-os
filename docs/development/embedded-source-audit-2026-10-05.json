@@ -1,0 +1,28 @@
+{
+  "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+  "counts": {
+    "media": 642,
+    "media_types": {
+      ".png": 369,
+      ".jpeg": 115,
+      ".jpg": 9,
+      ".emf": 138,
+      ".wdp": 11
+    },
+    "math_expressions": 41,
+    "math_text_tokens": 298,
+    "ole_objects": 21
+  },
+  "source_binding_status": "PASS",
+  "payload_extraction_status": "PASS",
+  "office_math_semantics": "NOT_RUN",
+  "wdp_decode_status": "NOT_RUN",
+  "raster_comparison_exact_matches": 0,
+  "raster_comparison_occurrences": 157,
+  "authorized_ocr_probe_lines": 4,
+  "ocr_accuracy_status": "UNCERTAINTY",
+  "document_status": "BLOCK",
+  "acceptance_granted": false,
+  "complete_document": false,
+  "evidentiary_status": "NOT_EVIDENCE"
+}

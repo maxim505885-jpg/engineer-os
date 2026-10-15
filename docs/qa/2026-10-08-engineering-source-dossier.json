@@ -1,0 +1,117 @@
+{
+  "scope": "PRELIMINARY_SOURCE_DOSSIER_NOT_ENGINEERING_ACCEPTANCE",
+  "status": "BLOCK",
+  "sources": [
+    {
+      "name": "v4-drive-source.pdf",
+      "sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+      "bytes": 74522583,
+      "pages": 534
+    },
+    {
+      "name": "АГП-371_23-КР.РР1.pdf",
+      "sha256": "c48fd61a899c6f15b71f71851d570cf2fbaa47227d44553cfad38ac92664e80a",
+      "bytes": 25030702,
+      "pages": 429
+    },
+    {
+      "name": "АГП-371_23-КР.РР2.pdf",
+      "sha256": "c149c0d5446ddf136fd450de44b14de73c2f0312bf69eac4aebbf63bd793edc4",
+      "bytes": 19749431,
+      "pages": 286
+    },
+    {
+      "name": "АГП-371_23-КР.РР3.pdf",
+      "sha256": "18145f6d47d44e559040b9559d5b6f9af1648ea34f194f8e3683be761afb5797",
+      "bytes": 18851615,
+      "pages": 298
+    },
+    {
+      "name": "Геодезические измерения 03.09 пакетная печать(1).pdf",
+      "sha256": "6092ab2298bf328a545379a850b0a740cc40f3c5592703fbf876c32f459913ce",
+      "bytes": 7563047,
+      "pages": 22
+    },
+    {
+      "name": "Графика 03.09.2026.pdf",
+      "sha256": "fc2e720d13039b5fa9628b05125e8ce3bc6ba2c8756bfcb882243a67ec69d44c",
+      "bytes": 10793106,
+      "pages": 21
+    }
+  ],
+  "matrix_rows": 42,
+  "transcription_verified": false,
+  "assessment_identity_authenticated": false,
+  "native_source_check": {
+    "source_sha256": "b5d95b660b35bfb6b2441623635cba91c235efd754bc283dfe1405f075834916",
+    "page": 13,
+    "source_match": "MATCH",
+    "provenance": {
+      "status": "UNIQUE",
+      "regions": [
+        {
+          "left": 92.06400299072266,
+          "top": 255.02032470703125,
+          "right": 270.1102294921875,
+          "bottom": 270.5626220703125
+        }
+      ],
+      "regions_total": 1,
+      "regions_truncated": false,
+      "coordinate_system": "unrotated_page_points_top_left",
+      "page_rotation": 0,
+      "page_width": 595.3200073242188,
+      "page_height": 841.9199829101562,
+      "exact_occurrences": 1
+    },
+    "document_validation": {
+      "status": "VALIDATED",
+      "scope": "SOURCE_BINDING_ONLY",
+      "candidate_id": "doc-evidence:e694f044f57ad5347d69d4e35185c7c73a830f28c23d904fc2fdc2ace32fc8ca",
+      "reasons": []
+    },
+    "engineering_verified": false,
+    "acceptance_granted": false,
+    "final_audit": "NOT_RUN"
+  },
+  "appendix_render_comparison": [
+    {
+      "file": "Графика 03.09.2026.pdf",
+      "report_start": 492,
+      "pages": 21,
+      "render_equal": 21,
+      "same_size_metrics": 21,
+      "mean_absolute_pixel_difference_min": 0.0,
+      "mean_absolute_pixel_difference_max": 0.0,
+      "scope": "PIXEL_COMPARISON_NOT_INDEPENDENCE_PROOF"
+    },
+    {
+      "file": "Геодезические измерения 03.09 пакетная печать(1).pdf",
+      "report_start": 513,
+      "pages": 22,
+      "render_equal": 22,
+      "same_size_metrics": 22,
+      "mean_absolute_pixel_difference_min": 0.0,
+      "mean_absolute_pixel_difference_max": 0.0,
+      "scope": "PIXEL_COMPARISON_NOT_INDEPENDENCE_PROOF"
+    }
+  ],
+  "verification": {
+    "python_tests": 564,
+    "node_tests": 4,
+    "dom": "PASS",
+    "chromium": "PASS",
+    "architecture": "PASS",
+    "live_model": "NOT_RUN",
+    "solver": "NOT_RUN",
+    "docling": "NOT_RUN",
+    "final_audit": "NOT_RUN",
+    "acceptance_granted": false
+  },
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "independent_tests": 18,
+    "scope": "WORKING_DIFF_AGAINST_e39cbeadff2c6e483688ccb349df709a418e51f4"
+  }
+}

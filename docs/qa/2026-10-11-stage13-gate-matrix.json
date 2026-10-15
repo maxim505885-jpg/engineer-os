@@ -1,0 +1,221 @@
+{
+  "schema": "ENGINEER_OS_STAGE13_READ_ONLY_CORPUS_GATE_AUDIT_V1",
+  "candidate_sha": "4641743a6da1086be75649a5e34c896283842888",
+  "read_only_repo": true,
+  "acceptance_criteria_unchanged": true,
+  "module_status": "BLOCK",
+  "document_status": "BLOCK",
+  "module_gates": [
+    {
+      "key": "pdf_ingestion",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_local_document_extraction.py:test_native_all_23_pages_without_model_ocr_or_acceptance",
+        "tests/test_local_app_http.py:test_document_extraction_protected_routes_and_page_journal",
+        "tests/test_automatic_document_analysis.py:test_bad_pdf_fails_before_model_and_unknown_text_is_disclosed"
+      ],
+      "remaining_limit": "PASS bounded to native PDF ingestion, original retention, page journal and disclosed unavailable content. Does not qualify scan/mixed meaning.",
+      "minimum_completion": "Bind executed tests and exact source hashes in release evidence; add actual raster/mixed corpus replay."
+    },
+    {
+      "key": "docx_ingestion",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_office_documents.py:test_docx_order_tables_and_exact_locators",
+        "tests/test_office_documents.py:test_malformed_office_original_retained_without_fabricated_text",
+        "tests/test_word_auxiliary_parts.py:test_auxiliary_content_reaches_model_receipts_and_separate_table_inventory"
+      ],
+      "remaining_limit": "Native source ZIP/XML ingestion and Store/Worker receipts verified with generated fixtures; real Office source QA is historical, not rerun.",
+      "minimum_completion": "Bind DOCX original and production HTTP/worker replay receipt to release evidence."
+    },
+    {
+      "key": "native_text_extraction",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_local_document_extraction.py:test_native_all_23_pages_without_model_ocr_or_acceptance",
+        "tests/test_automatic_document_analysis.py:test_attach_and_send_reads_page_24_without_manual_extraction",
+        "tests/test_office_documents.py:test_xlsx_formulas_cached_values_and_missing_cache_are_separate"
+      ],
+      "remaining_limit": "Native text tested through real Store/Worker and controlled model; no semantic qualification implied.",
+      "minimum_completion": "Retain exact native fixture expected text/locators and source digest in module evidence."
+    },
+    {
+      "key": "table_source_mapping",
+      "status": "UNCERTAINTY",
+      "existing_proof": [
+        "tests/test_stage13_pdf_table_asset_ingestion.py",
+        "tests/test_word_grid.py",
+        "tests/test_office_documents.py:test_docx_order_tables_and_exact_locators",
+        "docs/qa/2026-10-11-pdf-table-cell-provenance.json"
+      ],
+      "remaining_limit": "Native PDF candidate mapping passes bbox/rotation/null/header/hash checks and one historical V4 24-cell visual sample. local_app native page extraction still reports tables NOT_PARSED; stage13 table callable is not connected to user Store/HTTP route. Raster/mixed cells unverified.",
+      "minimum_completion": "Connect source-mapped table payload to application candidate/readback path and prove native, scanned and mixed-table values/locators against ground truth without promoting uncertain cells."
+    },
+    {
+      "key": "drawing_ocr_failure_handling",
+      "status": "UNCERTAINTY",
+      "existing_proof": [
+        "tests/test_local_ocr.py",
+        "tests/test_selected_ocr.py",
+        "tests/test_pdf_ocr_bounded_batch.py:test_timeout_is_recorded_without_losing_ledger",
+        "tests/test_vector_pdf_adaptive_ocr.py:test_one_failed_subtile_remains_partial_not_verified"
+      ],
+      "remaining_limit": "Injected bounded OCR script failures pass. 14 targeted OCR runtime tests and one automatic OCR integration skipped because rus+eng unavailable; current candidate live production OCR failures not executed. Historical regional source run and contradictory dimension spot exist.",
+      "minimum_completion": "Provide local rus+eng OCR runtime, rerun current production worker/automatic OCR positive scans and negative timeout/budget/damaged/partial cases, preserving contradictory tokens and incomplete coverage."
+    },
+    {
+      "key": "formula_media_preservation",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_office_structure.py:test_equation_structure_reaches_model_and_receipt_without_acceptance",
+        "tests/test_word_images.py:test_image_reference_reaches_receipt_and_preview_without_acceptance",
+        "tests/test_emf_native_text.py:test_native_image_text_reaches_model_and_bound_receipt_without_acceptance",
+        "tests/test_emf_bitmap.py:test_authenticated_http_preview_uses_exact_bitmap_ordinal",
+        "tests/test_stage13_docx_asset_ingestion.py:test_omml_and_emf_preserve_exact_source_hash"
+      ],
+      "remaining_limit": "PASS means immutable original retained plus source OMML structure/media identity and bound readback. It does not mean formula rendering or complete EMF layout; RPC stores metadata, not asset bytes. source_assets scans only main document OMML, whereas local_app supports auxiliary parts.",
+      "minimum_completion": "Bind source preservation tests to release evidence; separately extend stage13 candidate enumeration for auxiliary OMML if candidate ledger claims complete DOCX scope. Visual fidelity remains B."
+    },
+    {
+      "key": "source_identity",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_local_document_extraction.py:test_changed_original_blocks_current_page_and_resume",
+        "tests/test_stage13_source_to_evidence.py:test_source_identity_mismatch_blocks_pipeline",
+        "tests/test_stage13_unified_asset_entrypoint.py:test_identity_mismatch_fails_before_transport",
+        "tests/test_document_registration.py",
+        "tests/test_supabase_document_identity.py"
+      ],
+      "remaining_limit": "Source hashes/page/part locators and mismatch failures strong; backend identity verifier tests mocked; no new live DB replay.",
+      "minimum_completion": "Preserve checksum-before/after receipts and deployed identity RPC checks as separate transport proof."
+    },
+    {
+      "key": "uncertainty_isolation",
+      "status": "PASS",
+      "existing_proof": [
+        "tests/test_stage13_acceptance.py",
+        "tests/test_stage13_uncertain_asset_register.py:test_validated_rpc_transport_cannot_be_used_for_asset_candidate",
+        "tests/test_stage13_asset_live_rpc_pipeline.py:test_http_rpc_does_not_use_validated_text_route",
+        "tests/test_automatic_document_analysis.py",
+        "tests/test_runtime_document_completeness.py"
+      ],
+      "remaining_limit": "All candidate/coverage/model outputs remain uncertainty or block; explicit selection and separate candidate RPC enforced. Tests do not grant engineering acceptance.",
+      "minimum_completion": "Bind executed negative isolation tests; do not use generic PASS strings or asset counts as acceptance evidence."
+    },
+    {
+      "key": "integration_regression",
+      "status": "BLOCK",
+      "existing_proof": [
+        "targeted-tests.log:91 run,77 passed,14 skipped",
+        "integration-tests.log:113 run,112 passed,1 skipped",
+        "office-assets-tests.log:60 run,60 passed",
+        "tests/test_stage13_asset_live_rpc_pipeline.py uses injected capture transport/FakeHTTPResponse",
+        "tests/test_stage13_source_to_evidence.py manually constructs a text NormalizedDocument"
+      ],
+      "remaining_limit": "This audit ran 264 tests,249 pass,15 environment skips; no failures. Not full release CI or qualified cross-format source-to-user-output corpus. No stage13 app acceptance producer or user caller to asset persistence found.",
+      "minimum_completion": "Run frozen full suites/exact-head CI plus registered native/scanned/mixed PDF, DOCX and XLSX production upload->extraction->model/receipts->readback integration replay; bind test-run artifacts/hashes per required gate."
+    }
+  ],
+  "document_gates": [
+    {
+      "key": "complete_scope",
+      "status": "BLOCK",
+      "existing_proof": [
+        "docs/stage13_acceptance_contract.md",
+        "docs/qa/2026-10-09-office-source-structure.md",
+        "docs/qa/2026-10-11-pdf-table-cell-provenance.md"
+      ],
+      "remaining_limit": "534 V4 PDF pages inventoried, selected native tables and partial 40 vector sheets; V4 DOCX 41 OMML/654 media counts are inventory only. Native Office 665 units historically processed; no full semantic baseline.",
+      "minimum_completion": "Per-source inventory every page/part/cell/formula/image, mark absent or unread units, obtain complete reviewed source ground truth."
+    },
+    {
+      "key": "table_cells_validated",
+      "status": "BLOCK",
+      "existing_proof": [
+        "docs/qa/2026-10-11-pdf-table-cell-provenance.json",
+        "tests/test_stage13_pdf_table_asset_ingestion.py",
+        "tests/test_word_grid.py"
+      ],
+      "remaining_limit": "Only one V4 native table page15 24/24 cells visually/native-clip compared. Merged Word render topology and raster/mixed values remain unconfirmed.",
+      "minimum_completion": "Validate every in-scope table value, unit, header, merge and cell source region; preserve unresolved raster/mixed slots."
+    },
+    {
+      "key": "vector_labels_validated",
+      "status": "BLOCK",
+      "existing_proof": [
+        "docs/qa/2026-10-09-selected-region-ocr.md",
+        "docs/qa/2026-10-09-regional-ocr.md",
+        "tests/test_vector_ocr_review_routing.py"
+      ],
+      "remaining_limit": "Partial corner OCR, original 82406 versus source-reviewed 82400 conflict; individual spot is not all labels. EMF native text placement remains unverified.",
+      "minimum_completion": "Review complete drawing/vector label scope and coordinates; resolve or explicitly block contradictory OCR against original visual source."
+    },
+    {
+      "key": "formulas_visually_validated",
+      "status": "BLOCK",
+      "existing_proof": [
+        "docs/qa/2026-10-09-office-source-structure.md",
+        "tests/test_office_structure.py"
+      ],
+      "remaining_limit": "OMML source structure/tokens preserved but layout_verified=false; source_assets ET serialization is normalized XML, not original XML byte slice. No whole-source visual formula qualification.",
+      "minimum_completion": "Render source and downstream formula representation and visually compare every in-scope OMML formula including auxiliary parts."
+    },
+    {
+      "key": "embedded_graphics_validated",
+      "status": "BLOCK",
+      "existing_proof": [
+        "tests/test_word_images.py",
+        "tests/test_emf_native_text.py",
+        "tests/test_emf_bitmap.py",
+        "docs/stage13_acceptance_contract.md"
+      ],
+      "remaining_limit": "Bound source raster previews and EMF bitmap records are supported; complete graphic transforms/vector/Word placement not rendered or reviewed.",
+      "minimum_completion": "Validate each graphic against original rendering including EMF vectors, bitmap layout, transforms and placement, or block unsupported items."
+    },
+    {
+      "key": "source_provenance_complete",
+      "status": "BLOCK",
+      "existing_proof": [
+        "tests/test_document_registration.py",
+        "tests/test_stage13_asset_provenance.py",
+        "docs/qa/2026-10-11-pdf-table-cell-provenance.json"
+      ],
+      "remaining_limit": "Hash/locator mechanisms pass; no source-wide complete provenance ledger linked to visual qualifications/user readback. historical receipt confirms live_database_write and full_application_http_ui NOT_RUN.",
+      "minimum_completion": "For each qualified source unit link immutable source digest, page/part/location, payload hash, review record and application output/readback receipt."
+    }
+  ],
+  "corpus": {
+    "native_pdf": "Generated real PDF fixtures via production native worker/HTTP tests; historical V4 native sample",
+    "scanned_pdf": "Live scanned OCR runtime not executed in audit; test_scanned_cyrillic_and_english is PNG, while scan.pdf cancel fixture contains native text OCRed as raster",
+    "mixed_pdf": "mixed.pdf named fixture is native plus blank page, not native+raster semantic ground truth; no qualified mixed table corpus",
+    "docx": "Generated ZIP/XML fixtures cover tables, OMML, auxiliary parts, image relations, EMF records and negative packages; historical real Office counts",
+    "xlsx": "Generated real OOXML worker fixture covers formula cache/missing cache, shared followers, merged ranges and locators; historical two native sources",
+    "negative_ocr": "Mocked process timeout/subtile failures pass; current live OCR tests skipped",
+    "assets": "Source identity/preview/record tests pass; no complete visually qualified assets corpus"
+  },
+  "tests": {
+    "total_run": 264,
+    "passed": 249,
+    "skipped": 15,
+    "failures": 0,
+    "logs": [
+      {
+        "path": "/workspace/scratch/0a9c93c51c71/stage13-corpus-audit/targeted-tests.log",
+        "sha256": "fceca0692b660408ca700b6ef5f604992946407d039abccc35fd5fc0bfc7d658"
+      },
+      {
+        "path": "/workspace/scratch/0a9c93c51c71/stage13-corpus-audit/integration-tests.log",
+        "sha256": "bf461bd8f4a3d1503c18612a2c34324b10a33d30f08121d011f862404c7730dc"
+      },
+      {
+        "path": "/workspace/scratch/0a9c93c51c71/stage13-corpus-audit/office-assets-tests.log",
+        "sha256": "9006377715f3f270b8f0ed3f6474f005d3dbde16141c2f629b0df2e5dc6440a5"
+      }
+    ]
+  },
+  "critical_interpretation": [
+    "Stage13 audit is gate only, not test runner or evidence authenticity validator. Nonempty arbitrary evidence strings can satisfy evaluate; callers must supply executed linked evidence.",
+    "Module PASS entries are bounded software subclaims backed by tests; release remains BLOCK until all required criteria have complete release evidence.",
+    "Source-to-evidence test does not actually parse a table or persist production evidence; live RPC tests do not contact database."
+  ]
+}

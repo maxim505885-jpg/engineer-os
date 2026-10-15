@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "default_enabled": false,
+  "acceptance_granted": false,
+  "repositories": [
+    {
+      "id": "browser-use",
+      "repository": "browser-use/browser-use",
+      "url": "https://github.com/browser-use/browser-use.git",
+      "commit": "7be96ed8bafa8dfe1eef228b59cf5c884b8b2431",
+      "license": "MIT",
+      "purpose": "optional_browser",
+      "path": "third_party/browser-use",
+      "selected_paths": [
+        "browser_use",
+        "pyproject.toml",
+        "README.md"
+      ]
+    },
+    {
+      "id": "agentmemory",
+      "repository": "rohitg00/agentmemory",
+      "url": "https://github.com/rohitg00/agentmemory.git",
+      "commit": "c51bf3f294a423294deb050513a9741eff42fe8e",
+      "license": "Apache-2.0",
+      "purpose": "optional_memory",
+      "path": "third_party/agentmemory",
+      "selected_paths": [
+        "src",
+        "plugin",
+        "package.json",
+        "README.md"
+      ]
+    },
+    {
+      "id": "scientific-skills",
+      "repository": "K-Dense-AI/scientific-agent-skills",
+      "url": "https://github.com/K-Dense-AI/scientific-agent-skills.git",
+      "commit": "92ace75ac21efe19a620434e0ca4e356081fe807",
+      "license": "MIT",
+      "purpose": "reference",
+      "path": "third_party/scientific-skills",
+      "selected_paths": [
+        "skills/sympy",
+        "skills/statistical-analysis",
+        "skills/matplotlib",
+        "skills/scientific-critical-thinking",
+        "skills/geopandas"
+      ]
+    },
+    {
+      "id": "diagram-design",
+      "repository": "cathrynlavery/diagram-design",
+      "url": "https://github.com/cathrynlavery/diagram-design.git",
+      "commit": "cb80b0d299a5c0674e0d133d33f91f19af8cda0f",
+      "license": "MIT",
+      "purpose": "reference",
+      "path": "third_party/diagram-design",
+      "selected_paths": [
+        "skills/diagram-design",
+        "PRIVACY.md"
+      ]
+    },
+    {
+      "id": "cybersecurity-skills",
+      "repository": "mukul975/Anthropic-Cybersecurity-Skills",
+      "url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git",
+      "commit": "54a798831d2266a3ca61ce68a7acb80b81160d57",
+      "license": "Apache-2.0",
+      "purpose": "reference",
+      "path": "third_party/cybersecurity-skills",
+      "selected_paths": [
+        "skills/testing-api-for-broken-object-level-authorization",
+        "skills/testing-jwt-token-security",
+        "skills/testing-prompt-injection-in-rag-pipelines"
+      ]
+    },
+    {
+      "id": "harness-patterns",
+      "repository": "ai-boost/awesome-harness-engineering",
+      "url": "https://github.com/ai-boost/awesome-harness-engineering.git",
+      "commit": "cc06822327ad85d632a3e0cc76b71241cacab993",
+      "license": "CC0-1.0",
+      "purpose": "reference",
+      "path": "third_party/harness-patterns",
+      "selected_paths": [
+        "README.md"
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "repository": "volcengine/OpenViking",
+      "reason": "AGPL-3.0; инфраструктура и большая база контекста пока не нужны"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# Explicit Latin OCR for source table values
+
+Base9b4cd8f (PR143). User authorized continued stage13 fixes; bounded extension of existing selected-region OCR. UI/API/isolatedworker/history/CLI select eng or default rus+eng; no auto language guess or text correction. Existing local rus+eng model prerequisite unchanged, even when eng chosen. No additional dependency or runtime network downloads.
+
+V4p55 gold74cells: previous full-table OCR41conflicts/native0differences. Focused padded6xOCR7 with rus+eng matched23/74, so not adopted globally. eng matched36/40 numeric cells at full grid bounds,40/40 after explicit2/3point inset removes border. Source-bound originalPDF authenticated HTTP/worker/reopenedhistory40/40 measured on these narrower selections; the omitted1stfloor label also reread exactly (41HTTPrequests total). Qualified ledger combines33previous exactOCRcells with41explicit source rereads:74literalcells,84gridpositions,21rows×4columns,0literal mismatches,mergedspans and20project/actual row associations. Original whole-table OCR remains unchanged, not auto adjudicated; not a whole-table rewrite or entirecorpus qualification. Row/column/parentcell/requestbbox stored; black/red values remain literal, including7thfloor actual4d20 vsproject4d20+4d16. No engineering defect/units/acceptance inferred.
+
+Engine/dossier/request language validated symmetrically, absent legacy language treated asrus+eng; wrong/missingengidentity and hash-valid defaultidentity override rejected on history reopen. Exact sourcePNG and derivedprocessing provenance retained. Defaultwhole-page behavior/history unchanged; nondefaultlanguage requires explicit selectedOCR. Native alternatives and oldOCR preserved.
+
+OriginalWordreference/fonts/fullphysical layout and complete graphic/raster/mixed semantic corpus remain stage13OPEN. Calculations postponed; PCnotverified.

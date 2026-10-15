@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-05",
+  "source_docx_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+  "source_docx_size_bytes": 147210288,
+  "source_library_file_id": "libfile_10792d9386208191b103ee233d892250",
+  "native_source_checks": {
+    "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+    "paragraphs": 15651,
+    "tables": 118,
+    "cells": 12826,
+    "grid_span_cells": 186,
+    "vertical_merge_cells": 6114,
+    "source_locator_verification": "PASS",
+    "xml_text_copy_verification": "PASS",
+    "source_unchanged": "PASS",
+    "acceptance_granted": false
+  },
+  "native_declared_grid_widths_passed": 118,
+  "embedded_images_with_member_hashes": 631,
+  "page15_matching_cells": 24,
+  "page15_total_cells": 24,
+  "soil_display_fields_visually_checked": 65,
+  "tor_selected_clauses_visually_checked": 12,
+  "tor_scope_excludes_foundations": true,
+  "status": "UNCERTAINTY",
+  "document_status": "BLOCK",
+  "acceptance_granted": false,
+  "evidentiary_status": "NOT_EVIDENCE",
+  "ocr_attempt": {
+    "approval_review": "REJECTED",
+    "reason": "Unintended Microsoft telemetry connection; external egress payload not verified",
+    "retry": false,
+    "local_candidate_blocks": 248,
+    "local_candidate_below_confidence_0_9": 185,
+    "candidate_evidentiary_status": "NOT_EVIDENCE"
+  },
+  "remaining": [
+    "Full V4 page/text/figure completeness",
+    "Remaining raster/graphic interpretation",
+    "Full ToR transcription and source links",
+    "Model semantic/solver/result audit",
+    "Normative applicability and FINAL AUDIT"
+  ],
+  "two_locator_methods_byte_agreement": "PASS",
+  "native_output_sha256": "af791738e47a57744a1c83d2b2d6cce599198c71416eb135ee50966090af7c36",
+  "local_regression": {
+    "python": 191,
+    "node": 4,
+    "status": "PASS"
+  }
+}

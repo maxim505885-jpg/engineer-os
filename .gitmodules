@@ -1,0 +1,23 @@
+[submodule "browser-use"]
+	path = third_party/browser-use
+	url = https://github.com/browser-use/browser-use.git
+
+[submodule "agentmemory"]
+	path = third_party/agentmemory
+	url = https://github.com/rohitg00/agentmemory.git
+
+[submodule "scientific-skills"]
+	path = third_party/scientific-skills
+	url = https://github.com/K-Dense-AI/scientific-agent-skills.git
+
+[submodule "diagram-design"]
+	path = third_party/diagram-design
+	url = https://github.com/cathrynlavery/diagram-design.git
+
+[submodule "cybersecurity-skills"]
+	path = third_party/cybersecurity-skills
+	url = https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git
+
+[submodule "harness-patterns"]
+	path = third_party/harness-patterns
+	url = https://github.com/ai-boost/awesome-harness-engineering.git

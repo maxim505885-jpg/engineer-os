@@ -114,3 +114,7 @@ Establish:
 6. Clear separation between runtime and engineering logic.
 
 Do not implement a large application before these boundaries are reviewable.
+
+## Living project map
+
+Read `docs/development/project-map-handoff.md` before continuing shared work. The maintained map is on branch `docs/project-map-handoff-20261005`; if absent in this checkout, retrieve that branch version first. Update its current state, exact verification results, remaining limitations and next action after meaningful changes. Keep local, published and unverified work distinct.

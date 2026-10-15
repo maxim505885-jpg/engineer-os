@@ -1,0 +1,906 @@
+{
+  "checked_date": "2026-10-04",
+  "scope": "README/metadata compatibility screening, not full code or dependency audit",
+  "repositories": [
+    {
+      "article_number": 1,
+      "repository": "openclaw/openclaw",
+      "resolved_repository": "openclaw/openclaw",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Личный агент и мессенджеры; дублирует runtime, не проверяет PDF.",
+      "executed": false
+    },
+    {
+      "article_number": 2,
+      "repository": "obra/superpowers",
+      "resolved_repository": "obra/superpowers",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Применяем практики диагностики, тестов и ревью; доступный skill уже используется, второй пакет не устанавливаем.",
+      "executed": false
+    },
+    {
+      "article_number": 3,
+      "repository": "NousResearch/hermes-agent",
+      "resolved_repository": "NousResearch/hermes-agent",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Память личного агента; не заменяет Evidence Register и происхождение данных.",
+      "executed": false
+    },
+    {
+      "article_number": 4,
+      "repository": "n8n-io/n8n",
+      "resolved_repository": "n8n-io/n8n",
+      "license_assessment": "Sustainable Use / Enterprise",
+      "archived": false,
+      "decision": "Автоматизация Drive/очередей возможна позже; дополнительный сервис и специальные лицензии.",
+      "executed": false
+    },
+    {
+      "article_number": 5,
+      "repository": "Significant-Gravitas/AutoGPT",
+      "resolved_repository": "Significant-Gravitas/AutoGPT",
+      "license_assessment": "MIT / PolyForm Shield",
+      "archived": false,
+      "decision": "Полная платформа агентов; дублирует приложение, отдельные MIT/PolyForm части.",
+      "executed": false
+    },
+    {
+      "article_number": 6,
+      "repository": "firecrawl/firecrawl",
+      "resolved_repository": "firecrawl/firecrawl",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Для будущего сбора официальных нормативных веб-источников; не решает потерю PDF-ячеек.",
+      "executed": false
+    },
+    {
+      "article_number": 7,
+      "repository": "f/prompts.chat",
+      "resolved_repository": "f/prompts.chat",
+      "license_assessment": "MIT code / CC0 prompts",
+      "archived": false,
+      "decision": "Примеры промптов для разработки; не нормативы и не проверенные инженерные инструкции.",
+      "executed": false
+    },
+    {
+      "article_number": 8,
+      "repository": "AUTOMATIC1111/stable-diffusion-webui",
+      "resolved_repository": "AUTOMATIC1111/stable-diffusion-webui",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Генератор изображений; не инструмент достоверного восстановления скана.",
+      "executed": false
+    },
+    {
+      "article_number": 9,
+      "repository": "Snailclimb/JavaGuide",
+      "resolved_repository": "Snailclimb/JavaGuide",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Java-справочник; другой стек, учебные материалы.",
+      "executed": false
+    },
+    {
+      "article_number": 10,
+      "repository": "langgenius/dify",
+      "resolved_repository": "langgenius/dify",
+      "license_assessment": "Dify modified Apache",
+      "archived": false,
+      "decision": "Полная RAG-платформа; дополнительный Docker-стек, не нужна миграция существующего приложения.",
+      "executed": false
+    },
+    {
+      "article_number": 11,
+      "repository": "open-webui/open-webui",
+      "resolved_repository": "open-webui/open-webui",
+      "license_assessment": "Open WebUI custom",
+      "archived": false,
+      "decision": "Сохраняем имеющуюся связку Ollama/Open WebUI; состояние Windows отдельно не проверено.",
+      "executed": false
+    },
+    {
+      "article_number": 12,
+      "repository": "langchain-ai/langchain",
+      "resolved_repository": "langchain-ai/langchain",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Компоненты RAG возможны позже; текущие adapters/gateway уже обеспечивают необходимую границу.",
+      "executed": false
+    },
+    {
+      "article_number": 13,
+      "repository": "x1xhlol/system-prompts-and-models-of-ai-tools",
+      "resolved_repository": "x1xhlol/system-prompts-and-models-of-ai-tools",
+      "license_assessment": "GPL-3.0",
+      "archived": false,
+      "decision": "Архив чужих промптов; не источник инженерных доказательств.",
+      "executed": false
+    },
+    {
+      "article_number": 14,
+      "repository": "github/spec-kit",
+      "resolved_repository": "github/spec-kit",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Полезны сценарии и требования; не добавляем второй обязательный процесс поверх существующих AGENTS/tests.",
+      "executed": false
+    },
+    {
+      "article_number": 15,
+      "repository": "Comfy-Org/ComfyUI",
+      "resolved_repository": "Comfy-Org/ComfyUI",
+      "license_assessment": "GPL-3.0",
+      "archived": false,
+      "decision": "Генерация медиа; не применять для восстановления букв и чисел в доказательствах.",
+      "executed": false
+    },
+    {
+      "article_number": 16,
+      "repository": "microsoft/generative-ai-for-beginners",
+      "resolved_repository": "microsoft/generative-ai-for-beginners",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Учебный курс; справочный материал, не runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 17,
+      "repository": "supabase/supabase",
+      "resolved_repository": "supabase/supabase",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Имеющаяся база/auth/storage; улучшены текущие точные счётчики, миграция не нужна.",
+      "executed": false
+    },
+    {
+      "article_number": 18,
+      "repository": "google-gemini/gemini-cli",
+      "resolved_repository": "google-gemini/gemini-cli",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Дополнительный кодинговый CLI; не нужен новый провайдер/ключ для текущего этапа.",
+      "executed": false
+    },
+    {
+      "article_number": 19,
+      "repository": "rasbt/LLMs-from-scratch",
+      "resolved_repository": "rasbt/LLMs-from-scratch",
+      "license_assessment": "Составная; проверить конкретный файл",
+      "archived": false,
+      "decision": "Обучение LLM с нуля; не соответствует сроку, ресурсам и задаче OCR.",
+      "executed": false
+    },
+    {
+      "article_number": 20,
+      "repository": "JuliusBrussee/caveman",
+      "resolved_repository": "JuliusBrussee/caveman",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Сжатие логов возможно отдельно; нельзя сжимать канонические evidence, числа и нормативные ссылки.",
+      "executed": false
+    },
+    {
+      "article_number": 21,
+      "repository": "hacksider/Deep-Live-Cam",
+      "resolved_repository": "hacksider/Deep-Live-Cam",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Подмена лиц; не имеет применения в обследовании зданий и PDF.",
+      "executed": false
+    },
+    {
+      "article_number": 22,
+      "repository": "punkpeye/awesome-mcp-servers",
+      "resolved_repository": "punkpeye/awesome-mcp-servers",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Каталог MCP; каждый сервер требует отдельной проверки, каталог не является готовой интеграцией.",
+      "executed": false
+    },
+    {
+      "article_number": 23,
+      "repository": "thedotmack/claude-mem",
+      "resolved_repository": "thedotmack/claude-mem",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Память сессий, hooks и облачные варианты; не подключаем автоматически к инженерным данным.",
+      "executed": false
+    },
+    {
+      "article_number": 24,
+      "repository": "infiniflow/ragflow",
+      "resolved_repository": "infiniflow/ragflow",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Приоритет независимого сравнения OCR/TSR; current DeepDoc CPU, но полного сервиса не разворачиваем в малопамятном runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 25,
+      "repository": "koala73/worldmonitor",
+      "resolved_repository": "koala73/worldmonitor",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Мировые новости; не обследование и не нормативная проверка объекта.",
+      "executed": false
+    },
+    {
+      "article_number": 26,
+      "repository": "lobehub/lobehub",
+      "resolved_repository": "lobehub/lobehub",
+      "license_assessment": "LobeHub Community",
+      "archived": false,
+      "decision": "Ещё одна платформа агентов; не переносим существующий runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 27,
+      "repository": "bytedance/deer-flow",
+      "resolved_repository": "bytedance/deer-flow",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Сложный harness с sandboxes; дублирование инфраструктуры, не OCR.",
+      "executed": false
+    },
+    {
+      "article_number": 28,
+      "repository": "netdata/netdata",
+      "resolved_repository": "netdata/netdata",
+      "license_assessment": "GPL core / NCUL UI",
+      "archived": false,
+      "decision": "Мониторинг CPU/RSS полезен при диагностике OOM; отдельный демон сейчас не установлен.",
+      "executed": false
+    },
+    {
+      "article_number": 29,
+      "repository": "Leonxlnx/taste-skill",
+      "resolved_repository": "Leonxlnx/taste-skill",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Правила интерфейса можно применять точечно; не делаем редизайн и не устанавливаем рекламируемые API.",
+      "executed": false
+    },
+    {
+      "article_number": 30,
+      "repository": "D4Vinci/Scrapling",
+      "resolved_repository": "D4Vinci/Scrapling",
+      "license_assessment": "BSD-3-Clause",
+      "archived": false,
+      "decision": "Будущий сбор официальных нормативных страниц; сначала источник, версия, дата и hash, а не автоматическое принятие.",
+      "executed": false
+    },
+    {
+      "article_number": 31,
+      "repository": "unslothai/unsloth",
+      "resolved_repository": "unslothai/unsloth",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Локальный inference/finetuning; нет проверенной видеокарты и обучающего датасета.",
+      "executed": false
+    },
+    {
+      "article_number": 32,
+      "repository": "hiyouga/LlamaFactory",
+      "resolved_repository": "hiyouga/LlamaFactory",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Finetuning моделей; отложить до размеченного инженерного набора, не лечит нынешнее извлечение.",
+      "executed": false
+    },
+    {
+      "article_number": 33,
+      "repository": "OpenBB-finance/OpenBB",
+      "resolved_repository": "OpenBB-finance/OpenBB",
+      "license_assessment": "NOASSERTION",
+      "archived": false,
+      "decision": "Финансовые данные; не относится к текущему инженерному документу.",
+      "executed": false
+    },
+    {
+      "article_number": 34,
+      "repository": "daytonaio/daytona",
+      "resolved_repository": "daytonaio/daytona",
+      "license_assessment": "Лицензия archived tag; не интегрируем",
+      "archived": true,
+      "decision": "Открытая база архивирована, разработка перенесена в private; не брать как новый фундамент.",
+      "executed": false
+    },
+    {
+      "article_number": 35,
+      "repository": "code-yeongyu/oh-my-openagent",
+      "resolved_repository": "code-yeongyu/oh-my-openagent",
+      "license_assessment": "SUL-1.0 по README",
+      "archived": false,
+      "decision": "Надстройка кодинговых агентов со специальной лицензией; не обязательная зависимость приложения.",
+      "executed": false
+    },
+    {
+      "article_number": 36,
+      "repository": "santifer/career-ops",
+      "resolved_repository": "santifer/career-ops",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Поиск работы; вне задачи.",
+      "executed": false
+    },
+    {
+      "article_number": 37,
+      "repository": "headroomlabs-ai/headroom",
+      "resolved_repository": "headroomlabs-ai/headroom",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Экономия контекста возможна только на вспомогательных логах после отдельного теста сохранности фактов.",
+      "executed": false
+    },
+    {
+      "article_number": 38,
+      "repository": "microsoft/AI-For-Beginners",
+      "resolved_repository": "microsoft/AI-For-Beginners",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Учебный курс по AI; не продуктовый компонент.",
+      "executed": false
+    },
+    {
+      "article_number": 39,
+      "repository": "Fission-AI/OpenSpec",
+      "resolved_repository": "Fission-AI/OpenSpec",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Спецификации и сценарии полезны как практика; не добавляем второй CLI и каталог требований без необходимости.",
+      "executed": false
+    },
+    {
+      "article_number": 40,
+      "repository": "docling-project/docling",
+      "resolved_repository": "docling-project/docling",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Основной уже используемый parser; улучшение адаптера/региональных режимов вместо смены всей платформы.",
+      "executed": false
+    },
+    {
+      "article_number": 41,
+      "repository": "shanraisshan/claude-code-best-practice",
+      "resolved_repository": "shanraisshan/claude-code-best-practice",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Практики разработки справочно; не копируем автоматические hooks и конфигурации без просмотра.",
+      "executed": false
+    },
+    {
+      "article_number": 42,
+      "repository": "mem0ai/mem0",
+      "resolved_repository": "mem0ai/mem0",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Память предпочтений возможна позже; модельная память не равна проверенному evidence.",
+      "executed": false
+    },
+    {
+      "article_number": 43,
+      "repository": "asgeirtj/system_prompts_leaks",
+      "resolved_repository": "asgeirtj/system_prompts_leaks",
+      "license_assessment": "CC0-1.0",
+      "archived": false,
+      "decision": "Чужие системные промпты; нет пользы для снятия PDF BLOCK.",
+      "executed": false
+    },
+    {
+      "article_number": 44,
+      "repository": "sansan0/TrendRadar",
+      "resolved_repository": "sansan0/TrendRadar",
+      "license_assessment": "GPL-3.0",
+      "archived": false,
+      "decision": "Мониторинг новостей; для нормативов нужны официальные версии, не новостные сводки.",
+      "executed": false
+    },
+    {
+      "article_number": 45,
+      "repository": "microsoft/autogen",
+      "resolved_repository": "microsoft/autogen",
+      "license_assessment": "CC-BY docs; код проверять отдельно",
+      "archived": false,
+      "decision": "Maintenance mode; не добавляем новый агентный framework поверх работающего runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 46,
+      "repository": "meilisearch/meilisearch",
+      "resolved_repository": "meilisearch/meilisearch",
+      "license_assessment": "MIT / BUSL EE",
+      "archived": false,
+      "decision": "Поиск по принятым данным возможен позже; отдельный индекс/сервис и смешанные MIT/EE лицензии.",
+      "executed": false
+    },
+    {
+      "article_number": 47,
+      "repository": "MemPalace/mempalace",
+      "resolved_repository": "MemPalace/mempalace",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Дословная память с поиском интересна для сессий; не переносим инженерную истину в ещё одно хранилище.",
+      "executed": false
+    },
+    {
+      "article_number": 48,
+      "repository": "crewAIInc/crewAI",
+      "resolved_repository": "crewAIInc/crewAI",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Команды/Flows агентов; дублирует существующую оркестрацию и не восстанавливает таблицы.",
+      "executed": false
+    },
+    {
+      "article_number": 49,
+      "repository": "zylon-ai/private-gpt",
+      "resolved_repository": "zylon-ai/private-gpt",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Локальный AI API/RAG; gateway уже имеется, PDF доказательства всё равно требуют проверки.",
+      "executed": false
+    },
+    {
+      "article_number": 50,
+      "repository": "AntonOsika/gpt-engineer",
+      "resolved_repository": "AntonOsika/gpt-engineer",
+      "license_assessment": "MIT",
+      "archived": true,
+      "decision": "Генерация новой кодовой базы; противоречит продолжению существующего проекта.",
+      "executed": false
+    },
+    {
+      "article_number": 51,
+      "repository": "lencx/ChatGPT",
+      "resolved_repository": "lencx/ChatGPT",
+      "license_assessment": "Не подтверждена",
+      "archived": false,
+      "decision": "Оболочка ChatGPT; не инженерная функциональность сайта.",
+      "executed": false
+    },
+    {
+      "article_number": 52,
+      "repository": "aaif-goose/goose",
+      "resolved_repository": "aaif-goose/goose",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Дополнительный desktop/CLI агент; не заменяет parser и gate.",
+      "executed": false
+    },
+    {
+      "article_number": 53,
+      "repository": "dbeaver/dbeaver",
+      "resolved_repository": "dbeaver/dbeaver",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "SQL-клиент может помочь ручной диагностике Supabase; необязателен, существующие инструменты достаточны.",
+      "executed": false
+    },
+    {
+      "article_number": 54,
+      "repository": "jamiepine/voicebox",
+      "resolved_repository": "jamiepine/voicebox",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Речь и диктовка позже; не OCR и не расчётная часть.",
+      "executed": false
+    },
+    {
+      "article_number": 55,
+      "repository": "calesthio/OpenMontage",
+      "resolved_repository": "calesthio/OpenMontage",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Генерация видео; вне этапа.",
+      "executed": false
+    },
+    {
+      "article_number": 56,
+      "repository": "ClickHouse/ClickHouse",
+      "resolved_repository": "ClickHouse/ClickHouse",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Аналитическая база для больших потоков; нет основания заменять Postgres/Supabase.",
+      "executed": false
+    },
+    {
+      "article_number": 57,
+      "repository": "upscayl/upscayl",
+      "resolved_repository": "upscayl/upscayl",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "НЕ принимать дорисованные AI детали за исходные буквы/числа; GPU/Vulkan, только потенциальное визуальное пособие.",
+      "executed": false
+    },
+    {
+      "article_number": 58,
+      "repository": "mudler/LocalAI",
+      "resolved_repository": "mudler/LocalAI",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Альтернативный локальный model server; нынешний Ollama/gateway уже покрывает этот сценарий.",
+      "executed": false
+    },
+    {
+      "article_number": 59,
+      "repository": "rohitg00/ai-engineering-from-scratch",
+      "resolved_repository": "rohitg00/ai-engineering-from-scratch",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Обучающие примеры; не импортировать демонстрационные ответы как инженерные заключения.",
+      "executed": false
+    },
+    {
+      "article_number": 60,
+      "repository": "GitHubDaily/GitHubDaily",
+      "resolved_repository": "GitHubDaily/GitHubDaily",
+      "license_assessment": "CC-BY-NC-ND по README",
+      "archived": false,
+      "decision": "Каталог проектов; не подключаем в runtime, лицензия материалов отдельная.",
+      "executed": false
+    },
+    {
+      "article_number": 61,
+      "repository": "jeecgboot/JeecgBoot",
+      "resolved_repository": "jeecgboot/JeecgBoot",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Java low-code платформа; несоответствие стеку и дублирование приложения.",
+      "executed": false
+    },
+    {
+      "article_number": 62,
+      "repository": "elder-plinius/CL4R1T4S",
+      "resolved_repository": "elder-plinius/CL4R1T4S",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Архив промптов; не инженерные нормы или source evidence.",
+      "executed": false
+    },
+    {
+      "article_number": 63,
+      "repository": "zhayujie/CowAgent",
+      "resolved_repository": "zhayujie/CowAgent",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Личный помощник с управлением компьютером; лишняя инфраструктура на этом этапе.",
+      "executed": false
+    },
+    {
+      "article_number": 64,
+      "repository": "Kong/kong",
+      "resolved_repository": "Kong/kong",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "API gateway полезен при большом числе сервисов; нынешнему объёму не требуется новый сетевой слой.",
+      "executed": false
+    },
+    {
+      "article_number": 65,
+      "repository": "danielmiessler/Fabric",
+      "resolved_repository": "danielmiessler/Fabric",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Шаблоны AI-сценариев; нормативные выводы не строить на общих промптах.",
+      "executed": false
+    },
+    {
+      "article_number": 66,
+      "repository": "heygen-com/hyperframes",
+      "resolved_repository": "heygen-com/hyperframes",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Видео из HTML; не PDF extraction и не ускорение сайта.",
+      "executed": false
+    },
+    {
+      "article_number": 67,
+      "repository": "danny-avila/LibreChat",
+      "resolved_repository": "LibreChat-AI/LibreChat",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Ещё один чат-интерфейс; сохраняем ENGINEER OS и Open WebUI, не мигрируем.",
+      "executed": false
+    },
+    {
+      "article_number": 68,
+      "repository": "agno-agi/agno",
+      "resolved_repository": "agno-agi/agno",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "AgentOS/framework; не переносим существующие контракты, статусы и audit в новый runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 69,
+      "repository": "amruthpillai/reactive-resume",
+      "resolved_repository": "reactive-resume/reactive-resume",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Конструктор резюме; вне задачи.",
+      "executed": false
+    },
+    {
+      "article_number": 70,
+      "repository": "hpcaitech/ColossalAI",
+      "resolved_repository": "hpcaitech/ColossalAI",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Distributed GPU inference/training; нет такой инфраструктуры и задачи обучения.",
+      "executed": false
+    },
+    {
+      "article_number": 71,
+      "repository": "pingcap/tidb",
+      "resolved_repository": "pingcap/tidb",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Другая distributed SQL база; не нужна замена имеющегося Postgres.",
+      "executed": false
+    },
+    {
+      "article_number": 72,
+      "repository": "langchain-ai/langgraph",
+      "resolved_repository": "langchain-ai/langgraph",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Checkpoints/retries пригодятся при развитии очередей; пока достаточно существующих chunk outputs и resumable batch.",
+      "executed": false
+    },
+    {
+      "article_number": 73,
+      "repository": "photoprism/photoprism",
+      "resolved_repository": "photoprism/photoprism",
+      "license_assessment": "AGPL + дополнительные условия",
+      "archived": false,
+      "decision": "Фототека; фото обследования должны быть evidence с привязкой к объекту, не новой отдельной системой.",
+      "executed": false
+    },
+    {
+      "article_number": 74,
+      "repository": "mindsdb/mindshub",
+      "resolved_repository": "mindsdb/mindshub",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Agent workspace; дублирует приложения/агентов, не PDF parser.",
+      "executed": false
+    },
+    {
+      "article_number": 75,
+      "repository": "AstrBotDevs/AstrBot",
+      "resolved_repository": "AstrBotDevs/AstrBot",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Мессенджер-бот; не нужно добавлять новый frontend/runtime.",
+      "executed": false
+    },
+    {
+      "article_number": 76,
+      "repository": "QuivrHQ/quivr",
+      "resolved_repository": "The-Vibe-Company/quivr",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Репозиторий переехал и V2 ориентирован на потоки контента/поиск; описание старого RAG в статье устарело.",
+      "executed": false
+    },
+    {
+      "article_number": 77,
+      "repository": "RSSNext/Folo",
+      "resolved_repository": "RSSNext/Folo",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "RSS для будущего мониторинга источников; не подтверждает актуальность нормативного требования.",
+      "executed": false
+    },
+    {
+      "article_number": 78,
+      "repository": "google-research/google-research",
+      "resolved_repository": "google-research/google-research",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Исследовательский архив; требуется выбор конкретного проекта, общего install для ENGINEER OS нет.",
+      "executed": false
+    },
+    {
+      "article_number": 79,
+      "repository": "github/awesome-copilot",
+      "resolved_repository": "github/awesome-copilot",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Справочник skills; имеющиеся навыки достаточны, не импортировать hooks массово.",
+      "executed": false
+    },
+    {
+      "article_number": 80,
+      "repository": "LAION-AI/Open-Assistant",
+      "resolved_repository": "LAION-AI/Open-Assistant",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Исследовательский ассистент; не источник принятых инженерных ответов.",
+      "executed": false
+    },
+    {
+      "article_number": 81,
+      "repository": "patchy631/ai-engineering-hub",
+      "resolved_repository": "patchy631/ai-engineering-hub",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Учебные RAG/OCR примеры; полезны для сравнения, каждый parser/model требует собственного benchmark.",
+      "executed": false
+    },
+    {
+      "article_number": 82,
+      "repository": "CopilotKit/CopilotKit",
+      "resolved_repository": "CopilotKit/CopilotKit",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Agent UI компоненты возможны позже; нынешний frontend vanilla JS, импорт означал бы лишнюю миграцию.",
+      "executed": false
+    },
+    {
+      "article_number": 83,
+      "repository": "babysor/MockingBird",
+      "resolved_repository": "babysor/MockingBird",
+      "license_assessment": "MIT по README; не интегрируем",
+      "archived": false,
+      "decision": "Клонирование речи, README отмечает отсутствие активной поддержки; вне PDF этапа.",
+      "executed": false
+    },
+    {
+      "article_number": 84,
+      "repository": "Dokploy/dokploy",
+      "resolved_repository": "Dokploy/dokploy",
+      "license_assessment": "Специальная; не интегрируем",
+      "archived": false,
+      "decision": "Self-host deployment возможен при собственном сервере; бесплатная программа не даёт бесплатный сервер и RAM.",
+      "executed": false
+    },
+    {
+      "article_number": 85,
+      "repository": "khoj-ai/khoj",
+      "resolved_repository": "khoj-ai/khoj",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Ещё один document assistant/RAG; не обходит контроль полноты извлечения.",
+      "executed": false
+    },
+    {
+      "article_number": 86,
+      "repository": "reworkd/AgentGPT",
+      "resolved_repository": "reworkd/AgentGPT",
+      "license_assessment": "GPL-3.0",
+      "archived": true,
+      "decision": "Автономный browser agent; не даёт проверенного evidence и дублирует приложение.",
+      "executed": false
+    },
+    {
+      "article_number": 87,
+      "repository": "continuedev/continue",
+      "resolved_repository": "continuedev/continue",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "README говорит read-only/no active maintenance; не выбирать новой обязательной зависимостью.",
+      "executed": false
+    },
+    {
+      "article_number": 88,
+      "repository": "blakeblackshear/frigate",
+      "resolved_repository": "blakeblackshear/frigate",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "NVR/камеры; не текущий анализ PDF.",
+      "executed": false
+    },
+    {
+      "article_number": 89,
+      "repository": "VectifyAI/PageIndex",
+      "resolved_repository": "VectifyAI/PageIndex",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Существующий optional provider оставляем только для поиска; local SDK без OCR не снимает скановые BLOCK.",
+      "executed": false
+    },
+    {
+      "article_number": 90,
+      "repository": "DayuanJiang/next-ai-draw-io",
+      "resolved_repository": "DayuanJiang/next-ai-draw-io",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Схемы процессов полезны позже; не структурный расчёт ЛИРА/SCAD и не PDF extraction.",
+      "executed": false
+    },
+    {
+      "article_number": 91,
+      "repository": "xitu/gold-miner",
+      "resolved_repository": "xitu/gold-miner",
+      "license_assessment": "Не подтверждена",
+      "archived": false,
+      "decision": "Переводы статей; не первичный нормативный источник.",
+      "executed": false
+    },
+    {
+      "article_number": 92,
+      "repository": "explosion/spaCy",
+      "resolved_repository": "explosion/spaCy",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "NLP сущностей/единиц после OCR возможно; не восстанавливает утраченную сетку таблицы.",
+      "executed": false
+    },
+    {
+      "article_number": 93,
+      "repository": "TabbyML/tabby",
+      "resolved_repository": "TabbyML/tabby",
+      "license_assessment": "Apache core / EE",
+      "archived": false,
+      "decision": "Coding completion server; дополнительная модель и mixed EE лицензии, не нужен для OCR.",
+      "executed": false
+    },
+    {
+      "article_number": 94,
+      "repository": "Pythagora-io/gpt-pilot",
+      "resolved_repository": "Pythagora-io/gpt-pilot",
+      "license_assessment": "FSL-1.1-MIT",
+      "archived": false,
+      "decision": "README сообщает прошлый supply-chain инцидент и отсутствие поддержки; не устанавливаем.",
+      "executed": false
+    },
+    {
+      "article_number": 95,
+      "repository": "MadsLorentzen/ai-job-search",
+      "resolved_repository": "MadsLorentzen/ai-job-search",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Поиск работы; вне задачи.",
+      "executed": false
+    },
+    {
+      "article_number": 96,
+      "repository": "lutzroeder/netron",
+      "resolved_repository": "lutzroeder/netron",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "ONNX viewer полезен разработчику OCR при отладке моделей; не исполняет распознавание документов.",
+      "executed": false
+    },
+    {
+      "article_number": 97,
+      "repository": "JCodesMore/ai-website-cloner-template",
+      "resolved_repository": "JCodesMore/ai-website-cloner-template",
+      "license_assessment": "MIT",
+      "archived": false,
+      "decision": "Клонирование сайта; не нужно пересобирать текущий ENGINEER OS.",
+      "executed": false
+    },
+    {
+      "article_number": 98,
+      "repository": "zeroclaw-labs/zeroclaw",
+      "resolved_repository": "zeroclaw-labs/zeroclaw",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Rust runtime личного агента; не заменяем существующие engineering gates.",
+      "executed": false
+    },
+    {
+      "article_number": 99,
+      "repository": "SillyTavern/SillyTavern",
+      "resolved_repository": "SillyTavern/SillyTavern",
+      "license_assessment": "AGPL-3.0",
+      "archived": false,
+      "decision": "Чат с персонажами; нет пользы для PDF достоверности и расчётной части.",
+      "executed": false
+    },
+    {
+      "article_number": 100,
+      "repository": "iOfficeAI/AionUi",
+      "resolved_repository": "iOfficeAI/AionUi",
+      "license_assessment": "Apache-2.0",
+      "archived": false,
+      "decision": "Ещё одна оболочка CLI-агентов с OfficeCLI; берём OfficeCLI отдельно, без нового приложения.",
+      "executed": false
+    }
+  ]
+}

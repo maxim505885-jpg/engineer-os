@@ -1,0 +1,177 @@
+{
+  "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+  "source_unchanged": true,
+  "units": 14684,
+  "image_refs": 682,
+  "wdp_layer_refs": 11,
+  "ole_refs": 21,
+  "http_inventory": 704,
+  "original_download_equal": true,
+  "ole_checks": [
+    {
+      "part": "word/embeddings/oleObject1.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "e3f8c6f78f11f3ed336d63eda502cfb5223c412278136eef7b64c73bd11c1a8f"
+    },
+    {
+      "part": "word/embeddings/oleObject10.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "f5b419ac7c0dffed7ba1cd508f61ca7dd90efeb6790f382970713ebde0ffe62d"
+    },
+    {
+      "part": "word/embeddings/oleObject11.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "4004cef215766671cdfd1e7fb6705ac7bd3bf415a5882ae07896336eb130c1fd"
+    },
+    {
+      "part": "word/embeddings/oleObject12.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "1cbc73f8397e50a8e7e6a85e3e9188c9d82d70685dda37422ed3c70278ecfbf5"
+    },
+    {
+      "part": "word/embeddings/oleObject13.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "fbf3a555d3ca863a6d0e99ed044ca5987ce7c2a56dd264abc5136c9f10cb03e6"
+    },
+    {
+      "part": "word/embeddings/oleObject14.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "cb8707720c2bc591ba7080f18b8103a1d13c764c41366f61ce942dccb33130f6"
+    },
+    {
+      "part": "word/embeddings/oleObject15.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "b79cab471686693227e590d70724cbc7877a7bac8613e3879cc9a689fedfaccb"
+    },
+    {
+      "part": "word/embeddings/oleObject16.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "56cc86401e4be95afd2695732ef31a23b447741f3fa1d481b38ec51e34bccb42"
+    },
+    {
+      "part": "word/embeddings/oleObject17.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "1cbc73f8397e50a8e7e6a85e3e9188c9d82d70685dda37422ed3c70278ecfbf5"
+    },
+    {
+      "part": "word/embeddings/oleObject18.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "dee94b2febe326741f8caf24d6625c362f84c3c81f1869f8c022a0accc625a4a"
+    },
+    {
+      "part": "word/embeddings/oleObject19.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "10d35a3a865b613bdc2c8fbaf31dfc6608f8f7ca709e964cafa1663bf4b50741"
+    },
+    {
+      "part": "word/embeddings/oleObject2.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "cdde18fffdbc80862ba7d75e1f9d2c198ff39a37e975af57fd6ba33c5196c665"
+    },
+    {
+      "part": "word/embeddings/oleObject20.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "1ffc706d31a1933671c022609b5d59b8d2a88c813457deb667ebb1630edddce1"
+    },
+    {
+      "part": "word/embeddings/oleObject21.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "8e88ecd9bb1fb0c3306371a19506e21c7e682a00b29ca3b772c08727d3ff5c97"
+    },
+    {
+      "part": "word/embeddings/oleObject3.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "2f32c8217d7fc9e84aab29d2e56ac735bbabec595e22c00b19bc3ddf39886aa6"
+    },
+    {
+      "part": "word/embeddings/oleObject4.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "5d2a7556ee62a3023839ef5b9ca0aff012d99b5e276aa840f0be1265ae129627"
+    },
+    {
+      "part": "word/embeddings/oleObject5.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "fffc0e61bdd7b42afefcac2118112f36804a29e728b5a07a513da2123d99cbea"
+    },
+    {
+      "part": "word/embeddings/oleObject6.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "6d7a27f7e605910a7d52f82a0d4794ec972d2816df7263e9db9bc730adf3fcda"
+    },
+    {
+      "part": "word/embeddings/oleObject7.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "9b93dcfc9d7d85bbc3e937f5237ac65d4d95b69fe08228104088352c84e88952"
+    },
+    {
+      "part": "word/embeddings/oleObject8.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "ae0847baf33ec30f30b3b35a363bdfe1aa8b51cc32632278d89ae6d6564815a8"
+    },
+    {
+      "part": "word/embeddings/oleObject9.bin",
+      "raw_hash_match": true,
+      "preview_pixel_match": true,
+      "png_sha256": "d2dbee3cb423ca63152bdd0c1e3f091103852c71732dd3089bea3bdb449a97a6"
+    }
+  ],
+  "store_native_units": 14684,
+  "store_components": {
+    "scope": "DECLARED_STRUCTURE_NOT_COMPLETE_DOCUMENT",
+    "equations": 41,
+    "auxiliary_parts": [
+      "word/endnotes.xml",
+      "word/footnotes.xml",
+      "word/header1.xml",
+      "word/header2.xml"
+    ],
+    "auxiliary_units": 6,
+    "auxiliary_placement_verified": false,
+    "image_references": 682,
+    "bound_image_references": 682,
+    "unavailable_image_references": 0,
+    "emf_text_records": 3394,
+    "emf_bitmap_records": 130,
+    "available_emf_bitmap_records": 130,
+    "unavailable_emf_text_references": 0,
+    "image_content_verified": false,
+    "image_transforms_applied": false,
+    "image_layer_references": 11,
+    "embedded_object_references": 21,
+    "bound_embedded_object_references": 21,
+    "embedded_objects_activated": false,
+    "word_cells_with_merge_declarations": 6300,
+    "word_grid_consistent_cells": 12826,
+    "word_grid_unresolved_cells": 0,
+    "word_vertical_continuations_resolved": 5759,
+    "xlsx_merged_ranges": 0,
+    "xlsx_formula_cells": 0,
+    "formulas_evaluated": false,
+    "layout_verified": false
+  },
+  "checkpoint_object_previews": 21,
+  "evidence_count": 0,
+  "model_inference_performed": false,
+  "content_verified": false,
+  "elapsed_seconds": 538.94
+}

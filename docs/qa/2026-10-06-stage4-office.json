@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "baseline_tree": "970679286a05b9874ff1f66736c53de7959c6c1c",
+  "real_office_parser": true,
+  "real_libreoffice_conversion": true,
+  "model_quality_not_tested": true,
+  "cases": [
+    {
+      "name": "Расчет  .doc",
+      "source_bytes": 3029504,
+      "source_sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+      "state": "SUCCEEDED",
+      "elapsed_seconds": 3.885,
+      "total_units": 492,
+      "processed_units": 492,
+      "blocked_units": 53,
+      "failed_units": 0,
+      "limitations": [
+        "PHYSICAL_PAGES_UNKNOWN",
+        "LAYOUT_NOT_VERIFIED",
+        "HEADERS_FOOTNOTES_NOT_READ",
+        "DOC_CONVERSION_LAYOUT_UNVERIFIED",
+        "DRAWING_NOT_READ",
+        "NO_TEXT",
+        "MERGED_CELL_UNVERIFIED"
+      ],
+      "parts": 23,
+      "model_calls": 45,
+      "receipt_count": 45,
+      "all_batches_completed": true,
+      "acceptance_granted": false,
+      "conversion": {
+        "original_sha256": "ae8ba034b8970eefe8283577598da8529e1f94f9f0200c7309d3d6bc84357a76",
+        "derived_sha256": "629d0f4f9ca09a6befac8573c3e8e23b31c660649c34849ac03d3e6bc3ded4da",
+        "converter": {
+          "available": true,
+          "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override/soffice",
+          "executable_sha256": "35c5a2736f68e6370a7b9fe5082e66bc438c1a8de11261d6c4bc847073ced45b",
+          "sandbox_sha256": "8b0a1b37e46d57676ecb7f6aba08821f471af905d57403b658711c09c0829c45",
+          "adapter_sha256": "be25527ca7b05cf3985ec501ede0868ff19084c192617e25a3a1c6ec2dbca15b",
+          "platform": "linux",
+          "timeout": 90,
+          "max_derived": 33554432,
+          "macros": "DISABLED",
+          "network": "DENIED"
+        },
+        "scope": "DERIVED_UNVERIFIED",
+        "network_denied": true,
+        "macros_disabled": true,
+        "acceptance_granted": false
+      },
+      "real_model": false,
+      "model_transport": "controlled in-process"
+    },
+    {
+      "name": "Расчет  .docx",
+      "source_bytes": 2754000,
+      "source_sha256": "7b7fd508058e7cf91cf051d5a214bd9b1af09df9d361f32273d4942577bf61db",
+      "state": "SUCCEEDED",
+      "elapsed_seconds": 2.634,
+      "total_units": 487,
+      "processed_units": 487,
+      "blocked_units": 48,
+      "failed_units": 0,
+      "limitations": [
+        "PHYSICAL_PAGES_UNKNOWN",
+        "LAYOUT_NOT_VERIFIED",
+        "HEADERS_FOOTNOTES_NOT_READ",
+        "DRAWING_NOT_READ",
+        "NO_TEXT",
+        "EQUATION_NOT_READ",
+        "MERGED_CELL_UNVERIFIED",
+        "BODY_STRUCTURE_UNVERIFIED"
+      ],
+      "parts": 23,
+      "model_calls": 45,
+      "receipt_count": 45,
+      "all_batches_completed": true,
+      "acceptance_granted": false,
+      "conversion": null,
+      "real_model": false,
+      "model_transport": "controlled in-process"
+    },
+    {
+      "name": "Таблицы.xlsx",
+      "source_bytes": 10004,
+      "source_sha256": "305a8e47342c7d552095b936c382547b22fc0a933c4996f2422e8a8f7fe01c1f",
+      "state": "SUCCEEDED",
+      "elapsed_seconds": 0.358,
+      "total_units": 125,
+      "processed_units": 125,
+      "blocked_units": 0,
+      "failed_units": 0,
+      "limitations": [
+        "FORMULAS_NOT_EVALUATED",
+        "RAW_VALUES_STYLES_NOT_APPLIED",
+        "DRAWINGS_CHARTS_NOT_READ"
+      ],
+      "parts": 7,
+      "model_calls": 13,
+      "receipt_count": 13,
+      "all_batches_completed": true,
+      "acceptance_granted": false,
+      "conversion": null,
+      "real_model": false,
+      "model_transport": "controlled in-process"
+    }
+  ],
+  "review_fixes": "Word token preservation/explicit font symbol block; Excel phonetic annotations excluded; actual sources repeated after fixes"
+}

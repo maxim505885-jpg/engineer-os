@@ -1,0 +1,222 @@
+{
+  "schema": "ENGINEER_OS_FIVE_CRITERIA_SOURCE_CHECK_V1",
+  "scope": "REAL_SOURCE_IDENTITY_AND_UNVERIFIED_EXTRACTION",
+  "source_count": 7,
+  "all_originals_unchanged": true,
+  "acceptance_granted": false,
+  "calculation_intake": {
+    "status": "BLOCK",
+    "missing_roles": [
+      "GEOMETRY",
+      "MATERIALS_SECTIONS",
+      "LOADS_COMBINATIONS",
+      "SUPPORTS_RELEASES",
+      "UNITS",
+      "SOLVER_LOG",
+      "RESULTS",
+      "ACTUAL_STRUCTURE_REFERENCE"
+    ]
+  },
+  "cad": {
+    "status": "DERIVED_DXF_INVENTORIED_UNVERIFIED",
+    "copies": 5,
+    "unique_sources": 1,
+    "acceptance_granted": false,
+    "converter": "GNU LibreDWG 0.14",
+    "originals_unchanged": true,
+    "derived_bytes": 16034803,
+    "derived_sha256": "dddb5edf86015cf7603f9e95d485d18ee03c4916c30c46e8e88cca4fd9ed18d0",
+    "inventory": {
+      "scope": "OFFLINE_UNVERIFIED_DERIVED_INVENTORY",
+      "source_sha256": "dddb5edf86015cf7603f9e95d485d18ee03c4916c30c46e8e88cca4fd9ed18d0",
+      "version": "AC1032",
+      "units": 4,
+      "entitydb_count": 15906,
+      "modelspace_count": 4189,
+      "modelspace_types": {
+        "HATCH": 57,
+        "LWPOLYLINE": 3074,
+        "CIRCLE": 137,
+        "MTEXT": 112,
+        "DIMENSION": 128,
+        "INSERT": 152,
+        "LINE": 275,
+        "MULTILEADER": 196,
+        "SPLINE": 54,
+        "OLE2FRAME": 1,
+        "TEXT": 3
+      },
+      "block_entities_count": 10172,
+      "layouts": 3,
+      "blocks": 287,
+      "layers": 32,
+      "conversion_warning_lines": 1304,
+      "conversion_error_lines": 210,
+      "accepted": false,
+      "controlled_edit": "NOT_RUN",
+      "original_geometry_equivalence": "NOT_VERIFIED"
+    },
+    "application_inventory": {
+      "status": "BLOCK",
+      "reason": "CAD_ENTITY_LIMIT",
+      "limit": 10000
+    }
+  },
+  "sources": [
+    {
+      "label": "source-1",
+      "format": ".lir",
+      "bytes": 42047193,
+      "original_preserved": true,
+      "processed_units": null,
+      "total_units": null,
+      "failed_units": null,
+      "limitations": null,
+      "native_identity": {
+        "status": "BLOCK",
+        "scope": "NATIVE_FILE_IDENTITY_ONLY",
+        "source_sha256": "a753162adf1f1b2de8ab92ab1355eac4d0c23e9241bf6e0e97f39d3ee6205ca9",
+        "source_bytes": 42047193,
+        "declared_format": "LIRA-SAPR 2013",
+        "declared_version": "13.0.0.a",
+        "header_byte_span": [
+          0,
+          38
+        ],
+        "embedded_archive": {
+          "member_count": 2,
+          "listed_members": [
+            {
+              "name": "0",
+              "uncompressed_bytes": 4770
+            },
+            {
+              "name": "naberezhnayasimf_секция1`2.sld",
+              "uncompressed_bytes": 947118
+            }
+          ],
+          "inventory_truncated": false,
+          "contents_decoded": false,
+          "scope": "EMBEDDED_ARCHIVE_INVENTORY_ONLY"
+        },
+        "semantics_decoded": false,
+        "engineering_verified": false,
+        "acceptance_granted": false,
+        "reasons": [
+          "MODEL_DECODER_UNAVAILABLE",
+          "NATIVE_MODEL_EXPORT_REQUIRED"
+        ]
+      }
+    },
+    {
+      "label": "source-3",
+      "format": ".pdf",
+      "bytes": 7563047,
+      "original_preserved": true,
+      "processed_units": 22,
+      "total_units": 22,
+      "failed_units": 0,
+      "limitations": {
+        "VECTOR_CONTENT_UNVERIFIED": 22,
+        "NO_NATIVE_TEXT": 19
+      },
+      "native_identity": null
+    },
+    {
+      "label": "source-5",
+      "format": ".pdf",
+      "bytes": 10793106,
+      "original_preserved": true,
+      "processed_units": 21,
+      "total_units": 21,
+      "failed_units": 0,
+      "limitations": {
+        "VECTOR_CONTENT_UNVERIFIED": 21,
+        "NO_NATIVE_TEXT": 21
+      },
+      "native_identity": null
+    },
+    {
+      "label": "source-7",
+      "format": ".docx",
+      "bytes": 2754000,
+      "original_preserved": true,
+      "processed_units": 487,
+      "total_units": 487,
+      "failed_units": 0,
+      "limitations": {
+        "PHYSICAL_PAGES_UNKNOWN": 1,
+        "LAYOUT_NOT_VERIFIED": 1,
+        "HEADERS_FOOTNOTES_NOT_READ": 1,
+        "DRAWING_NOT_READ": 31,
+        "NO_TEXT": 33,
+        "EQUATION_NOT_READ": 2,
+        "MERGED_CELL_UNVERIFIED": 14,
+        "BODY_STRUCTURE_UNVERIFIED": 1
+      },
+      "native_identity": null
+    },
+    {
+      "label": "source-9",
+      "format": ".lir",
+      "bytes": 21209600,
+      "original_preserved": true,
+      "processed_units": null,
+      "total_units": null,
+      "failed_units": null,
+      "limitations": null,
+      "native_identity": {
+        "status": "BLOCK",
+        "scope": "NATIVE_FILE_IDENTITY_ONLY",
+        "source_sha256": "cc1a18a7723bb7d142d301ee39750ae1855c2671b710b577d9f28193b5d6b9fa",
+        "source_bytes": 21209600,
+        "declared_format": "LIRA-SAPR 2013",
+        "declared_version": "13.0.0.a",
+        "header_byte_span": [
+          0,
+          38
+        ],
+        "embedded_archive": null,
+        "semantics_decoded": false,
+        "engineering_verified": false,
+        "acceptance_granted": false,
+        "reasons": [
+          "MODEL_DECODER_UNAVAILABLE",
+          "NATIVE_MODEL_EXPORT_REQUIRED"
+        ]
+      }
+    },
+    {
+      "label": "source-10",
+      "format": ".xlsx",
+      "bytes": 10004,
+      "original_preserved": true,
+      "processed_units": 125,
+      "total_units": 125,
+      "failed_units": 0,
+      "limitations": {
+        "FORMULAS_NOT_EVALUATED": 1,
+        "RAW_VALUES_STYLES_NOT_APPLIED": 1,
+        "DRAWINGS_CHARTS_NOT_READ": 1
+      },
+      "native_identity": null
+    },
+    {
+      "label": "source-11",
+      "format": ".xlsx",
+      "bytes": 665732,
+      "original_preserved": true,
+      "processed_units": 48,
+      "total_units": 48,
+      "failed_units": 0,
+      "limitations": {
+        "FORMULAS_NOT_EVALUATED": 1,
+        "RAW_VALUES_STYLES_NOT_APPLIED": 1,
+        "DRAWINGS_CHARTS_NOT_READ": 1,
+        "MERGED_CELLS_UNVERIFIED": 48,
+        "DRAWING_NOT_READ": 48
+      },
+      "native_identity": null
+    }
+  ]
+}

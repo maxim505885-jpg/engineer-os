@@ -1,0 +1,234 @@
+{
+  "source_sha256": "b253439bdd673a775eaf209ca7d398d766efae5f4a18ac33fa6679f7faae28a5",
+  "source_bytes": 147210288,
+  "source_complete_derived_pdf": {
+    "mode": "source cached previews, source tables>80rows split every80rows",
+    "bound_seconds": 120,
+    "exit_code": 0,
+    "nonempty_pdf": true,
+    "pdf_path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked/source-row-complete-chunked.pdf",
+    "pdf_bytes": 24993047,
+    "pdf_sha256": "301e449965de13cac64de6ecdd219d7958f736a0fc82fc263ce2ecbe9c372d23",
+    "pdf_pages": 493,
+    "page_pngs": 493,
+    "qualified_original_layout": false,
+    "full_all_page_visual_qa": false
+  },
+  "source_invariants": {
+    "cells": {
+      "original_count": 12826,
+      "derived_count": 12826,
+      "exact_original_semantic_hash_match_count": 12801,
+      "exact_original_mismatch_ordinals": [
+        63,
+        65,
+        68,
+        70,
+        71,
+        72,
+        73,
+        76,
+        77,
+        481,
+        483,
+        545,
+        549,
+        551,
+        567,
+        583,
+        619,
+        621,
+        653,
+        669,
+        671,
+        703,
+        719,
+        735,
+        865
+      ],
+      "original_vs_derived_after_explicit_passive_preview_removals_all_source_order_semantic_hashes_equal": true,
+      "canonical_hash_encoding": "SHA256 of JSON expanded tags/sorted attrs/text/recursivechildren/tails;root tail excluded",
+      "source_passive_normalized_ordered_hashes_sha256": "9592d35a834475ef366d9e4bd8571fae53c855024b170995fa8cb418e643a05c",
+      "derived_ordered_hashes_sha256": "9592d35a834475ef366d9e4bd8571fae53c855024b170995fa8cb418e643a05c"
+    },
+    "paragraphs": {
+      "original_count": 15651,
+      "derived_count": 15651,
+      "exact_original_semantic_hash_match_count": 15623,
+      "exact_original_mismatch_ordinals": [
+        379,
+        395,
+        396,
+        429,
+        443,
+        449,
+        456,
+        464,
+        498,
+        504,
+        1278,
+        1281,
+        1384,
+        1392,
+        1393,
+        1395,
+        1425,
+        1449,
+        1505,
+        1512,
+        1569,
+        1606,
+        1616,
+        1626,
+        1691,
+        1716,
+        1748,
+        1947
+      ],
+      "original_vs_derived_after_explicit_passive_preview_removals_all_source_order_semantic_hashes_equal": true,
+      "canonical_hash_encoding": "SHA256 of JSON expanded tags/sorted attrs/text/recursivechildren/tails;root tail excluded",
+      "source_passive_normalized_ordered_hashes_sha256": "375d989b13a0536e232f42ed13472f344f0c2760229b0e0d160b191b7f64e24b",
+      "derived_ordered_hashes_sha256": "375d989b13a0536e232f42ed13472f344f0c2760229b0e0d160b191b7f64e24b"
+    },
+    "formulas": {
+      "original_count": 41,
+      "derived_count": 41,
+      "exact_original_semantic_hash_match_count": 41,
+      "exact_original_mismatch_ordinals": [],
+      "original_vs_derived_after_explicit_passive_preview_removals_all_source_order_semantic_hashes_equal": true,
+      "canonical_hash_encoding": "SHA256 of JSON expanded tags/sorted attrs/text/recursivechildren/tails;root tail excluded",
+      "source_passive_normalized_ordered_hashes_sha256": "7c6c87dad0e43dc8eb5a1eb17a43bc02f934d4182fe15ad978d07f6cecd4bc05",
+      "derived_ordered_hashes_sha256": "7c6c87dad0e43dc8eb5a1eb17a43bc02f934d4182fe15ad978d07f6cecd4bc05"
+    }
+  },
+  "evidence": [
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/REPORT.md",
+      "bytes": 9643,
+      "sha256": "ec9599e25c29b5763bda54ebe5874861b1f302732b4c4e64b873daacbc78811c"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/summary.json",
+      "bytes": 4940,
+      "sha256": "591778484433bcc85e816448d5cbfd681f13801053166930039fab5093591940"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/probe.json",
+      "bytes": 105194,
+      "sha256": "2ae28daf61531fb26f35765a9fa11d9f6bea93ab43de6fd15dbcacaea5417f95"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/formula-fragment-verification.json",
+      "bytes": 880,
+      "sha256": "8d5acb65076d1ce84b19e811b01da8fd443474c09208060ebf025248f7e5005b"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/source-canonical-order-invariants.json",
+      "bytes": 2512,
+      "sha256": "8ffa631560ca7444bf16281aaff60e47a91d0773b9627532013a738f2e318610"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/source-row-complete-chunked-source-coverage.json",
+      "bytes": 747,
+      "sha256": "c31b80dc3654274ffa4a4540b4bb0b74215a6c38b6cea6cfa0885fac9b1097aa"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/source-row-complete-chunked-changes.json",
+      "bytes": 1113,
+      "sha256": "94b3f76d347565d687f2c64b24961e287a2abc4ca81e47fb95ea79d58f3d1954"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/passive-preview-copy-changes.json",
+      "bytes": 98,
+      "sha256": "7a6e1a4e63c2b47fa2b661d75a15e394d5bfadd3c73f33635938e405259b2548"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/source-field-instruction-inventory.json",
+      "bytes": 15649,
+      "sha256": "77db2660467f767c6ce199476068ceed2a64a2402d1f7cc95e5cdaac18061355"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/wdp-layer-vs-base.json",
+      "bytes": 32158,
+      "sha256": "e07b309c25965036dd2633a56953eadd407fa8b32151a1f2255e17d54c8ccd3e"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/emfplus-record-audit.json",
+      "bytes": 119477,
+      "sha256": "540a6ccc8fc82a057faabca827ed03562b070b16ec16e7fdd653b4296e445a44"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/emfplus-region-objects.json",
+      "bytes": 3583,
+      "sha256": "592fc4ac447f573a2f0de251af989f2300e22674f7fa779b051daac7b88dafbf"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/emf-comment-render-results.json",
+      "bytes": 5383,
+      "sha256": "2625d04293683bf44f1661d6089e4e2de26e86a4ca7bed891eecad6a21a541e6"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/emf-dual-equivalence.json",
+      "bytes": 8488,
+      "sha256": "6cbef90d3fd7f6243d8697353374c35dd420c4b6f0e1100ad612b70cbe8bc928"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/formula-render.log",
+      "bytes": 649,
+      "sha256": "19950017d14b00b086a241f6f433916262ee53e4b0511911206dacbeb000e084"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/formula-render/formula-source-fragments.pdf",
+      "bytes": 63909,
+      "sha256": "192882ad428702e50ae76635cdcb2206f5437dfb699a51c9d1371dfc632f6847"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render.log",
+      "bytes": 256,
+      "sha256": "de2b8a85811534e460ff3bed6f43a2d95b667cc31a9d20e5a1ac16ac2d549301"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-lowdpi.log",
+      "bytes": 476,
+      "sha256": "e2e68b4d71bd23c54c342dc9fb9fdb30af299fba64d22e2c0adaa5b0f0faa5a0"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-passive.log",
+      "bytes": 426,
+      "sha256": "0e097784335a94d672fd050b8af60c49ccb9342ffdd14b71458f23734d07ddb6"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-first-page.log",
+      "bytes": 363,
+      "sha256": "4359c4e14a17c51bc5923f161cfd740abbe14458d38d675f11eefeb1ab458ad7"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked.log",
+      "bytes": 436,
+      "sha256": "37f211231a388f89d80b759a22b658d673adf994fc5183a471fe32d59b8f3b19"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked/fonts.txt",
+      "bytes": 3384,
+      "sha256": "3b2fc0406d25a07c84baf0e57bf489cf138e045b9d50f891b5f4194e1cd9cef7"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked/pages.json",
+      "bytes": 698140,
+      "sha256": "9c9beed2976e3146ca6184458ad9f40348b95ac388919ad94f04ec54a720308d"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked/source-row-complete-chunked.pdf",
+      "bytes": 24993047,
+      "sha256": "301e449965de13cac64de6ecdd219d7958f736a0fc82fc263ce2ecbe9c372d23"
+    },
+    {
+      "path": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/formula-source-fragments.docx",
+      "bytes": 113420,
+      "sha256": "537e57ef823b394c9bf7aa15401e5ba9e3cf416931411c4afdb437edd40a28cf"
+    }
+  ],
+  "source_unchanged": true,
+  "all_493_raster_page_hashes_in": "/workspace/scratch/0a9c93c51c71/stage13-word-visual-completion/full-render-chunked/pages.json",
+  "qualified_acceptance": false
+}

@@ -1,0 +1,2 @@
+# Optional DXF evidence/annotation workflow. No native DWG conversion included.
+ezdxf==1.4.4

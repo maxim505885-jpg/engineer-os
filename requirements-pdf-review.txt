@@ -1,0 +1,2 @@
+# Optional local verifier only; install in an isolated project Python environment.
+PyMuPDF==1.26.6
