@@ -58,7 +58,10 @@ def check_requirements(path, *, expected_sha256, requirements):
                 explicit=getattr(field,'Unit',None)
                 nominal=getattr(field,'NominalValue',None)
                 if req['unit']=='project_length':
-                    unit_verified=(field.is_a('IfcQuantityLength') and explicit is None)
+                    unit_verified=(explicit is None and inventory['length_to_m'] is not None and
+                        (field.is_a('IfcQuantityLength') or
+                         (field.is_a('IfcPropertySingleValue') and nominal is not None and
+                          nominal.is_a() in ('IfcLengthMeasure','IfcPositiveLengthMeasure','IfcNonNegativeLengthMeasure'))))
                 elif req['unit']=='unitless':
                     unit_verified=(explicit is None and
                         (field.is_a('IfcQuantityCount') or

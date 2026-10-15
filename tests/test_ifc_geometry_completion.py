@@ -108,6 +108,22 @@ class IfcWorkerOutputContractTests(IfcGeometryTests):
                 self.assertEqual(self.inspect()['status'],'BLOCK',change)
 
 class IfcDimensionlessPropertyTests(unittest.TestCase):
+    def test_nominal_length_measure_uses_project_units_without_becoming_unitless(self):
+        from engineering.bim.ifc_requirements import check_requirements
+        import ifcopenshell.api
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'length.ifc';model=ifcopenshell.open(str(Path(__file__).parent/'fixtures/bim/reference.ifc'))
+            beam=model.by_type('IfcBeam')[0]
+            pset=ifcopenshell.api.run('pset.add_pset',model,product=beam,name='Dimensions')
+            value=model.create_entity('IfcPropertySingleValue',Name='Length',NominalValue=model.create_entity('IfcLengthMeasure',6000.))
+            pset.HasProperties=[value];model.write(str(path))
+            req=dict(id='L',source='Controlled project-length requirement',ifc_type='IfcBeam',pset='Dimensions',property='Length',equals=6000.,unit='project_length')
+            sha=hashlib.sha256(path.read_bytes()).hexdigest()
+            result=check_requirements(path,expected_sha256=sha,requirements=[req])
+            self.assertEqual(result['checks'][0]['status'],'PASS',result)
+            req['unit']='unitless';result=check_requirements(path,expected_sha256=sha,requirements=[req])
+            self.assertEqual(result['checks'][0]['status'],'UNCERTAINTY')
+
     def test_real_property_is_unitless_only_without_explicit_unit(self):
         from engineering.bim.ifc_requirements import check_requirements
         import ifcopenshell.api

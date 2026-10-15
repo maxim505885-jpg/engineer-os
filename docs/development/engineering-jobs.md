@@ -56,10 +56,11 @@ storeys, properties and GUIDs remain PROJECT; no accepted Evidence is created.
 The UI lists at most 200 elements and retains the complete bounded receipt.
 The resource boundary does not claim network isolation or hostile-code safety.
 
-CAD and IFC diff adapter code remains disabled in the queue. DWG conversion,
-annotations, IFC geometry/requirements and GUID Evidence still
-need their own bounded worker/source review qualifications (T08/T09). Catalog
-entries explicitly show that boundary. The whole six-stage plan is not complete.
+IFC geometry/requirements/diff and GUID Evidence are now connected through the
+bounded workflow; see [IFC workflows](ifc-workflows.md) for exact scope and
+independent reference receipts. CAD adapters, conversion and annotations still
+require T08 qualification before enabling their queue entries. The whole
+six-stage plan is not complete.
 
 Optional calculation/BIM requirements include the pinned Windows pywin32 worker
 dependency. The optional Linux/Windows workflow exercises these workers and

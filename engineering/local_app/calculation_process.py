@@ -30,14 +30,18 @@ def probe_memory_limit(stop):
     return _run_request('MEMORY_PROBE',{},stop)
 
 
-def _run_request(tool,data,stop):
-    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF','MEMORY_PROBE'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
+def _run_request(tool,data,stop,*,timeout_seconds=None):
+    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_LOCATE','MEMORY_PROBE'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
+    seconds=TIMEOUT if timeout_seconds is None else timeout_seconds
+    if type(seconds) is not int or not 1<=seconds<=TIMEOUT:raise ValueError('RESOURCE_TIMEOUT_INVALID')
     if stop.is_set():raise ValueError('CALCULATION_CANCELLED')
     root=Path(__file__).resolve().parents[2]
     with tempfile.TemporaryDirectory(prefix='engineer-calculation-') as tmp:
         folder=Path(tmp);source=folder/'request.json';target=folder/'result.json'
-        source.write_text(json.dumps(dict(tool=tool,data=data),allow_nan=False),encoding='utf-8')
-        command=[sys.executable,'-m','engineering.local_app.calculation_process',str(source),str(target),str(MEMORY_BYTES),str(TIMEOUT)]
+        request=json.dumps(dict(tool=tool,data=data),allow_nan=False,ensure_ascii=False).encode('utf-8')
+        if len(request)>70000:raise ValueError('CALCULATION_REQUEST_LIMIT')
+        source.write_bytes(request)
+        command=[sys.executable,'-m','engineering.local_app.calculation_process',str(source),str(target),str(MEMORY_BYTES),str(seconds)]
         environment=dict(os.environ,PYTHONPATH=str(root),OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
         started=time.monotonic();process=None;job=None;thread=None;child=None
         try:
@@ -64,14 +68,14 @@ def _run_request(tool,data,stop):
                 def exitcode():return child.returncode
             while not finished():
                 if stop.is_set():raise ValueError('CALCULATION_CANCELLED')
-                if time.monotonic()-started>TIMEOUT:raise ValueError('CALCULATION_TIMEOUT')
+                if time.monotonic()-started>seconds:raise ValueError('CALCULATION_TIMEOUT')
                 if target.exists() and target.stat().st_size>MAX_OUTPUT:raise ValueError('CALCULATION_OUTPUT_LIMIT')
                 time.sleep(.02)
             if exitcode()!=0 or not target.is_file() or target.stat().st_size>MAX_OUTPUT:raise ValueError('CALCULATION_CHILD_FAILED')
             def reject_constant(value):raise ValueError('CALCULATION_NONFINITE_OUTPUT')
             value=json.loads(target.read_text(encoding='utf-8'),parse_constant=reject_constant)
             if not isinstance(value,dict) or value.get('acceptance_granted') is not False:raise ValueError('CALCULATION_RECEIPT_INVALID')
-            value['resource_boundary']=dict(memory_bytes=MEMORY_BYTES,timeout_seconds=TIMEOUT,output_bytes=MAX_OUTPUT,
+            value['resource_boundary']=dict(memory_bytes=MEMORY_BYTES,timeout_seconds=seconds,output_bytes=MAX_OUTPUT,
                 child_isolated=True,network_isolation_verified=False)
             return value
         except ImportError:raise ValueError('WINDOWS_CALCULATION_JOB_BOUNDARY_UNAVAILABLE') from None
@@ -112,7 +116,7 @@ def main():
         for index in range(0,len(allocation),4096):allocation[index]=1
         result=dict(status='PASS',scope='FIXED_MEMORY_ALLOCATION_PROBE_ONLY',
                     allocated_bytes=len(allocation),acceptance_granted=False)
-    elif tool in ('IFC_INVENTORY','IFC_DIFF'):
+    elif tool in ('IFC_INVENTORY','IFC_DIFF','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_LOCATE'):
         from .ifc_process import evaluate_staged
         result=evaluate_staged(tool,data)
     else:raise ValueError('CALCULATOR_NOT_SUPPORTED')

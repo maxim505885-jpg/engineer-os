@@ -9,7 +9,7 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 |1. Сборка и окружение|T01: manifest/API/UI/worker identity; Windows Start/Start/Stop на18768; старый8765 правильно отклонён без остановки. T02: explicit offline probes PDF/OCR/IFC/beam|T02: воспроизводимый wheel/model profile, защищённый Office renderer, offline tables; T12: поставка именно этой сборки|
 |2. Документы и ТЗ|Повторно сверены все29исходников,828577307байт: SHA-256 совпали с corpus manifest,0добавлений/удалений|T03/T04: source-bound Windows layout, все объекты/формулы/ячейки и критические числа; image-only ТЗ и полнота V4. Наличие текста не закрывает эти проверки|
 |3. Приёмка и нормы|T05: явный локальный issuer, типизированные подписи, отзыв и freshness; UI; узкий положительный цикл PROJECT/plaintext через production issuer|Полная предметная приёмка T05 после T04/T06; T06 квалифицированный каталог полных нормативных источников и предметные сравнения|
-|4. Расчёты/CAD/IFC в приложении|ENGINEERING_RUN, immutable bounded inputs, SI calculations; Chromium rectangle/beam; Windows bounded child; IFC upload→bounded inventory→элементы/GUID/receipt; cross-project isolation|Полная квалификация T07; CAD T08; IFC geometry/requirements/diff/GUID Evidence T09; исходы обоих DWG; независимый реальный IFC|
+|4. Расчёты/CAD/IFC в приложении|ENGINEERING_RUN, immutable bounded inputs, SI calculations; Chromium rectangle/beam; Windows bounded child; IFC inventory/geometry/requirements/diff, типизированный GUID Evidence; независимые IFC2X3/IFC4 reference-прогоны; cross-project isolation|Полная квалификация T07; CAD T08; T09: финальная квалификация границ и геометрических различий; исходы обоих DWG|
 |5. Реальная приёмка, память, итог|Предварительные выводы сохранены; controlled production issuer→case→FINAL_AUDIT→memory проходит с сохранением PROJECT scope, source change/revocation снимают доверие|T10 положительный source-backed realcase; T11 FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
 |6. Windows и выпуск|Schema3 migration recovery, backup/restore журнала проверок и engineering inputs проверены; пользовательский8765 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
 
@@ -100,3 +100,21 @@ CI относится к новому коммиту теста, а не авт�
 недоступны через vendor API (0x8000FFFF); наличие `.lir` не доказывает расчёт.
 В текущей папке нет IFC/SCAD. Требуются достаточные реальные источники, полные
 нормативные тексты и ответственный reviewer для предметной приёмки.
+
+
+## Дополнение T09: полный доступный маршрут IFC
+
+В UI включены inventory, ограниченная геометрия, декларативные requirements,
+сравнение двух ревизий и PROJECT Evidence по GUID/однозначному свойству.
+Один native worker одновременно; геометрия ограничена 30 s / 2 GiB.
+Исправлены наследование этажа через пространственную структуру, обработка
+IfcLengthMeasure и отказ при нехватке памяти. IFC_DIFF сравнивает декларации;
+эквивалентность геометрии не подтверждается.
+
+51 focused IFC tests PASS; Chromium calculation/IFC/review flows PASS,
+включая desktop/mobile и смену проекта. Независимые опубликованные Duplex
+IFC2X3 (86 элементов) и OpenHouse IFC4 (6 элементов) прочитаны и получили
+геометрию VISIBLE; исходные байты и лицензии сохранены в private QA corpus.
+Полный прогон до исправления OCR: 1243 tests, 34 skipped, 1 известный OCR failure.
+Подробные границы и provenance: [IFC workflows](../development/ifc-workflows.md).
+Это не приёмка фактического объекта, в его комплекте IFC отсутствует.

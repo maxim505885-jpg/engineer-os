@@ -33,7 +33,7 @@ class IfcWorkerTests(unittest.TestCase):
         self.assertEqual(self.path.read_bytes(),self.raw)
 
     def test_wrong_identity_or_count_refused_before_child(self):
-        for changes in ({'sources':[(self.path,'0'*64)]},{'sources':[]},{'tool':'IFC_GEOMETRY'}):
+        for changes in ({'sources':[(self.path,'0'*64)]},{'sources':[]},{'tool':'IFC_EXECUTE'}):
             with self.subTest(changes=changes),self.assertRaises(ValueError):self.run_ifc(**changes)
 
     def test_growth_after_stat_is_bounded_during_parent_hash(self):
@@ -68,6 +68,19 @@ class IfcWorkerTests(unittest.TestCase):
             return {'status':'UNCERTAINTY','acceptance_granted':False}
         with patch('engineering.local_app.calculation_process._run_request',side_effect=changed):
             with self.assertRaisesRegex(ValueError,'IFC_SOURCE_CHANGED'):self.run_ifc()
+
+    def test_http_and_queue_cannot_start_parallel_native_workers(self):
+        from concurrent.futures import ThreadPoolExecutor
+        started=threading.Event();release=threading.Event()
+        def hold(*args):
+            started.set();release.wait(5)
+            return {'status':'UNCERTAINTY','acceptance_granted':False}
+        with patch('engineering.local_app.calculation_process._run_request',side_effect=hold),ThreadPoolExecutor(max_workers=1) as executor:
+            future=executor.submit(self.run_ifc)
+            try:
+                self.assertTrue(started.wait(3))
+                with self.assertRaisesRegex(ValueError,'IFC_WORKER_BUSY'):self.run_ifc()
+            finally:release.set();future.result(timeout=5)
 
     def test_source_bound_queue_keeps_project_class_without_acceptance(self):
         from engineering.local_app.store import Store

@@ -227,7 +227,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if parts[3]=='evidence':
                         from .evidence import register
                         body=self.json_body()
-                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U'),source_job=body.get('source_job'),logical_unit=body.get('logical_unit')))
+                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U'),source_job=body.get('source_job'),logical_unit=body.get('logical_unit'),ifc_locator=body.get('ifc_locator')))
                     if parts[3]=='jobs':
                         body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[]),mode=body.get('mode','CHAT'),requested_checks=body.get('requested_checks')))
                     if parts[3]=='files':
@@ -322,6 +322,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
                     try:return self.respond(200,render_original(store,parts[2],parts[4],int(query.get('page',['1'])[0])),'image/png')
                     finally:self.server.preview_slots.release()
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='ifc-location' and not post:
+                    from .source_binding import ifc_location
+                    query=parse_qs(path.query)
+                    if set(query)!={'locator'} or len(query['locator'])!=1 or len(query['locator'][0])>4000:raise ValueError('Exact bounded IFC locator query required')
+                    return self.respond(200,ifc_location(store,parts[2],store.get_file(parts[4]),json.loads(query['locator'][0])))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
                     from .preview import render_preview
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')

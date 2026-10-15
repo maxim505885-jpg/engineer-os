@@ -49,6 +49,7 @@ function renderAnalysisResume(box,job,r){
 }
 function sourceLocation(ref){
  const l=ref.locator;if(!l)return 'стр. '+ref.page;
+ if(l.kind==='IFC_GUID')return 'IFC · GUID '+l.guid+' · '+l.property_path.join(' / ')+' · ревизия '+l.model_revision.slice(0,12);
  const derived=l.scope==='DERIVED_DOCX_LOCATION'?'DOC→DOCX (привязка производная) · ':'';
  return derived+sourcePartLocation(l)+(l.cell?l.sheet+'!'+l.cell:l.kind==='paragraph'?'абзац '+l.paragraph:l.kind==='table_cell'?'таблица '+l.table+', строка '+l.row+', ячейка '+l.column:'элемент '+ref.logical_unit);
 }
@@ -163,7 +164,7 @@ $('task-mode').onchange=controls;
 $('composer').onsubmit=async event=>{event.preventDefault();if(pending||busy||uploading||!current)return;const text=$('prompt').value.trim();if(!text)return;pending=true;controls();error(null);try{await api(`/api/sessions/${current}/jobs`,{method:'POST',body:{prompt:text,file_ids:[...selected],mode:$('task-mode').value,...($('task-mode').value==='CHAT'?{}:{requested_checks:[...document.querySelectorAll('#core-checks input:checked')].map(c=>c.value)})}});$('prompt').value='';await refresh();await sessions();}catch(e){error(e);}finally{pending=false;controls();}};
 $('evidence-form').onsubmit=async event=>{event.preventDefault();if(pending||uploading||!current)return;const raw=$('evidence-page').value,page=raw===''?null:Number(raw);if(page!==null&&(!Number.isSafeInteger(page)||page<1)){error('Укажите целый номер страницы');return;}pending=true;controls();error(null);try{await api(`/api/sessions/${current}/evidence`,{method:'POST',body:{file_id:$('evidence-file').value,page,quote:$('evidence-quote').value,statement:$('evidence-statement').value,data_class:$('evidence-class').value,source_job:$('evidence-source-job').value||null,logical_unit:$('evidence-unit').value?Number($('evidence-unit').value):null}});$('evidence-quote').value='';$('evidence-statement').value='';await refresh();}catch(e){error(e);}finally{pending=false;controls();}};
 $('drive-form').onsubmit=async event=>{event.preventDefault();if(!driveConfigured||!current||pending||uploading||busy)return;const id=current;uploading=true;controls();error(null);try{const f=await api(`/api/sessions/${id}/drive-import`,{method:'POST',body:{source:$('drive-source').value,expected_sha256:$('drive-sha').value||null}});if(id===current){selected.add(f.id);$('drive-source').value='';$('drive-sha').value='';}await refresh();}catch(e){error(e);}finally{uploading=false;controls();}};
-function uploadLimitBytes(name){return /\.(docx|xlsx)$/i.test(name)?256*1024*1024:100*1024*1024;}
+function uploadLimitBytes(name){return /\.ifc$/i.test(name)?50*1024*1024:/\.(docx|xlsx)$/i.test(name)?256*1024*1024:100*1024*1024;}
 $('upload').onchange=async()=>{const file=$('upload').files[0];if(!file||!current)return;const id=current;if(file.size>uploadLimitBytes(file.name)){error('Файл превышает '+(uploadLimitBytes(file.name)/1024/1024)+' МБ');$('upload').value='';return;}uploading=true;controls();error(null);try{const f=await api(`/api/sessions/${id}/files?name=${encodeURIComponent(file.name)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:await file.arrayBuffer()});if(id===current)selected.add(f.id);await refresh();}catch(e){error(e);}finally{uploading=false;$('upload').value='';controls();}};
 async function poll(){try{await refresh();}catch(e){error(e);}setTimeout(poll,1500);}
 async function pollStatus(){try{await status();}catch(e){$('model-status').textContent='Сервер недоступен';$('model-status').className='connection offline';}setTimeout(pollStatus,15000);}
@@ -391,14 +392,17 @@ const engineeringPanel=node('details');engineeringPanel.id='engineering-tools-pa
 engineeringPanel.append(node('summary','Расчёты и модель IFC'),node('p','Введённые значения считаются предположениями (ASSUMED), декларации IFC — проектными данными (PROJECT). Связь с файлом не подтверждает фактическую конструкцию. Единицы расчётов: Н, м, Па.'));
 const engineeringForm=node('form');engineeringForm.id='engineering-tools-form';
 const engineeringTool=domainSelect(engineeringForm,'Расчёт','engineering-tool');engineeringTool.id='engineering-tool';engineeringTool.className='';
-for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки'],['IFC_INVENTORY','IFC · декларации элементов, этажей и свойств']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
+for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки'],['IFC_INVENTORY','IFC · декларации элементов, этажей и свойств'],['IFC_GEOMETRY','IFC · границы геометрии в метрах'],['IFC_REQUIREMENTS','IFC · проверка заявленных требований'],['IFC_DIFF','IFC · сравнение двух ревизий']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
 const engineeringSource=domainSelect(engineeringForm,'Связанный исходник','engineering-source');engineeringSource.id='engineering-source';engineeringSource.className='';engineeringSource.required=true;
+const engineeringSource2=domainSelect(engineeringForm,'Вторая ревизия IFC','engineering-source-2');engineeringSource2.id='engineering-source-2';engineeringSource2.className='';
 const engineeringFields={};
 for(const [name,label] of Object.entries({width_m:'Ширина b, м',height_m:'Высота h, м',length_m:'Пролёт L, м',elastic_modulus_pa:'Модуль E, Па',inertia_m4:'Момент инерции Iz, м⁴',area_m2:'Площадь A, м²',load_n_m:'Равномерная нагрузка вниз q, Н/м'})){
  const input=domainInput(engineeringForm,label,name);input.id='engineering-'+name;input.type='number';input.step='any';input.min=name==='load_n_m'?'0':'0.000000000000001';engineeringFields[name]=input;
 }
 const planarLabel=node('label','Узлы, стержни, закрепления и узловые нагрузки · JSON в единицах Н, м, Па');
 const planarInput=node('textarea');planarInput.id='engineering-planar';planarInput.maxLength=60000;planarInput.rows=12;planarLabel.append(planarInput);engineeringForm.append(planarLabel);
+const ifcRequirementsLabel=node('label','Заявленные требования к свойствам IFC · JSON-массив');
+const ifcRequirementsInput=node('textarea');ifcRequirementsInput.id='engineering-ifc-requirements';ifcRequirementsInput.maxLength=60000;ifcRequirementsInput.rows=8;ifcRequirementsLabel.append(ifcRequirementsInput);engineeringForm.append(ifcRequirementsLabel);
 const engineeringNotice=node('p','Откройте проект и выберите исходник.');engineeringNotice.setAttribute('role','status');
 const engineeringSubmit=node('button','Выполнить контрольный расчёт');engineeringSubmit.type='submit';engineeringSubmit.id='engineering-submit';engineeringForm.append(engineeringSubmit);
 const engineeringReload=node('button','Обновить исходники и результаты');engineeringReload.type='button';
@@ -406,8 +410,8 @@ const engineeringResults=node('div');engineeringResults.id='engineering-results'
 engineeringPanel.append(engineeringForm,engineeringNotice,engineeringReload,engineeringResults);domainPanel.insertBefore(engineeringPanel,normativeForm);
 let engineeringRevision=null,engineeringSession=null;
 document.addEventListener('engineer-session-change',()=>{
- engineeringRevision=null;engineeringSession=null;engineeringResults.replaceChildren();engineeringSource.replaceChildren();
- for(const input of Object.values(engineeringFields))input.value='';planarInput.value='';engineeringTool.value='RECTANGLE';engineeringFieldState();
+ engineeringRevision=null;engineeringSession=null;engineeringResults.replaceChildren();engineeringSource.replaceChildren();engineeringSource2.replaceChildren();
+ for(const input of Object.values(engineeringFields))input.value='';planarInput.value='';ifcRequirementsInput.value='';engineeringTool.value='RECTANGLE';engineeringFieldState();
  engineeringNotice.textContent='Выбран другой проект. Загрузите его исходники.';engineeringSubmit.disabled=true;
  if(engineeringPanel.open)loadEngineeringTools();
 });
@@ -415,19 +419,26 @@ function engineeringFieldState(){
  const names=engineeringTool.value==='RECTANGLE'?['width_m','height_m']:engineeringTool.value==='BEAM'?['length_m','elastic_modulus_pa','inertia_m4','area_m2','load_n_m']:[];
  for(const [name,input] of Object.entries(engineeringFields)){input.disabled=!names.includes(name);input.required=names.includes(name);input.parentElement.hidden=input.disabled;}
  planarLabel.hidden=engineeringTool.value!=='PLANAR';planarInput.disabled=planarLabel.hidden;planarInput.required=!planarLabel.hidden;
- engineeringSubmit.textContent=engineeringTool.value==='IFC_INVENTORY'?'Прочитать декларации IFC':'Выполнить контрольный расчёт';
+ engineeringSource2.parentElement.hidden=engineeringTool.value!=='IFC_DIFF';engineeringSource2.disabled=engineeringSource2.parentElement.hidden;engineeringSource2.required=!engineeringSource2.disabled;
+ if(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value)engineeringSource2.value=[...engineeringSource2.options].find(o=>o.value!==engineeringSource.value)?.value||'';
+ engineeringSource2.setCustomValidity(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
+ ifcRequirementsLabel.hidden=engineeringTool.value!=='IFC_REQUIREMENTS';ifcRequirementsInput.disabled=ifcRequirementsLabel.hidden;ifcRequirementsInput.required=!ifcRequirementsLabel.hidden;
+ engineeringSubmit.textContent=engineeringTool.value.startsWith('IFC_')?'Выполнить операцию IFC':'Выполнить контрольный расчёт';
 }
 engineeringTool.onchange=engineeringFieldState;engineeringFieldState();
+engineeringSource.onchange=engineeringFieldState;engineeringSource2.onchange=()=>engineeringSource2.setCustomValidity(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
 async function loadEngineeringTools(){
  if(!current)return;const session=current;
  try{const [catalog,snap]=await Promise.all([api(`/api/sessions/${session}/engineering-runs`),api(`/api/sessions/${session}`)]);if(current!==session)return;
-  engineeringRevision=catalog.expected_revision;engineeringSession=session;const prior=engineeringSource.value;engineeringSource.replaceChildren();
-  for(const file of snap.files){const option=node('option',file.name);option.value=file.id;engineeringSource.append(option);}if(snap.files.some(f=>f.id===prior))engineeringSource.value=prior;
+  engineeringRevision=catalog.expected_revision;engineeringSession=session;const prior=engineeringSource.value,prior2=engineeringSource2.value;engineeringSource.replaceChildren();engineeringSource2.replaceChildren();
+  for(const file of snap.files){for(const select of [engineeringSource,engineeringSource2]){const option=node('option',file.name);option.value=file.id;select.append(option);}}if(snap.files.some(f=>f.id===prior))engineeringSource.value=prior;if(snap.files.some(f=>f.id===prior2))engineeringSource2.value=prior2;else if(snap.files.length>1)engineeringSource2.selectedIndex=1;
   engineeringSubmit.disabled=!snap.files.length;engineeringResults.replaceChildren();
   const latest=snap.jobs.find(j=>j.mode==='ENGINEERING_RUN');
   engineeringNotice.textContent=latest?`Последняя задача: ${latest.state}. Инженерное принятие отсутствует.`:snap.files.length?'Исходники обновлены. Введите значения и проверьте единицы.':'Сначала прикрепите исходник в этом проекте.';
   if(latest?.result?.engineering_run){const run=latest.result.engineering_run;engineeringResults.append(node('strong',run.tool+' · '+(run.result?.status||'НЕ ЗАВЕРШЕНО')),node('p','Входные данные: '+run.input_data_class+'. Нормативная проверка: NOT_RUN.'),node('p',latest.result.text));
+   if(run.tool==='IFC_DIFF')engineeringResults.append(node('p','Сравниваются GUID, атрибуты, свойства, материалы и связь с этажом. Эквивалентность геометрии не проверена.'));
    if(run.tool==='IFC_INVENTORY'){const elements=run.result?.elements||[];for(const element of elements.slice(0,200))engineeringResults.append(node('p',element.type+' · GUID '+element.guid));if(elements.length>200)engineeringResults.append(node('p','Показаны первые 200 из '+elements.length+' элементов; весь список находится в квитанции.'));}
+   if(run.tool==='IFC_INVENTORY'&&run.result?.elements?.length)renderIfcEvidenceForm(engineeringResults,run,session);
    engineeringDiagram(run,engineeringResults);const details=node('details');details.append(node('summary','Исходные значения, единицы и полная квитанция расчёта'),node('pre',JSON.stringify(run,null,2),'extraction-text'));engineeringResults.append(details);}
  }catch(e){error(e);}
 }
@@ -436,11 +447,27 @@ engineeringForm.onsubmit=async event=>{
  event.preventDefault();if(!current||pending||busy||uploading)return;
  if(engineeringSession!==current||!engineeringRevision){await loadEngineeringTools();return;}
  let options;
- try{options=engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));if(engineeringTool.value!=='IFC_INVENTORY')options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON узлов и нагрузок.'));return;}
+ try{options=engineeringTool.value==='IFC_REQUIREMENTS'?{requirements:JSON.parse(ifcRequirementsInput.value)}:engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));if(!engineeringTool.value.startsWith('IFC_'))options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON входных данных.'));return;}
  pending=true;engineeringSubmit.disabled=true;controls();error(null);
- try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Расчёт поставлен в очередь. Результат появится в истории; обновите результаты после завершения.';await refresh();}
+ try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:engineeringTool.value==='IFC_DIFF'?[engineeringSource.value,engineeringSource2.value]:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Задача поставлена в очередь. Обновите результаты после завершения.';await refresh();}
  catch(e){error(e);}finally{pending=false;engineeringSubmit.disabled=false;controls();}
 };
+function renderIfcEvidenceForm(container,run,session){
+ const form=node('form');form.id='ifc-evidence-form';form.append(node('p','Основание по GUID · только проектная декларация. Единицы и фактическое состояние не подтверждаются.'));
+ const element=domainSelect(form,'Элемент IFC','ifc-element');element.id='ifc-evidence-element';element.className='';
+ const property=domainSelect(form,'Атрибут или свойство','ifc-property');property.id='ifc-evidence-property';property.className='';
+ const rows=run.result.elements.slice(0,200);for(const row of rows){const option=node('option',row.type+' · '+row.guid);option.value=row.guid;element.append(option);}
+ const read=node('button','Открыть значение IFC');read.type='button';read.id='ifc-evidence-read';
+ const quote=node('pre','Выберите свойство и откройте исходное значение.','extraction-text');quote.id='ifc-evidence-quote';
+ const statement=domainInput(form,'Запись пользователя о проектной декларации','ifc-statement',true);statement.id='ifc-evidence-statement';statement.required=true;statement.maxLength=4000;
+ const save=node('button','Зарегистрировать PROJECT Evidence');save.type='submit';save.id='ifc-evidence-save';save.disabled=true;
+ form.insertBefore(read,statement.parentElement);form.insertBefore(quote,statement.parentElement);form.append(save);container.append(form);let located=null,request=0;
+ function clear(){request++;located=null;statement.value='';save.disabled=true;quote.textContent='Выберите свойство и откройте исходное значение.';}
+ function properties(){clear();property.replaceChildren();const row=rows.find(r=>r.guid===element.value);if(!row)return;const paths=[['type'],['name'],['storey_guid']];for(const [pset,values] of Object.entries(row.properties||{}))for(const [name,value] of Object.entries(values))if(value===null||['string','boolean','number'].includes(typeof value))paths.push(['properties',pset,name]);for(const path of paths.slice(0,1000)){const option=node('option',path.join(' / '));option.value=JSON.stringify(path);property.append(option);}}
+ element.onchange=properties;property.onchange=clear;properties();
+ read.onclick=async()=>{if(current!==session||pending||busy||uploading)return;const version=++request;located=null;save.disabled=true;read.disabled=true;try{const [fileId,sha]=run.sources[0];const locator={kind:'IFC_GUID',source_sha256:sha,model_revision:sha,guid:element.value,property_path:JSON.parse(property.value)};const result=await api(`/api/sessions/${session}/files/${fileId}/ifc-location?locator=${encodeURIComponent(JSON.stringify(locator))}`);if(current!==session||version!==request)return;located=result;quote.textContent=result.quote;save.disabled=false;}catch(e){if(current===session&&version===request)error(e);}finally{read.disabled=false;}};
+ form.onsubmit=async event=>{event.preventDefault();if(current!==session||!located||pending||busy||uploading)return;pending=true;controls();error(null);try{await api(`/api/sessions/${session}/evidence`,{method:'POST',body:{file_id:run.sources[0][0],quote:located.quote,statement:statement.value,data_class:'P',ifc_locator:located.locator}});save.disabled=true;statement.value='';await refresh();}catch(e){error(e);}finally{pending=false;controls();}};
+}
 function engineeringDiagram(run,container){
  const data=run.result?.inputs;if(!data)return;
  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 300 170');svg.setAttribute('role','img');svg.setAttribute('aria-label','Условная схема введённых данных');svg.style.width='100%';svg.style.maxHeight='170px';

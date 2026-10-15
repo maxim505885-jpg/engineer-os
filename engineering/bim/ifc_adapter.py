@@ -8,6 +8,24 @@ from pathlib import Path
 SUPPORTED=('IfcBeam','IfcColumn','IfcWall','IfcSlab')
 
 
+def _storey_container(entity):
+    """Resolve one declared ancestry path; never pick among conflicting parents."""
+    seen=set();current=entity
+    for depth in range(64):
+        ident=current.id()
+        if ident in seen:return None,'UNVERIFIED'
+        seen.add(ident)
+        if current.is_a('IfcBuildingStorey'):return current,'DIRECT' if depth==1 else 'INHERITED'
+        contained=list(getattr(current,'ContainedInStructure',()))
+        parents={r.id():r for r in (*getattr(current,'Decomposes',()),*getattr(current,'Nests',()))
+                 if r.is_a('IfcRelAggregates') or r.is_a('IfcRelNests')}
+        if len(contained)>1 or len(parents)>1 or (contained and parents):return None,'UNVERIFIED'
+        if contained:current=contained[0].RelatingStructure
+        elif parents:current=next(iter(parents.values())).RelatingObject
+        else:return None,'UNVERIFIED'
+    return None,'UNVERIFIED'
+
+
 def _valid_length_unit(unit,depth=0):
     if depth>8 or getattr(unit,'UnitType',None)!='LENGTHUNIT':return False
     if unit.is_a('IfcSIUnit'):
@@ -63,7 +81,7 @@ def inspect_ifc(path,*,expected_sha256,max_entities=100000):
         if type(max_entities) is not int or not 1<=max_entities<=100000:
             return dict(base,reasons=['IFC_ENTITY_LIMIT'])
         import ifcopenshell
-        from ifcopenshell.util.element import get_container,get_materials,get_psets
+        from ifcopenshell.util.element import get_materials,get_psets
         from ifcopenshell.util.unit import calculate_unit_scale
         model=ifcopenshell.open(str(path))
         for count,_ in enumerate(model,1):
@@ -94,12 +112,11 @@ def inspect_ifc(path,*,expected_sha256,max_entities=100000):
         rows=[]
         for kind in SUPPORTED:
             for entity in model.by_type(kind):
-                containers=list(getattr(entity,'ContainedInStructure',()))
-                container=get_container(entity)
-                if len(containers)!=1 or container is None or not container.is_a('IfcBuildingStorey'):
+                container,relation=_storey_container(entity)
+                if container is None:
                     reasons.append('IFC_STOREY_RELATION_UNVERIFIED')
                 rows.append(dict(guid=entity.GlobalId,type=entity.is_a(),name=entity.Name,
-                    storey_guid=container.GlobalId if container else None,
+                    storey_guid=container.GlobalId if container else None,storey_relation=relation,
                     materials=[m.Name for m in get_materials(entity)],
                     properties=_bounded(get_psets(entity)),locator='ifc:guid:'+entity.GlobalId,
                     data_class='PROJECT',geometry_verified=False))

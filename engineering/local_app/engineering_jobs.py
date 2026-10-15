@@ -11,7 +11,7 @@ from .store import identifier,ReviewConflict
 
 TOOLS=('BEAM','PLANAR','RECTANGLE','CAD_INVENTORY','CAD_DIFF','CAD_ANNOTATE',
        'DWG_CONVERT','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
-ENABLED=('BEAM','PLANAR','RECTANGLE','IFC_INVENTORY')
+ENABLED=('BEAM','PLANAR','RECTANGLE','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
 MAX_REQUEST=65536
 
 
@@ -53,12 +53,14 @@ def enqueue_engineering(store,session_id,*,tool,input_file_ids,options,expected_
     if len(input_file_ids)!=expected_count:raise ValueError('Wrong input file count')
     if not isinstance(options,dict):raise ValueError('Engineering options required')
     if any(k in options for k in ('source_sha256','evidence_ids','engineering_verified','acceptance_granted')):raise ValueError('Server-owned input identity cannot be supplied')
-    if tool not in ('BEAM','PLANAR','RECTANGLE') and options:raise ValueError('This tool takes no options')
+    if tool=='IFC_REQUIREMENTS' and set(options)!={'requirements'}:raise ValueError('Declared IFC requirements required')
+    if tool not in ('BEAM','PLANAR','RECTANGLE','IFC_REQUIREMENTS') and options:raise ValueError('This tool takes no options')
     try:encoded=json.dumps(options,allow_nan=False,ensure_ascii=False)
     except (ValueError,TypeError,RecursionError):raise ValueError('Finite JSON options required') from None
     if len(encoded.encode('utf-8'))>MAX_REQUEST:raise ValueError('Engineering request size limit')
     options=json.loads(encoded)
     files=[store.get_file(fid) for fid in input_file_ids]
+    if tool.startswith('IFC_') and any(Path(f['name']).suffix.lower()!='.ifc' for f in files):raise ValueError('IFC original required')
     request=dict(tool=tool,input_file_ids=input_file_ids,options=options,expected_revision=expected_revision,
         sources=[[f['id'],f['sha256']] for f in files])
     request['request_sha256']=digest(request)
@@ -107,9 +109,9 @@ def execute_engineering(store,job,stop):
     elif tool=='CAD_DIFF':
         from engineering.cad.roundtrip import compare_dxf
         result=compare_dxf(path,Path(files[1]['path']),source_sha256=sha)
-    elif tool=='IFC_INVENTORY':
+    elif tool.startswith('IFC_'):
         from .ifc_process import run_ifc
-        result=run_ifc(tool=tool,sources=[(path,sha)],stop=stop)
+        result=run_ifc(tool=tool,sources=[(Path(f['path']),f['sha256']) for f in files],stop=stop,options=request['options'])
     else:
         from engineering.bim.ifc_adapter import compare_ifc
         result=compare_ifc(path,Path(files[1]['path']),source_sha256=sha)

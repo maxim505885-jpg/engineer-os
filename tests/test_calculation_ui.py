@@ -29,5 +29,5 @@ class CalculationHTTPTests(unittest.TestCase):
     def test_unknown_or_unqualified_adapter_is_not_queued(self):
         sid=self.create();route=f'/api/sessions/{sid}/engineering-runs'
         status,_,raw=self.request('GET',route);catalog=json.loads(raw)
-        self.assertEqual(self.request('POST',route,dict(tool='IFC_GEOMETRY',input_file_ids=[],options={},expected_revision=catalog['expected_revision']))[0],400)
+        self.assertEqual(self.request('POST',route,dict(tool='DWG_CONVERT',input_file_ids=[],options={},expected_revision=catalog['expected_revision']))[0],400)
         self.assertFalse(self.store.snapshot(sid)['jobs'])
