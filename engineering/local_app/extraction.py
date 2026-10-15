@@ -158,6 +158,8 @@ def execute(store,job,stop_event,*,progress=None):
                     record['ocr']='REQUESTED_NOT_VERIFIED'
                     document=parser.parse(file['path'],page_range=(page,page))
                     if document.source_sha256!=file['sha256']:raise ValueError('Wrong normalized source')
+                    record['limitations'].extend(document.limitations)
+                    if document.limitations:record['status']='BLOCK'
                     blocks=[asdict(b) for b in document.blocks]
                     for b in blocks:b['provenance']=list(b['provenance'])
                 kept,used,clipped=retain_blocks(blocks,page,MAX_TOTAL_TEXT-run['stored_chars'])

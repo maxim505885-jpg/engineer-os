@@ -58,7 +58,7 @@ test('late initial session list preserves user-created conversation', async () =
 test('browser fixture waits for child closure after forced shutdown', async () => {
   const {EventEmitter}=require('node:events');
   const source=fs.readFileSync(path.join(__dirname,'../e2e/local_document_intake_ui_smoke.cjs'),'utf8');
-  const cleanup=source.match(/\}finally\{([^\n]+)\}\n\}\)\(\)/);
+  const cleanup=source.replace(/\r\n/g,'\n').match(/\}finally\{([^\n]+)\}\n\}\)\(\)/);
   assert.ok(cleanup,'intake fixture cleanup missing');
   const child=new EventEmitter();child.exitCode=null;child.signalCode=null;let closed=false,removed=false;
   child.kill=signal=>{if(signal==='SIGKILL')setTimeout(()=>{closed=true;child.signalCode='SIGKILL';child.emit('exit');child.emit('close');},20);return true;};
