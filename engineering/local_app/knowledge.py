@@ -133,6 +133,7 @@ def promote(store,source_session_id,*,expected_audit_id,title,evidence_ids,scope
         row=dict(schema='ENGINEER_OS_KNOWLEDGE_V1',id=knowledge_id,revision=revision,source_session_id=source_session_id,
                  scope_session_ids=sorted(scope),audit_id=audit['id'],case_id=case['id'],case_sha256=case['case_sha256'],
                  audit_sha256=audit['audit_sha256'],content_sha256=_digest(content),evidence_ids=evidence_ids,
+                 origin_review_scope=audit.get('review_scope','UNSPECIFIED'),origin_actual_structure_verified=audit.get('actual_structure_verified') is True,
                  state='ACTIVE',created=time.time(),actor=actor,reason='',evidentiary_status='NOT_EVIDENCE',
                  acceptance_granted=False,mandatory_reverification=True)
         # Authority is recomputed after obtaining the writer lock; state changes

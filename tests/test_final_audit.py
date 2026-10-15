@@ -20,9 +20,9 @@ class Model:
 
 def ready_case():
     return dict(
-        id='case-1',case_sha256='a'*64,revision=1,point7_readiness='READY_FOR_REAL_CASE_REVIEW',
-        engineering_status='READY_FOR_FINAL_AUDIT',acceptance_granted=False,final_audit='NOT_RUN',
-        identity=dict(core_job_id='job-1',originals=[dict(id='f1',sha256='b'*64,size=1)]),
+        id='case-1',session_id='session-1',case_sha256='a'*64,revision=1,point7_readiness='READY_FOR_REAL_CASE_REVIEW',
+        engineering_status='READY_FOR_FINAL_AUDIT',acceptance_granted=False,final_audit='NOT_RUN',review_scope='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY',
+        identity=dict(core_job_id='job-1',requested_checks=['report'],originals=[dict(id='f1',sha256='b'*64,size=1)]),
         evidence=[dict(candidate_id='e1')],
         domain_packets=dict(packets=[]),
         stages=dict(
@@ -41,23 +41,35 @@ TEST_VERIFICATION_KEY=b'0123456789abcdef0123456789abcdef'
 def verified_case():
     """Controlled server-verifier contract; not a verified real object."""
     case=ready_case()
-    def checked(value):
+    def checked(value,kind,subject_id):
         value['engineering_verified']=True
         sha=hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
         value['engineering_verification']=dict(decision='ACCEPTED',reviewer='controlled-reviewer',
             method='controlled source comparison',version='1',verified_at='2026-10-08T00:00:00Z',
-            source_refs=['f1'],subject_sha256=sha)
+            source_refs=['f1'],subject_sha256=sha,subject_kind=kind,subject_id=subject_id,session_id='session-1')
         record=value['engineering_verification']
+        record['verified_scope']={'REQUIREMENTS':'COMPLETE_PLAINTEXT_TOR_TRACEABILITY_ONLY','EVIDENCE':'PROJECT_DECLARATION_CLASS_ONLY','SPECIALIST':'PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY'}[kind]
         record['signature']=hmac.new(TEST_VERIFICATION_KEY,b'ENGINEER_OS_VERIFICATION_V1\x00'+
             json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode(),hashlib.sha256).hexdigest()
         return value
-    case['requirements']=checked({'requirements':[{'id':'r1','status':'ACCEPTED'}]})
-    case['evidence']=[checked(dict(candidate_id='e1',file_id='f1',source_sha256='b'*64,data_class_verified=True))]
-    case['stages']['specialists']['results']=[checked(dict(agent='report-audit-agent',status='ACCEPTED',execution='COMPLETED'))]
+    case['requirements']=checked({'set_id':'set-1','requirements':[{'id':'r1','status':'ACCEPTED'}]},'REQUIREMENTS','set-1')
+    case['evidence']=[checked(dict(candidate_id='e1',file_id='f1',source_sha256='b'*64,data_class='P',data_class_verified=True),'EVIDENCE','e1')]
+    case['stages']['specialists']['results']=[checked(dict(agent='report-audit-agent',status='ACCEPTED',execution='COMPLETED'),'SPECIALIST','job-1:report-audit-agent')]
     return case
 
 
 class FinalAuditContractTests(unittest.TestCase):
+    def test_valid_reviews_from_another_session_do_not_authorize_case(self):
+        case=verified_case();case['session_id']='other-session'
+        result=evaluate_case(case,fresh=True,store_revalidated=True,verification_key=TEST_VERIFICATION_KEY)
+        self.assertEqual(result['decision'],'BLOCK')
+
+    def test_evidence_signature_cannot_substitute_for_requirements_review(self):
+        case=verified_case();case['requirements']=case['evidence'][0]
+        result=evaluate_case(case,fresh=True,store_revalidated=True,verification_key=TEST_VERIFICATION_KEY)
+        self.assertEqual(result['decision'],'BLOCK')
+        self.assertIn('TZ_ENGINEERING_VERIFICATION_REQUIRED',result['blocker_codes'])
+
     def test_only_clean_fresh_case_can_be_accepted(self):
         r=evaluate_case(verified_case(),fresh=True,store_revalidated=True,verification_key=TEST_VERIFICATION_KEY)
         self.assertEqual(r['decision'],'ACCEPTED');self.assertTrue(r['acceptance_granted'])

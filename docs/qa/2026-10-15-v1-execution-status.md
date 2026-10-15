@@ -8,10 +8,10 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 |---|---|---|
 |1. Сборка и окружение|T01: manifest/API/UI/worker identity; Windows Start/Start/Stop на18768; старый8765 правильно отклонён без остановки. T02: explicit offline probes PDF/OCR/IFC/beam|T02: воспроизводимый wheel/model profile, защищённый Office renderer, offline tables; T12: поставка именно этой сборки|
 |2. Документы и ТЗ|Повторно сверены все29исходников,828577307байт: SHA-256 совпали с corpus manifest,0добавлений/удалений|T03/T04: source-bound Windows layout, все объекты/формулы/ячейки и критические числа; image-only ТЗ и полнота V4. Наличие текста не закрывает эти проверки|
-|3. Приёмка и нормы|Существующий fail-closed gate сохранён; unsigned inventory/model output не выдаёт engineering_verified|T05 production review issuer; T06 квалифицированный каталог полных нормативных источников и предметные сравнения|
+|3. Приёмка и нормы|T05: явный локальный issuer, типизированные подписи, отзыв и freshness; UI; узкий положительный цикл PROJECT/plaintext через production issuer|Полная предметная приёмка T05 после T04/T06; T06 квалифицированный каталог полных нормативных источников и предметные сравнения|
 |4. Расчёты/CAD/IFC в приложении|Новая ENGINEERING_RUN в существующей очереди, immutable bounded input records, typed SI calculations; Chromium rectangle/beam; Windows bounded beam/frame child; схема/цифры/полная квитанция; cross-project isolation fix|Полная квалификация T07, bounded CAD/IFC jobs и GUID Evidence T08/T09; исходы обоих DWG; независимый реальный IFC|
-|5. Реальная приёмка, память, итог|Предварительные выводы и запрет автоматического принятия сохранены|T10 положительный source-backed realcase; T11 accepted-origin memory и FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
-|6. Windows и выпуск|Проверены schema2 migration recovery, backup/restore engineering inputs; пользовательский8765/PID39004 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
+|5. Реальная приёмка, память, итог|Предварительные выводы сохранены; controlled production issuer→case→FINAL_AUDIT→memory проходит с сохранением PROJECT scope, source change/revocation снимают доверие|T10 положительный source-backed realcase; T11 FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
+|6. Windows и выпуск|Schema3 migration recovery, backup/restore журнала проверок и engineering inputs проверены; пользовательский8765 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
 
 ## Проверки текущего пакета
 
@@ -33,6 +33,27 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 Число тестов не является процентом готовности. Installed Tesseract fast models
 остаются исходным профилем. Отдельные официальные tessdata_best rus/eng оценены
 и отклонены из-за5расхождений; installed models и исходники не заменены.
+
+## Дополнение T05: локальный issuer
+
+131 интеграционный тест PASS: issuer/HTTP, требования, real case, FINAL_AUDIT,
+память, черновые выводы, backup/restore и automatic analysis. Chromium
+desktop/mobile: явная выдача решения по P, source-review invalidation,
+очистка формы при смене проекта PASS. Независимое чтение кода: actionable
+замечаний нет; независимый запуск тестов ограничен sandbox и не объявлен PASS.
+
+Поддерживаемая область принятия — только `PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY`,
+`actual_structure_verified=false`. ТЗ должно быть полным небольшим TXT/MD;
+image-only ТЗ объекта этот путь не закрывает. Классы F/M/T/C и DOMAIN не
+принимаются. Детали: `docs/engineering-verification.md`. Общая свежая регрессия
+этого пакета записывается отдельно в ledger; прежние1196tests относятся к T07.
+
+Свежая общая Windows-регрессия T05: 1216tests,34skipped,1failure за323.514s.
+Сбой прежний: реальная OCR-цитата «Прогиб20мм» распознаётся «Прогид20мм».
+Assert и эталон не ослаблены. Общий suite не PASS, выпуск остаётся открыт.
+Пользователь подтвердил, что папка «ДЛЯ ИИ» содержит весь предоставленный
+комплект; отсутствующие IFC/SCAD и недоступные vendor results учитываются
+как ограничения этого комплекта, а не как обещанные дополнительные файлы.
 
 Отдельный V01 остаётся открытым: сохранённые результаты9ЛИРА-моделей ранее
 недоступны через vendor API (0x8000FFFF); наличие `.lir` не доказывает расчёт.

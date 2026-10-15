@@ -83,10 +83,11 @@ def identity(store,job,model):
         from engineering.core.engineer_core import CHECK_REGISTRY
         loader=SkillLoader(Path(__file__).resolve().parents[2])
         implementation['skills']=[digest(loader.load(CHECK_REGISTRY[c][1])) for c in dict.fromkeys(job['requested_checks']+['final_audit'])]
+    live_context=context_identity(store,job)
     value=dict(schema=1,task_id=job['id'],session_id=job['session_id'],mode=job['mode'],prompt=job['prompt'],checks=job['requested_checks'],
                sources=[dict(id=f['id'],sha256=f['sha256'],name=f['name']) for f in files],parser=parser_identity(backend),model=selected,
-               evidence_sha256=context_identity(store,job)['evidence_sha256'],
-               domain_packets_sha256=context_identity(store,job)['domain_packets_sha256'],
+               evidence_sha256=live_context['evidence_sha256'],
+               domain_packets_sha256=live_context['domain_packets_sha256'],verification_sha256=live_context['verification_sha256'],
                requirements_sha256=digest(store.requirements_state(job['session_id'])),
                parsers={f['id']:parser_identity('ocr' if Path(f['name']).suffix.lower() in {'.png','.jpg','.jpeg'} else Path(f['name']).suffix.lower()[1:]) for f in files if Path(f['name']).suffix.lower() in {'.docx','.xlsx','.doc','.png','.jpg','.jpeg'}},
                implementation=implementation,budgets=dict(part_chars=automatic_analysis.PART_CHARS,source_chars=automatic_analysis.MAX_SOURCE_CHARS,
@@ -96,6 +97,7 @@ def identity(store,job,model):
 
 def context_identity(store,job):
     from .domain_packets import latest
+    from .verification import verification_stamp
     packets=store.domain_packets_state(job['session_id'])
     current_packets=latest(packets)
     domain_linked={s['candidate_id'] for e in current_packets for s in e['sources']}
@@ -108,5 +110,5 @@ def context_identity(store,job):
         live_sources.append([fid,actual])
     state=store.requirements_state(job['session_id']);current=state['sets'][-1]['id'] if state['sets'] else None
     linked={s['candidate_id'] for e in state['assessments'] if e['set_id']==current for s in e['sources']}
-    return dict(requirements_sha256=digest(state),domain_packets_sha256=digest([packets,live_sources]),
+    return dict(requirements_sha256=digest(state),domain_packets_sha256=digest([packets,live_sources]),verification_sha256=verification_stamp(store,job['session_id']),
         evidence_sha256=digest([r for r in store.snapshot(job['session_id'])['evidence'] if r['file_id'] in job['file_ids'] or r['id'] in linked or r['id'] in domain_linked]))

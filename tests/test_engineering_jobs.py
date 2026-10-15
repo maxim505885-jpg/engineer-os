@@ -118,7 +118,8 @@ class EngineeringJobTests(unittest.TestCase):
         import sqlite3
         with self.store.connection() as db:db.execute('DROP TABLE engineering_inputs');db.execute('PRAGMA user_version=1')
         upgraded=Store(self.store.root)
-        with upgraded.connection() as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],2)
+        from engineering.local_app.store import SCHEMA_VERSION
+        with upgraded.connection() as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],SCHEMA_VERSION)
         backup=sqlite3.connect(self.store.root/'history.pre-migration-v1.sqlite3')
         try:
             self.assertEqual(backup.execute('PRAGMA user_version').fetchone()[0],1)

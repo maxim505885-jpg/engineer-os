@@ -295,6 +295,8 @@ function renderFinalAudit(report,realCase){
  for(const audit of (report.audits||[]).slice(-5).reverse()){const decision=audit.effective_decision||audit.decision;const card=node('article',undefined,'final-audit-result '+toneClass(decision));card.append(statusLine(`FINAL AUDIT #${audit.revision} · ${decision}`,decision),node('p','Audit SHA256: '+audit.audit_sha256),node('p','Case SHA256: '+audit.case_sha256),node('small',(audit.current?'текущий':'исторический')+' · '+(audit.fresh?'актуален':'не актуален')));
   for(const check of audit.checks||[])card.append(node('p',check.dimension+' · '+check.status),node('small',(check.reasons||[]).join(', ')));
   if(audit.blocker_codes?.length)card.append(node('small','BLOCK: '+audit.blocker_codes.join(', ')));
+  if(audit.review_scope)card.append(node('p',audit.review_scope==='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY'?'Область приёмки: проверка проектных деклараций в текстовых документах.':'Область приёмки: '+audit.review_scope));
+  if(audit.actual_structure_verified===false)card.append(node('small','Фактическое состояние конструкции этим решением не подтверждено.'));
   if(audit.stale_reasons?.length)card.append(node('small','Audit stale: '+audit.stale_reasons.join(', ')));
   card.append(node('strong',audit.effective_acceptance_granted?'ACCEPTED':'NOT ACCEPTED','status-pill '+(audit.effective_acceptance_granted?'tone-pass':'tone-block')),node('small','acceptance_granted='+(audit.effective_acceptance_granted?'true':'false')+' · FINAL AUDIT COMPLETED'));finalAuditResults.append(card);}
 }
@@ -456,3 +458,46 @@ function engineeringDiagram(run,container){
  }else{return;}
  container.append(node('p','Условная схема введённых данных'),svg);
 }
+
+const authorityPanel=node('details');authorityPanel.id='engineering-review-panel';
+authorityPanel.append(node('summary','Ответственный review основания'),node('p','Сейчас доступен класс PROJECT и полный текстовый ТЗ. Это локальная запись ответственного решения; личность проверяющего не удостоверяется. Измерения, испытания, расчётные данные и image-only ТЗ требуют отдельных подтверждений. Приёмка всего объекта выполняется через FINAL AUDIT.'));
+const authorityStatus=node('p');authorityStatus.id='engineering-review-status';authorityStatus.setAttribute('role','status');
+const provisionButton=node('button','Создать локальный ключ review');provisionButton.type='button';provisionButton.id='engineering-review-provision';
+const authorityReload=node('button','Обновить основания review');authorityReload.type='button';
+const authorityForm=node('form');authorityForm.id='engineering-review-form';
+const authoritySelect=domainSelect(authorityForm,'Проверяемое основание','engineering-review-subject');authoritySelect.id='engineering-review-subject';authoritySelect.className='';authoritySelect.required=true;
+const authoritySources=node('div');authoritySources.id='engineering-review-sources';authorityForm.append(authoritySources);
+const authorityDecision=domainSelect(authorityForm,'Предметное решение','engineering-review-decision');authorityDecision.id='engineering-review-decision';authorityDecision.className='';
+for(const [value,label] of [['ACCEPTED','Принять это основание'],['ACCEPTED ALTERNATIVE','Принять альтернативу'],['REVOKED','Отозвать решение']]){const option=node('option',label);option.value=value;authorityDecision.append(option);}
+const authorityFields={};
+for(const [name,label,limit] of [['reviewer','Ответственный проверяющий',120],['method','Метод и границы предметной проверки',2000],['reason','Решение, основание и ограничения',4000]]){const input=domainInput(authorityForm,label,name,name!=='reviewer');input.id='engineering-review-'+name;input.maxLength=limit;authorityFields[name]=input;}
+const authorityConfirmLabel=node('label');const authorityConfirm=node('input');authorityConfirm.type='checkbox';authorityConfirm.required=true;authorityConfirm.id='engineering-review-confirm';authorityConfirmLabel.append(authorityConfirm,document.createTextNode('Подтверждаю решение по выбранному основанию и указанному методу.'));authorityForm.append(authorityConfirmLabel);
+const authoritySubmit=node('button','Записать ответственный review');authoritySubmit.type='submit';authoritySubmit.id='engineering-review-submit';authorityForm.append(authoritySubmit);
+authorityPanel.append(authorityStatus,provisionButton,authorityReload,authorityForm);$('evidence-panel').append(authorityPanel);
+let authorityState=null,authoritySession=null,authorityRequest=0,authorityKey=false;
+document.addEventListener('engineer-session-change',()=>{authorityRequest++;authorityState=null;authoritySession=null;authoritySources.replaceChildren();authoritySelect.replaceChildren();authorityConfirm.checked=false;for(const input of Object.values(authorityFields))input.value='';authorityStatus.textContent='Выбран другой проект.';authoritySubmit.disabled=true;if(authorityPanel.open)loadAuthorityCatalog();});
+async function loadAuthorityCatalog(){
+ if(!current)return;const session=current,request=++authorityRequest;authorityState=null;authoritySubmit.disabled=true;
+ try{const data=await api(`/api/sessions/${session}/verifications`);if(session!==current||request!==authorityRequest)return;authoritySession=session;authorityKey=data.key_provisioned;provisionButton.disabled=authorityKey;
+  const previous=authoritySelect.value;authoritySelect.replaceChildren();for(const item of data.subjects){const option=node('option',(item.kind==='REQUIREMENTS'?'ТЗ · ':item.kind==='SPECIALIST'?'Роль · ':'Evidence · ')+item.label);option.value=item.kind+'|'+item.id;authoritySelect.append(option);}if([...authoritySelect.options].some(o=>o.value===previous))authoritySelect.value=previous;
+  if(!data.subjects.length)authorityStatus.textContent='Добавьте исходник, источник ТЗ и кандидаты Evidence; затем выполните проверку источников.';
+  await loadAuthoritySubject();
+ }catch(e){error(e);}
+}
+async function loadAuthoritySubject(){
+ const value=authoritySelect.value;if(!current||!value)return;const [kind,id]=value.split('|'),session=current,request=++authorityRequest;authorityState=null;authorityConfirm.checked=false;authoritySubmit.disabled=true;authoritySources.replaceChildren();
+ try{const state=await api(`/api/sessions/${session}/verifications?kind=${encodeURIComponent(kind)}&subject_id=${encodeURIComponent(id)}`);if(session!==current||request!==authorityRequest)return;
+  authoritySession=session;authorityState={...state,kind,id};authorityStatus.textContent=(state.verified_subject?'Актуальный локальный review: '+state.verified_subject.engineering_verification.decision:'Ответственное решение отсутствует или устарело.')+(state.prerequisite_reasons.length?' Открытые условия: '+state.prerequisite_reasons.join(', '):'')+(!authorityKey?' Локальный ключ ещё не создан.':'');
+  if(kind==='SPECIALIST'){authoritySources.append(node('strong',state.subject.label||state.subject.agent),node('p',state.subject.summary));for(const finding of state.subject.findings||[])authoritySources.append(node('p',finding.text));}
+  for(const source of state.source_context||[]){authoritySources.append(node('strong',(source.name||source.file_id)+' · '+source.data_class),node('blockquote',source.quote),node('p',source.statement));const button=node('button',source.page?'Показать страницу источника':'Скачать исходник');button.type='button';button.onclick=()=>source.page?showPreview({name:source.name,page:source.page,original_file:source.file_id}):download({id:source.file_id,name:source.name});authoritySources.append(button);}
+  authoritySubmit.disabled=!authorityKey;
+ }catch(e){error(e);}
+}
+authorityPanel.addEventListener('toggle',()=>{if(authorityPanel.open)loadAuthorityCatalog();});authorityReload.onclick=loadAuthorityCatalog;authoritySelect.onchange=loadAuthoritySubject;
+provisionButton.onclick=async()=>{if(pending||busy||uploading)return;pending=true;provisionButton.disabled=true;controls();error(null);try{await api('/api/review-authority',{method:'POST',headers:{'X-Engineer-Review-Intent':'PROVISION_LOCAL_REVIEW_AUTHORITY'},body:{}});await loadAuthorityCatalog();}catch(e){error(e);}finally{pending=false;provisionButton.disabled=authorityKey;controls();}};
+authorityForm.onsubmit=async event=>{
+ event.preventDefault();if(pending||busy||uploading||!current||!authorityState||authoritySession!==current||!authorityConfirm.checked)return;
+ pending=true;authoritySubmit.disabled=true;controls();error(null);const session=current,state=authorityState;
+ try{await api(`/api/sessions/${session}/verifications`,{method:'POST',headers:{'X-Engineer-Review-Intent':'RESPONSIBLE_ENGINEERING_REVIEW'},body:{subject_kind:state.kind,subject_id:state.id,expected_revision:state.expected_revision,decision:authorityDecision.value,reviewer:authorityFields.reviewer.value,method:authorityFields.method.value,reason:authorityFields.reason.value,source_refs:state.source_refs}});if(current===session){await loadAuthoritySubject();await refresh();}}
+ catch(e){error(e);}finally{pending=false;authorityConfirm.checked=false;authoritySubmit.disabled=!authorityKey;controls();}
+};

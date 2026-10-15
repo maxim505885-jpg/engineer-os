@@ -16,10 +16,11 @@ MAX_REQUEST=65536
 
 
 def revision(store,session_id):
+    from .verification import verification_stamp
     snap=store.snapshot(session_id)
     return digest(dict(files=[[f['id'],f['sha256'],f['size']] for f in snap['files']],
         evidence=snap['evidence'],requirements=store.requirements_state(session_id),
-        domains=store.domain_packets_state(session_id)))
+        domains=store.domain_packets_state(session_id),verification=verification_stamp(store,session_id)))
 
 
 def catalog(store,session_id):

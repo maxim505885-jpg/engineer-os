@@ -10,7 +10,7 @@ import time
 import uuid
 from .coverage import unknown_coverage
 from .lock import managed_file,managed_database
-SCHEMA_VERSION=2
+SCHEMA_VERSION=3
 
 
 def identifier(value):
@@ -58,9 +58,9 @@ class Store:
     def verification_key(self):
         """Read a provisioned local issuer key; never mint authority on audit.
 
-        The current app has no verification issuer/provisioning HTTP endpoint.
-        A missing, malformed or symlinked key fails closed. Backup must preserve
-        this key together with verification records once an issuer is added.
+        Explicit provisioning belongs to verification.provision_key, never an
+        audit/read path. A missing, malformed or symlinked key fails closed.
+        Backup must preserve this key together with verification records.
         """
         path=self.root/'engineering-verification.key'
         try:
@@ -88,6 +88,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_receipts(seq INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES jobs(id),record TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS engineering_inputs(job_id TEXT PRIMARY KEY REFERENCES jobs(id),record TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS engineering_verifications(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),subject_kind TEXT NOT NULL,subject_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,subject_kind,subject_id,revision));
             CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_region_reads(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),result TEXT NOT NULL,result_sha256 TEXT NOT NULL,source_sha256 TEXT NOT NULL,created REAL NOT NULL);

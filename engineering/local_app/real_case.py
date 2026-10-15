@@ -31,7 +31,7 @@ def _selected_candidates(store,session_id,snapshot,file_ids):
     for candidate in snapshot['evidence']:
         if candidate['file_id'] not in selected:continue
         checked=source_check(store,session_id,candidate,selected_files=file_ids)
-        rows.append(dict(
+        row=dict(
             candidate_id=candidate['id'],
             file_id=candidate['file_id'],
             source_sha256=candidate['source_sha256'],
@@ -40,7 +40,9 @@ def _selected_candidates(store,session_id,snapshot,file_ids):
             review_event_id=(candidate['latest_review'] or {}).get('id'),
             status=checked['status'],
             reasons=checked['reasons'],
-        ))
+        )
+        from .verification import overlay_evidence
+        rows.append(overlay_evidence(store,session_id,row))
     return rows
 
 
@@ -99,7 +101,7 @@ def _evidence_stage(candidates):
                 reasons=reasons,candidates_total=len(candidates))
 
 
-def _specialist_stage(job):
+def _specialist_stage(job,store=None,session_id=None):
     result=job.get('result') or {};run=result.get('core_run')
     reasons=[]
     if job.get('mode')!='CORE_RUN':reasons.append('CASE_REQUIRES_CORE_RUN')
@@ -113,10 +115,14 @@ def _specialist_stage(job):
         for row in run.get('results',[]):
             if row.get('execution')!='COMPLETED':reasons.append('SPECIALIST_EXECUTION_INCOMPLETE')
             if row.get('status') in {'ERROR','BLOCK'}:reasons.append('SPECIALIST_RESULT_BLOCKED')
+    results=(run or {}).get('results',[])
+    if store is not None:
+        from .verification import overlay_subject
+        results=[overlay_subject(store,session_id,'SPECIALIST',job['id']+':'+row['agent'],row) for row in results]
     return dict(status='BLOCK' if reasons else 'READY_FOR_CASE_QC',
                 reasons=list(dict.fromkeys(reasons)),
                 requested_checks=list(job.get('requested_checks',[])),
-                results=(run or {}).get('results',[]))
+                results=results)
 
 
 def _domain_stage(job,domains):
@@ -166,7 +172,10 @@ def build(store,session_id,*,job_id,expected_revision,manifest=None):
     source=_source_stage(files,job['result'],manifest)
     req_stage=_requirements_stage(requirements)
     evidence=_evidence_stage(candidates)
-    specialists=_specialist_stage(job)
+    specialists=_specialist_stage(job,store,session_id)
+    reviewed_roles=specialists['results']
+    review_scope='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY' if reviewed_roles and all(
+        row.get('engineering_verified') is True and (row.get('engineering_verification') or {}).get('verified_scope')=='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY' for row in reviewed_roles) else 'UNQUALIFIED'
     domain=_domain_stage(job,domains)
     qc=_qc_stage(req_stage,evidence,specialists,domain)
 
@@ -182,10 +191,12 @@ def build(store,session_id,*,job_id,expected_revision,manifest=None):
         evidence_digest=_digest(candidates),
         domain_digest=_digest(domains),
         core_result_digest=_digest(job['result']),
+        specialist_review_digest=_digest(specialists),
     )
     event=dict(
         id=str(uuid.uuid4()),session_id=session_id,job_id=job_id,created=time.time(),
         scope='REAL_ENGINEERING_CASE_SNAPSHOT',
+        review_scope=review_scope,
         identity=identity,
         source_manifest=manifest,
         stages=dict(source_identity=source,requirements=req_stage,evidence=evidence,
@@ -229,6 +240,7 @@ def report(store,session_id):
         if _digest(candidates)!=current['identity']['evidence_digest']:stale_reasons.append('EVIDENCE_STATE_CHANGED')
         if _digest(domains)!=current['identity']['domain_digest']:stale_reasons.append('DOMAIN_STATE_CHANGED')
         if _digest(job.get('result'))!=current['identity']['core_result_digest']:stale_reasons.append('CORE_RESULT_CHANGED')
+        if _digest(_specialist_stage(job,store,session_id))!=current['identity'].get('specialist_review_digest'):stale_reasons.append('SPECIALIST_REVIEW_CHANGED')
         current_ids=[(f['id'],f['name'],f['sha256'],f['size']) for f in files]
         expected=[(f['id'],f['name'],f['sha256'],f['size']) for f in current['identity']['originals']]
         if current_ids!=expected:stale_reasons.append('ORIGINAL_SET_CHANGED')
