@@ -45,9 +45,16 @@ class IfcWorkerTests(unittest.TestCase):
                 _checked_hash(small,hashlib.sha256(b'x'*32).hexdigest())
 
     def test_actual_low_memory_child_fails_closed(self):
+        from engineering.local_app.calculation_process import probe_memory_limit
         with patch('engineering.local_app.calculation_process.MEMORY_BYTES',16*1024**2):
-            with self.assertRaises(ValueError):self.run_ifc()
+            with self.assertRaises(ValueError):probe_memory_limit(threading.Event())
         self.assertEqual(self.path.read_bytes(),self.raw)
+
+    def test_same_fixed_allocation_succeeds_at_normal_limit(self):
+        from engineering.local_app.calculation_process import probe_memory_limit
+        result=probe_memory_limit(threading.Event())
+        self.assertEqual(result['allocated_bytes'],64*1024**2)
+        self.assertFalse(result['acceptance_granted'])
 
     def test_pre_cancelled_request_never_launches_child(self):
         stop=threading.Event();stop.set()

@@ -99,11 +99,10 @@ class EngineeringJobTests(unittest.TestCase):
     def test_windows_job_memory_limit_fails_closed(self):
         import importlib.util
         if importlib.util.find_spec('win32job') is None:self.skipTest('Windows Job Object adapter absent')
-        from engineering.local_app.calculation_process import run_calculation
+        from engineering.local_app.calculation_process import probe_memory_limit
         from unittest.mock import patch
-        data=dict(length_m=6.,elastic_modulus_pa=210e9,inertia_m4=8e-6,area_m2=.003,load_n_m=1000.,units='N_m_Pa',source_sha256='a'*64,evidence_ids=['synthetic'])
         with patch('engineering.local_app.calculation_process.MEMORY_BYTES',16*1024**2):
-            with self.assertRaises((ValueError,__import__('pywintypes').error)):run_calculation('BEAM',data,threading.Event())
+            with self.assertRaises((ValueError,__import__('pywintypes').error)):probe_memory_limit(threading.Event())
 
     def test_interrupted_calculation_retains_request_and_progress(self):
         from engineering.local_app.engineering_jobs import execute_engineering,request_for

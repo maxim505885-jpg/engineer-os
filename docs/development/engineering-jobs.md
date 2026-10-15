@@ -33,6 +33,12 @@ tree. Linux applies RLIMIT_AS/RLIMIT_CPU before solver imports. Missing boundary
 support fails closed; this is not network isolation or an Office sandbox.
 Rectangle arithmetic is constant-size and executes directly.
 
+The negative memory probe commits and touches a fixed 64 MiB allocation, paired
+with a positive run at the normal limit and refusal at 16 MiB. Merely importing
+IFC/Pynite is not a reliable negative workload: Windows limits committed memory,
+as specified by [JOBOBJECT_EXTENDED_LIMIT_INFORMATION](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information).
+The fixed diagnostic is not exposed through the engineering tool API.
+
 Database schema 2 adds `engineering_inputs`; schema 3 adds the responsible-review
 journal. Upgrading an older supported database first
 makes and verifies its version-specific SQLite recovery copy. Previous schema-1

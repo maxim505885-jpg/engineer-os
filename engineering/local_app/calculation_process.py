@@ -21,8 +21,17 @@ def run_calculation(tool,data,stop):
     return _run_request(tool,data,stop)
 
 
+def probe_memory_limit(stop):
+    """Fixed 64 MiB committed allocation; never exposed as an engineering tool.
+
+    Module imports need not exhaust a small commit limit on every machine.
+    This same workload must succeed normally and fail under a 16 MiB boundary.
+    """
+    return _run_request('MEMORY_PROBE',{},stop)
+
+
 def _run_request(tool,data,stop):
-    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
+    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF','MEMORY_PROBE'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
     if stop.is_set():raise ValueError('CALCULATION_CANCELLED')
     root=Path(__file__).resolve().parents[2]
     with tempfile.TemporaryDirectory(prefix='engineer-calculation-') as tmp:
@@ -97,6 +106,12 @@ def main():
         from engineering.calculation.planar_control import PlanarInput,Node,Member,calculate_planar
         data.update(nodes=tuple(Node(**n) for n in data['nodes']),members=tuple(Member(**m) for m in data['members']),loads=tuple(tuple(load) for load in data['loads']))
         result=calculate_planar(PlanarInput(**data))
+    elif tool=='MEMORY_PROBE':
+        if data!={}:raise ValueError('FIXED_MEMORY_PROBE_REQUIRED')
+        allocation=bytearray(64*1024**2)
+        for index in range(0,len(allocation),4096):allocation[index]=1
+        result=dict(status='PASS',scope='FIXED_MEMORY_ALLOCATION_PROBE_ONLY',
+                    allocated_bytes=len(allocation),acceptance_granted=False)
     elif tool in ('IFC_INVENTORY','IFC_DIFF'):
         from .ifc_process import evaluate_staged
         result=evaluate_staged(tool,data)
