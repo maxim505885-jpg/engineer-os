@@ -81,3 +81,17 @@ class IfcJobsTests(unittest.TestCase):
         result=self.run_tool('IFC_REQUIREMENTS',{'requirements':[req]})
         self.assertEqual(result['status'],'BLOCK',result)
         self.assertIn('IFC_LENGTH_UNIT_REQUIRED',result['reasons'])
+
+    def test_base_type_requirement_includes_standard_case_subclasses(self):
+        raw=self.path.read_bytes();self.assertIn(b'IFCWALL(',raw)
+        self.path.write_bytes(raw.replace(b'IFCWALL(',b'IFCWALLSTANDARDCASE('))
+        import ifcopenshell,ifcopenshell.api
+        model=ifcopenshell.open(str(self.path));wall=model.by_type('IfcWall')[0]
+        self.assertEqual(wall.is_a(),'IfcWallStandardCase');self.assertTrue(wall.is_a('IfcWall'))
+        pset=ifcopenshell.api.run('pset.add_pset',model,product=wall,name='Synthetic')
+        ifcopenshell.api.run('pset.edit_pset',model,pset=pset,properties={'Code':'W-1'})
+        model.write(str(self.path))
+        req=dict(id='subtype',source='Controlled base-type requirement',ifc_type='IfcWall',pset='Synthetic',property='Code',equals='W-1',unit='text')
+        result=self.run_tool('IFC_REQUIREMENTS',{'requirements':[req]})
+        self.assertEqual(len(result['checks']),1,result);self.assertEqual(result['checks'][0]['status'],'PASS',result)
+        self.assertEqual(result['checks'][0]['guid'],wall.GlobalId);self.assertFalse(result['acceptance_granted'])

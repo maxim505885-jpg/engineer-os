@@ -13,7 +13,7 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 |5. Реальная приёмка, память, итог|Предварительные выводы сохранены; controlled production issuer→case→FINAL_AUDIT→memory проходит с сохранением PROJECT scope, source change/revocation снимают доверие|T10 положительный source-backed realcase; T11 FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
 |6. Windows и выпуск|Schema3 migration recovery, backup/restore журнала проверок и engineering inputs проверены; пользовательский8765 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
 
-## Проверки текущего пакета
+## История проверок пакетов
 
 - 48 focused profile/OCR/tooling/startup tests: PASS.
 - 67 worker/HTTP/CORE integration tests: PASS.
@@ -141,3 +141,27 @@ API/расширенной формой предметных пакетов. И�
 Детали: [нормативный каталог](../development/normative-catalog.md).
 Предыдущий полный прогон после OCR:1243tests344.598s,34skipped,PASS; он не
 удостоверяет более поздние изменения каталога. Новый полный прогон отдельно.
+
+
+## Итог текущего прохода и точные открытые границы
+
+После каталога полный Windows suite:1254tests339.118s,34skipped,PASS.
+Независимое review нашло один P2: IfcWall requirement пропускал
+IfcWallStandardCase. Реальный child test воспроизвёл NO_APPLICABLE_ELEMENT;
+исправлен выбор по наследованию IFC.52focusedIFCtestsPASS. Новый общий прогон
+после этой правки и exact-head CI учитываются отдельно.
+
+T03 feasibility: собственный AppContainer token=1/capabilities=0, чтение
+постороннего canary запрещено, унаследованный stdio IPC работает. Контрольный
+обычный процесс читает canary и соединяется с собственным локальным endpoint.
+В AppContainer network и cross-container named pipe дали timeout, поэтому
+полная изоляция Office renderer не объявлена квалифицированной. Собственные
+профили удалены (DeleteAppContainerProfile HRESULT0). Документы не открывались.
+LibreOffice в текущем Windows profile не установлен; WSL backend не получен.
+
+Остались реализация/квалификация защищённого source Office renderer, полнота
+документов/ТЗ, полный нормативный UI/authority и реальный scoped comparison,
+CAD routes, положительная предметная приёмка, FINAL exports, воспроизводимая
+Windows поставка/update/reboot/rollback/release. ЛИРА saved results остаются
+недоступны через проверенный vendor API; IFC/SCAD в переданном комплекте нет.
+Эти ограничения не закрываются количеством тестов или существованием файла.
