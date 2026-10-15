@@ -1,8 +1,14 @@
 import hashlib
 import tempfile
 import unittest
+import importlib.util
 from pathlib import Path
-import ifcopenshell
+if importlib.util.find_spec('ifcopenshell') is not None:
+    import ifcopenshell
+
+def setUpModule():
+    if importlib.util.find_spec('ifcopenshell') is None:
+        raise unittest.SkipTest('optional requirements-bim.txt not installed')
 
 class IfcGeometryTests(unittest.TestCase):
     def setUp(self):

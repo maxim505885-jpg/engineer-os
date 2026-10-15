@@ -64,3 +64,14 @@ PASS; часть сценариев использует controlled model, от�
 полное соответствие инженерному ТЗ не заявлено. Это не FINAL_AUDIT объекта и
 не FINAL_RELEASE_AUDIT. Для инженерной приёмки нужны квалифицированные исходные
 данные и проверки, а не изменение статусов или фиктивная подпись.
+
+## CI correction after publication
+
+Initial Core1027 failed because the new optional IFC fixture imported
+IfcOpenShell at module scope and planar positive fixtures assumed Pynite.
+The dedicated optional Linux/Windows job3 and native Windows226 passed.
+Reproduced in the actual minimum venv:17tests,7failures/3errors before fix.
+Fixtures now declare optional capabilities; validation-only planar tests remain
+active. Fresh minimum run16tests OK(12skips), installed optional suite51tests
+OK with no skips. No production checks or acceptance gates changed.
+Final exact-head CI remains authoritative and is recorded in PR153.
