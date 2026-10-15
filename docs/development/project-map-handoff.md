@@ -1,3 +1,11 @@
+# Дополнение этапа2 — визуальные инструменты, 16.10.2026
+
+Продолжение той же codex/v1-completion-20261015 послеf4a8b24; разработка не начиналась заново. Добавлены source-bound diff-pdf CLI и offline Gotenberg pilot, без замены reader/acceptance или пользовательского server8765. [QA и ограничения](../qa/2026-10-16-document-visual-tooling.md), [команды](document-visual-tools.md).
+
+diff-pdf0.5.3 реально обнаружил2500→2800;13новых тестовPASS. Штатный полный Windows suite1288/400.496s/34skipped/OK; guardsPASS. Отдельный системный Python/PyMuPDF1.28.2 дал8failures/4errors, не считать этот запускPASS; использовать закреплённый профиль1.26.6.29источников unchanged.
+
+PaddleCPU установлен отдельно и прочитал2PNGТЗ, но числовой контроль провален(2500→25оо); профиль не активирован,7из8моделей сохранены. Gotenberg exact image/config не запускался: нет engine, WMI virtualisation false. Следующее: подготовить локальный Linux engine/виртуализацию, квалифицировать renderer, затем source-bound visual/semantic review. Этап2 остаётсяOPEN; прежние доказательства native cells/OMML/media сохранены. Предыдущие записи ниже — история.
+
 # Текущий проход этапа2 — адресная сверка документов, 15.10.2026
 
 База225ee83, локальный пакет на codex/v1-completion-20261015. Новый comparator/CLI и native-cell identity реализованы; продуктовый код не развёрнут в пользовательский dirty checkout/server8765. Свежая Windows регрессия1275tests,380.576s,34skipped,OK; guards/diffPASS. GitHub CI и release этого нового пакета не заявлены.
