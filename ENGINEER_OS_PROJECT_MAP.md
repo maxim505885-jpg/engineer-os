@@ -1,3 +1,16 @@
+# Актуальная передача: полный аудит и план1.0 — 15.10.2026
+
+Проверенный candidate: `3f87eed93f1460715a35df0a6cbf0d8550d380e3`, PR153 merged;
+tree `b91c33d7cbb11e008e15516ecae4a74d33ac69bd`. Exact-head CI PASS.
+Читать сначала [полную матрицу19](docs/qa/2026-10-15-full-readiness-audit.md),
+[определение готовности1.0](docs/development/release-v1-definition-20261015.md) и
+[исполняемый план13пакетов](docs/superpowers/plans/2026-10-15-engineer-os-v1-completion.md).
+Главные product gaps: production verification issuer, Windows document qualification,
+интеграция новых CLI tools в UI/Evidence, real ACCEPTED→memory→FINAL report, поставка.
+ЛИРА/SCAD — отдельный vendor поток согласно исходному MASTER§8, не автоматический
+block базового runtime. Первое исполнение:T01→T02→T03/T04 иT05. Процент готовности
+не назначен. Старые записи ниже — история и не заменяют новую матрицу.
+
 # Актуальное состояние — восемь направлений, 15.10.2026
 
 PR152 объединён в candidate `e27cf79582e929421685169304ac873d20a3df3a`.
