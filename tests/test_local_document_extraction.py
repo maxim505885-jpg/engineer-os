@@ -13,6 +13,25 @@ from engineering.local_app.worker import Worker
 
 
 class LocalDocumentExtractionTests(unittest.TestCase):
+    def test_docling_partial_text_keeps_parser_limitations_and_blocks_page(self):
+        from engineering.document_intelligence.docling_adapter import DoclingDocumentParser
+        f=self.source(['source text'])
+        job=self.store.enqueue_extraction(self.session,f['id'],'docling')
+        exported=dict(texts=[dict(text='Table 1',label='caption',prov=[dict(page_no=1)])])
+        converter=SimpleNamespace(convert=lambda *a,**k:SimpleNamespace(
+            document=SimpleNamespace(export_to_dict=lambda:exported)))
+        parser=DoclingDocumentParser(lambda:converter)
+        with patch.dict('os.environ',{'ENGINEER_OS_DOCUMENT_INTELLIGENCE':'true'}),patch.object(self.module,'docling_parser',return_value=parser):
+            Worker(self.store,None).run_once()
+        page=self.store.extraction_page(self.session,job['id'],1)
+        self.assertEqual(page['status'],'BLOCK')
+        self.assertIn('TABLE_CAPTION_WITHOUT_VERIFIED_ROWS',page['limitations'])
+        self.assertEqual(page['execution'],'COMPLETED')
+        self.assertEqual(page['blocks'][0]['text'],'Table 1')
+        self.assertEqual(self.job()['result']['extraction']['blocked_pages'],1)
+        self.assertFalse(page['acceptance_granted'])
+        self.assertEqual(hashlib.sha256(Path(self.store.get_file(f['id'])['path']).read_bytes()).hexdigest(),f['sha256'])
+
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
         self.store=Store(Path(self.tmp.name));self.session=self.store.create_session()['id']

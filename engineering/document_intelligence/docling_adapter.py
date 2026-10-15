@@ -8,14 +8,30 @@ accepted document.
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import math
 import re
 import sys
+import threading
 from pathlib import Path
 from typing import Any, Callable
 
 from .contracts import BoundingBox, DocumentBlock, DocumentParseError, NormalizedDocument, PageRef
+
+_conversion_lock = threading.RLock()
+
+class _TableLossMonitor(logging.Handler):
+    """Retain a fixed loss code, never source-bearing log messages."""
+    def __init__(self) -> None:
+        super().__init__(logging.WARNING)
+        self.detected = False
+
+    def emit(self, record: logging.LogRecord) -> None:
+        message = record.getMessage()
+        if ('pdf cells matched neither a row nor a column band' in message
+                and 'dropped from the table' in message):
+            self.detected = True
 
 
 def document_intelligence_enabled() -> bool:
@@ -329,9 +345,23 @@ class DoclingDocumentParser:
         if not document_intelligence_enabled():
             raise DocumentParseError("document intelligence is disabled")
 
+        source_sha256 = self._sha256(path)
+        monitor = _TableLossMonitor()
         try:
             converter = self._converter()
-            result = converter.convert(str(path), page_range=page_range) if page_range else converter.convert(str(path))
+            # Docling's table stages emit from internal worker threads. Scope
+            # diagnostics to a serialized conversion window, not its caller's
+            # thread. Concurrent adapter conversions cannot consume each
+            # other's table-loss warnings. Only fixed codes leave the monitor.
+            with _conversion_lock:
+                logger = logging.getLogger()
+                logger.addHandler(monitor)
+                try:
+                    result = converter.convert(str(path), page_range=page_range) if page_range else converter.convert(str(path))
+                finally:
+                    logger.removeHandler(monitor)
+            if self._sha256(path) != source_sha256:
+                raise DocumentParseError('source changed during conversion')
             document = getattr(result, "document", None)
             if document is None or not hasattr(document, "export_to_dict"):
                 raise DocumentParseError("Docling returned no exportable document")
@@ -346,7 +376,7 @@ class DoclingDocumentParser:
                 block.kind == "caption" and re.match(r"^\s*(?:табл(?:ица|\.)?\s|table\s)", block.text, re.I)
                 for block in blocks
             )
-            limitations=[]
+            limitations=['TABLE_CELLS_DROPPED_BY_LAYOUT_PARSER'] if monitor.detected else []
             table_error=None
             try:
                 table_rows = self._table_rows(exported)
@@ -378,6 +408,6 @@ class DoclingDocumentParser:
             source_path=str(path),
             parser="docling",
             blocks=blocks,
-            source_sha256=self._sha256(path),
+            source_sha256=source_sha256,
             limitations=tuple(dict.fromkeys(limitations)),
         )
