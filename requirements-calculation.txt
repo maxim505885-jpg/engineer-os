@@ -1,0 +1,2 @@
+# Optional independent benchmark adapter; no LIRA/SCAD execution implied.
+PyniteFEA==3.2.0
