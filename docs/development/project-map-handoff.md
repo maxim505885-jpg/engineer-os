@@ -1,4 +1,31 @@
-# Текущий результат — §92: PR108 merged; мастер-план синхронизирован с незакрытой аномалией receipts (документация, без изменения reader)
+# Текущий результат — 15.10.2026, MASTER audit / optional engineering adapters
+
+База GitHub `integration/release-candidate-v1` подтверждена через Git refs API:
+`db29e4c946e4db5e088e8fdd727c6165365dcc4d`; Core1022/Windows222/Security845 success
+относятся к базе. Ветка текущего пакета: `codex/master-engineering-audit-20261015`.
+Исходный `C:/Users/maxim/engineer-os` содержит чужие staged/untracked изменения;
+не переносить их, не менять его ветку. Пакет находится в managed worktree.
+
+Читать сначала [матрицу19 и QA](../qa/2026-10-15-master-engineering-audit.md),
+[план](master-engineering-pass-20261015.md), затем карту. Исправлены потерянные
+Docling limitations, worker-thread table-loss и source mutation checks.
+Реальная V4 page57 обработана offline существующим Docling:23 блока сохранены,
+BLOCK TABLE_CAPTION_WITHOUT_VERIFIED_ROWS, source unchanged; private artifacts
+в `.engineer-os/master-pass/` текущего managed worktree. Полный rerun не выполнен.
+Optional IFC/DXF/Pynite CLI проверен на синтетических эталонах. Новые adapters
+не подключены автоматически к UI/Evidence/acceptance. №13/14/19 остаются BLOCK.
+
+Chromium7/7 PASS; pinned full suite1085:0failures/7errors/47skips (6symlink privilege,
+1 transient app.lock cleanup; restart separately PASS). Целевые tests и повтор
+независимого review PASS. Прямой Git network недоступен; GitHub connector работает.
+В новом чате проверить PR/head/CI пакета; не выдавать проверки базы за новые.
+
+Следующий предметный шаг: найти актуальный приватный v12 corpus, пересчитать
+source-bound output с новой parser identity, сверить таблицы/формулы/числа с
+оригиналом. Старый доступный review137 BLOCK отличается от documented v12
+52BLOCK/55UNCERTAINTY; наборы не смешивать. Никаких 100%/ACCEPTED/release claims.
+
+## Историческая передача — §92 / PR108
 
 # Передача состояния ENGINEER OS
 

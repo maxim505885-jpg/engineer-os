@@ -1,5 +1,30 @@
 # ENGINEER OS — живая карта проекта
 
+## Текущий проход — 15.10.2026, MASTER audit
+
+Актуальная проверенная база GitHub: `integration/release-candidate-v1`
+`db29e4c946e4db5e088e8fdd727c6165365dcc4d`. Рабочая ветка
+`codex/master-engineering-audit-20261015`, отдельный managed worktree;
+исходный грязный checkout не изменён. Этот раздел приоритетнее исторических
+указателей ниже. PR148/149/151 остаются отдельными открытыми потоками.
+
+Матрица **всех 19 пунктов**, фактические проверки и следующий шаг:
+[`docs/qa/2026-10-15-master-engineering-audit.md`](docs/qa/2026-10-15-master-engineering-audit.md).
+Исправлена потеря ограничений Docling в page journal, добавлены parser-level
+table-loss diagnostics из worker threads и проверка неизменности источника.
+Подготовлены optional IFC inventory/GUID diff, DXF loss comparison и контрольная
+Pynite UDL балка с аналитической сверкой. Они не дают инженерный ACCEPTED.
+Реальная страница57 V4 offline:23 блока сохранены, source unchanged,
+TABLE_CAPTION_WITHOUT_VERIFIED_ROWS/BLOCK; полнота страницы не подтверждена.
+
+7/7 Chromium маршрутов и целевые regressions PASS. Полный pinned Windows suite:
+1085 tests, 0 assertion failures, 7 errors, 47 skips; 6 symlink privilege errors
+и app.lock cleanup error (отдельный повтор restart PASS). Общий suite не PASS.
+Реальная полнота №13, положительный №14 и release №19 остаются BLOCK.
+Физическая установка/перезагрузка и DWG equivalence не подтверждены.
+Новые IFC/FEM инструменты доступны через `scripts/engineering_tools.py`, а не
+через новый UI. [Установка и scope](docs/development/optional-engineering-adapters.md).
+
 Обновлено: 09.10.2026. Это файл передачи состояния разработки, а не инженерное доказательство и не FINAL AUDIT. После существенного результата обновлять этот же файл; сохранять его имя и историю версий.
 
 Идентичность этой карты: пользовательский файл `libfile_947c39aad11c81918c7887832c1411bb`, имя `ENGINEER_OS_PROJECT_MAP.md`. Обновлять этот же ID с фактической текущей версией. Правило сопровождения — `AGENTS.md`; краткий указатель — `docs/development/project-map-handoff.md` и README. Актуальная ветка и проверенный результат указаны ниже; ранние SHA и результаты сохраняются в исторических разделах.

@@ -1,5 +1,25 @@
 # MASTER PLAN — ENGINEER OS
 
+## Приоритетное состояние — MASTER audit, 15.10.2026
+
+Этот раздел заменяет устаревшие указатели кандидата ниже, не удаляя историю.
+GitHub candidate подтверждён: `db29e4c946e4db5e088e8fdd727c6165365dcc4d`.
+Рабочий пакет: `codex/master-engineering-audit-20261015`.
+Полная матрица19: [MASTER audit](../qa/2026-10-15-master-engineering-audit.md),
+план исполнения: [master-engineering-pass-20261015.md](master-engineering-pass-20261015.md).
+
+Исправлены runtime Docling limitations/table-loss из pipeline threads и source
+identity check. Добавлены изолированные optional IFC/GUID diff, DXF comparison,
+Pynite analytical beam benchmark и CLI; базовый Ollama/UI не заменены.
+7/7 Chromium PASS; полный pinned Windows suite1085 не зелёный:0 assertion failures,
+7 errors,47 skips; детали и отдельные повторы в QA. Review findings исправлены.
+
+Порядок: №13 реальный source-bound rerun/визуальная сверка → DWG converter loss
+ledger/roundtrip → IFC formal requirements и геометрическая квалификация →
+расширение control calculations. Нормы проверять только по законным актуальным
+источникам. №14/15/16 требуют настоящего qualified ACCEPTED; №9/19 ждут physical
+clean install/reboot и полного release audit. Ни один engineering BLOCK не снят.
+
 ## Актуализация №14 — 14.10.2026, PR150 / очередность до v1.0
 
 Текущий проверенный candidate: `integration/release-candidate-v1` `091edd1c2881b1f7c416034b45c1d6f48899bcdd`. PR150 открыт на этом candidate, не слит. На его точном head `9189a124af95af0cfbcfa4b9688b7731307dc7ea` PASS все три GitHub checks: Core Tests, Windows local runtime и Repository Security Guard. Изменения включают bounded locator для vector graphics, сохранение source-located текста при неразобранной таблице с fail-closed `BLOCK`, а также защиту batch/evidence/V4 review от принятия частичного результата. Локально проверены 20 extraction/vector, 33 parser/evidence/batch tests и предыдущий полный набор 1,065 тестов (известные Windows symlink/temp ACL ошибки описаны в локальных логах; latest head подтверждён зелёным GitHub Core).
