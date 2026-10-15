@@ -1,3 +1,4 @@
+from tests.platform_capabilities import symlink_or_skip
 import unittest
 import json
 import tempfile
@@ -71,7 +72,7 @@ class LocalDoclingBatchTests(unittest.TestCase):
                 target=out/('reviewed-regions.candidates.json' if mode=='raw-sidecar' else 'pages-0001-0001.json')
                 target.write_text('original')
                 if mode=='raw-sidecar':raw=target
-                else:(out/'combined-extraction.json').symlink_to(target)
+                else:symlink_or_skip(out/'combined-extraction.json',target)
                 args=['batch','source.pdf','--start','1','--end','1','--sha256','a'*64,
                       '--project-id','p','--document-id','d','--output-dir',str(out),
                       '--raw-export',str(raw),'--reviewed-manifest','missing-map.json','--reviewed-only']
@@ -243,7 +244,7 @@ class LocalDoclingBatchTests(unittest.TestCase):
                 original=dest/'pages-0396-0404.audit.json';original.write_text('original Docling BLOCK')
                 output=dest/'reviewed-regions.audit.json'
                 if alias=='hardlink':os.link(original,output)
-                else:output.symlink_to(original)
+                else:symlink_or_skip(output,original)
                 args=SimpleNamespace(source=dest/'source.pdf',reviewed_manifest=dest/'map.json',
                                      output_dir=dest,start=396,end=404,sha256='a'*64)
                 with self.assertRaises(ValueError):export_reviewed_regions(args)

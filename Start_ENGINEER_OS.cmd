@@ -1,9 +1,10 @@
 @echo off
 setlocal
 chcp 65001 >nul
+set "PSModulePath=%SystemRoot%\System32\WindowsPowerShell\v1.0\Modules;%PSModulePath%"
 cd /d "%~dp0"
 title ENGINEER OS
-powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\windows_supervisor.ps1"
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\windows_supervisor.ps1" %*
 set "RC=%ERRORLEVEL%"
 if not "%RC%"=="0" (
   echo.

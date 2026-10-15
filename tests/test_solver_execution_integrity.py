@@ -1,3 +1,4 @@
+from tests.platform_capabilities import symlink_or_skip
 import sys,tempfile,unittest,subprocess
 from pathlib import Path
 from engineering.calculation.solver_bridge import SolverCommand,execute_solver
@@ -23,7 +24,7 @@ class SolverExecutionIntegrityTests(unittest.TestCase):
   self.assertEqual(self.inp.read_bytes(),b'original')
  def test_symlink_parent_cannot_escape_workdir(self):
   with tempfile.TemporaryDirectory() as other:
-   outside=Path(other);(self.root/'escape').symlink_to(outside,target_is_directory=True)
+   outside=Path(other);symlink_or_skip(self.root/'escape',outside,target_is_directory=True)
    with self.assertRaises(ValueError):execute_solver(self.command("from pathlib import Path;Path('escape/result').write_text('outside')",output_path=str(self.root/'escape/result')))
    self.assertFalse((outside/'result').exists())
  def test_changed_input_cannot_receive_execution_receipt(self):
@@ -37,12 +38,13 @@ class SolverExecutionIntegrityTests(unittest.TestCase):
   self.assertEqual(self.log.read_bytes(),b'prior evidence')
 
  def test_broken_output_symlink_is_not_reused(self):
-  self.out.symlink_to(self.root/'new-target')
+  symlink_or_skip(self.out,self.root/'new-target')
   with self.assertRaises(ValueError):execute_solver(self.command("from pathlib import Path;Path('output').write_text('result')"))
   self.assertFalse((self.root/'new-target').exists())
  def test_empty_output_cannot_be_a_solver_result(self):
   with self.assertRaises(RuntimeError):execute_solver(self.command("from pathlib import Path;Path('output').touch()"))
  def test_output_symlink_created_by_process_is_rejected(self):
+  probe=self.root/'symlink-probe';symlink_or_skip(probe,self.inp);probe.unlink()
   with self.assertRaises(RuntimeError):execute_solver(self.command("from pathlib import Path;Path('output').symlink_to(Path('input'))"))
 
  def test_output_hardlink_to_input_is_rejected(self):
@@ -50,6 +52,7 @@ class SolverExecutionIntegrityTests(unittest.TestCase):
  def test_output_hardlink_to_captured_log_is_rejected(self):
   with self.assertRaises(RuntimeError):execute_solver(self.command("import os;print('diagnostic',flush=True);os.link('log','output')"))
  def test_replaced_log_symlink_cannot_substitute_outside_evidence(self):
+  probe=self.root/'symlink-probe';symlink_or_skip(probe,self.inp);probe.unlink()
   with tempfile.TemporaryDirectory() as other:
    outside=Path(other)/'evidence';outside.write_bytes(b'old evidence')
    code="from pathlib import Path;print('captured',flush=True);Path('log').unlink();Path('log').symlink_to("+repr(str(outside))+");Path('output').write_text('result')"
@@ -58,3 +61,18 @@ class SolverExecutionIntegrityTests(unittest.TestCase):
  def test_replaced_regular_log_is_rejected(self):
   code="from pathlib import Path;print('captured',flush=True);Path('log').unlink();Path('log').write_text('fake log');Path('output').write_text('result')"
   with self.assertRaises(RuntimeError):execute_solver(self.command(code))
+
+class SymlinkCapabilityTests(unittest.TestCase):
+ def test_only_windows_privilege_1314_is_skipped(self):
+  from unittest.mock import Mock,patch
+  from tests.platform_capabilities import symlink_or_skip
+  for windows,winerror,skipped in ((True,1314,True),(True,5,False),(False,1314,False)):
+   error=OSError('fixture failure');error.winerror=winerror
+   link=Mock();link.symlink_to.side_effect=error
+   with self.subTest(windows=windows,winerror=winerror),patch('tests.platform_capabilities.os.name','nt' if windows else 'posix'):
+    with self.assertRaises(unittest.SkipTest if skipped else OSError):symlink_or_skip(link,'target')
+ def test_supported_platform_runs_symlink_fixture(self):
+  from unittest.mock import Mock
+  from tests.platform_capabilities import symlink_or_skip
+  link=Mock();symlink_or_skip(link,'target',target_is_directory=True)
+  link.symlink_to.assert_called_once_with('target',target_is_directory=True)
