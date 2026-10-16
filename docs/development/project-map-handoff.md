@@ -1,3 +1,18 @@
+# Verified follow-up checkpoint — 2026-10-16
+
+Hosted CI on `4adaa0a` is all green, including Windows and browser tests; see
+[exact results and private-control limits](../qa/2026-10-16-browser-ci-scad-api-probe.md).
+SCAD exchange-unit control checked 1120 nodes / 3360 components with exact 100x
+linear scaling; it does not qualify physical units or vendor model support.
+Existing same-source Word/GDI references were hash-verified (69 EMF + 69 PNG).
+Native pages 7–9 show all three assignment sheets; v4 still loses one. Imported
+logical cells: 521 exact text matches, 30 complex, extra empty cell and page-break
+marker difference; complete graphics/numeric/layout qualification remains open.
+Original native capture and cell provenance limitations remain explicit. Sources
+52/52 unchanged. Next: resolve complex-cell/native graphic correspondence, continue
+bounded renderer diagnosis and remaining T01–T13/V01/release checks. No acceptance,
+FINAL_AUDIT, merge, tag or release is claimed.
+
 # Current follow-up — browser CI and private SCAD read route, 2026-10-16
 
 Read [browser CI and SCAD probe](../qa/2026-10-16-browser-ci-scad-api-probe.md).

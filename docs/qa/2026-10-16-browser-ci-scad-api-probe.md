@@ -77,3 +77,46 @@ its controller, but no valid result frame existed. This is a failed diagnostic
 fixture, not evidence that the original DOC is corrupt. No limits were increased
 and no production renderer/configuration changed. Missing-raster and frame/footer
 qualification remains BLOCK as recorded in the preceding QA.
+
+
+## Exact-head CI and further private controls
+
+All hosted workflows on `4adaa0aa952adfac8bd7bf574f223a933d288737`
+completed successfully: Core Tests (38890313526), Windows local runtime
+(38890313309), Optional engineering adapters (38890313548), Repository Security
+Guard (38890313533), and the PR workflow (38890310680). This qualifies those CI
+checks on that commit, not the engineering corpus or release gates.
+
+A private in-memory SCAD API exchange-unit control on the three current projects
+checked 1120 nodes / 3360 coordinate components. Requesting a linear exchange
+coefficient of 100 scaled the API coordinates by exactly 100 (maximum absolute
+error zero); the force unit remained unchanged. No native write or solver was
+called. This tests API exchange behavior only, not physical units, UI correlation,
+section semantics, model correctness or production vendor support.
+
+An existing Word ProtectedView capture was matched to the current report source.
+The source and captured main-story hashes match; all 69 EMF hashes and 69 raster
+hashes match the capture/render manifests. Reuse required no new Word execution.
+The capture has 69 pages, the supplied PDF 65 and the v4 derivative 68. The native
+capture is itself unqualified and its original network isolation was not verified;
+page counts alone establish no canonical layout. Native pages 7–9 visibly contain
+all three assignment sheets, strengthening the missing-sheet finding for v4.
+
+A preliminary native-cell text screen covered 552 captured cells: 364 substantial
+text candidates occur in the PDF; 169 are too short to diagnose preservation,
+18 are empty and one required visual follow-up. That candidate's text and restraint
+diagram are visible on native page 56 / derived page 55; an inline-object marker
+explains the literal mismatch candidate. No text loss was established there.
+Frame/footer and line/color differences remain unqualified.
+
+A separate imported-DOCX logical-cell comparison found 521 exact literal matches,
+30 complex cells needing visual review, one extra empty imported cell and one
+page-break-marker difference. There are 553 imported logical cells versus 552
+captured Word cells. These are diagnostic results, not complete table, graphic or
+numeric qualification. The cell JSON is associated with the captured reference,
+but its hash was not included in the original native manifest; this provenance
+limitation is retained privately. No renderer promotion or acceptance follows.
+
+All 52 registered sources remain unchanged, with no additions/missing files on the
+latest preservation check. Private payloads, source identities and receipts stay
+outside Git. T03/T04, remaining V01 semantics and unproven release gates stay open.
