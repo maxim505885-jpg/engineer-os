@@ -31,7 +31,7 @@ def probe_memory_limit(stop):
 
 
 def _run_request(tool,data,stop,*,timeout_seconds=None):
-    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_LOCATE','MEMORY_PROBE'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
+    if tool not in ('BEAM','PLANAR','IFC_INVENTORY','IFC_DIFF','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_LOCATE','CAD_INVENTORY','CAD_DIFF','MEMORY_PROBE'):raise ValueError('RESOURCE_TOOL_NOT_SUPPORTED')
     seconds=TIMEOUT if timeout_seconds is None else timeout_seconds
     if type(seconds) is not int or not 1<=seconds<=TIMEOUT:raise ValueError('RESOURCE_TIMEOUT_INVALID')
     if stop.is_set():raise ValueError('CALCULATION_CANCELLED')
@@ -116,6 +116,9 @@ def main():
         for index in range(0,len(allocation),4096):allocation[index]=1
         result=dict(status='PASS',scope='FIXED_MEMORY_ALLOCATION_PROBE_ONLY',
                     allocated_bytes=len(allocation),acceptance_granted=False)
+    elif tool in ('CAD_INVENTORY','CAD_DIFF'):
+        from .cad_process import evaluate_staged
+        result=evaluate_staged(tool,data)
     elif tool in ('IFC_INVENTORY','IFC_DIFF','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_LOCATE'):
         from .ifc_process import evaluate_staged
         result=evaluate_staged(tool,data)

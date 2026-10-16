@@ -1,2 +1,3 @@
 # Optional DXF evidence/annotation workflow. No native DWG conversion included.
+-r requirements-engineering-process.txt
 ezdxf==1.4.4

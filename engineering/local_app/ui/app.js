@@ -414,12 +414,12 @@ modelCheck.onclick=async()=>{if(!current||pending||busy||uploading)return;pendin
 
 // Reuse the current project, durable queue and domain form components.
 const engineeringPanel=node('details');engineeringPanel.id='engineering-tools-panel';
-engineeringPanel.append(node('summary','Расчёты и модель IFC'),node('p','Введённые значения считаются предположениями (ASSUMED), декларации IFC — проектными данными (PROJECT). Связь с файлом не подтверждает фактическую конструкцию. Единицы расчётов: Н, м, Па.'));
+engineeringPanel.append(node('summary','Расчёты, CAD и модель IFC'),node('p','Введённые значения считаются предположениями (ASSUMED), декларации CAD/IFC — проектными данными (PROJECT). Связь с файлом не подтверждает фактическую конструкцию. Единицы расчётов: Н, м, Па.'));
 const engineeringForm=node('form');engineeringForm.id='engineering-tools-form';
 const engineeringTool=domainSelect(engineeringForm,'Расчёт','engineering-tool');engineeringTool.id='engineering-tool';engineeringTool.className='';
-for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки'],['IFC_INVENTORY','IFC · декларации элементов, этажей и свойств'],['IFC_GEOMETRY','IFC · границы геометрии в метрах'],['IFC_REQUIREMENTS','IFC · проверка заявленных требований'],['IFC_DIFF','IFC · сравнение двух ревизий']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
+for(const [value,label] of [['RECTANGLE','Прямоугольное сплошное сечение'],['BEAM','Шарнирно опёртая балка · равномерная нагрузка'],['PLANAR','Плоская рама или ферма · узловые нагрузки'],['CAD_INVENTORY','DXF · объекты, слои и единицы'],['CAD_DIFF','DXF · сравнение двух файлов по handle'],['IFC_INVENTORY','IFC · декларации элементов, этажей и свойств'],['IFC_GEOMETRY','IFC · границы геометрии в метрах'],['IFC_REQUIREMENTS','IFC · проверка заявленных требований'],['IFC_DIFF','IFC · сравнение двух ревизий']]){const option=node('option',label);option.value=value;engineeringTool.append(option);}
 const engineeringSource=domainSelect(engineeringForm,'Связанный исходник','engineering-source');engineeringSource.id='engineering-source';engineeringSource.className='';engineeringSource.required=true;
-const engineeringSource2=domainSelect(engineeringForm,'Вторая ревизия IFC','engineering-source-2');engineeringSource2.id='engineering-source-2';engineeringSource2.className='';
+const engineeringSource2=domainSelect(engineeringForm,'Второй исходник для сравнения','engineering-source-2');engineeringSource2.id='engineering-source-2';engineeringSource2.className='';
 const engineeringFields={};
 for(const [name,label] of Object.entries({width_m:'Ширина b, м',height_m:'Высота h, м',length_m:'Пролёт L, м',elastic_modulus_pa:'Модуль E, Па',inertia_m4:'Момент инерции Iz, м⁴',area_m2:'Площадь A, м²',load_n_m:'Равномерная нагрузка вниз q, Н/м'})){
  const input=domainInput(engineeringForm,label,name);input.id='engineering-'+name;input.type='number';input.step='any';input.min=name==='load_n_m'?'0':'0.000000000000001';engineeringFields[name]=input;
@@ -444,14 +444,14 @@ function engineeringFieldState(){
  const names=engineeringTool.value==='RECTANGLE'?['width_m','height_m']:engineeringTool.value==='BEAM'?['length_m','elastic_modulus_pa','inertia_m4','area_m2','load_n_m']:[];
  for(const [name,input] of Object.entries(engineeringFields)){input.disabled=!names.includes(name);input.required=names.includes(name);input.parentElement.hidden=input.disabled;}
  planarLabel.hidden=engineeringTool.value!=='PLANAR';planarInput.disabled=planarLabel.hidden;planarInput.required=!planarLabel.hidden;
- engineeringSource2.parentElement.hidden=engineeringTool.value!=='IFC_DIFF';engineeringSource2.disabled=engineeringSource2.parentElement.hidden;engineeringSource2.required=!engineeringSource2.disabled;
- if(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value)engineeringSource2.value=[...engineeringSource2.options].find(o=>o.value!==engineeringSource.value)?.value||'';
- engineeringSource2.setCustomValidity(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
+ engineeringSource2.parentElement.hidden=!engineeringTool.value.endsWith('_DIFF');engineeringSource2.disabled=engineeringSource2.parentElement.hidden;engineeringSource2.required=!engineeringSource2.disabled;
+ if(engineeringTool.value.endsWith('_DIFF')&&engineeringSource2.value===engineeringSource.value)engineeringSource2.value=[...engineeringSource2.options].find(o=>o.value!==engineeringSource.value)?.value||'';
+ engineeringSource2.setCustomValidity(engineeringTool.value.endsWith('_DIFF')&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
  ifcRequirementsLabel.hidden=engineeringTool.value!=='IFC_REQUIREMENTS';ifcRequirementsInput.disabled=ifcRequirementsLabel.hidden;ifcRequirementsInput.required=!ifcRequirementsLabel.hidden;
- engineeringSubmit.textContent=engineeringTool.value.startsWith('IFC_')?'Выполнить операцию IFC':'Выполнить контрольный расчёт';
+ engineeringSubmit.textContent=engineeringTool.value.startsWith('IFC_')?'Выполнить операцию IFC':engineeringTool.value.startsWith('CAD_')?'Выполнить операцию DXF':'Выполнить контрольный расчёт';
 }
 engineeringTool.onchange=engineeringFieldState;engineeringFieldState();
-engineeringSource.onchange=engineeringFieldState;engineeringSource2.onchange=()=>engineeringSource2.setCustomValidity(engineeringTool.value==='IFC_DIFF'&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
+engineeringSource.onchange=engineeringFieldState;engineeringSource2.onchange=()=>engineeringSource2.setCustomValidity(engineeringTool.value.endsWith('_DIFF')&&engineeringSource2.value===engineeringSource.value?'Выберите другую ревизию IFC':'');
 async function loadEngineeringTools(){
  if(!current)return;const session=current;
  try{const [catalog,snap]=await Promise.all([api(`/api/sessions/${session}/engineering-runs`),api(`/api/sessions/${session}`)]);if(current!==session)return;
@@ -461,6 +461,8 @@ async function loadEngineeringTools(){
   const latest=snap.jobs.find(j=>j.mode==='ENGINEERING_RUN');
   engineeringNotice.textContent=latest?`Последняя задача: ${latest.state}. Инженерное принятие отсутствует.`:snap.files.length?'Исходники обновлены. Введите значения и проверьте единицы.':'Сначала прикрепите исходник в этом проекте.';
   if(latest?.result?.engineering_run){const run=latest.result.engineering_run;engineeringResults.append(node('strong',run.tool+' · '+(run.result?.status||'НЕ ЗАВЕРШЕНО')),node('p','Входные данные: '+run.input_data_class+'. Нормативная проверка: NOT_RUN.'),node('p',latest.result.text));
+   if(run.tool==='CAD_INVENTORY'){const r=run.result||{};engineeringResults.append(node('p','Всего объектов DXF: '+(r.entity_total??'не определено')+' · код единиц DXF: '+(r.units??'не определён')),node('p','Инвентаризация не подтверждает инженерный смысл или полноту преобразования DWG.'));for(const entity of r.entities||[])engineeringResults.append(node('p',entity.type+' · handle '+entity.handle+' · слой '+entity.layer));if(r.entities_truncated)engineeringResults.append(node('small','Показаны первые 100 объектов модели; это ограниченный список.'));}
+   if(run.tool==='CAD_DIFF'){const r=run.result||{};engineeringResults.append(node('p','Сравнение сериализованных DXF: DWG, визуальная и инженерная эквивалентность не подтверждены.'),node('p','Изменено объектов: '+(r.changed_handles?.length??'не определено')),node('p','Удалено: '+(r.missing_handles?.length??'не определено')+' · добавлено: '+(r.added_handles?.length??'не определено')));for(const handle of (r.changed_handles||[]).slice(0,100))engineeringResults.append(node('p','Изменён handle: '+handle));}
    if(run.tool==='IFC_DIFF')engineeringResults.append(node('p','Сравниваются GUID, атрибуты, свойства, материалы и связь с этажом. Эквивалентность геометрии не проверена.'));
    if(run.tool==='IFC_INVENTORY'){const elements=run.result?.elements||[];for(const element of elements.slice(0,200))engineeringResults.append(node('p',element.type+' · GUID '+element.guid));if(elements.length>200)engineeringResults.append(node('p','Показаны первые 200 из '+elements.length+' элементов; весь список находится в квитанции.'));}
    if(run.tool==='IFC_INVENTORY'&&run.result?.elements?.length)renderIfcEvidenceForm(engineeringResults,run,session);
@@ -472,9 +474,9 @@ engineeringForm.onsubmit=async event=>{
  event.preventDefault();if(!current||pending||busy||uploading)return;
  if(engineeringSession!==current||!engineeringRevision){await loadEngineeringTools();return;}
  let options;
- try{options=engineeringTool.value==='IFC_REQUIREMENTS'?{requirements:JSON.parse(ifcRequirementsInput.value)}:engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));if(!engineeringTool.value.startsWith('IFC_'))options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON входных данных.'));return;}
+ try{options=engineeringTool.value==='IFC_REQUIREMENTS'?{requirements:JSON.parse(ifcRequirementsInput.value)}:engineeringTool.value==='PLANAR'?JSON.parse(planarInput.value):Object.fromEntries(Object.entries(engineeringFields).filter(([,input])=>!input.disabled).map(([name,input])=>[name,Number(input.value)]));if(!engineeringTool.value.startsWith('IFC_')&&!engineeringTool.value.startsWith('CAD_'))options.units='N_m_Pa';}catch(e){error(new Error('Проверьте JSON входных данных.'));return;}
  pending=true;engineeringSubmit.disabled=true;controls();error(null);
- try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:engineeringTool.value==='IFC_DIFF'?[engineeringSource.value,engineeringSource2.value]:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Задача поставлена в очередь. Обновите результаты после завершения.';await refresh();}
+ try{await api(`/api/sessions/${current}/engineering-runs`,{method:'POST',body:{tool:engineeringTool.value,input_file_ids:engineeringTool.value.endsWith('_DIFF')?[engineeringSource.value,engineeringSource2.value]:[engineeringSource.value],options,expected_revision:engineeringRevision}});engineeringNotice.textContent='Задача поставлена в очередь. Обновите результаты после завершения.';await refresh();}
  catch(e){error(e);}finally{pending=false;engineeringSubmit.disabled=false;controls();}
 };
 function renderIfcEvidenceForm(container,run,session){

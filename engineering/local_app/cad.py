@@ -25,13 +25,13 @@ def _folder(store,session_id):
 
 def inventory(store,session_id,file_id):
     source,path=_source(store,session_id,file_id)
-    report=dict(inventory_dxf(path,source['sha256']),file_id=file_id)
-    if report.get('format')=='DXF' and 'entity_counts' in report:
-        doc,_=_load(path,source['sha256'],inventory=True)
-        from itertools import islice
-        report['entities']=[dict(handle=e.dxf.handle,type=e.dxftype(),layer=e.dxf.layer[:250]) for e in islice(doc.modelspace(),100)]
-        report['entities_truncated']=len(doc.modelspace())>100
-    return report
+    if path.suffix.lower()=='.dwg':
+        from engineering.cad.intake import inspect_cad
+        return dict(inspect_cad(path,source['sha256']),file_id=file_id,acceptance_granted=False)
+    import threading
+    from .cad_process import run_cad
+    return dict(run_cad(tool='CAD_INVENTORY',sources=[(path,source['sha256'])],stop=threading.Event()),file_id=file_id)
+
 
 def derive(store,session_id,file_id,*,request):
     source,path=_source(store,session_id,file_id);request=_request(request)

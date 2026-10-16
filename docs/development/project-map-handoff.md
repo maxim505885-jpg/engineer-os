@@ -1,3 +1,21 @@
+# Продолжение пункта4 — CAD worker, 16.10.2026
+
+База d8e9ae5. [Пакет T08 и QA](../qa/2026-10-16-cad-worker-route.md):
+CAD_INVENTORY/CAD_DIFF включены в существующую очередь и форму,PROJECT/no
+acceptance. DXF parser получает собственные проверенные копии через общий
+2GiB/30s/2MiB child boundary; legacy DXF inventory делегирует ему. Исправлен
+stat/read growth race. Прежние20MiB/50000 limits не повышены,сеть не объявлена
+изолированной,аннотации/locator/export и реальные DWG не квалифицированы.
+
+58focusedPASS; Chromium new CAD и прежние IFC/calculation/CAD-memory PASS,
+скриншоты desktop/mobile просмотрены. Общий native Windows suite1308tests/
+389.460s/34skipped/OK. Независимое review важных дефектов не выявило,его запуск
+tests был ограничен sandbox и не считается PASS. CAD process requirements и
+optional CI обновлены; опубликованный exact-head CI не заявлен. Пользовательский
+checkout/server не заменены. Пункт2 отложен,пункт4 целиком ещё OPEN; следующие
+границы T08 — source census больших DWG,геометрические проверки и остальные
+native операции. Предыдущие записи ниже — история.
+
 # Продолжение остальных пунктов — 16.10.2026
 
 Пользователь отложил пункт 2; не возвращать его в текущий приоритет. [Новый пакет

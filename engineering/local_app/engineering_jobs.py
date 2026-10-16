@@ -11,7 +11,7 @@ from .store import identifier,ReviewConflict
 
 TOOLS=('BEAM','PLANAR','RECTANGLE','CAD_INVENTORY','CAD_DIFF','CAD_ANNOTATE',
        'DWG_CONVERT','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
-ENABLED=('BEAM','PLANAR','RECTANGLE','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
+ENABLED=('BEAM','PLANAR','RECTANGLE','CAD_INVENTORY','CAD_DIFF','IFC_INVENTORY','IFC_GEOMETRY','IFC_REQUIREMENTS','IFC_DIFF')
 MAX_REQUEST=65536
 
 
@@ -25,7 +25,7 @@ def revision(store,session_id):
 
 def catalog(store,session_id):
     return dict(schema='ENGINEER_OS_ENGINEERING_TOOLS_V1',expected_revision=revision(store,session_id),
-        tools=[dict(tool=tool,input_data_class='PROJECT' if tool.startswith('IFC_') else 'ASSUMED',available=tool in ENABLED,reason=None if tool in ENABLED else 'BOUNDED_WORKER_OR_SOURCE_REVIEW_NOT_QUALIFIED') for tool in TOOLS],
+        tools=[dict(tool=tool,input_data_class='PROJECT' if tool.startswith(('IFC_','CAD_')) else 'ASSUMED',available=tool in ENABLED,reason=None if tool in ENABLED else 'BOUNDED_WORKER_OR_SOURCE_REVIEW_NOT_QUALIFIED') for tool in TOOLS],
         input_data_class='ASSUMED',acceptance_granted=False)
 
 
@@ -61,6 +61,7 @@ def enqueue_engineering(store,session_id,*,tool,input_file_ids,options,expected_
     options=json.loads(encoded)
     files=[store.get_file(fid) for fid in input_file_ids]
     if tool.startswith('IFC_') and any(Path(f['name']).suffix.lower()!='.ifc' for f in files):raise ValueError('IFC original required')
+    if tool.startswith('CAD_') and any(Path(f['name']).suffix.lower()!='.dxf' for f in files):raise ValueError('DXF original required')
     request=dict(tool=tool,input_file_ids=input_file_ids,options=options,expected_revision=expected_revision,
         sources=[[f['id'],f['sha256']] for f in files])
     request['request_sha256']=digest(request)
@@ -83,7 +84,7 @@ def execute_engineering(store,job,stop):
     files=validate_request(store,job['session_id'],request,job['file_ids'])
     run=dict(schema='ENGINEER_OS_ENGINEERING_RUN_V1',tool=request['tool'],
         request_sha256=request['request_sha256'],sources=request['sources'],
-        input_data_class='PROJECT' if request['tool'].startswith('IFC_') else 'ASSUMED',acceptance_granted=False,actual_structure_verified=False,
+        input_data_class='PROJECT' if request['tool'].startswith(('IFC_','CAD_')) else 'ASSUMED',acceptance_granted=False,actual_structure_verified=False,
         normative_verification='NOT_RUN',result=None)
     envelope=dict(text='Инженерная задача: исходники связаны; расчёт ещё не завершён.',engineering_run=run,acceptance_granted=False)
     store.checkpoint(job['id'],envelope)
@@ -103,12 +104,9 @@ def execute_engineering(store,job,stop):
                 from .calculation_process import run_calculation
                 result=run_calculation(tool,data,stop)
         except (TypeError,KeyError,ValueError):raise ValueError('ENGINEERING_INPUT_FIELDS_INVALID') from None
-    elif tool=='CAD_INVENTORY':
-        from .cad import inventory
-        result=inventory(store,job['session_id'],files[0]['id'])
-    elif tool=='CAD_DIFF':
-        from engineering.cad.roundtrip import compare_dxf
-        result=compare_dxf(path,Path(files[1]['path']),source_sha256=sha)
+    elif tool.startswith('CAD_'):
+        from .cad_process import run_cad
+        result=run_cad(tool=tool,sources=[(Path(f['path']),f['sha256']) for f in files],stop=stop)
     elif tool.startswith('IFC_'):
         from .ifc_process import run_ifc
         result=run_ifc(tool=tool,sources=[(Path(f['path']),f['sha256']) for f in files],stop=stop,options=request['options'])
@@ -122,7 +120,7 @@ def execute_engineering(store,job,stop):
     numbers=result.get('results') or {}
     readable='\n'.join(labels[key]+': '+format(value,'.9g') for key,value in numbers.items() if key in labels and type(value) in (int,float))
     if not readable:readable='Подробные результаты и ограничения сохранены в квитанции задачи.'
-    classification='Декларации модели — PROJECT' if tool.startswith('IFC_') else 'Введённые значения — ASSUMED'
+    classification='Декларации модели — PROJECT' if tool.startswith(('IFC_','CAD_')) else 'Введённые значения — ASSUMED'
     envelope['text']='Инженерная задача '+tool+': '+result['status']+'. '+classification+'; фактическая конструкция и нормы не приняты.\n'+readable
     if len(envelope['text'])>24000:envelope['text']=envelope['text'][:24000]+'\n[Показана часть результата; полный receipt в задаче.]'
     if len(json.dumps(envelope,ensure_ascii=False,allow_nan=False).encode('utf-8'))>2*1024*1024:raise ValueError('ENGINEERING_RESULT_LIMIT')

@@ -22,6 +22,15 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 Текущий пакет T06: [обычный каталог](../development/normative-catalog.md);
 прежние строки ниже являются историей, а не новой проверкой.
 
+## Текущий пакет T08 — 16.10.2026
+
+Обычные CAD_INVENTORY/CAD_DIFF теперь доступны в ограниченной очереди и форме;
+legacy DXF inventory использует тот же child. Source snapshots/revision/hash,
+PROJECT/no acceptance,20MiB/50000 scopes сохранены. Полная новая Windows-регрессия
+1308tests389.460s34skippedOK;58focused и CAD/IFC/calculation browser PASS.
+[Точный объём и остаток](2026-10-16-cad-worker-route.md). Пункт4 целиком не закрыт:
+реальные DWG/геометрия/остальные native операции остаются. Пункт2 отложен.
+
 ## История проверок пакетов
 
 - 48 focused profile/OCR/tooling/startup tests: PASS.

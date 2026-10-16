@@ -66,3 +66,35 @@ Optional calculation/BIM requirements include the pinned Windows pywin32 worker
 dependency. The optional Linux/Windows workflow exercises these workers and
 the calculation/IFC/review Chromium scenarios; configured CI is not a CI PASS
 until a run on the published exact head actually succeeds.
+
+
+## CAD read-only queue — 16.10.2026
+
+В существующей ENGINEERING_RUN очереди доступны CAD_INVENTORY и CAD_DIFF.
+Требуются один или два разных DXF file IDs того же проекта, неизменный context
+revision и options={}. DWG_CONVERT/CAD_ANNOTATE в этой очереди не включены.
+Данные DXF имеют класс PROJECT, не MEASURED и не принятый факт.
+
+cad_process проверяет исходный SHA и размер, создаёт собственные снимки DXF,
+затем использует общий calculation_process boundary: 2 GiB памяти, 30 секунд,
+2 MiB JSON-результата. Одновременно выполняется не более одного CAD child.
+Хеши снимков и оригиналов проверяются повторно; отмена, рост файла или смена
+источника не дают пригодного результата. Это ограничение ресурсов, не sandbox
+с доказанным запретом сети или чтения произвольных локальных файлов.
+
+Существующий GET session/cad/file inventory теперь использует тот же worker
+для DXF. Аннотация, экспорт и locator остаются прежними маршрутами; их полная
+resource qualification этим пакетом не выполнена. CAD-профиль включает общий
+Windows process-adapter; отсутствие границы даёт явный отказ вместо inline parse.
+
+Бюджеты прежние: каждый DXF до20MiB, inventory до50000 объектов во всех блоках;
+редактирование сохраняет отдельный более узкий предел. UI показывает первые100
+объектов Model отдельно от общего census count и отмечает усечение. При превышении
+лимита чтения inventory не сообщает полноту. CAD_DIFF использует существующий
+строгий сериализованный DXF comparator: handles, tags, layers, resources и units.
+PASS такого сравнения не доказывает визуальную эквивалентность, правильность
+инженерной модели или отсутствие потерь при преобразовании DWG.
+
+Новые операции видны в обычной форме расчётов/CAD/IFC; при выборе сравнения
+появляется второй исходник. Результат содержит changed/missing/added handles,
+полную квитанцию и ограничения. Evidence и acceptance автоматически не создаются.
