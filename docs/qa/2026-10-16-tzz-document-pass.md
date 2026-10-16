@@ -239,3 +239,40 @@ Private product-chain-latest.json binds host/guest code and result provenance.
 Remaining:configured document host adapter with immutable bundle/seed identity,
 per-job source staging and output/cancellation integration into existing app;
 active-content,package/font and real-source qualification. Point2 still OPEN.
+
+## Configured adapter,queue and file UI
+
+Added pinned-bundle verifier and application render adapter. Bundle identity
+checks exact165-file set,all hashes,link/path/count/byte limits,current guest
+source hash and externally supplied manifest pin. Private builder inspected
+seed ISO and verified embedded guest script equals project runtime source.
+Manifest pin:bcd3121f133f346f0bdca586bf268623fad773acf66aec65df0c1a3419f1f44a.
+
+Adapter creates checked per-job source/image/seed copies;fixed noNIC/no monitor/
+no host-share command;owned runtime timeout/cancel/output monitoring. Serial
+bytes/hash must match process receipt;host decoder binds source/PDF hash. Original,
+staged source and bundle rechecked after render. No host Office/cloud fallback.
+Bundle4/adapter4 tests RED->GREEN;independent review:no important findings.
+
+DOCUMENT_RENDER now uses existing ENGINEERING_RUN queue/API/Worker. Local
+store-root office-renderer.json config only,not user-supplied API command/options.
+Input classUNKNOWN,one DOC/DOCX/RTF<=64MiB. Original revision checked before and
+after;derived PDF gets original fileID/hash,jobID and unverified lineage. No
+accepted evidence. Queue3 tests PASS;existing engineering-jobs13 tests PASS.
+Related Office suite49 tests/13.754s/OK. Independent queue review:no important
+findings;derived preview caption corrected from original to PDF-copy.
+
+Actual full adapter and actual queue/Worker owned-DOCX controls PASS,required
+text/table/2500mm and source/PDF hashes checked. Chromium actual API/queue/Worker
+UI control PASS with explicitly synthetic converter payload:button,derived file
+labels,preview copy caption and no accepted evidence. Desktop/mobile screenshots
+inspected;one bounded text/order refinement confirmed by final browser PASS.
+Original supplied SPU untouched. Local default worktree app data configured
+with pinned private bundle;other/main user data not modified.
+
+First real new-corpus DOCX via actual queue and contained converter SUCCEEDED:
+source35d267506adfabc901b8a5a974880dc2bd1f95d218b111375c34aa6c3529799b,
+12-page738,289byte derived PDF,113.476s,AppContainer1/capabilities0,noNIC,exit0.
+Original source SHA unchanged. Receipt:real-docx-render-receipt.json;PDF/file
+lineage in separate render-real-docx-qualification store. Page count is not
+content/layout/math qualification;those gates remain OPEN,as does point2.
