@@ -120,3 +120,16 @@ limitation is retained privately. No renderer promotion or acceptance follows.
 All 52 registered sources remain unchanged, with no additions/missing files on the
 latest preservation check. Private payloads, source identities and receipts stay
 outside Git. T03/T04, remaining V01 semantics and unproven release gates stay open.
+
+
+A further private variant split the second inline image into its own paragraph and
+added explicit page-break-before properties to the second and third image
+paragraphs. It still renders 68 pages, with the first two assignment rasters visible
+and the third absent. Explicit pagination is therefore not a qualified workaround;
+no production changes were made. Root cause remains unresolved.
+
+An imported-media census found 29 raster parts with exact decoded RGB matches in
+the original v4 PDF, 51 without exact matches (33 JPEG, 18 PNG), and two WMF parts
+excluded from this raster decoder. Nonmatches do not prove absence: recompression,
+color conversion, cropping and scaling require separate visual/object checks.
+These diagnostics do not close the 30 complex-cell or full-graphics qualification.

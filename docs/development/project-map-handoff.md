@@ -8,6 +8,8 @@ Existing same-source Word/GDI references were hash-verified (69 EMF + 69 PNG).
 Native pages 7–9 show all three assignment sheets; v4 still loses one. Imported
 logical cells: 521 exact text matches, 30 complex, extra empty cell and page-break
 marker difference; complete graphics/numeric/layout qualification remains open.
+Explicit image page breaks also fail to preserve all three assignment rasters.
+Imported raster census: 29 exact RGB matches, 51 requiring review, 2 WMF excluded.
 Original native capture and cell provenance limitations remain explicit. Sources
 52/52 unchanged. Next: resolve complex-cell/native graphic correspondence, continue
 bounded renderer diagnosis and remaining T01–T13/V01/release checks. No acceptance,
