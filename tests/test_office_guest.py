@@ -1,4 +1,7 @@
 """Validate guest-worker input and invocation contracts without executing Office."""
+import contextlib
+import io
+from unittest.mock import patch
 import hashlib
 import json
 from pathlib import Path
@@ -12,6 +15,12 @@ class OfficeGuestTests(unittest.TestCase):
         value.update(changes)
         return json.dumps(value).encode()
 
+    def test_input_read_failure_records_last_reached_phase(self):
+        from runtime.office_guest import main
+        phases=[]
+        with patch('runtime.office_guest.phase',side_effect=phases.append),patch('runtime.office_guest._bounded_read',side_effect=[self.request(),GuestInputError('owned read failure')]),contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(main(),1)
+        self.assertEqual(phases,['REQUEST_READ_BEGIN','REQUEST_READ_COMPLETE','INPUT_READ_BEGIN'])
     def test_only_exact_request_contract(self):
         self.assertEqual(parse_request(self.request())["suffix"], ".docx")
         for value in [self.request(extra=True), self.request(schema=True),self.request(suffix=".exe"),self.request(suffix="../source.docx"),self.request(source_sha256="A"*64),b'{"schema":1,"schema":1}',b"x"*4097]:

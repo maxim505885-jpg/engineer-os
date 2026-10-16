@@ -22,12 +22,13 @@ class OfficeRenderError(ValueError):
         self.diagnostic=diagnostic or {}
 
 
-def _failure_diagnostic(raw,source_sha256,manifest_sha256,process):
+def _failure_diagnostic(raw,source_sha256,manifest_sha256,process,console_tail=None):
     # Guest text is an untrusted observation, never evidence of source corruption.
     result=dict(source_sha256=source_sha256,bundle_manifest_sha256=manifest_sha256,
                 process_reason=process.get('reason'),process_exit_code=process.get('exit_code'),
                 result_bytes=len(raw),result_sha256=hashlib.sha256(raw).hexdigest(),
                 acceptance_granted=False,scope='UNVERIFIED_WORKER_DIAGNOSTIC')
+    if isinstance(console_tail,bytes):result['console_tail_base64']=base64.b64encode(console_tail[-4096:]).decode('ascii')
     if len(raw)>4096:return result
     result['result_base64']=base64.b64encode(raw).decode('ascii')
     def unique(pairs):
@@ -49,6 +50,21 @@ def _failure_diagnostic(raw,source_sha256,manifest_sha256,process):
             result['guest_failure']=value
     except (ValueError,UnicodeError,RecursionError):pass
     return result
+
+def _verified_console_tail(stage,process):
+    observed=process.get('outputs',{}).get('out/serial.log')
+    if not isinstance(observed,dict):return None
+    total=0;tail=b'';digest=hashlib.sha256()
+    try:
+        with (stage/'out/serial.log').open('rb') as stream:
+            while chunk:=stream.read(65536):
+                total+=len(chunk)
+                if total>MAX_SERIAL_BYTES:return None
+                digest.update(chunk);tail=(tail+chunk)[-4096:]
+    except OSError:return None
+    if observed!=dict(bytes=total,sha256=digest.hexdigest()):return None
+    return tail
+
 
 def _cancel(stop):
     if stop.is_set():raise OfficeRenderError('OFFICE_CANCELLED')
@@ -112,7 +128,7 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
             if observed!=dict(bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest()):raise OfficeRenderError('OFFICE_RESULT_CHANGED')
             try:pdf,lineage=decode_render_result(raw,expected_sha256)
             except ValueError as exc:
-                raise OfficeRenderError('OFFICE_RESULT_INVALID',_failure_diagnostic(raw,expected_sha256,manifest_sha256,process)) from exc
+                raise OfficeRenderError('OFFICE_RESULT_INVALID',_failure_diagnostic(raw,expected_sha256,manifest_sha256,process,_verified_console_tail(stage,process))) from exc
             if _source_hash(staged,stop)!=expected_sha256 or _source_hash(source,stop)!=expected_sha256:raise OfficeRenderError('OFFICE_SOURCE_CHANGED')
             verify_bundle(bundle_root,manifest_sha256,stop=stop)
             _cancel(stop)

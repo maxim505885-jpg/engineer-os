@@ -10,7 +10,7 @@ class OfficeRenderProcessTests(unittest.TestCase):
         self.engine=self.root/'qemu';self.engine.mkdir();self.image=self.root/'worker.qcow2';self.image.write_bytes(b'owned image');self.seed=self.root/'worker-seed.iso';self.seed.write_bytes(b'owned seed')
         self.bundle=dict(root=self.root,engine=self.engine,image=self.image,seed=self.seed,files={'worker.qcow2':hashlib.sha256(self.image.read_bytes()).hexdigest(),'worker-seed.iso':hashlib.sha256(self.seed.read_bytes()).hexdigest()},manifest_sha256='a'*64,guest_worker_sha256='b'*64)
         self.pdf=b'%PDF-1.7\nowned fixture\n%%EOF\n'
-    def invoke(self,effect=None,raw_override=None):
+    def invoke(self,effect=None,raw_override=None,console=None):
         def execute(command,engine,stage,**options):
             self.assertEqual(options['timeout_seconds'],450)
             self.assertIn('-nic',command);self.assertEqual(command[command.index('-nic')+1],'none');self.assertNotIn('-virtfs',command)
@@ -19,7 +19,11 @@ class OfficeRenderProcessTests(unittest.TestCase):
             if raw_override is not None:raw=raw_override
             target=stage/'out/results.log';target.write_bytes(raw)
             if effect:effect(target)
-            return dict(reason='EXITED',exit_code=0,outputs={'out/results.log':{'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}})
+            outputs={'out/results.log':{'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}}
+            if console is not None:
+                (stage/'out/serial.log').write_bytes(console)
+                outputs['out/serial.log']=dict(bytes=len(console),sha256=hashlib.sha256(console).hexdigest())
+            return dict(reason='EXITED',exit_code=0,outputs=outputs)
         with patch('engineering.local_app.office_render_process.verify_bundle',return_value=self.bundle),patch('engineering.local_app.office_render_process.run_contained',side_effect=execute):
             return render_office(self.source,self.sha,'.docx',bundle_root=self.root,manifest_sha256='a'*64,stop=self.stop)
     def test_guest_failure_retains_bounded_unverified_diagnostic(self):
@@ -40,6 +44,16 @@ class OfficeRenderProcessTests(unittest.TestCase):
         with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
         self.assertEqual(base64.b64decode(caught.exception.diagnostic['result_base64']),raw)
         self.assertNotIn('guest_failure',caught.exception.diagnostic)
+    def test_failure_retains_only_bounded_verified_console_tail(self):
+        console=b'x'*5000+b'ENGINEER_OFFICE_STAGE INPUT_READ_BEGIN\n'
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=b'failure',console=console)
+        self.assertEqual(base64.b64decode(caught.exception.diagnostic['console_tail_base64']),console[-4096:])
+    def test_changed_console_is_not_retained_as_process_observation(self):
+        from engineering.local_app.office_render_process import _verified_console_tail
+        stage=self.root/'changed-console';(stage/'out').mkdir(parents=True)
+        (stage/'out/serial.log').write_bytes(b'changed')
+        process=dict(outputs={'out/serial.log':dict(bytes=7,sha256='a'*64)})
+        self.assertIsNone(_verified_console_tail(stage,process))
     def test_large_invalid_stream_is_hashed_without_copying_into_diagnostic(self):
         raw=b'x'*4097
         with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)

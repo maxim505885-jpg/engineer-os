@@ -127,18 +127,38 @@ def _bounded_read(path, maximum):
     if len(data) > maximum: raise GuestInputError("Firmware input size limit")
     return data
 
+def phase(name):
+    # Separate diagnostic console: never contaminate the PDF wire protocol.
+    if name not in {'REQUEST_READ_BEGIN','REQUEST_READ_COMPLETE','INPUT_READ_BEGIN','INPUT_READ_COMPLETE','RENDER_BEGIN','RENDER_COMPLETE','RESULT_EMITTED'}:return
+    if sys.platform!='linux':return
+    try:
+        descriptor=os.open('/dev/ttyS0',os.O_WRONLY|os.O_NOCTTY|os.O_NOFOLLOW|os.O_NONBLOCK)
+        try:
+            if stat.S_ISCHR(os.fstat(descriptor).st_mode):
+                os.write(descriptor,('ENGINEER_OFFICE_STAGE '+name+'\n').encode('ascii'))
+        finally:os.close(descriptor)
+    except OSError:pass
+
+
 def main():
     try:
         firmware = Path("/sys/firmware/qemu_fw_cfg/by_name/opt/eos")
+        phase('REQUEST_READ_BEGIN')
         request = parse_request(_bounded_read(firmware / "request/raw", 4096))
+        phase('REQUEST_READ_COMPLETE')
+        phase('INPUT_READ_BEGIN')
         data = _bounded_read(firmware / "input/raw", MAX_SOURCE)
+        phase('INPUT_READ_COMPLETE')
+        phase('RENDER_BEGIN')
         pdf, log = render(data, request)
+        phase('RENDER_COMPLETE')
         print("ENGINEER_INPUT_SHA256 " + request["source_sha256"], flush=True)
         print("ENGINEER_OFFICE_RESULT " + json.dumps(dict(code=0, log=log), ensure_ascii=True), flush=True)
         print("ENGINEER_PDF_SHA256 " + hashlib.sha256(pdf).hexdigest(), flush=True)
         print("ENGINEER_PDF_BEGIN", flush=True)
         print(base64.b64encode(pdf).decode("ascii"), flush=True)
         print("ENGINEER_PDF_END", flush=True)
+        phase('RESULT_EMITTED')
         return 0
     except Exception as exc:
         print("ENGINEER_OFFICE_RESULT " + json.dumps(dict(code=1, error=type(exc).__name__, detail=str(exc)[:1024]), ensure_ascii=True), flush=True)

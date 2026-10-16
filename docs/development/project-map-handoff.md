@@ -1,3 +1,21 @@
+# Current live phase-qualified report run,16.10.2026
+
+Exec18074 LIVE:retry_failed_office_phases_v3.py,job9f9a9f77-f7c5-4595-b859-336f22b62f52.
+Separatebundle v3 pin dbb24df1532d8e87951a656dab47ba26339fcbb8aaead028de9d1f681c434109.
+Receipt when terminal:private office-failure-retry-phases-v3.json. Phase events
+before/after firmware input read,render and output on separate ttyS0;invalid
+result retains verified4096byte console tail as base64. Read tail on failure to
+identify delay phase;do not restart/raise limits blindly.53focused tests PASS,
+independent review no actionable issues. Guest source changed:oldv1/v2 manifests
+correctly fail current guest-code identity;only private qualification store
+configuredv3. Main local app pin must be updated only after v3 qualification.
+Original v1/v2 bundles retained for reproducibility. No original document changes.
+
+Style warning delivered and committed722b53d(native parser+UI+browser proof).
+Native370cells/40OMML/62objects requalified with warning parser. Original-case
+render still needs a qualified solution for duplicate style names;variant alone
+is not production completeness. Point2 and remaining application goal active.
+
 # Current state — Office warning delivered, report phase diagnosis next
 
 All live handles in preceding entries now terminal:28926 FAILED at controller300s;
