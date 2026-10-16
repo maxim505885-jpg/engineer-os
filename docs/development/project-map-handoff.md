@@ -1,3 +1,13 @@
+# New exclusive source set — 16.10.2026
+
+Latest user direction: use only `C:\Users\maxim\Desktop\тззззззз` engineering
+materials to close outstanding points. [Current source policy](current-engineering-sources.md).
+Read-only census52files/106072451bytes;SHA256 registry private. DWG/PDF/Word/XLSX/
+RTF/SPR and SCAD auxiliary files present,noIFC. Contents/model correctness and
+controlling revisions not yet verified. Older source-based results below are
+historical and must not be carried over as closure evidence for this set.
+SPU integration/code are retained;no development restart. Point2 deferral unchanged.
+
 # SPU UI and desktop connected to ENGINEER OS — 16.10.2026
 
 User requested reusing only supplied interface/application, then explicitly attaching
