@@ -1,3 +1,21 @@
+# Controlled image recovery checkpoint — 2026-10-16
+
+Read [floating-table/context diagnosis](../qa/2026-10-16-floating-table-render-diagnosis.md).
+A minimal image/section control preserves all three assignment sheets; adding the
+original empty floating table hides the third. Removing it from the source prefix
+restores all three. In the complete imported document, a separately declared
+paragraph split plus removal of one floating-position property restores all three
+on pages 7–9. Exact reverse-XML and all-other-package-part checks pass; all three
+pages were visually inspected. This is a private diagnostic derivative, not a
+qualified production transformation. Frame geometry/rotation and header numbering
+remain wrong; native 4/5/6 versus cached literals 17/17/17. Source field/header
+assignment remains unverified. An explicit PAGE-field control renders native-matching
+4/5/6 on pages 7–9, proving field evaluation works once supplied; reconstruction
+provenance and frame rotation remain unqualified. Originals 52/52 unchanged. No acceptance or stage
+closure. Published `9619941` CI is all green after one scoped Windows retry; first
+attempt had an early 0xC0000142, cause not proven. Next: field provenance and native
+layout/image fidelity, then remaining T01–T13/V01 and release requirements.
+
 # Verified follow-up checkpoint — 2026-10-16
 
 Hosted CI on `4adaa0a` is all green, including Windows and browser tests; see
