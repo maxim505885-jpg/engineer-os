@@ -8,7 +8,19 @@ const root=path.resolve(__dirname,'..');
   child=spawn(process.env.PYTHON||'python3',['scripts/run_local_app.py','--no-browser','--port','0','--data-dir',temp],{cwd:root,env:{...process.env,PYTHONUTF8:'1'}});
   const origin=await new Promise((resolve,reject)=>{let text='';const timer=setTimeout(()=>reject(Error('Startup timeout')),15000);child.stdout.on('data',data=>{text+=data;const found=text.match(/ENGINEER OS: (http:\/\/127\.0\.0\.1:\d+)/);if(found){clearTimeout(timer);resolve(found[1]);}});child.on('exit',code=>{clearTimeout(timer);reject(Error('Server exited '+code));});});
   browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1366,height:950}});const errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.goto(origin);await page.waitForFunction(()=>!document.querySelector('#prompt').disabled);
+  // Hold bootstrap to exercise the same startup race seen on a fast CI browser.
+  let releaseBootstrap;const bootstrapGate=new Promise(resolve=>releaseBootstrap=resolve);
+  const bootstrapRequested=page.waitForRequest(request=>new URL(request.url()).pathname==='/api/sessions'&&request.method()==='GET');
+  const bootstrapRoute=async route=>{if(route.request().method()==='GET')await bootstrapGate;await route.continue();};
+  await page.route('**/api/sessions',bootstrapRoute);await page.goto(origin);await bootstrapRequested;
+  assert.equal(await page.evaluate(()=>current),null,'Bootstrap fixture must hold the current conversation unset');
+  let readyResolved=false;
+  const ready=page.waitForFunction(()=>typeof current==='string'&&current.length>0&&!document.querySelector('#prompt').disabled).then(()=>{readyResolved=true;});
+  try{
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert.equal(readyResolved,false,'Catalog setup must wait for the current conversation, not only an enabled prompt');
+  }finally{releaseBootstrap();}
+  await ready;await page.unroute('**/api/sessions',bootstrapRoute);
   const ids=await page.evaluate(async()=>{
     async function upload(name,text){return api(`/api/sessions/${current}/files?name=${encodeURIComponent(name)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:new TextEncoder().encode(text).buffer});}
     const norm=await upload('norm.txt','TEST 2026 clause1 Limit 2.5\nm');await upload('norm.txt','Other edition with same name');const actual=await upload('actual.txt','Height 2500 mm');

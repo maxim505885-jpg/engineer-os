@@ -80,7 +80,27 @@ Next: continue controlled reduction with captured failure diagnostics; keep T03/
 BLOCK. Investigate the locally installed SCAD API for current SPR/SAV/SEC using
 only documented, read-only routes. Do not run a solver or claim SCAD support from
 installation/header presence. Preserve all T01–T13/V01 and release requirements.
+## Follow-up — 2026-10-16
+
 # Current continuation checkpoint — 2026-10-16
+
+Latest working head began at `cb53dfec`. The normative-catalog browser smoke test
+had a setup race: it waited for an enabled prompt, which is true before session
+bootstrap, then sent a file request with a null session. The test now holds the
+bootstrap response and asserts that catalog setup remains pending until the
+conversation ID exists. The old predicate failed under that deterministic gate;
+the corrected predicate passed. All five local engineering browser flows pass;
+the final focused normative-catalog rerun passes. Hosted CI for this follow-up is
+pending.
+
+Office source-field provenance has been traced for the three assignment pages
+from source PAGE field records through textbox/shape/header anchors to the
+corresponding imported section headers. This is limited to those three fields.
+A reduced vertical-text control failed visually in LibreOffice, so no frame-text
+rewrite is qualified. See [bounded Office diagnosis](../qa/2026-10-16-floating-table-render-diagnosis.md).
+The full T03/T04 qualification remains BLOCK; no renderer promotion, acceptance,
+FINAL_AUDIT, merge or release is claimed. The source corpus remains the controlling
+52-file set.
 
 Read [current-corpus qualification](../qa/2026-10-16-current-corpus-render-qualification.md)
 before historical entries below. Baseline `cac54476` matched open draft PR #155

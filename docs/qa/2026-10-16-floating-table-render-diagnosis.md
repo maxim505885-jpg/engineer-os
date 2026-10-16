@@ -55,10 +55,30 @@ used as page-presence proof: the private raster census was recalculated with
 actual drawn-image xrefs; its totals remain 29 exact RGB matches, 51 requiring
 review and two WMF parts excluded. Nonmatches do not by themselves prove loss.
 
+## Bounded source-field provenance and text-flow control
+
+A passive, bounded parse of the source binary now follows the three relevant
+numeric PAGE fields through their field PLCs, textbox records, OfficeArt shape
+IDs and header anchors to the three imported section-header parts. Their cached
+values correspond to the native page labels 4/5/6, and each imported header part
+contains the matching numeric text twice (choice and fallback). This resolves
+the earlier uncertainty for these three fields only. It is not a general DOC
+parser or a complete format/layout qualification. The parse followed the public
+MS-DOC definitions for [field PLCs](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-doc/751b09bb-72f0-45ef-8e87-666dea68219f),
+[header textbox mappings](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-doc/efaa9508-5dcb-4bcb-8468-87939ea34181),
+and [OfficeArt text-flow properties](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-odraw/8234eb61-3963-40ee-a025-a80cc7c4f628).
+
+A separate minimal rendering control translated the three source bottom-to-top
+text labels from rotated wide boxes into narrow boxes with vertical text flow,
+preserving each axis-aligned box boundary. LibreOffice stacked the characters
+vertically and did not reproduce the readable native labels. This is a negative
+control, not a candidate repair. The full-report frame rotation problem remains
+open; no generic rotation or vertical-text rewrite is qualified.
+
 The combined derivative is explicitly unverified. Remaining work includes native
 page correspondence, all complex cells/critical numeric content, frame geometry,
-field provenance/numbering and image/vector fidelity. No automatic normalization,
-renderer promotion, engineering acceptance or FINAL_AUDIT follows.
+numbering and image/vector fidelity. No automatic normalization, renderer
+promotion, engineering acceptance or FINAL_AUDIT follows.
 
 ## Verification and CI
 
