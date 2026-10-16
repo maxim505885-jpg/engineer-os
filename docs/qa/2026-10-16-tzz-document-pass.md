@@ -208,3 +208,34 @@ source qualification gates are unchanged;point2 remains OPEN.
 Related Office suite38tests/12.234s/OK after guest-worker integration. Architecture
 and repository guards PASS. Full1312-test success above predates this change;
 no claim that the new worker has already passed a new full-suite run.
+
+## Windows contained-process runtime
+
+Added runtime/windows_contained_process.py:trusted caller command preflight,
+exe-under-runtime and disjoint staging,link/path/limit checks,unique AppContainer
+profile with zero capabilities,temporary ACL grants,minimal environment,owned
+suspended process assigned to2GiB-process/3GiB-job/4-process JobObject before
+token check/resume. Monitors cancellation,deadline and selected output bytes.
+It is a process primitive;caller must separately qualify immutable runtime and
+constrain every command/image/IO option. No document-facing API enabled yet.
+
+TDD4 preflight tests PASS. Independent review identified asynchronous descendant
+termination race;2 additional RED cases then bounded zero-ActiveProcesses wait
+fix. Cleanup/readback fails closed if termination cannot be confirmed. Reviewer
+confirmed fix,no remaining important findings;6 focused tests PASS. Build-identity
+10 tests PASS,architecture guard PASS.
+
+Real product-host controls after fix:normal own boot exit33,timeout exit124 at
+1.109s,cancel exit124 at0.549s. Owned output flood rejected OUTPUT_LIMIT at
+13,515 observed bytes with1,024byte polling threshold. This is a monitored
+threshold,not a kernel disk quota;output can overshoot between polls.
+
+Full synthetic chain using new Windows primitive+guest worker+host decoder
+repeated after fix:AppContainer1/capabilities0,noNIC,exit0,no timeout,64.852s.
+Runtime files/image hashes checked before launch;source/build-image unchanged;
+returned1page21,976byte PDF matches required heading/table/2500mm text and hash.
+Private product-chain-latest.json binds host/guest code and result provenance.
+
+Remaining:configured document host adapter with immutable bundle/seed identity,
+per-job source staging and output/cancellation integration into existing app;
+active-content,package/font and real-source qualification. Point2 still OPEN.
