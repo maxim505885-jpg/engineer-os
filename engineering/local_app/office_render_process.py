@@ -3,6 +3,7 @@
 Results remain unverified. This adapter neither accepts document contents nor
 silently falls back to host Office or a network service.
 """
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -28,6 +29,7 @@ def _failure_diagnostic(raw,source_sha256,manifest_sha256,process):
                 result_bytes=len(raw),result_sha256=hashlib.sha256(raw).hexdigest(),
                 acceptance_granted=False,scope='UNVERIFIED_WORKER_DIAGNOSTIC')
     if len(raw)>4096:return result
+    result['result_base64']=base64.b64encode(raw).decode('ascii')
     def unique(pairs):
         obj={}
         for key,value in pairs:

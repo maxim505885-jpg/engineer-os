@@ -325,3 +325,11 @@ The Office adapter now preserves a bounded, untrusted guest failure observation 
 
 
 Corpus batch terminal:7/8 sources rendered;all source hashes unchanged. Last DOCX14derived pages vs16Wordreference pages,not acceptance. Failure diagnostic retry live(session7115). Review found malformed Unicode could prevent persistence;strict UTF-8 validation added with RED/GREEN adapter test and queue terminal-state regression. Reviewer confirmed fix,no remaining issue in that specific fix.40 focused tests passed.
+
+
+The report retry completed FAILED:host worker EXITED0,100-byte result rejected by success protocol;diagnostic retained source/bundle identities and result SHA256716744aefb969ad6e98ccde7aae602cfa37588832c6c977107820452d7a6b728,but no parseable strict failure object. Root cause remains unknown. Added exact base64 retention for failure streams no larger than4096bytes to permit framing diagnosis without storing large PDF streams.
+
+Visual comparison of final calculation DOCX page confirmed conclusion text present on derived page14 vsWordpage16. Original default paragraph style is Times New Roman14pt;derived final-body span is LiberationSerif10pt. This is a proven font-size/layout discrepancy,not proof of content equivalence. Experimental copy explicitly assigns the existing default paragraph style to296previously implicit paragraphs,original unchanged;render control running(session46098). No product normalization enabled.
+
+
+Explicit-default-style control terminal:14pages,LiberationSerif10pt unchanged;hypothesis did not resolve mismatch. Do not enable normalization. Exact-byte failure retention is bounded4096bytes/5464base64characters;larger failures retain size/hash only.42focused tests passed;independent review found no actionable issue. Report retry with exact-byte retention running(exec27110,job337d6d83-3485-4ba8-942e-c90f2cff1930).

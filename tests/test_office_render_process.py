@@ -33,6 +33,18 @@ class OfficeRenderProcessTests(unittest.TestCase):
         raw=b'ENGINEER_OFFICE_RESULT {"code":1,"code":0,"detail":"fake"}\n'
         with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
         self.assertNotIn('guest_failure',caught.exception.diagnostic)
+    def test_small_unparsed_failure_keeps_exact_bounded_bytes(self):
+        import base64
+        raw=b'unknown diagnostic\r\n'
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
+        self.assertEqual(base64.b64decode(caught.exception.diagnostic['result_base64']),raw)
+        self.assertNotIn('guest_failure',caught.exception.diagnostic)
+    def test_large_invalid_stream_is_hashed_without_copying_into_diagnostic(self):
+        raw=b'x'*4097
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
+        self.assertNotIn('result_base64',caught.exception.diagnostic)
+        self.assertEqual(caught.exception.diagnostic['result_bytes'],4097)
+        self.assertEqual(caught.exception.diagnostic['result_sha256'],hashlib.sha256(raw).hexdigest())
     def test_surrogate_failure_text_is_not_retained(self):
         raw=b'ENGINEER_OFFICE_RESULT {"code":1,"error":"GuestInputError","detail":"\\ud800"}\n'
         with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)

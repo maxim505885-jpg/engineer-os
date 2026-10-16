@@ -1,3 +1,34 @@
+# Current state — failed style hypothesis and diagnostic retry,16.10.2026
+
+Style control session46098 is terminal SUCCESSFUL_CONVERSION only:14pages,
+LiberationSerif10pt unchanged. Explicit default pStyle did NOT fix the discrepancy.
+No normalization is enabled. Source/bundle/variant/output hashes are retained in
+private style-inheritance-render.json;do not conflate variant with original.
+
+Current live exec27110 is retry_failed_office.py,job337d6d83-3485-4ba8-942e-c90f2cff1930.
+This run includes exact short failure-stream base64 retention;await the same
+handle before another launch. Earlier retry receipt may be overwritten only by
+completed current result;jobs remain durable in the Store. Guest/bundle unchanged.
+42focused tests PASS;reviewer found no issue in bounded raw retention. Large
+streams retain only hashes/size. Point2 still open;continue diagnostic analysis
+and qualified content/layout checks,then full remaining application criteria.
+
+# Current live control — style inheritance,16.10.2026
+
+Report retry session7115 is terminal FAILED;100-byte worker result was rejected.
+Private office-failure-retry.json has source/bundle/result hashes and EXITED0
+worker status,but no parsed guest failure. Cause is still UNKNOWN. Short invalid
+streams now retain exact bounded base64 (<=4096bytes),22focused tests passed;
+this latest diagnostic extension is uncommitted. Retry report after current
+control completes;do not modify guest hash/bundle while control is running.
+
+Current live exec session46098:run_style_inheritance_control.py. Experimental
+DOCX copy explicitly names original default paragraph style;296implicit paragraphs.
+Original source unchanged. Baseline final body uses LiberationSerif10pt despite
+source default Times New Roman14pt;Word16pages,derived14pages. Final conclusion
+text visually present;whole-document equivalence still unproven. Control result
+will be private style-inheritance-render.json. No production source rewriting.
+
 # Current continuation — corpus render and failure diagnostics,16.10.2026
 
 Real Office corpus batch is terminal:7/8 unique sources rendered, originals unchanged.
