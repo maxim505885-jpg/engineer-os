@@ -1,3 +1,19 @@
+# Current state — Office warning delivered, report phase diagnosis next
+
+All live handles in preceding entries now terminal:28926 FAILED at controller300s;
+21440 Office suite PASS64;browser native extraction/style-warning/PDF-copy fixture PASS.
+No real converter process currently live. Report diagnostic private
+.office-failure-retry-controller-v2.json under tzz-stage2 (filename without leading dot).
+Actual source input is16,372,736bytes valid OLE signature. Delay phase UNKNOWN;
+next add bounded phase events before/after fw_cfg read,conversion,andoutput,
+then capture them on failure. Do not raise limits blindly or label source corrupt.
+
+Uncommitted style warning changes:office.py,UI app.js,new unit tests,e2e fixture.
+Native payload requalification after parser change:370cells/40OMML/62objects match.
+No original normalization. Style-name collision control restored16pages/14pt but
+production conversion still baseline until a fully qualified derivative policy.
+Full objective and remaining release/engineering criteria remain active.
+
 # Current live report retry v2 and confirmed style-name effect,16.10.2026
 
 Exec28926 live:retry_failed_office_controller_v2.py,job161dae82-1213-41d1-bc78-9e63b0251f0d.
