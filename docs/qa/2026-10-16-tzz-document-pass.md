@@ -131,3 +131,24 @@ resource-limit checks,repeat/restart/cleanup qualification,runtime/package/font
 manifest,integration tests and real-source layout/critical-object qualification.
 The earlier runuser/combined-terminal attempt has no verified PDF receipt and
 is not counted PASS. Point2 remains OPEN. Full UTF8 suite still pending.
+
+## Firmware input,boundary controls and full regression
+
+Full suite repeated with consistent PYTHONUTF8=1/PYTHONIOENCODING=utf-8:
+1312 tests,408.971s,OK,34 skipped. Initial four encoding failures retained;
+no product behavior was changed to mask failures. Log:full-suite-utf8-20261016.log.
+
+Actual QEMU AppContainer controls:staged owned file load+boot succeeds(expected
+exit33);unstaged owned file load fails(Permission denied,exit1);connection to
+own live local TCP listener fails(exit1),while normal listener control connects.
+These representative checks do not prove every possible network/file channel.
+
+Owned DOCX transferred by read-only guest fw_cfg(no shared host folders),guest
+input SHA256 matched host expected hash before Office invocation. One-page PDF
+returned,hash verified and required text/table/2500mm preserved. Exit0,no timeout,
+68.798s;AppContainer1/capabilities0,no virtual NIC. Staged source SHA unchanged.
+Private evidence:linux-worker-spike/fwcfg-boundary-verification.json and receipts.
+
+Remaining:bounded production protocol,active-content/limits/cancellation tests,
+immutable runtime/package/font manifest,existing-app integration,source-specific
+render qualification. Synthetic success is not real-document engineering PASS.
