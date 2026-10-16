@@ -1,3 +1,32 @@
+# Current continuation checkpoint — 2026-10-16
+
+Read [current-corpus qualification](../qa/2026-10-16-current-corpus-render-qualification.md)
+before historical entries below. Baseline `cac54476` matched open draft PR #155
+through GitHub REST. All 52 registered sources are unchanged, with no added or
+missing files. The current set has five distinct DWGs and no LIR, IFC or DXF.
+Historical two-DWG/geodesy/nine-LIR evidence cannot qualify this source set.
+
+All 65 reference / 68 derived report pages received overview comparison and page
+correspondence. Two title-line spills and one text reflow explain the three added
+pages. A native/reference identical RGB assignment raster is absent from the
+derivative page; the existing source-bound gate returns BLOCK for that object.
+Frame/footer defects were also observed. Full critical-object/native-layout
+qualification remains incomplete. Retain DERIVED_UNVERIFIED, no acceptance and
+FINAL_AUDIT NOT_RUN. Private receipts: `.engineer-os/tzz-stage2/page-correspondence-v4/`.
+No production configuration or original source was changed. Only anonymized QA is
+published. Fresh regression checks: CAD 17 tests OK; Office/documents 56 tests OK.
+
+The five current DWGs received ODA probes in zero-capability AppContainers. All
+processes exited 0, but all DXFs stop inside BLOCKS at the same INSERT with no EOF.
+The production CAD gate rejects all five by CAD_SOURCE_SIZE_LIMIT. Original and
+staged source hashes and all 56 copied runtime files remained unchanged. A repeat
+observed zero active Job processes before cleanup. Root cause remains UNKNOWN;
+no source equivalence or roundtrip qualification is claimed.
+
+Next: controlled reproducer for the omitted native raster, diagnosis of the current
+DWG export failure and SPR/SAV/RTF/XLSX investigation. Preserve T01–T13/V01 and
+R01–R12 as separate requirements. Release and engineering acceptance remain open.
+Earlier LIVE entries below are historical and do not describe running processes.
 # Current live phase-qualified report run,16.10.2026
 
 Exec18074 LIVE:retry_failed_office_phases_v3.py,job9f9a9f77-f7c5-4595-b859-336f22b62f52.

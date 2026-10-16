@@ -86,3 +86,25 @@ supplied PDF and native source; qualify or explicitly block this renderer for th
 source class; then proceed with the remaining corpus and T06/T07/T08/T09/V01
 checks. Do not change the production renderer configuration or claim stage 2
 closed based on the successful conversion alone.
+
+### Current-source correction and qualification checkpoint, 2026-10-16
+
+See `docs/qa/2026-10-16-current-corpus-render-qualification.md` before executing
+historical corpus instructions. Fresh registered source preservation is 52/52,
+with no added/missing files. This set has five distinct DWGs, SPR/SAV/SEC and SCAD
+companion files, but no LIR, IFC or DXF. Earlier geodesy/two-DWG/nine-LIR receipts
+are not evidence for this set. Do not remove historical requirements or substitute
+other source folders; record missing-input boundaries explicitly.
+
+Office report qualification is BLOCK: all pages received overview comparison and
+page correspondence, but a native/reference identical assignment raster is absent
+from the derivative. The +3 pages are two title-line spills and one text reflow.
+Full critical-object/native-layout qualification remains incomplete. Existing gate
+returns BLOCK for the missing source-bound object. Do not promote v4 as qualified.
+
+All five current DWGs received private bounded ODA probes: zero-capability
+AppContainer, memory/time/output limits, preserved originals. Every exit0 export
+is incomplete inside BLOCKS with no EOF; production CAD gate blocks their size.
+No roundtrip or source fidelity acceptance. Root causes remain unresolved.
+T01–T13/V01, the eight directions, 19 criteria and R01–R12 retain their separate
+requirements. No complete work-package, real acceptance or release claim follows.
