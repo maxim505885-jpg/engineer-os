@@ -18,9 +18,34 @@ class OfficeGuestTests(unittest.TestCase):
     def test_input_read_failure_records_last_reached_phase(self):
         from runtime.office_guest import main
         phases=[]
-        with patch('runtime.office_guest.phase',side_effect=phases.append),patch('runtime.office_guest._bounded_read',side_effect=[self.request(),GuestInputError('owned read failure')]),contextlib.redirect_stdout(io.StringIO()):
+        with patch('runtime.office_guest.phase',side_effect=phases.append),patch('runtime.office_guest._bounded_read',return_value=self.request()),patch('runtime.office_guest.read_input_disk',side_effect=GuestInputError('owned read failure')),contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(main(),1)
         self.assertEqual(phases,['REQUEST_READ_BEGIN','REQUEST_READ_COMPLETE','INPUT_READ_BEGIN'])
+    def test_input_device_must_be_block_device(self):
+        import os
+        from runtime.office_guest import read_input_disk
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'owned';path.write_bytes(b'not a block device')
+            descriptor=os.open(path,os.O_RDONLY)
+            with patch('runtime.office_guest.os.open',return_value=descriptor),self.assertRaises(GuestInputError):
+                read_input_disk('a'*64)
+            with self.assertRaises(OSError):os.fstat(descriptor)
+
+    def test_input_disk_reads_only_fixed_block_device_and_checks_source_hash(self):
+        import os
+        from runtime.office_guest import read_input_disk
+        from runtime.office_input import HEADER_SIZE, MAGIC
+        payload=b'PK\x03\x04owned docx'
+        digest=hashlib.sha256(payload).hexdigest()
+        header=MAGIC+len(payload).to_bytes(8,'big')+bytes.fromhex(digest)
+        raw=header+bytes(HEADER_SIZE-len(header))+payload+bytes((-len(payload))%512)
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'disk';path.write_bytes(raw)
+            descriptor=os.open(path,os.O_RDONLY)
+            with patch('runtime.office_guest.os.open',return_value=descriptor) as opener,patch('runtime.office_guest.stat.S_ISBLK',return_value=True):
+                self.assertEqual(read_input_disk(digest),payload)
+            opener.assert_called_once_with('/dev/vdb',os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0)|getattr(os,'O_CLOEXEC',0))
+            with self.assertRaises(OSError):os.fstat(descriptor)
     def test_only_exact_request_contract(self):
         self.assertEqual(parse_request(self.request())["suffix"], ".docx")
         for value in [self.request(extra=True), self.request(schema=True),self.request(suffix=".exe"),self.request(suffix="../source.docx"),self.request(source_sha256="A"*64),b'{"schema":1,"schema":1}',b"x"*4097]:

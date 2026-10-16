@@ -13,6 +13,10 @@ class OfficeRenderProcessTests(unittest.TestCase):
     def invoke(self,effect=None,raw_override=None,console=None):
         def execute(command,engine,stage,**options):
             self.assertEqual(options['timeout_seconds'],450)
+            from runtime.office_input import read_input_stream
+            with (stage/'input.raw').open('rb') as stream:self.assertEqual(read_input_stream(stream,self.sha),self.source.read_bytes())
+            self.assertTrue(any('input.raw' in arg and 'readonly=on' in arg for arg in command))
+            self.assertFalse(any(arg.startswith('name=opt/eos/input,') for arg in command))
             self.assertIn('-nic',command);self.assertEqual(command[command.index('-nic')+1],'none');self.assertNotIn('-virtfs',command)
             self.assertEqual(json.loads((stage/'request.json').read_text())['source_sha256'],self.sha)
             raw=('ENGINEER_INPUT_SHA256 '+self.sha+'\nENGINEER_OFFICE_RESULT {"code":0}\nENGINEER_PDF_SHA256 '+hashlib.sha256(self.pdf).hexdigest()+'\nENGINEER_PDF_BEGIN\n'+base64.b64encode(self.pdf).decode()+'\nENGINEER_PDF_END\n').encode()
@@ -45,9 +49,10 @@ class OfficeRenderProcessTests(unittest.TestCase):
         self.assertEqual(base64.b64decode(caught.exception.diagnostic['result_base64']),raw)
         self.assertNotIn('guest_failure',caught.exception.diagnostic)
     def test_failure_retains_only_bounded_verified_console_tail(self):
-        console=b'x'*5000+b'ENGINEER_OFFICE_STAGE INPUT_READ_BEGIN\n'
+        console=b'ENGINEER_OFFICE_STAGE INPUT_READ_BEGIN\n'+b'x'*5000
         with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=b'failure',console=console)
         self.assertEqual(base64.b64decode(caught.exception.diagnostic['console_tail_base64']),console[-4096:])
+        self.assertEqual(caught.exception.diagnostic['guest_phases'],['INPUT_READ_BEGIN'])
     def test_changed_console_is_not_retained_as_process_observation(self):
         from engineering.local_app.office_render_process import _verified_console_tail
         stage=self.root/'changed-console';(stage/'out').mkdir(parents=True)

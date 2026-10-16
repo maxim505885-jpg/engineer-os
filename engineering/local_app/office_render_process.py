@@ -11,6 +11,7 @@ import re
 import tempfile
 import threading
 from runtime.office_bundle import verify_bundle,BundleError
+from runtime.office_input import write_input_disk
 from runtime.windows_contained_process import run_contained,ContainmentError
 from engineering.document_intelligence.office_render_protocol import decode_render_result,MAX_SERIAL_BYTES
 
@@ -22,13 +23,14 @@ class OfficeRenderError(ValueError):
         self.diagnostic=diagnostic or {}
 
 
-def _failure_diagnostic(raw,source_sha256,manifest_sha256,process,console_tail=None):
+def _failure_diagnostic(raw,source_sha256,manifest_sha256,process,console_tail=None,console_phases=None):
     # Guest text is an untrusted observation, never evidence of source corruption.
     result=dict(source_sha256=source_sha256,bundle_manifest_sha256=manifest_sha256,
                 process_reason=process.get('reason'),process_exit_code=process.get('exit_code'),
                 result_bytes=len(raw),result_sha256=hashlib.sha256(raw).hexdigest(),
                 acceptance_granted=False,scope='UNVERIFIED_WORKER_DIAGNOSTIC')
     if isinstance(console_tail,bytes):result['console_tail_base64']=base64.b64encode(console_tail[-4096:]).decode('ascii')
+    if isinstance(console_phases,list) and console_phases:result['guest_phases']=console_phases[:7]
     if len(raw)>4096:return result
     result['result_base64']=base64.b64encode(raw).decode('ascii')
     def unique(pairs):
@@ -51,19 +53,32 @@ def _failure_diagnostic(raw,source_sha256,manifest_sha256,process,console_tail=N
     except (ValueError,UnicodeError,RecursionError):pass
     return result
 
-def _verified_console_tail(stage,process):
+_GUEST_PHASES={'REQUEST_READ_BEGIN','REQUEST_READ_COMPLETE','INPUT_READ_BEGIN','INPUT_READ_COMPLETE','RENDER_BEGIN','RENDER_COMPLETE','RESULT_EMITTED'}
+
+def _verified_console_observations(stage,process):
     observed=process.get('outputs',{}).get('out/serial.log')
-    if not isinstance(observed,dict):return None
-    total=0;tail=b'';digest=hashlib.sha256()
+    if not isinstance(observed,dict):return None,None
+    total=0;tail=b'';digest=hashlib.sha256();phases=[];at_line_start=True
     try:
         with (stage/'out/serial.log').open('rb') as stream:
-            while chunk:=stream.read(65536):
+            while chunk:=stream.readline(257):
                 total+=len(chunk)
-                if total>MAX_SERIAL_BYTES:return None
+                if total>MAX_SERIAL_BYTES:return None,None
                 digest.update(chunk);tail=(tail+chunk)[-4096:]
-    except OSError:return None
-    if observed!=dict(bytes=total,sha256=digest.hexdigest()):return None
-    return tail
+                complete=chunk.endswith(b'\n')
+                if at_line_start and complete and len(chunk)<=128:
+                    match=re.fullmatch(rb'(?:[^\r\n]*?)ENGINEER_OFFICE_STAGE ([A-Z_]+)\r?\n',chunk)
+                    if match:
+                        try:name=match.group(1).decode('ascii')
+                        except UnicodeError:name=''
+                        if name in _GUEST_PHASES and len(phases)<7:phases.append(name)
+                at_line_start=complete
+    except OSError:return None,None
+    if observed!=dict(bytes=total,sha256=digest.hexdigest()):return None,None
+    return tail,phases
+
+def _verified_console_tail(stage,process):
+    return _verified_console_observations(stage,process)[0]
 
 
 def _cancel(stop):
@@ -107,6 +122,8 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
             stage=Path(temp).resolve();(stage/'out').mkdir()
             staged=stage/('source'+suffix)
             _copy_checked(source,staged,expected_sha256,MAX_SOURCE,stop)
+            input_disk=stage/'input.raw'
+            write_input_disk(staged,input_disk,expected_sha256,stop=stop)
             image=stage/'worker.qcow2';seed=stage/'seed.iso'
             _copy_checked(bundle['image'],image,bundle['files']['worker.qcow2'],2*1024**3,stop)
             _copy_checked(bundle['seed'],seed,bundle['files']['worker-seed.iso'],2*1024**3,stop)
@@ -117,7 +134,7 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
                      '-serial','file:'+str(stage/'out/serial.log'),'-serial','file:'+str(stage/'out/results.log'),
                      '-nic','none','-no-reboot','-drive','file='+_file_option(image)+',format=qcow2,if=virtio',
                      '-drive','file='+_file_option(seed)+',format=raw,media=cdrom,readonly=on',
-                     '-fw_cfg','name=opt/eos/input,file='+str(staged).replace(',',',,'),
+                     '-drive','file='+_file_option(input_disk)+',format=raw,if=virtio,readonly=on',
                      '-fw_cfg','name=opt/eos/request,file='+str(request).replace(',',',,')]
             process=run_contained(command,engine,stage,stop=stop,timeout_seconds=450,output_limit=MAX_SERIAL_BYTES)
             _cancel(stop)
@@ -128,7 +145,8 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
             if observed!=dict(bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest()):raise OfficeRenderError('OFFICE_RESULT_CHANGED')
             try:pdf,lineage=decode_render_result(raw,expected_sha256)
             except ValueError as exc:
-                raise OfficeRenderError('OFFICE_RESULT_INVALID',_failure_diagnostic(raw,expected_sha256,manifest_sha256,process,_verified_console_tail(stage,process))) from exc
+                tail,phases=_verified_console_observations(stage,process)
+                raise OfficeRenderError('OFFICE_RESULT_INVALID',_failure_diagnostic(raw,expected_sha256,manifest_sha256,process,tail,phases)) from exc
             if _source_hash(staged,stop)!=expected_sha256 or _source_hash(source,stop)!=expected_sha256:raise OfficeRenderError('OFFICE_SOURCE_CHANGED')
             verify_bundle(bundle_root,manifest_sha256,stop=stop)
             _cancel(stop)

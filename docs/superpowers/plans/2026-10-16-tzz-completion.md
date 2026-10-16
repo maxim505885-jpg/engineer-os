@@ -46,3 +46,43 @@ work;continue unaffected packages and do not fabricate a release or engineering 
 - Then:package/font inventory and active-content controls;connect derived PDF
   source view to existing application with unverified lineage;test actual new
   corpus,revisions and critical objects against Word/PDF reference evidence.
+
+
+### Large Office input transport and result
+
+The v3 receipt `office-failure-retry-phases-v3.json` records the 16,372,736-byte
+report failing after 300 seconds in the guest controller; the earlier live phase
+trace had `INPUT_READ_BEGIN` but no `INPUT_READ_COMPLETE`. This did not establish
+document corruption. The suspected fw_cfg performance problem is consistent with
+the Linux reader implementation, which reselects the blob and skips preceding
+bytes for each read; this is a diagnosis, not a claim about the exact guest kernel
+build.
+
+The host now builds a fixed-format raw input disk from the checked staged source:
+512-byte header, bounded length, expected SHA-256, exact source bytes and zero
+sector padding. QEMU attaches it read-only as a second virtio disk, with no
+filesystem or host-directory sharing. The guest opens only `/dev/vdb`, requires a
+block device, validates the complete header/padding and SHA-256, then applies the
+existing source-format validation before conversion. The small request remains in
+fw_cfg. Focused transport/guest/host/queue suite and adjacent Office protocol/bundle
+suite: 48 tests PASS. Private v4 bundle
+manifest: `00887e47f7bf8715fc9a8128de0f35ad8966bb2d2bfd0411d89aeb519e28e86b`;
+v1–v3 bundles remain preserved.
+
+Actual source `Отчет/Ростов ТрансКонтейнер.doc` from the controlling folder rendered
+successfully through the v4 guest in 143.614 seconds. Source SHA-256
+`5a599aa80e5de542892a085072d02e890de83f65d36ab700af44aad03324c805` remained
+unchanged. Derived PDF SHA-256 `7356320f82d1569c81b783dedbc20973b5971b05eb9bfe6af01673f503773604`,
+8,831,496 bytes, 68 pages; process exited 0. This establishes conversion-path
+functionality for this file only. The matching supplied PDF in the same source
+folder is SHA-256 `19f294e9468ea759e8835fa4bae3c109da756f398b03a951e6993329a9cba09f`
+and has 65 pages. Direct page-index normalized-text comparison is low, with mean
+similarity 0.3026; it is not a fidelity qualification. PDF structure, page/layout,
+font, formula, table and image equivalence remain UNVERIFIED; the result remains
+`DERIVED_UNVERIFIED` / `UNCERTAINTY`, not evidence or engineering acceptance.
+
+Next: investigate page correspondence and visual/object differences against the
+supplied PDF and native source; qualify or explicitly block this renderer for the
+source class; then proceed with the remaining corpus and T06/T07/T08/T09/V01
+checks. Do not change the production renderer configuration or claim stage 2
+closed based on the successful conversion alone.

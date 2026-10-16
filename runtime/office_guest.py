@@ -1,7 +1,8 @@
 """Linux guest Office worker; outer host containment is a separate requirement.
 
 Never expose this as a host converter. The trusted guest controller starts it as
-root, without a virtual NIC, and supplies only fw_cfg request/input files.
+root, without a virtual NIC, and supplies a tiny fw_cfg request plus a read-only
+virtio input disk. No host filesystem is shared with the guest.
 """
 import base64
 import hashlib
@@ -14,6 +15,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+from runtime.office_input import read_input_stream, OfficeInputError
 
 MAX_SOURCE = 64 * 1024 * 1024
 MAX_PDF = 32 * 1024 * 1024
@@ -127,6 +129,27 @@ def _bounded_read(path, maximum):
     if len(data) > maximum: raise GuestInputError("Firmware input size limit")
     return data
 
+def read_input_disk(expected_sha256):
+    """Read only the fixed, hashed payload from QEMU's second virtio disk."""
+    descriptor = None
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+        flags |= getattr(os, "O_CLOEXEC", 0)
+        descriptor = os.open("/dev/vdb", flags)
+        if not stat.S_ISBLK(os.fstat(descriptor).st_mode):
+            raise GuestInputError("Input device is not a block device")
+        stream = os.fdopen(descriptor, "rb")
+        descriptor = None  # fdopen now owns and closes it
+        with stream:
+            return read_input_stream(stream, expected_sha256)
+    except OfficeInputError as exc:
+        raise GuestInputError(str(exc)) from exc
+    except OSError as exc:
+        raise GuestInputError("Input block device unavailable") from exc
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
 def phase(name):
     # Separate diagnostic console: never contaminate the PDF wire protocol.
     if name not in {'REQUEST_READ_BEGIN','REQUEST_READ_COMPLETE','INPUT_READ_BEGIN','INPUT_READ_COMPLETE','RENDER_BEGIN','RENDER_COMPLETE','RESULT_EMITTED'}:return
@@ -147,7 +170,7 @@ def main():
         request = parse_request(_bounded_read(firmware / "request/raw", 4096))
         phase('REQUEST_READ_COMPLETE')
         phase('INPUT_READ_BEGIN')
-        data = _bounded_read(firmware / "input/raw", MAX_SOURCE)
+        data = read_input_disk(request["source_sha256"])
         phase('INPUT_READ_COMPLETE')
         phase('RENDER_BEGIN')
         pdf, log = render(data, request)
