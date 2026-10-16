@@ -89,9 +89,9 @@ had a setup race: it waited for an enabled prompt, which is true before session
 bootstrap, then sent a file request with a null session. The test now holds the
 bootstrap response and asserts that catalog setup remains pending until the
 conversation ID exists. The old predicate failed under that deterministic gate;
-the corrected predicate passed. All five local engineering browser flows pass;
-the final focused normative-catalog rerun passes. Hosted CI for this follow-up is
-pending.
+the corrected predicate passed. All five local engineering browser flows pass.
+Exact-head CI for `1bcb8ac` passed Core, Windows runtime, Optional adapters on
+Ubuntu and Windows, Security, and CodeQL.
 
 Office source-field provenance has been traced for the three assignment pages
 from source PAGE field records through textbox/shape/header anchors to the

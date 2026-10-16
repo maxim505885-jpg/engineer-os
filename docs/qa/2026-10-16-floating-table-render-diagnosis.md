@@ -90,3 +90,10 @@ post-job executables also failed. A scoped rerun of the same unchanged job passe
 (attempt 2, job 116944543626, run 38891981986). No workflow relaxation or product
 change was made. That successful retry does not prove a cause for the first host
 failure. New documentation commits require their own CI observation.
+
+The follow-up test-only bootstrap fix and these bounded QA updates were committed
+as `1bcb8ac64ead9f7ed9eb0f887ef99cea2746304b`. On that exact head, Core, Windows
+runtime, Optional adapters (Ubuntu and Windows), Security, and CodeQL all passed.
+The five local engineering browser flows also passed. This validates the tested
+software checks only; it does not change the Office-derived report's
+DERIVED_UNVERIFIED status or close T03/T04.
