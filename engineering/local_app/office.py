@@ -1,6 +1,7 @@
 """Bounded OOXML text candidates, never layout/evidence or formula evaluation."""
 import io
 import copy
+import unicodedata
 import hashlib
 import json
 import posixpath
@@ -82,6 +83,8 @@ def word_text(element):
 def word_limits(element):
     limits=[];tags={e.tag.rsplit('}',1)[-1] for e in element.iter()}
     if 'sym' in tags:limits.append('SYMBOL_NOT_DECODED')
+    if any(unicodedata.category(char)=='Co' for node in element.iter() if node.tag in {W+'t',M+'t'} for char in (node.text or '')):
+        limits.append('PRIVATE_USE_GLYPH_UNVERIFIED')
     for group,reason in [(('drawing','pict'),'DRAWING_NOT_READ'),(('oMath','oMathPara'),'EQUATION_NOT_READ'),
                          (('ins','del','moveFrom','moveTo'),'TRACKED_CHANGES_UNVERIFIED'),(('instrText','fldSimple','fldChar'),'FIELD_NOT_EVALUATED')]:
         if tags.intersection(group):limits.append(reason)

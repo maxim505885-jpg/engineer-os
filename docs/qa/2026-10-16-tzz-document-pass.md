@@ -288,3 +288,32 @@ source-bound comparison. This is not a full content PASS.
 
 Full post-integration Python suite started with consistent UTF8;completion
 remains pending in full-suite-render-integrated.log.
+
+## Real-source cell comparison and literal private-use signs
+
+Full post-render integration regression:1343tests/390.637s/OK,34skipped.
+This run predates the small private-use-warning addition described below.
+
+Same-source page2 reviewed ROI excludes outer stamp/frame;three tables found
+with7x8,4x8,14x3 declared PDF grids. Compared116 logical Word-reference cells
+by table/row/column,retaining merged-cell slots rather than global text search.
+113 literal text MATCH;3UNRESOLVED:one diagram cell(Word text slash vs noPDF
+text),private-use sign label,and label containing private-use code plus subscript
+layout. All checked numeric cells match without numeric repair. Receipt records
+source/PDF/Word-reference hashes,table bboxes and everycell. Normalization removes
+Word cell terminator and collapses whitespace runs only;no guessed symbols.
+Evidence:page2-table-comparison.json. Not whole-document/table acceptance.
+
+XML investigation binds side-stamp labels to header1.xml wps:bodyPr vert270.
+Specific code points F061/F067/F020 occur literally in w:t;no explicit run-font
+or paragraph-style reference at those runs(inherited font not resolved here).
+They must not be silently read as standard Greek letters. Office reader now
+retains bytes/text and adds PRIVATE_USE_GLYPH_UNVERIFIED for Unicode categoryCo,
+including supplementary planes.2TDD tests RED->GREEN;relatedOffice51tests/
+13.460s/OK. Independent review:no important findings. Actual source units now
+flagged,source SHA unchanged;private-use-glyph-source-check.json.
+
+Broader real Office batch running sequentially in existing queue. Legacy report
+DOC conversion failed while original remained unchanged;precise cause is not
+proven by generic Worker error. It is not called corrupt or unsupported merely
+from failure. Remaining batch continues;do not restart its live process.
