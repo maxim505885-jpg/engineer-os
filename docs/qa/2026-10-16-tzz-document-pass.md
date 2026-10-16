@@ -114,3 +114,20 @@ CP1251 decoding in subprocess.run(text=True). Setting PYTHONUTF8=1 consistently
 for parent/child made the complete affected10-test module PASS. No product
 change was made for this runner mismatch. Full UTF8 regression is running and
 not yet counted successful. Preserve both initial failure and repeat logs.
+
+## Contained offline Office control result
+
+Direct Python UID/GID65534 drop replaced PAM-based runuser;result serial channel
+separated from guest login terminal. One owned DOCX converted successfully to
+one-page PDF:required heading,table labels and2500mm text present. Returned PDF
+SHA256 matches guest output. QEMU exit0,no timeout,74.938s;AppContainer token1,
+capabilities0,virtual NIC absent;guest interfaces list contains only loopback.
+Build image SHA512 unchanged. No user engineering documents were processed.
+Private evidence:linux-worker-spike/offline-office-control-verification.json.
+
+This proves this synthetic offline conversion only. Remaining before production:
+source-bound input/output protocol,host file/network canaries,active-content and
+resource-limit checks,repeat/restart/cleanup qualification,runtime/package/font
+manifest,integration tests and real-source layout/critical-object qualification.
+The earlier runuser/combined-terminal attempt has no verified PDF receipt and
+is not counted PASS. Point2 remains OPEN. Full UTF8 suite still pending.
