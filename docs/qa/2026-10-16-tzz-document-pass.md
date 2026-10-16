@@ -61,3 +61,20 @@ are committed. Remaining:production controlled Office route,complete layout/crit
 object/font and cross-version qualification,source-bound task extraction/review.
 Point2 remains OPEN until its criteria pass. Continue independent application work;
 no unsupported100%/engineering acceptance/FINAL_AUDIT claim.
+
+## Offline Linux feasibility control
+
+Approval execution recovered. Verified private pycdlib1.22.0 wheel by SHA256;
+created and read back NoCloud control seed ISO. Official Debian13 cloud image
+booted using QEMU11.1.0 TCG inside Windows AppContainer (verified token1,
+capabilities0),no virtual NIC,no monitor,no user engineering inputs.
+Guest serial emitted the owned control marker and powered off normally;
+QEMU exit0,no timeout,177.48s. Original downloaded image SHA512 unchanged.
+Private receipts:linux-worker-spike/linux-boot-verification.json and referenced run.
+
+Ruling: investigate an outer Windows AppContainer around software-emulated Linux
+rather than enabling firmware virtualization;TCG itself is not the security
+boundary. This feasibility control does not qualify Office conversion,host
+file/network denial,active-content behavior,fonts,performance or release.
+Next:software-only guest provisioning,then owned document/boundary controls
+before any production integration or engineering-source conversion. Point2 OPEN.
