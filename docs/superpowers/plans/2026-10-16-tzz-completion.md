@@ -33,3 +33,16 @@ private reports and personal identifiers must not be committed. Written QA and
 reproducible application changes belong in Git. Original SPU and main user checkout
 are preserved. A named environment limitation is not an excuse to stop independent
 work;continue unaffected packages and do not fabricate a release or engineering PASS.
+
+### Controlled-render implementation continuation
+
+- Completed:offline owned DOCX feasibility,fw_cfg source identity,representative
+  host file/network controls,owned timeout cleanup,host output decoder with RED/
+  GREEN and independent review. These are partial gates,not closure ofT03/T04.
+- Next:place reusable Windows process/ACL/JobObject mechanics in existing runtime
+  bridge,not engineering methodology. Minimal configured command/image allowlist,
+  immutable runtime manifest,per-job staging/read-only inputs,noNIC/nohostshares,
+  bounded serial output and cancellation. No old experimental DLL dependency.
+- Then:package/font inventory and active-content controls;connect derived PDF
+  source view to existing application with unverified lineage;test actual new
+  corpus,revisions and critical objects against Word/PDF reference evidence.

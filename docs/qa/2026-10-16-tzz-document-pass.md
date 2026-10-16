@@ -152,3 +152,30 @@ Private evidence:linux-worker-spike/fwcfg-boundary-verification.json and receipt
 Remaining:bounded production protocol,active-content/limits/cancellation tests,
 immutable runtime/package/font manifest,existing-app integration,source-specific
 render qualification. Synthetic success is not real-document engineering PASS.
+
+## Host renderer-result protocol
+
+Added engineering/document_intelligence/office_render_protocol.py:bounded
+six-line unwrapped-base64 result decoding,source/output SHA256 checks,strict
+framing and duplicate JSON rejection,failed exit-result and PDF size/signature
+rejection. Returned receipt explicitly DERIVED_UNVERIFIED,acceptance false and
+PDF structure NOT_VALIDATED;no security assertion inferred from guest metadata.
+Caller still must verify actual process exit,isolation/runtime and source state.
+
+TDD:missing module RED,8 tests GREEN. Independent review found newline memory
+amplification;new1MB newline-flood regression measured9.4MB peak RED. Early
+separator cap and exact6-line framing fixed it;9tests GREEN,peak<128KiB.
+Related qualification20/source-assets6 tests PASS;architecture guard PASS.
+Final decoder also matches actual owned fw_cfg control PDF bytes.
+
+Owned infinite boot control hit1s deadline;JobObject terminated QEMU with exit124,
+profile cleanup HRESULT0,without touching user server/processes. Private receipt:
+linux-worker-spike/run-396f4373b5604c159800b6b0602ef31a/receipt.json.
+No production worker integration or real-document qualification claimed yet.
+
+Review follow-up:LF/CR cap alone missed VT/FF/FS separators interpreted by
+str.splitlines. All7 separator-flood variants were exercised;5 additional RED
+cases reproduced. Byte-header precheck and literal LF parsing with explicit CRLF
+handling remove that path. All9 tests PASS;independent reviewer confirmed fix
+and reran9 tests PASS,no remaining important findings. Actual fw_cfg output
+still decodes to the previously verified PDF.
