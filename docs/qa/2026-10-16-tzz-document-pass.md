@@ -276,3 +276,15 @@ source35d267506adfabc901b8a5a974880dc2bd1f95d218b111375c34aa6c3529799b,
 Original source SHA unchanged. Receipt:real-docx-render-receipt.json;PDF/file
 lineage in separate render-real-docx-qualification store. Page count is not
 content/layout/math qualification;those gates remain OPEN,as does point2.
+
+Initial same-source visual comparison:derived page2 and prior Word ProtectedView/
+GDI page2 inspected side by side. Tables,snow-profile drawing and visible numeric
+rows remain present. WARNING:side stamp text orientation/line layout differs
+(Word rotated side labels versus vertically wrapped labels in derivedPDF).
+Line spacing/table placement also differs;source symbol boxes were already
+visible in Word reference. Do not reconstruct them or claim pixel/font/symbol
+equivalence from this check. Remaining pages/critical objects still require
+source-bound comparison. This is not a full content PASS.
+
+Full post-integration Python suite started with consistent UTF8;completion
+remains pending in full-suite-render-integrated.log.

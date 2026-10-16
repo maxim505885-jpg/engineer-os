@@ -1,3 +1,16 @@
+# Latest:Office renderer connected to queue and file UI — 16.10.2026
+
+Pinned bundle+adapter now use existing ENGINEERING_RUN/Worker and Create PDF copy
+action. Default worktree local app configured;main user checkout/SPU unchanged.
+Owned full queue control PASS;first real new-corpus DOCX produced12pagePDF with
+original SHA preserved. Derived output is unverified and labeled as a copy.
+WARNING:first Word-vs-derived page comparison shows side-stamp text orientation/
+layout differences;do not claim exact fidelity. Point2 OPEN for real-corpus
+critical content/layout/symbol/font qualification,active-content/package gates.
+Full post-integration regression is pending;preserve its live handle/receipts.
+See [current QA](../qa/2026-10-16-tzz-document-pass.md) and
+[local renderer setup](office-renderer-local.md). No data/source-census restart.
+
 # Latest controlled-render progress — 16.10.2026
 
 Runtime guest worker and source-bound host decoder added;owned DOCX conversion
