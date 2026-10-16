@@ -141,6 +141,13 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
                     from .requirements import report
                     return self.respond(200,report(store,parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='normative-catalog' and post:
+                    from .normative_catalog import inspect_catalog
+                    body=self.json_body()
+                    if set(body)!={'catalog_file_id','source_file_ids'}:raise ValueError('Exact catalog selection fields required')
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another source inspection is busy; retry shortly')
+                    try:return self.respond(200,inspect_catalog(store,parts[2],**body))
+                    finally:self.server.preview_slots.release()
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='domain-packets':
                     from .domain_packets import save,report
                     if not post:return self.respond(200,report(store,parts[2]))

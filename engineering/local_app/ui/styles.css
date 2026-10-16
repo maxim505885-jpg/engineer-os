@@ -186,3 +186,5 @@ footer{color:var(--muted-2);font-size:10px;padding-top:16px}
 .pdf-viewer-canvas-wrap { max-height: 70vh; overflow: auto; background: #e6e9ed; padding: .5rem; }
 .pdf-viewer-canvas { display: block; margin: auto; }
 .pdf-viewer-status { min-height: 1.5em; }
+
+#normative-catalog{min-width:0;margin:1rem 0;padding:1rem;border:1px solid #9bbdac;border-radius:8px}#normative-catalog-detail{overflow-wrap:anywhere}#normative-catalog blockquote{white-space:pre-wrap;overflow-wrap:anywhere;margin:1rem 0}#normative-catalog label{display:block}

@@ -13,6 +13,15 @@ FINAL_AUDIT или разрешением выпуска. Работы веду�
 |5. Реальная приёмка, память, итог|Предварительные выводы сохранены; controlled production issuer→case→FINAL_AUDIT→memory проходит с сохранением PROJECT scope, source change/revocation снимают доверие|T10 положительный source-backed realcase; T11 FINAL DOCX/PDF. Тестовый эталон не принимается за обследованный объект|
 |6. Windows и выпуск|Schema3 migration recovery, backup/restore журнала проверок и engineering inputs проверены; пользовательский8765 оставлен работающим|T12 reboot/offline/update/rollback всей поставки; T13 exact-head CI/release gates/main/tag/дистрибутив. Релиз не объявлен|
 
+## Приоритеты после указания пользователя 16.10.2026
+
+Пункт 2 отложен пользователем, остаётся OPEN; повторно не ставить его текущей
+задачей. Продолжение остальных этапов: T06 интерфейс каталога → оставшиеся
+расчётные/CAD границы T07/T08/T09 → T10/T11 в доступной области → T12/T13.
+Зависимости реального инженерного ACCEPTED от отложенных проверок сохраняются.
+Текущий пакет T06: [обычный каталог](../development/normative-catalog.md);
+прежние строки ниже являются историей, а не новой проверкой.
+
 ## История проверок пакетов
 
 - 48 focused profile/OCR/tooling/startup tests: PASS.
