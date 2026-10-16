@@ -1,3 +1,16 @@
+# Active completion pass — new sources and resumed point2,16.10.2026
+
+Latest user explicitly requests closing point2 using only тззззззз,then all remaining
+readiness points. Earlier deferral is revoked. [Plan](../superpowers/plans/2026-10-16-tzz-completion.md).
+Private source register52files unchanged;new census204PDFpages,804DOCXlogicalunits.
+New Word Protected View reference run6uniqueDOC/DOCX/121pages;all were captured
+using separate owned instances/unique snapshot names after a multi-open failure.
+AppContainer GDI121PNG/0failures. Literal3DOCX cells365MATCH/5complexvisualreviews,
+0missing after correct grid-vs-ordinal mapping. These are scoped results,not point2
+completion or calculation/engineering acceptance. Continue critical visual review,
+source/PDF correspondence and production integration;do not restart census.
+Private artefacts:.engineer-os/tzz-stage2. Original data/source folder immutable.
+
 # New exclusive source set — 16.10.2026
 
 Latest user direction: use only `C:\Users\maxim\Desktop\тззззззз` engineering

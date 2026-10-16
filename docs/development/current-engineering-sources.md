@@ -24,5 +24,6 @@ Originals were not modified. Inventory is not semantic review or acceptance.
 Next: identify controlling technical assignment and report/model revisions from
 this root; compare native/PDF versions; evaluate actual calculation/model coverage;
 map available evidence to remaining closure criteria. Missing/unclear data remain
-UNCERTAINTY/BLOCK; never fill gaps from superseded folders. The earlier deferral of
-point2 is not automatically revoked by this source-folder change.
+UNCERTAINTY/BLOCK; never fill gaps from superseded folders. The latest user explicitly resumed point2 on this source set and then requested
+continuation through all remaining application-readiness points without stopping.
+Point2 is now the active priority; earlier deferral entries are historical.
