@@ -10,16 +10,34 @@ class OfficeRenderProcessTests(unittest.TestCase):
         self.engine=self.root/'qemu';self.engine.mkdir();self.image=self.root/'worker.qcow2';self.image.write_bytes(b'owned image');self.seed=self.root/'worker-seed.iso';self.seed.write_bytes(b'owned seed')
         self.bundle=dict(root=self.root,engine=self.engine,image=self.image,seed=self.seed,files={'worker.qcow2':hashlib.sha256(self.image.read_bytes()).hexdigest(),'worker-seed.iso':hashlib.sha256(self.seed.read_bytes()).hexdigest()},manifest_sha256='a'*64,guest_worker_sha256='b'*64)
         self.pdf=b'%PDF-1.7\nowned fixture\n%%EOF\n'
-    def invoke(self,effect=None):
+    def invoke(self,effect=None,raw_override=None):
         def execute(command,engine,stage,**options):
             self.assertIn('-nic',command);self.assertEqual(command[command.index('-nic')+1],'none');self.assertNotIn('-virtfs',command)
             self.assertEqual(json.loads((stage/'request.json').read_text())['source_sha256'],self.sha)
             raw=('ENGINEER_INPUT_SHA256 '+self.sha+'\nENGINEER_OFFICE_RESULT {"code":0}\nENGINEER_PDF_SHA256 '+hashlib.sha256(self.pdf).hexdigest()+'\nENGINEER_PDF_BEGIN\n'+base64.b64encode(self.pdf).decode()+'\nENGINEER_PDF_END\n').encode()
+            if raw_override is not None:raw=raw_override
             target=stage/'out/results.log';target.write_bytes(raw)
             if effect:effect(target)
             return dict(reason='EXITED',exit_code=0,outputs={'out/results.log':{'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}})
         with patch('engineering.local_app.office_render_process.verify_bundle',return_value=self.bundle),patch('engineering.local_app.office_render_process.run_contained',side_effect=execute):
             return render_office(self.source,self.sha,'.docx',bundle_root=self.root,manifest_sha256='a'*64,stop=self.stop)
+    def test_guest_failure_retains_bounded_unverified_diagnostic(self):
+        raw=b'ENGINEER_OFFICE_RESULT {"code":1,"error":"GuestInputError","detail":"Office timeout"}\n'
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
+        diagnostic=caught.exception.diagnostic
+        self.assertEqual(diagnostic['guest_failure']['detail'],'Office timeout')
+        self.assertFalse(diagnostic['acceptance_granted'])
+        self.assertEqual(diagnostic['source_sha256'],self.sha)
+        self.assertEqual(diagnostic['result_sha256'],hashlib.sha256(raw).hexdigest())
+    def test_ambiguous_failure_is_not_interpreted(self):
+        raw=b'ENGINEER_OFFICE_RESULT {"code":1,"code":0,"detail":"fake"}\n'
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
+        self.assertNotIn('guest_failure',caught.exception.diagnostic)
+    def test_surrogate_failure_text_is_not_retained(self):
+        raw=b'ENGINEER_OFFICE_RESULT {"code":1,"error":"GuestInputError","detail":"\\ud800"}\n'
+        with self.assertRaises(OfficeRenderError) as caught:self.invoke(raw_override=raw)
+        self.assertNotIn('guest_failure',caught.exception.diagnostic)
+        json.dumps(caught.exception.diagnostic,ensure_ascii=False).encode('utf-8')
     def test_owned_source_staged_and_result_bound_without_acceptance(self):
         data,receipt=self.invoke();self.assertEqual(data,self.pdf);self.assertEqual(receipt['source_sha256'],self.sha);self.assertFalse(receipt['acceptance_granted']);self.assertEqual(hashlib.sha256(self.source.read_bytes()).hexdigest(),self.sha)
     def test_changed_original_rejected_after_worker(self):

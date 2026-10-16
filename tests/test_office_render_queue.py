@@ -21,6 +21,28 @@ class OfficeRenderQueueTests(unittest.TestCase):
         with patch('engineering.local_app.office_render_process.render_office',return_value=(pdf,lineage)) as renderer:Worker(self.store,None).run_once()
         snapshot=self.store.snapshot(self.sid);finished=next(x for x in snapshot['jobs'] if x['id']==job['id']);self.assertEqual(finished['state'],'SUCCEEDED');self.assertTrue(renderer.called)
         result=finished['result']['engineering_run']['result'];derived=self.store.get_file(result['derived_file_id']);self.assertEqual(derived['source_metadata']['kind'],'DERIVED_OFFICE_PDF');self.assertEqual(derived['source_metadata']['original_file_id'],self.file['id']);self.assertEqual(derived['sha256'],lineage['derived_sha256']);self.assertEqual(len(snapshot['files']),2);self.assertFalse(finished['result']['acceptance_granted']);self.assertEqual(snapshot['evidence'],[]);self.assertEqual(hashlib.sha256(Path(self.store.get_file(self.file['id'])['path']).read_bytes()).hexdigest(),self.file['sha256'])
+    def test_failed_conversion_retains_diagnostic_without_pdf_or_evidence(self):
+        from engineering.local_app.office_render_process import OfficeRenderError
+        self.configure();job=self.enqueue()
+        diagnostic=dict(scope='UNVERIFIED_WORKER_DIAGNOSTIC',acceptance_granted=False,guest_failure=dict(code=1,error='GuestInputError',detail='Office timeout'))
+        with patch('engineering.local_app.office_render_process.render_office',side_effect=OfficeRenderError('OFFICE_RESULT_INVALID',diagnostic)):
+            Worker(self.store,None).run_once()
+        snapshot=self.store.snapshot(self.sid);failed=next(x for x in snapshot['jobs'] if x['id']==job['id'])
+        self.assertEqual(failed['state'],'FAILED')
+        self.assertEqual(failed['result']['office_render_failure']['diagnostic'],diagnostic)
+        self.assertIn('engineering_run',failed['result'])
+        self.assertEqual(len(snapshot['files']),1);self.assertEqual(snapshot['evidence'],[])
+        self.assertFalse(failed['result']['acceptance_granted'])
+    def test_malformed_guest_unicode_still_reaches_failed_state(self):
+        from engineering.local_app.office_render_process import OfficeRenderError,_failure_diagnostic
+        self.configure();job=self.enqueue()
+        raw=b'ENGINEER_OFFICE_RESULT {"code":1,"error":"GuestInputError","detail":"\\ud800"}\n'
+        diagnostic=_failure_diagnostic(raw,self.file['sha256'],'a'*64,dict(reason='EXITED',exit_code=0))
+        with patch('engineering.local_app.office_render_process.render_office',side_effect=OfficeRenderError('OFFICE_RESULT_INVALID',diagnostic)):
+            self.assertTrue(Worker(self.store,None).run_once())
+        failed=next(x for x in self.store.snapshot(self.sid)['jobs'] if x['id']==job['id'])
+        self.assertEqual(failed['state'],'FAILED')
+        self.assertNotIn('guest_failure',failed['result']['office_render_failure']['diagnostic'])
     def test_cancelled_queue_does_not_invoke_converter(self):
         self.configure();job=self.enqueue();self.store.cancel(self.sid,job['id'])
         with patch('engineering.local_app.office_render_process.render_office') as renderer:Worker(self.store,None).run_once()

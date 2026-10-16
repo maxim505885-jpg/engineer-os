@@ -1,3 +1,21 @@
+# Current continuation — corpus render and failure diagnostics,16.10.2026
+
+Real Office corpus batch is terminal:7/8 unique sources rendered, originals unchanged.
+One report DOC failed without retained detail in the old worker. Its diagnostic
+retry is live in exec session7115,job f7541de7-2a92-40b3-8ab6-b84e411fb8d7;
+never restart based only on elapsed observation. Receipt:private
+.engineer-os/tzz-stage2/office-failure-retry.json when completed.
+Batch receipt:real-office-corpus-render.json. Last DOCX rendered14pages versus
+16Wordreference pages:content/layout equivalence remains unverified.
+
+Uncommitted product changes retain bounded untrusted failure JSON and hashes,
+preserve existing checkpoint,fail without PDF/Evidence. Strict UTF-8 validation
+rejects lone surrogates; independent review confirmed this correction.
+40 focused adapter/protocol/queue/engineering/architecture tests passed.
+Previous full suite1343passed/34skipped predates these changes;not rerun yet.
+Point2 remains OPEN for failed source,critical content/layout/symbol/font checks
+and active-content/package gates. Continue existing plan and preserve full scope.
+
 # Latest:Office renderer connected to queue and file UI — 16.10.2026
 
 Pinned bundle+adapter now use existing ENGINEERING_RUN/Worker and Create PDF copy

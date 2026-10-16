@@ -317,3 +317,11 @@ Broader real Office batch running sequentially in existing queue. Legacy report
 DOC conversion failed while original remained unchanged;precise cause is not
 proven by generic Worker error. It is not called corrupt or unsupported merely
 from failure. Remaining batch continues;do not restart its live process.
+
+
+### Failure diagnostics continuation
+
+The Office adapter now preserves a bounded, untrusted guest failure observation (strict single JSON record, duplicate keys rejected), source and bundle identities, output size/hash, and process outcome on invalid result frames. The queue retains this diagnostic alongside the existing request checkpoint and fails without creating a derived PDF or Evidence. This does not establish why the earlier report DOC failed: that run predates diagnostic retention. Regression: 19 Office adapter/protocol/queue tests passed, including failure persistence and ambiguous JSON rejection. The live corpus batch additionally converted the calculation DOC to 10 pages with source hash unchanged; the final DOCX remains in progress at this checkpoint.
+
+
+Corpus batch terminal:7/8 sources rendered;all source hashes unchanged. Last DOCX14derived pages vs16Wordreference pages,not acceptance. Failure diagnostic retry live(session7115). Review found malformed Unicode could prevent persistence;strict UTF-8 validation added with RED/GREEN adapter test and queue terminal-state regression. Reviewer confirmed fix,no remaining issue in that specific fix.40 focused tests passed.

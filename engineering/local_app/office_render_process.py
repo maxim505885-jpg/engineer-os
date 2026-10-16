@@ -15,7 +15,38 @@ from engineering.document_intelligence.office_render_protocol import decode_rend
 
 MAX_SOURCE=64*1024**2
 _slots=threading.BoundedSemaphore(1)
-class OfficeRenderError(ValueError):pass
+class OfficeRenderError(ValueError):
+    def __init__(self,message,diagnostic=None):
+        super().__init__(message)
+        self.diagnostic=diagnostic or {}
+
+
+def _failure_diagnostic(raw,source_sha256,manifest_sha256,process):
+    # Guest text is an untrusted observation, never evidence of source corruption.
+    result=dict(source_sha256=source_sha256,bundle_manifest_sha256=manifest_sha256,
+                process_reason=process.get('reason'),process_exit_code=process.get('exit_code'),
+                result_bytes=len(raw),result_sha256=hashlib.sha256(raw).hexdigest(),
+                acceptance_granted=False,scope='UNVERIFIED_WORKER_DIAGNOSTIC')
+    if len(raw)>4096:return result
+    def unique(pairs):
+        obj={}
+        for key,value in pairs:
+            if key in obj:raise ValueError('duplicate')
+            obj[key]=value
+        return obj
+    prefix=b'ENGINEER_OFFICE_RESULT '
+    line=raw.removesuffix(b'\n').removesuffix(b'\r')
+    if not line.startswith(prefix) or b'\n' in line or b'\r' in line:return result
+    try:
+        value=json.loads(line[len(prefix):].decode('ascii'),object_pairs_hook=unique)
+        if (isinstance(value,dict) and set(value)=={'code','error','detail'} and
+            type(value['code']) is int and value['code']==1 and
+            isinstance(value['error'],str) and len(value['error'])<=128 and
+            isinstance(value['detail'],str) and len(value['detail'])<=1024):
+            value['error'].encode('utf-8');value['detail'].encode('utf-8')
+            result['guest_failure']=value
+    except (ValueError,UnicodeError,RecursionError):pass
+    return result
 
 def _cancel(stop):
     if stop.is_set():raise OfficeRenderError('OFFICE_CANCELLED')
@@ -77,7 +108,9 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
             if len(raw)>MAX_SERIAL_BYTES:raise OfficeRenderError('OFFICE_OUTPUT_LIMIT')
             observed=process['outputs'].get('out/results.log')
             if observed!=dict(bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest()):raise OfficeRenderError('OFFICE_RESULT_CHANGED')
-            pdf,lineage=decode_render_result(raw,expected_sha256)
+            try:pdf,lineage=decode_render_result(raw,expected_sha256)
+            except ValueError as exc:
+                raise OfficeRenderError('OFFICE_RESULT_INVALID',_failure_diagnostic(raw,expected_sha256,manifest_sha256,process)) from exc
             if _source_hash(staged,stop)!=expected_sha256 or _source_hash(source,stop)!=expected_sha256:raise OfficeRenderError('OFFICE_SOURCE_CHANGED')
             verify_bundle(bundle_root,manifest_sha256,stop=stop)
             _cancel(stop)
