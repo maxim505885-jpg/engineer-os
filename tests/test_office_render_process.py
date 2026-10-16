@@ -12,6 +12,7 @@ class OfficeRenderProcessTests(unittest.TestCase):
         self.pdf=b'%PDF-1.7\nowned fixture\n%%EOF\n'
     def invoke(self,effect=None,raw_override=None):
         def execute(command,engine,stage,**options):
+            self.assertEqual(options['timeout_seconds'],450)
             self.assertIn('-nic',command);self.assertEqual(command[command.index('-nic')+1],'none');self.assertNotIn('-virtfs',command)
             self.assertEqual(json.loads((stage/'request.json').read_text())['source_sha256'],self.sha)
             raw=('ENGINEER_INPUT_SHA256 '+self.sha+'\nENGINEER_OFFICE_RESULT {"code":0}\nENGINEER_PDF_SHA256 '+hashlib.sha256(self.pdf).hexdigest()+'\nENGINEER_PDF_BEGIN\n'+base64.b64encode(self.pdf).decode()+'\nENGINEER_PDF_END\n').encode()

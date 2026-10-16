@@ -333,3 +333,8 @@ Visual comparison of final calculation DOCX page confirmed conclusion text prese
 
 
 Explicit-default-style control terminal:14pages,LiberationSerif10pt unchanged;hypothesis did not resolve mismatch. Do not enable normalization. Exact-byte failure retention is bounded4096bytes/5464base64characters;larger failures retain size/hash only.42focused tests passed;independent review found no actionable issue. Report retry with exact-byte retention running(exec27110,job337d6d83-3485-4ba8-942e-c90f2cff1930).
+
+
+Exact report failure decoded:ENGINEER_CONTROL_ERROR TimeoutExpired on python3 /opt/engineer-office-guest.py at approximately180seconds. This proves old outer-controller deadline expiry,not document corruption or a LibreOffice internal cause. Versioned dedicated-guest controller now allows300seconds and host450;Office150wall/90CPU unchanged. Controller failures structured and bounded;host guard prevents shutdown outside dedicated fw_cfg guest. Independent review no actionable issues. Separate v2 bundle pin14066e9fe0ee6ce7b43de4ac7d85301d57b1748150b14d471751b8355dfc00b3,originalv1 preserved. Actual report retry live exec28926/job161dae82-1213-41d1-bc78-9e63b0251f0d.
+
+Style collision control terminal:original contains default style a named Normal and custom style Normal0 also named Normal. Changing ONLY display name of Normal0 in separate copy produced16pages and final-body LiberationSerif14pt,versus baseline14pages/10pt. Variant SHA82730bf7f30fbf470fc8b649304b47f26514e9d361e550326bcb3bfbcd314f86;PDFSHA20c216df18b38cab8444a4c375d6e1321b191bed8b7a0fefe2ea6460c160406f. This supports a converter style-name collision effect;no automatic source transformation enabled and exact layout/math equivalence remains unqualified.

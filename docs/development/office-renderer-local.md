@@ -27,3 +27,11 @@ the host security boundary. Windows/AppContainer ACLs remain authoritative.
 This is the tested local development route,not a standalone release installer.
 Real document font/layout/formula/source equivalence must be reviewed separately.
 Current qualification evidence and open limits are in the new-corpus QA log.
+
+The current outer Windows launch ceiling is450seconds. The versioned guest
+controller runtime/office_guest_controller.py allows300seconds for worker startup,
+conversion and result emission,then bounded sync/poweroff. The Office subprocess
+retains its separate150second wall and90second CPU limits. Older seeds may still
+embed the historical180second controller;rebuild/repin the seed explicitly.
+Controller exceptions use bounded structured failure records. A controller
+nonzero exit does not turn guest output into accepted evidence.

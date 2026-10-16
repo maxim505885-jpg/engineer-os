@@ -1,3 +1,20 @@
+# Current live report retry v2 and confirmed style-name effect,16.10.2026
+
+Exec28926 live:retry_failed_office_controller_v2.py,job161dae82-1213-41d1-bc78-9e63b0251f0d.
+Report old exact failure:outer Python controller TimeoutExpired180s. Separatev2
+bundle embeds new runtime/office_guest_controller.py(300s);host450s;Office150wall/
+90CPU unchanged. Only private qualification Store configuredv2;main local app
+stillv1. v1 bundle preserved. Await same live handle;do not restart blindly.
+Private receipt office-failure-retry-controller-v2.json after completion.
+
+Style collision control95826 terminal:renaming ONLY custom Normal0 display name
+from Normal to EngineerOriginalNormal0 restores16pages/14pt(final body),baseline
+14pages/10pt. Default style a also named Normal. No production transformation
+implemented. Explicit pStyle control earlier failed. All original hashes unchanged.
+Controller/deadline changes independently reviewed,no actionable findings.
+Continue point2 full critical-object/layout/fonts/active-content qualification,
+then remaining application/release scope;no blanket acceptance from these controls.
+
 # Current state — failed style hypothesis and diagnostic retry,16.10.2026
 
 Style control session46098 is terminal SUCCESSFUL_CONVERSION only:14pages,

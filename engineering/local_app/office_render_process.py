@@ -103,7 +103,7 @@ def render_office(source,expected_sha256,suffix,*,bundle_root,manifest_sha256,st
                      '-drive','file='+_file_option(seed)+',format=raw,media=cdrom,readonly=on',
                      '-fw_cfg','name=opt/eos/input,file='+str(staged).replace(',',',,'),
                      '-fw_cfg','name=opt/eos/request,file='+str(request).replace(',',',,')]
-            process=run_contained(command,engine,stage,stop=stop,timeout_seconds=300,output_limit=MAX_SERIAL_BYTES)
+            process=run_contained(command,engine,stage,stop=stop,timeout_seconds=450,output_limit=MAX_SERIAL_BYTES)
             _cancel(stop)
             if process['reason']!='EXITED' or process['exit_code']!=0:raise OfficeRenderError('OFFICE_WORKER_'+process['reason'])
             with (stage/'out/results.log').open('rb') as stream:raw=stream.read(MAX_SERIAL_BYTES+1)
