@@ -1,3 +1,26 @@
+# Current working package — CAD hash bounds / Office controls, 2026-10-16
+
+Read [CAD bounds and Office controls](../qa/2026-10-16-cad-bounds-office-controls.md)
+and [current-corpus qualification](../qa/2026-10-16-current-corpus-render-qualification.md).
+Baseline is `d472dee` on the existing PR #155 branch. The new code bounds CAD hashes,
+retains BLOCK receipts for removed/growing originals, and prevents conversion PASS
+when the derivative changes after inventory. Four regressions were observed RED
+then GREEN. CAD scope: 48 tests OK. Full native suite: 1371 tests OK, 34 skipped,
+395.672 seconds. Architecture/repository/dependency checks passed. Independent
+scoped review found no actionable regressions; reviewer test execution was blocked
+by sandbox permissions. Existing converter process/log bounds remain a limitation.
+
+Office controls: all three source PNGs decode in a simple DOCX and survive DOC
+import with exact RGB identity. Full imported-DOCX render still omits one. A private
+paragraph-split variant restores the second raster but loses the third; a repeat
+preserving XML namespaces behaves the same. Neither is a qualified fix. A reduced
+styles/settings/section control failed the render protocol; cause is UNKNOWN.
+Production renderer/configuration and original source bytes are preserved.
+
+Next: continue controlled reduction with captured failure diagnostics; keep T03/T04
+BLOCK. Investigate the locally installed SCAD API for current SPR/SAV/SEC using
+only documented, read-only routes. Do not run a solver or claim SCAD support from
+installation/header presence. Preserve all T01–T13/V01 and release requirements.
 # Current continuation checkpoint — 2026-10-16
 
 Read [current-corpus qualification](../qa/2026-10-16-current-corpus-render-qualification.md)

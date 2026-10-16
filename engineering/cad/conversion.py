@@ -9,8 +9,25 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from .intake import inspect_cad
+from .intake import inspect_cad, MAX_BYTES
 from .dxf_workflow import inventory_dxf
+
+
+def _bounded_hash(path):
+    """Hash within the existing CAD byte budget and reject changing files."""
+    before=path.stat()
+    if not path.is_file() or not 0<before.st_size<=MAX_BYTES:
+        raise ValueError('CAD_FILE_SIZE_LIMIT')
+    digest=hashlib.sha256();total=0
+    with path.open('rb') as stream:
+        while chunk:=stream.read(min(1024**2,MAX_BYTES-total+1)):
+            total+=len(chunk)
+            if total>MAX_BYTES:raise ValueError('CAD_FILE_SIZE_LIMIT')
+            digest.update(chunk)
+    after=path.stat()
+    if total!=before.st_size or (before.st_size,before.st_mtime_ns,before.st_ino)!=(after.st_size,after.st_mtime_ns,after.st_ino):
+        raise ValueError('CAD_FILE_CHANGED')
+    return digest.hexdigest()
 
 
 def convert_dwg(source, destination, *, converter, source_sha256, timeout=120):
@@ -25,7 +42,7 @@ def convert_dwg(source, destination, *, converter, source_sha256, timeout=120):
     staged=destination/'input';output=destination/'output'
     staged.mkdir();output.mkdir()
     copy=staged/'source.dwg';shutil.copyfile(source,copy)
-    if hashlib.sha256(copy.read_bytes()).hexdigest()!=source_sha256:
+    if _bounded_hash(copy)!=source_sha256:
         raise ValueError('Staged source identity mismatch')
     command=[str(converter),str(staged),str(output),'ACAD2018','DXF','0','0',copy.name]
     report=dict(status='BLOCK',conversion_status='BLOCK',source_sha256=source_sha256,
@@ -51,24 +68,33 @@ def convert_dwg(source, destination, *, converter, source_sha256, timeout=120):
         if result.returncode!=0:entry('CONVERTER_NONZERO_EXIT','BLOCK',str(result.returncode))
         elif not derivative.is_file():entry('CONVERTER_OUTPUT_MISSING','BLOCK','No expected DXF')
         else:
-            report['output_sha256']=hashlib.sha256(derivative.read_bytes()).hexdigest()
-            try:report['inventory']=inventory_dxf(derivative,report['output_sha256'])
-            except ValueError as exc:report['inventory']=dict(status='BLOCK',reasons=[str(exc)])
-            with derivative.open('rb') as stream:
-                stream.seek(max(0,derivative.stat().st_size-256))
-                tail=[line.strip() for line in stream.read().splitlines()]
-            complete=tail[-2:]==[b'0',b'EOF']
-            if not complete:entry('CONVERTER_OUTPUT_INCOMPLETE','BLOCK','ASCII DXF terminal EOF record missing; file may be truncated')
-            if complete and report['inventory'].get('inventory_read_complete'):
-                report['conversion_status']='PASS'
-                for reason in report['inventory'].get('reasons',[]):entry(reason,'BLOCK','Derived DXF inventory limitation')
-            else:entry('CONVERTER_OUTPUT_UNREADABLE','BLOCK','Derived DXF inventory unavailable')
+            try:
+                report['output_sha256']=_bounded_hash(derivative)
+            except ValueError as exc:
+                report['inventory']=dict(status='BLOCK',reasons=[str(exc)])
+                entry('CONVERTER_OUTPUT_UNREADABLE','BLOCK','Derived DXF exceeds size limit or changed during hashing')
+            else:
+                try:report['inventory']=inventory_dxf(derivative,report['output_sha256'])
+                except ValueError as exc:report['inventory']=dict(status='BLOCK',reasons=[str(exc)])
+                with derivative.open('rb') as stream:
+                    stream.seek(max(0,derivative.stat().st_size-256))
+                    tail=[line.strip() for line in stream.read(256).splitlines()]
+                complete=tail[-2:]==[b'0',b'EOF']
+                if not complete:entry('CONVERTER_OUTPUT_INCOMPLETE','BLOCK','ASCII DXF terminal EOF record missing; file may be truncated')
+                try:unchanged=_bounded_hash(derivative)==report['output_sha256']
+                except (OSError,ValueError):unchanged=False
+                if not unchanged:entry('CONVERTER_OUTPUT_CHANGED','BLOCK','Derived DXF identity differs after inventory')
+                if complete and unchanged and report['inventory'].get('inventory_read_complete'):
+                    report['conversion_status']='PASS'
+                    for reason in report['inventory'].get('reasons',[]):entry(reason,'BLOCK','Derived DXF inventory limitation')
+                else:entry('CONVERTER_OUTPUT_UNREADABLE','BLOCK','Derived DXF inventory unavailable or changed')
     except subprocess.TimeoutExpired:
         entry('CONVERTER_TIMEOUT','BLOCK','Converter exceeded configured timeout')
     except OSError as exc:
         entry('CONVERTER_EXECUTION_FAILED','BLOCK',type(exc).__name__)
     finally:
-        report['source_unchanged']=hashlib.sha256(source.read_bytes()).hexdigest()==source_sha256
+        try:report['source_unchanged']=_bounded_hash(source)==source_sha256
+        except (OSError,ValueError):report['source_unchanged']=False
         if not report['source_unchanged']:
             report['conversion_status']='BLOCK';entry('SOURCE_CHANGED','BLOCK','Source identity differs after conversion')
         (destination/'conversion.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
