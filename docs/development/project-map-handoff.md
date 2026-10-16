@@ -1,3 +1,27 @@
+# Current follow-up — browser CI and private SCAD read route, 2026-10-16
+
+Read [browser CI and SCAD probe](../qa/2026-10-16-browser-ci-scad-api-probe.md).
+Published CAD correction: `8c3c95c`; local native suite 1371 OK, 34 skipped.
+Its Core/Windows CI reached browser checks and failed on an ambiguous project-title
+selector. Local RED reproduced it. Test-only correction uses desktop conversation
+navigation and mobile SPU project cards; it verifies the current SPU navigation
+route instead of the intentionally hidden old bar. All seven local Chromium
+workflows now pass. New exact-head hosted CI remains to be verified after push.
+
+Current three SPR files were read by the locally installed documented SCAD API
+inside zero-capability AppContainers after a private VC90 activation-context fix.
+Selected PROJECT geometry, connectivity, support/deletion masks, API units, force
+records, combinations and rigidity text were extracted privately with preserved
+originals and source/output hashes. Read/Create/Release codes are zero; geometry
+is stable across two reads. This is not production SCAD support or model/solver
+qualification. Units/UI, force codes, joints/releases/materials/actual structure
+and solver result packets remain unverified. No solver or native write was called.
+
+Exact Office reduced-fixture retry captured missing expected PDF at guest render,
+not a timeout or proof of source corruption. Original raster/layout qualification
+remains BLOCK. Keep all T01–T13/V01 and R01–R12 requirements open where unproven.
+Next: exact-head CI, then qualify SCAD unit/code semantics and excluded model data
+against local SDK/current sources, and continue renderer reduction. No merge/tag.
 # Current working package — CAD hash bounds / Office controls, 2026-10-16
 
 Read [CAD bounds and Office controls](../qa/2026-10-16-cad-bounds-office-controls.md)
