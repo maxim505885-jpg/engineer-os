@@ -1,3 +1,21 @@
+# SPU UI and desktop connected to ENGINEER OS — 16.10.2026
+
+User requested reusing only supplied interface/application, then explicitly attaching
+our core. [Integration QA](../qa/2026-10-16-spu-core-integration.md),
+[launcher](../../Open_ENGINEER_OS_SPU.cmd),[desktop instructions](../../desktop/README.md).
+Working implementation is on codex/v1-completion-20261015; main user checkout is not
+overwritten. Immutable17-file source import remains unchanged (SHA recheck PASS).
+
+Dashboard uses existing sessions/snapshots and forms; source SPU backend/database
+not imported. Supplied Electron window/tray/state launches owned verified ENGINEER
+OS backend on port0,with cancellation/exit cleanup and origin/main-frame IPC gates.
+Real Electron selftest and Chromium engineering scenarios PASS. Full Python suite
+1310tests/434.139s/34skipped/OK. Independent P1 startup leak fixed and reviewed.
+
+Local launcher uses installed supplied runtime; a new standalone installer/current
+runtime release qualification remains OPEN. This UI integration does not close
+engineering acceptance or deferred point2. Earlier entries below are history.
+
 # Продолжение пункта4 — CAD worker, 16.10.2026
 
 База d8e9ae5. [Пакет T08 и QA](../qa/2026-10-16-cad-worker-route.md):

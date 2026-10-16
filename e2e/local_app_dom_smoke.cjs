@@ -145,7 +145,7 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   }
   const normCandidate=await reviewedDomainSource('domain-norm.txt','TEST 2026 clause1 Limit 2.5 m');
   const actualCandidate=await reviewedDomainSource('domain-actual.txt','Height 2500 mm');
-  await until(()=>[...doc.querySelector('[name="norm-source"]').options].some(o=>o.value===normCandidate.id));
+  await until(()=>[...doc.querySelector('[name="norm-source"]').options].some(o=>o.value===normCandidate.id)&&[...doc.querySelector('[name="actual-source"]').options].some(o=>o.value===actualCandidate.id));
   const nf=doc.querySelector('#normative-packet-form');
   assert.ok(nf.querySelector('[name="reviewer"]'),'Dated substantive normative review must be available without JSON');
   const chain={document:'TEST',edition:'2026',scope:'Synthetic scope declaration',clause:'clause1',requirement:'Limit 2.5 m',actual_condition:'Height 2500 mm',comparison:'Compare synthetic quantities',conclusion:'Arithmetic matches, norm unverified'};
@@ -319,8 +319,8 @@ async function until(check){const end=Date.now()+10000;while(Date.now()<end){if(
   await until(()=>doc.querySelector('#title').textContent==='Новый диалог');
   assert.equal(doc.querySelector('#history-records').children.length,0,'Archive must not leak across projects');
   assert.equal(errors.length,0,errors.join('\n'));console.log(JSON.stringify({result:'PASS',dom_emulation:true,browser_visual_check:false,synthetic_model:true,real_ollama:false,checks:['launcher','background-worker','upload-action','source-context','chat','inert-markup','history-reload','session-switch','core-plan-no-model','core-plan-reload','evidence-register','inert-evidence','evidence-reload','evidence-draft-isolation','source-preview','preview-isolation','source-review','review-draft-poll','review-isolation','core-run-three-roles','core-run-inert-output','core-run-history-reload','drive-unconfigured','no-fabricated-import','file-extraction-coverage','pdf-page-coverage','automatic-pdf-analysis','advanced-document-actions','analysis-receipts'],requests:requests.length}));
- }finally{
-  closing=true;await closeDom();if(child){child.kill('SIGINT');await new Promise(resolve=>{if(child.exitCode!==null)return resolve();const t=setTimeout(()=>{child.kill('SIGKILL');resolve();},2500);child.once('exit',()=>{clearTimeout(t);resolve();});});}
+ }catch(e){console.error('DOM_DIAGNOSTIC',JSON.stringify({ui:dom?.window.document.querySelector('#error')?.textContent,errors,drive:dom?.window.document.querySelector('#drive-status')?.textContent,model:dom?.window.document.querySelector('#model-status')?.textContent,state:dom?.window.eval('({current,creating,pending,uploading,sessionRequest})')}));throw e;}finally{
+  closing=true;await closeDom();if(child)await require('../desktop/server-owner.cjs').stopChild(child);
   await new Promise(resolve=>model.close(resolve));fs.rmSync(temp,{recursive:true,force:true});
  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Платформа СПУ — запуск</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:
+      radial-gradient(760px 420px at 72% -10%, rgba(255,90,31,.16), transparent 62%),
+      radial-gradient(620px 360px at 4% 6%, rgba(120,120,255,.06), transparent 60%),
+      #0a0a0c;
+    color:#f4f4f6;
+    font:14px/1.6 Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
+    display:grid;place-items:center;-webkit-app-region:drag;user-select:none
+  }
+  .box{display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px;max-width:640px;text-align:center}
+  .mark{
+    width:64px;height:64px;border-radius:20px;display:grid;place-items:center;
+    background:linear-gradient(140deg,#ff8250,#ff5a1f);
+    box-shadow:0 22px 46px -20px rgba(255,90,31,.85)
+  }
+  .mark svg{width:34px;height:34px}
+  h1{font-size:19px;margin:0;letter-spacing:-.02em;font-weight:650}
+  .lbl{font:10px/1 'JetBrains Mono',Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#70707c}
+  .bar{position:relative;width:230px;height:3px;border-radius:99px;background:#1e1e25;overflow:hidden}
+  .bar::after{
+    content:"";position:absolute;inset:0;border-radius:99px;
+    background:linear-gradient(90deg,transparent,#ff5a1f,transparent);
+    animation:run 1.15s linear infinite
+  }
+  @keyframes run{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+  #status{
+    color:#a2a2ad;font-size:13px;line-height:1.6;max-width:74ch;margin:0;
+    white-space:pre-wrap;text-align:left
+  }
+  #status.bad{color:#ffb3b4;font-size:12px;font-family:'JetBrains Mono',Consolas,monospace;
+    max-height:44vh;overflow:auto;background:#0d0d10;border:1px solid #232329;border-radius:12px;padding:12px 14px;text-align:left}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round">
+        <path d="M6 20V13M12 20V6M18 20v-9"/>
+      </svg>
+    </div>
+    <div>
+      <div class="lbl">Платформа СПУ</div>
+      <h1>Рабочее место инженера-обследователя</h1>
+    </div>
+    <div class="bar" role="progressbar" aria-label="Запуск"></div>
+    <p id="status">Запускаю сервер платформы…</p>
+  </div>
+<script>
+  // главный процесс обновляет текст по ходу запуска
+  window.setStatus = function (text, bad) {
+    var el = document.getElementById('status');
+    if (!el || typeof text !== 'string') return;
+    el.textContent = text;
+    el.classList.toggle('bad', !!bad);
+  };
+</script>
+</body>
+</html>

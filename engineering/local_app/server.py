@@ -73,11 +73,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/cad-memory.js','/pdf-viewer.js','/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs','/styles.css','/recovery.html','/recovery.js'}:
-                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/pdf-viewer.js':'pdf-viewer.js','/vendor/pdfjs/pdf.mjs':'vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs':'vendor/pdfjs/pdf.worker.mjs','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
+                if not post and route in {'/','/app.js','/cad-memory.js','/pdf-viewer.js','/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs','/styles.css','/spu-shell.js','/spu-shell.css','/spu-bg-building.jpg','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/pdf-viewer.js':'pdf-viewer.js','/vendor/pdfjs/pdf.mjs':'vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs':'vendor/pdfjs/pdf.worker.mjs','/styles.css':'styles.css','/spu-shell.js':'spu-shell.js','/spu-shell.css':'spu-shell.css','/spu-bg-building.jpg':'spu-bg-building.jpg','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
                     if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
-                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
+                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'image/jpeg' if name.endswith('.jpg') else 'application/javascript; charset=utf-8'
                     return self.respond(200,data,ctype)
                 if route=='/api/data/status' and not post:
                     return self.respond(200,dict(root=str(self.server.data_root),recovery_only=recovery_only))

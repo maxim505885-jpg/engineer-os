@@ -41,6 +41,10 @@ def inventory(root):
             if p.is_file():
                 paths.append(p)
                 if len(paths)>MAX_FILES:raise ValueError('BUILD_FILE_COUNT_LIMIT')
+    # Only shipped desktop sources/assets; never descend into installed Electron/node_modules.
+    for relative in ('desktop/main.js','desktop/preload.js','desktop/server-owner.cjs','desktop/splash.html','desktop/splash.js','desktop/splash.css','desktop/package.json','desktop/build/icon.png','desktop/build/icon.ico','desktop/build/tray.png'):
+        p=root/relative
+        if p.is_file():paths.append(p)
     for p in root.iterdir():
         if p.is_file() and (p.suffix in {'.cmd','.py','.js','.html','.css'} or
                            p.name.startswith('requirements') or p.name in {'AGENTS.md','pyproject.toml'}):
