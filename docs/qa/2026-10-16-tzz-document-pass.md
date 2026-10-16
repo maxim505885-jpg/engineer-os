@@ -179,3 +179,32 @@ cases reproduced. Byte-header precheck and literal LF parsing with explicit CRLF
 handling remove that path. All9 tests PASS;independent reviewer confirmed fix
 and reran9 tests PASS,no remaining important findings. Actual fw_cfg output
 still decodes to the previously verified PDF.
+
+## Reusable guest worker in project runtime
+
+Added runtime/office_guest.py,with exact firmware request schema,64MiB source
+cap,SHA256/signature checks,loopback-only guest-interface check and a dedicated
+UID/GID65534 Office child. Per-job macro3/link2 profile,CPU/AS/file/descriptor
+limits,150s timeout/process-group kill and NOFOLLOW regular-file bounded32MiB
+PDF readback. Controller emits the existing source-bound result protocol.
+The host must still provide qualified AppContainer/image/command/staging/serial
+limits and cancellation;this guest file alone is not the security boundary.
+DOC/DOCX/RTF signatures accepted by contract;only owned DOCX was exercised.
+
+TDD4 input/command tests:missing module RED then GREEN. Independent review found
+no important issues within disposable-guest scope;reviewer test cleanup hit a
+Windows sandbox restriction,not counted as independent fullPASS. Product guest
+script itself then ran inside real offline QEMU/AppContainer:exit0,no timeout,
+67.605s,1page21,976byte PDF. Host product decoder verified required heading/table/
+2500mm and hashes. Private product-guest-verification.json binds guest-code SHA.
+This is a synthetic conversion,not full resource/active-content qualification.
+
+Build identity now includes runtime source directory through the existing bounded
+inventory. New runtime-mutation test RED before inclusion,GREEN after;complete
+build-identity10 tests PASS. Independent review confirms manifest coverage,not
+deployed-image identity. Remaining host integration/active-content/font/real
+source qualification gates are unchanged;point2 remains OPEN.
+
+Related Office suite38tests/12.234s/OK after guest-worker integration. Architecture
+and repository guards PASS. Full1312-test success above predates this change;
+no claim that the new worker has already passed a new full-suite run.

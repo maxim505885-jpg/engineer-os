@@ -30,6 +30,17 @@ class BuildIdentityTests(unittest.TestCase):
         self.assertFalse(report['acceptance_granted'])
         self.assertEqual(len(report['manifest_sha256']),64)
 
+    def test_guest_runtime_is_bound_to_build_manifest(self):
+        from engineering.local_app.build_identity import BuildIdentity, inventory
+        (self.root/'runtime').mkdir()
+        worker=self.root/'runtime/office_guest.py'
+        worker.write_text('VALUE=1\n',encoding='utf-8')
+        self.assertIn('runtime/office_guest.py',inventory(self.root))
+        build=BuildIdentity(self.root,manifest_path=self.manifest(),profile='native')
+        self.assertTrue(build.report()['artifact_verified'])
+        worker.write_text('VALUE=2\n',encoding='utf-8')
+        self.assertFalse(build.report()['artifact_verified'])
+
     def test_missing_manifest_is_development_not_verified_release(self):
         from engineering.local_app.build_identity import BuildIdentity
         report=BuildIdentity(self.root,profile='native').report()

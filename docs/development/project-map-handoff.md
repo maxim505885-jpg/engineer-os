@@ -1,3 +1,12 @@
+# Latest controlled-render progress — 16.10.2026
+
+Runtime guest worker and source-bound host decoder added;owned DOCX conversion
+passed real offline QEMU/AppContainer control. Guest code now in build identity.
+[Detailed evidence and limits](../qa/2026-10-16-tzz-document-pass.md). Point2 OPEN:
+next host launcher/cancellation/bounded-output integration,active-content and
+package/font controls,then actual new-source render qualification. Preserve
+.engineer-os/tzz-stage2 receipts;do not restart SPU integration/source inventory.
+
 # Active completion pass — new sources and resumed point2,16.10.2026
 
 Latest user explicitly requests closing point2 using only тззззззз,then all remaining

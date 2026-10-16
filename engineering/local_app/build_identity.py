@@ -10,7 +10,7 @@ import threading
 
 SCHEMA='ENGINEER_OS_BUILD_MANIFEST_V1'
 ROOT=Path(__file__).resolve().parents[2]
-DIRECTORIES=('engineering','scripts','agents','skills','config','schemas')
+DIRECTORIES=('engineering','runtime','scripts','agents','skills','config','schemas')
 MAX_FILES=4096
 MAX_FILE_BYTES=32*1024*1024
 MAX_TOTAL_BYTES=128*1024*1024
