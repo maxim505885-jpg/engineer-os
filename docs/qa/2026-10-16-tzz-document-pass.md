@@ -78,3 +78,19 @@ boundary. This feasibility control does not qualify Office conversion,host
 file/network denial,active-content behavior,fonts,performance or release.
 Next:software-only guest provisioning,then owned document/boundary controls
 before any production integration or engineering-source conversion. Point2 OPEN.
+
+## New-corpus native payload roundtrip
+
+Independent ZIP/XML reference compared with actual application-store source
+assets and Office reader on all three distinct new-corpus DOCX files. Matched
+370/370 table cells (215 containing digits),40/40 OMML formulas and62/62
+media/embedded objects;zero missing/mismatched objects and no unmapped XML
+cells in the checked direct-table scope. All three source SHA256 unchanged.
+Reference uses no entity resolution/network. Comparison receipts bind source,
+reference and parser hashes. This is native payload preservation,not formula
+correctness,layout equivalence,controlling task or full-document acceptance.
+Private evidence:qualified-payloads-0f91dfe5ef9346758e40e7d2c75bc7d6/summary.json.
+
+Software-only Linux provisioning and full application regression were started
+as separate owned processes;their completion remains unproven until receipts
+and final outputs are inspected. No user documents entered the build VM.
