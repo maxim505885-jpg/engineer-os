@@ -94,3 +94,23 @@ Private evidence:qualified-payloads-0f91dfe5ef9346758e40e7d2c75bc7d6/summary.jso
 Software-only Linux provisioning and full application regression were started
 as separate owned processes;their completion remains unproven until receipts
 and final outputs are inspected. No user documents entered the build VM.
+
+## Software provision and regression follow-up
+
+Software-only Debian VM installed LibreOffice25.2.3.2 Debian build,Writer/Calc,
+Python,bubblewrap and selected open fonts;package-install marker present,exit0,
+357.65s,no timeout. No engineering inputs or shared host folders were supplied.
+Package list is retained inside the build image;production manifest/export and
+isolation qualification remain pending.
+
+First offline AppContainer Office control reached Linux and exited normally,
+but conversion did not start:private guest PATH omitted /usr/sbin so runuser
+was not found. Corrected test script to absolute /usr/sbin/runuser;repeat pending.
+A normal guest shutdown alone is not converter success.
+
+Full Python regression:1312 tests,4 failures,34 skipped. All four failures were
+CLI JSON Cyrillic decoding mismatches under PYTHONIOENCODING=utf-8 with locale
+CP1251 decoding in subprocess.run(text=True). Setting PYTHONUTF8=1 consistently
+for parent/child made the complete affected10-test module PASS. No product
+change was made for this runner mismatch. Full UTF8 regression is running and
+not yet counted successful. Preserve both initial failure and repeat logs.
