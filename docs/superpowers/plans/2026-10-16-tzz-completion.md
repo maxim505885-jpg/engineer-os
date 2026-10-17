@@ -131,3 +131,7 @@ Current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
 qualification and real-case responsible review are not evidenced. No FINAL_AUDIT,
 merge, tag or release. See the latest [current-corpus QA checkpoint](../../qa/2026-10-16-current-corpus-render-qualification.md)
 for evidence boundaries and scoped results.
+
+Binary-DXF compression was tested only on a copy of the smallest audit=1 output.
+The candidate was smaller than the intake limit but ezdxf read-back failed with
+`missing ENDSEC`; it is rejected as an intake workaround and grants no CAD pass.

@@ -163,3 +163,12 @@ Do not merge, tag or release automatically.
 Fresh existing CAD conversion/roundtrip/local-app regression: 17 tests OK.
 Fresh Office/document/transport regression: 56 tests OK in 7.282 seconds.
 These are implementation checks, not document equivalence or object acceptance.
+
+A private binary-DXF size control used the smallest audit=1 derivative (30,241,793
+bytes) and ezdxf 1.4.4. The converter wrote a 391,907-byte binary candidate, but
+read-back in the same zero-capability AppContainer exited 1 with
+`DXFStructureError: missing ENDSEC tag`. This candidate is unusable for intake;
+its smaller size is not evidence of preserved content. No application ingestion,
+entity-fidelity comparison, or conversion acceptance was performed. Binary DXF
+is rejected as a size workaround for this corpus unless a separately validated
+writer/read-back path is established.
