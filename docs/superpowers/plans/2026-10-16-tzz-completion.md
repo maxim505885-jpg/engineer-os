@@ -150,3 +150,13 @@ page and the separate indexed drawing PDF contains two of seven listed sheets.
 Object identity, full graphics, clause-level normative applicability and
 technical validity of tests/calculations remain BLOCK/UNVERIFIED; the report is
 not promoted.
+
+Task-level review of the controlling ТЗ has found two additional unproven
+requirements: the report mentions dimensional drawings but supplies no 3D-scan
+record or point-cloud evidence, and its masonry appendix shows press tests on
+extracted specimens but no non-destructive masonry-strength results. The defect
+schedule points DS-1 to Appendix К sheet 6, which is absent from both the
+title-only compiled appendix and the two-page separate graphics PDF. These items
+remain BLOCK. The report cites ГОСТ 31937-2024 and СП 13-102-2003, but only
+bibliography presence is confirmed; current-GOST clause comparison and any
+non-conflicting use of СП as reference remain open.

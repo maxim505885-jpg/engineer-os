@@ -209,3 +209,55 @@ The requested one-PDF/three-paper-copy delivery is not established by the files.
 Clause-level normative verification and detailed source-bound review of the
 inspection, test results, calculations and defect-to-drawing links remain open.
 T03/T04 stay BLOCK and the report remains DERIVED_UNVERIFIED.
+
+### TЗ task-level evidence review
+
+The report states that dimensional work is presented as plans, sections and facades,
+but the provided package contains no scan record or point-cloud export, and the
+instrument list names a laser distance meter, a visual-measurement kit, a
+theodolite, a press, a perforator and a camera—not a terrestrial 3D scanner.
+The required 3D scanning is therefore not demonstrated by the supplied evidence.
+
+The masonry appendix documents press tests of extracted brick and mortar samples.
+The report identifies the test press and gives sample strength results, but does
+not identify a non-destructive masonry-strength method, measurement points or
+results. This proves the sampled-material tests only; it does not establish the
+separately requested non-destructive assessment. Mark that TЗ item BLOCK pending
+source-bound NDT evidence or a documented agreed change in scope.
+
+The defect schedule on the report's printed page 18 places defect DS-1 on sheet 6
+of Appendix К. The compiled report ends at its Appendix К title page. The separate
+graphics PDF has an index of seven sheets but only two PDF pages (the index and
+sheet 2). The location callout cannot be checked against the missing sheet 6; the
+defect-to-drawing requirement is BLOCK.
+
+The report's bibliography cites ГОСТ 31937-2024 and СП 13-102-2003. The
+[Rosstandart catalog](https://protect.gost.ru/gost/details/150801aa-be38-4abc-98d6-6f0d0aadb977)
+marks ГОСТ 31937-2024 as active and records a correction effective 12.09.2025;
+the report does not identify the correction, and no clause-level comparison has
+been completed. A 2025 ФАУ «ФЦС» letter, [reproduced by Garant](https://base.garant.ru/413362320/),
+describes СП 13-102-2003 as usable for reference, subject to consistency with
+current normative documents.
+Because the signed ТЗ names both documents, the СП reference is retained as a
+contractual method source but cannot replace the current ГОСТ. Do not infer
+normative compliance from bibliography presence.
+
+### ТЗ: status by requirement
+
+| Requirement | Current status | Evidence and remaining gate |
+| --- | --- | --- |
+| Review available project/executive records | UNCERTAINTY | Report lists source records, but completeness and traceable review against the supplied originals are not established. |
+| Terrestrial 3D survey and measurement drawings | BLOCK | Some drawings are supplied; scanner record/point cloud is absent and only 2 of 7 indexed graphic sheets are present. |
+| Visual/instrumental inspection, photos and defect schedule | PARTIAL / UNCERTAINTY | Report contains inspection sections, photos and a schedule; source-to-finding and complete location traceability remain unverified. |
+| Structural description and defect-cause analysis | UNCERTAINTY | Corresponding sections are present; evidence-to-mechanism reasoning has not been fully reviewed. |
+| Non-destructive masonry-strength assessment | BLOCK | The supplied appendix shows press tests on extracted specimens; no non-destructive method, locations or results are identified. |
+| Openings/sampling when necessary | CONDITIONAL | The ТЗ makes this conditional; need and execution must be evaluated from the actual findings, not presumed. |
+| Verification calculations for roof and wall | UNCERTAINTY | Calculation appendices exist; assumptions, units, loads, model/source correspondence and results remain unqualified. |
+| Technical-condition conclusion under named standards | BLOCK | A conclusion and both named references are present; object identity conflicts and clause-level current-edition verification remain unresolved. |
+| Defect graphics tied to locations | BLOCK | Defect DS-1 points to Appendix К sheet 6, which is missing from the supplied graphics pages. |
+| Compiled PDF and three paper originals | UNCERTAINTY | A PDF is available; the required paper delivery is not evidenced. |
+
+These are evidence statuses for the supplied package, not findings that the
+underlying work was not performed. “Not demonstrated” remains distinct from
+“not performed”; close each gate with source-bound records or an agreed change
+to the ТЗ.
