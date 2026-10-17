@@ -1,3 +1,21 @@
+# Current continuation checkpoint — 2026-10-17
+
+Fresh source-preservation verification: 52/52 unchanged, no additions or
+omissions. Three assignment rasters now pass the private source-bound object gate
+in a diagnostic derivative; traced PAGE fields render footer labels 4/5/6 on
+pages 7–9. The base v4 PDF still omits the second raster. The diagnostic remains
+68 pages with frame/layout differences, so T03/T04 stay BLOCK and the report stays
+DERIVED_UNVERIFIED.
+
+The 30 complex logical cells received visual review across 13 page-pair sheets.
+Their visible text matches after control-character filtering; 28 raster assets
+plus one WMF were located, and all raster assets map to drawn PDF images. The
+page-2 table check matched 68/68 marked critical numeric cells, with 3/116 cell
+records unresolved for symbols/Greek-letter order. These scoped checks do not
+close all-page table, number, image-geometry, formula, frame, or source-layout
+qualification. Remaining T01–T13/V01 and R01–R12 criteria remain open wherever
+their evidence gates are unmet. No FINAL_AUDIT, merge, tag or release.
+
 # Controlled image recovery checkpoint — 2026-10-16
 
 Read [floating-table/context diagnosis](../qa/2026-10-16-floating-table-render-diagnosis.md).

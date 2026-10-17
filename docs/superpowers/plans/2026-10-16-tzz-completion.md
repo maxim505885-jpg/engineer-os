@@ -108,3 +108,22 @@ is incomplete inside BLOCKS with no EOF; production CAD gate blocks their size.
 No roundtrip or source fidelity acceptance. Root causes remain unresolved.
 T01–T13/V01, the eight directions, 19 criteria and R01–R12 retain their separate
 requirements. No complete work-package, real acceptance or release claim follows.
+
+### Continuation checkpoint, 2026-10-17
+
+Source-preservation verification again confirms 52/52 unchanged. A private
+diagnostic Office candidate restores all three assignment PNG payloads and the
+source-traced page labels 4/5/6; its source-bound gate passes those three objects
+only. The original v4 PDF still omits the second sheet, and the diagnostic remains
+68 pages with frame/layout differences. Thirty complex cells received bounded
+visual review; page 2 has 68/68 marked critical numeric cells matching, while
+three of 116 page-2 cell records remain unresolved. T03/T04 stay BLOCK and the
+report remains DERIVED_UNVERIFIED.
+
+Other release gates remain open where evidence is unavailable or incomplete:
+current DWG exports are structurally incomplete and blocked by size; SCAD API
+exchange scaling is verified but physical unit meaning and model/result semantics
+are not; current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
+qualification and real-case responsible review are not evidenced. No FINAL_AUDIT,
+merge, tag or release. See the latest [current-corpus QA checkpoint](../../qa/2026-10-16-current-corpus-render-qualification.md)
+for evidence boundaries and scoped results.

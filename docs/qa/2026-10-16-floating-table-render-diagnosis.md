@@ -1,5 +1,27 @@
 # Controlled Office context diagnosis — 2026-10-16
 
+## Continuation — 2026-10-17
+
+The source PAGE fields for the three assignment sheets have now been traced to
+their imported section headers. A private diagnostic derivative replaces only
+those traced cached labels with PAGE fields and inserts the exact three source PNG
+payloads on pages 7–9. Its source-bound gate matches all three raster payloads;
+rendered footer labels are 4/5/6. Page count remains 68, and the rotated frame
+labels/layout still differ. This is a bounded diagnostic result, not a qualified
+automatic conversion rule or production repair. The original v4 PDF remains
+unchanged and still omits the second sheet.
+
+The 30 imported complex cells were reviewed on 13 paired-page sheets. Their
+visible text agrees after excluding nonprinting control markers. Twenty-eight
+raster assets and one WMF were located in the corresponding table regions, with
+all 28 raster assets found among drawn images in the PDF; two moved one derived
+page earlier due to text reflow. The page-44/page-43 snow-load table and
+page-56/page-55 diagram received larger-scale visual checks. These checks do not
+establish complete table geometry, image cropping/scaling, formula or numeric
+fidelity. A separate page-2 comparison matched all 68 marked critical numeric
+cells but left three of 116 total cell records unresolved for symbol/Greek-letter
+rendering. Overall T03/T04 remain BLOCK and the report remains DERIVED_UNVERIFIED.
+
 Status: TESTED diagnostic recovery of three assignment rasters; T03/T04 remain
 BLOCK for full source/layout/graphics qualification. No production renderer or
 bundle configuration changed. All source payloads and receipts remain private.

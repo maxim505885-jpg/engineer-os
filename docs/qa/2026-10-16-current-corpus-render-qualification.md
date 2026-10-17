@@ -1,5 +1,40 @@
 # Current-corpus continuation: document qualification, 2026-10-16
 
+## Continuation checkpoint — 2026-10-17
+
+The source-preservation script was rerun: all 52 registered files remain
+unchanged, with no added or missing files. A private, diagnostic-only derivative
+now combines the two previously isolated image/layout controls, the three
+source-traced PAGE fields, and exact source PNG payloads on pages 7–9. Its bounded
+source-object gate reports 3/3 assignment rasters matched, with footer labels 4/5/6.
+The PDF remains 68 pages; full-page comparison shows changes only inside the three
+target image areas for the exact-raster insertion. Frame text/orientation and page
+layout still differ from the native capture. This derivative is not a production
+fix or a full-report qualification, and the original v4 PDF still lacks the second
+assignment sheet.
+
+The imported logical-cell review found 521 exact text matches, 30 cells requiring
+visual review, one missing cell and one mismatch (a page-break marker). The 30
+complex cells were inspected in 13 native/derived page-pair sheets: visible text
+matches after removing nonprinting control characters; 28 raster assets and one
+WMF were visually located in the corresponding table regions. All 28 raster assets
+were found among actually drawn PDF images; two map one derived page earlier after
+text reflow. The snow-load table and the critical diagram received additional
+large-scale visual comparison. This does not qualify every table boundary, image
+scale/crop, formula, or numeric value across the report.
+
+A separately scoped native-PDF versus derived-PDF comparison on reference page 2
+covered 116 table-cell records. All 68 cells marked as critical numeric matched;
+113 records matched overall and three remain unresolved (two symbol-only cells and
+one reordered Greek-letter expression). No mismatch in the marked numeric cells
+was observed in this page-level check. It does not extend to other pages or
+establish engineering correctness.
+
+Accordingly, T03/T04 remain BLOCK and the report remains DERIVED_UNVERIFIED.
+The assignment-raster omission is resolved only in this private diagnostic
+candidate; document layout, all-page tables/numbers, and complete source-view
+fidelity are still unqualified. No acceptance or FINAL_AUDIT is granted.
+
 Status: T03/T04 remain BLOCK for faithful Office source view. This is a negative
 qualification result, not engineering acceptance or a release audit. The tested
 baseline is `cac54476b84de4bb3a6f86fc7562f5bd56a768eb` on
