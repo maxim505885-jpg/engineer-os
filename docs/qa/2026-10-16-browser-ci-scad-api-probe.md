@@ -55,14 +55,21 @@ Host checks confirmed finite coordinates/force values, in-range node references,
 matching declared load/combination counts and source/output identity. Bounded API
 messages were captured; their lists were empty at the capture point.
 
-These are selected API data, not complete semantic qualification. Source UI unit
-correlation, force-code interpretation, material/section semantics, joints/releases,
-local axes/offsets, elastic supports, solver result packets and correspondence to
-the actual structure remain unverified or excluded. The SDK specifically requires
-checking units after reading a project; the API unit labels and coefficients were
-retained without silently normalizing them. No native results or solver run are
-claimed. The historical absence of SCAD inputs must not be applied to these current
-SPR files, but successful getters do not establish production SCAD support.
+The installed vendor API manual (pp. 5–6) defines the three unit slots as linear
+dimensions, bar-section dimensions, and forces; its coefficients convert those
+quantities to metres and tonne-force. All three current SPR reads returned the
+same API tuple: `M/1`, `M/1`, `H/9810`. This qualifies the documented API slot
+mapping and declared coefficients for these three reads. The literal label `H` is
+preserved as returned; no independent conventional-unit interpretation is claimed.
+
+This is not complete model-unit qualification. The manual says to check and, if
+needed, redefine the working unit system after reading a project. Correlation with
+the source UI/protocol unit settings and interpretation of the actual force records
+remain unverified, as do material/section semantics, joints/releases, local
+axes/offsets, elastic supports, solver result packets and correspondence to the
+actual structure. No native results or solver run are claimed. The historical
+absence of SCAD inputs must not be applied to these current SPR files, but
+successful getters do not establish production SCAD support.
 
 All proprietary DLL copies, SDK/probe hashes, source/model data, compiled probes
 and receipts remain private under `.engineer-os/tzz-stage2/scad-api-current/`.
@@ -91,8 +98,10 @@ A private in-memory SCAD API exchange-unit control on the three current projects
 checked 1120 nodes / 3360 coordinate components. Requesting a linear exchange
 coefficient of 100 scaled the API coordinates by exactly 100 (maximum absolute
 error zero); the force unit remained unchanged. No native write or solver was
-called. This tests API exchange behavior only, not physical units, UI correlation,
-section semantics, model correctness or production vendor support.
+called. This tests API exchange behavior only; it does not verify project UI or
+protocol settings, force-record units, section semantics, model correctness or
+production vendor support. The detailed private receipt remains under
+`.engineer-os/tzz-stage2/scad-api-current/`.
 
 An existing Word ProtectedView capture was matched to the current report source.
 The source and captured main-story hashes match; all 69 EMF hashes and 69 raster

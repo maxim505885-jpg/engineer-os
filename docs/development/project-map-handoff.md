@@ -13,8 +13,11 @@ plus one WMF were located, and all raster assets map to drawn PDF images. The
 page-2 table check matched 68/68 marked critical numeric cells, with 3/116 cell
 records unresolved for symbols/Greek-letter order. These scoped checks do not
 close all-page table, number, image-geometry, formula, frame, or source-layout
-qualification. Remaining T01–T13/V01 and R01–R12 criteria remain open wherever
-their evidence gates are unmet. No FINAL_AUDIT, merge, tag or release.
+qualification. SCAD API unit slots and declared coefficients are now mapped from
+the installed vendor guide for all three SPR reads; project UI/protocol settings
+and force-record semantics remain unverified. Remaining T01–T13/V01 and R01–R12
+criteria remain open wherever their evidence gates are unmet. No FINAL_AUDIT,
+merge, tag or release.
 
 # Controlled image recovery checkpoint — 2026-10-16
 

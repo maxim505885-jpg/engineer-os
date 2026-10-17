@@ -122,8 +122,9 @@ report remains DERIVED_UNVERIFIED.
 
 Other release gates remain open where evidence is unavailable or incomplete:
 current DWG exports are structurally incomplete and blocked by size; SCAD API
-exchange scaling is verified but physical unit meaning and model/result semantics
-are not; current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
+unit slots and declared coefficients are mapped from the installed vendor guide,
+but source UI/protocol settings, force-record semantics and model/results are not
+qualified; current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
 qualification and real-case responsible review are not evidenced. No FINAL_AUDIT,
 merge, tag or release. See the latest [current-corpus QA checkpoint](../../qa/2026-10-16-current-corpus-render-qualification.md)
 for evidence boundaries and scoped results.
