@@ -123,6 +123,19 @@ The same incomplete endpoint reproduced. No repair, native save or budget
 increase was attempted. No source census, geometry fidelity or roundtrip PASS is
 claimed. Current qualification remains BLOCK for all five DWGs.
 
+A separate control changed only ODA's audit flag from 0 to 1, retaining the
+ACAD2018/DXF target and the same zero-capability AppContainer, time, memory and
+output limits. All five processes exited 0. Section-level scans found `ENTITIES`
+and `EOF` in every output, with `OBJECTS` and either `ACDSDATA` or
+`THUMBNAILIMAGE` afterward; the repeated first-source run returned the same byte
+size and section markers. Outputs ranged from 30,241,793 to 62,979,017 bytes,
+each above the application's 20 MiB CAD intake limit. The originals, staged DWGs
+and copied ODA runtime remained unchanged. These derivatives were not accepted by
+the application parser, and no entity, geometry, layer, unit or roundtrip
+comparison was performed. Audit mode avoids the prior `BLOCKS`-only endpoint in
+this bounded probe, but it is not a qualified fix; source fidelity and normal
+application use remain BLOCK.
+
 Private receipts are in the current-corpus CAD probe directory under
 `.engineer-os/tzz-stage2/`; the structural diagnostic and actual application-gate
 results are preserved separately from the conversion-process receipt.

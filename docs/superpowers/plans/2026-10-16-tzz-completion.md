@@ -121,10 +121,13 @@ three of 116 page-2 cell records remain unresolved. T03/T04 stay BLOCK and the
 report remains DERIVED_UNVERIFIED.
 
 Other release gates remain open where evidence is unavailable or incomplete:
-current DWG exports are structurally incomplete and blocked by size; SCAD API
-unit slots and declared coefficients are mapped from the installed vendor guide,
-but source UI/protocol settings, force-record semantics and model/results are not
-qualified; current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
+Default current DWG exports are structurally incomplete. Audit flag 1 on copied
+DWGs emitted `ENTITIES` and `EOF` markers across all five files, but outputs are
+30.2–63.0 MB, exceed the 20 MiB application gate and have no entity-fidelity
+review. SCAD API unit slots and
+declared coefficients are mapped from the installed vendor guide, but source
+UI/protocol settings, force-record semantics and model/results are not qualified.
+Current IFC/DXF/LIR inputs are absent; second-machine/offline Windows
 qualification and real-case responsible review are not evidenced. No FINAL_AUDIT,
 merge, tag or release. See the latest [current-corpus QA checkpoint](../../qa/2026-10-16-current-corpus-render-qualification.md)
 for evidence boundaries and scoped results.

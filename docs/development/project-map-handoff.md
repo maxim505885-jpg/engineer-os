@@ -19,6 +19,11 @@ and force-record semantics remain unverified. Remaining T01–T13/V01 and R01–
 criteria remain open wherever their evidence gates are unmet. No FINAL_AUDIT,
 merge, tag or release.
 
+An ODA audit-flag-1 control on all five copied DWGs emits section markers through
+ENTITIES and EOF; output sizes range from 30.2 to 63.0 MB, above the 20 MiB
+application intake limit. No entity/geometry comparison was performed. This
+remains a diagnostic control, not a qualified conversion.
+
 # Controlled image recovery checkpoint — 2026-10-16
 
 Read [floating-table/context diagnosis](../qa/2026-10-16-floating-table-render-diagnosis.md).
