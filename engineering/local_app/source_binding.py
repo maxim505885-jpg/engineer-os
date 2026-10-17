@@ -59,9 +59,33 @@ def _office_location(store,session_id,file,source_job,logical_unit,quote,*,image
 def validate_candidate(store,session_id,candidate,*,require_confirmable=True):
     file=store.get_file(candidate['file_id']);verify_originals([file])
     if file['session_id']!=session_id or file['sha256']!=candidate['source_sha256']:raise ValueError('Candidate source changed')
+    if Path(file['name']).suffix.lower()=='.ifc':
+        if candidate.get('data_class')!='P':raise ValueError('IFC declarations must remain PROJECT')
+        current=ifc_location(store,session_id,file,candidate.get('locator'))
+        if current['quote']!=candidate['quote']:raise ValueError('IFC declared value changed')
     if candidate.get('source_binding'):
         binding=candidate['source_binding']
         current=office_location(store,session_id,file,binding['source_job'],binding['logical_unit'],candidate['quote'])
         if digest(current)!=digest(binding):raise ValueError('Office location/review basis changed')
         if require_confirmable and not current['source_confirmable']:raise ValueError('Office location has unresolved source limitations')
     return file
+
+
+def ifc_location(store,session_id,file,locator):
+    """Read the exact source again in the bounded worker; never trust model text."""
+    import re
+    import threading
+    from .ifc_process import run_ifc
+    if file['session_id']!=session_id or Path(file['name']).suffix.lower()!='.ifc':raise ValueError('IFC source isolation failure')
+    keys={'kind','source_sha256','model_revision','guid','property_path'}
+    if not isinstance(locator,dict) or set(locator)!=keys or locator['kind']!='IFC_GUID':raise ValueError('Exact IFC locator required')
+    if locator['source_sha256']!=file['sha256'] or locator['model_revision']!=file['sha256']:raise ValueError('IFC model revision mismatch')
+    path=locator['property_path'];guid=locator['guid']
+    if not isinstance(guid,str) or re.fullmatch('[0-3][0-9A-Za-z_$]{21}',guid) is None:raise ValueError('Invalid IFC GUID')
+    if not isinstance(path,list) or len(path) not in (1,3) or any(not isinstance(k,str) or not k or len(k)>200 for k in path):raise ValueError('Bounded IFC property path required')
+    if not ((len(path)==1 and path[0] in ('type','name','storey_guid')) or (len(path)==3 and path[0]=='properties')):raise ValueError('IFC property path not supported')
+    verify_originals([file])
+    try:result=run_ifc(tool='IFC_LOCATE',sources=[(Path(file['path']),file['sha256'])],stop=threading.Event(),options=dict(guid=guid,property_path=path))
+    except ValueError:raise ValueError('IFC_GUID_OR_PROPERTY_NOT_VERIFIED') from None
+    verify_originals([file])
+    return dict(result,locator=locator,source_confirmable=True)

@@ -36,9 +36,13 @@ def check_requirements(path, *, expected_sha256, requirements):
             return dict(base,reasons=['IFC_SOURCE_CHANGED_DURING_READ'])
     except Exception:
         return dict(base,reasons=['IFC_REQUIREMENT_SOURCE_NOT_VERIFIED'])
+    # Inventory retains concrete IFC class names; base-type requirements must
+    # include all schema-defined subtypes without accepting arbitrary type names.
+    applicable={name:{product.GlobalId for product in model.by_type(name)}
+                for name in {req['ifc_type'] for req in requirements}}
     checks=[]
     for req in requirements:
-        elements=[e for e in inventory['elements'] if e['type']==req['ifc_type']]
+        elements=[e for e in inventory['elements'] if e['guid'] in applicable[req['ifc_type']]]
         if not elements:
             checks.append(dict(requirement=req,status='UNCERTAINTY',reason='NO_APPLICABLE_ELEMENT'))
         for entity in elements:
@@ -58,7 +62,10 @@ def check_requirements(path, *, expected_sha256, requirements):
                 explicit=getattr(field,'Unit',None)
                 nominal=getattr(field,'NominalValue',None)
                 if req['unit']=='project_length':
-                    unit_verified=(field.is_a('IfcQuantityLength') and explicit is None)
+                    unit_verified=(explicit is None and inventory['length_to_m'] is not None and
+                        (field.is_a('IfcQuantityLength') or
+                         (field.is_a('IfcPropertySingleValue') and nominal is not None and
+                          nominal.is_a() in ('IfcLengthMeasure','IfcPositiveLengthMeasure','IfcNonNegativeLengthMeasure'))))
                 elif req['unit']=='unitless':
                     unit_verified=(explicit is None and
                         (field.is_a('IfcQuantityCount') or

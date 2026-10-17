@@ -1,0 +1,28 @@
+/* ENGINEER OS backend adapter for the supplied SPU Electron lifecycle. */
+'use strict';
+const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process');
+const PREFIX='ENGINEER_OS_DESKTOP_READY ',LIMIT=262144;
+function validateReady(value){
+ if(!value||value.schema!=='ENGINEER_OS_DESKTOP_READY_V1'||!Number.isInteger(value.pid)||value.pid<=0)throw Error('Invalid desktop startup descriptor');
+ let url;try{url=new URL(value.origin);}catch{throw Error('Invalid loopback origin');}
+ if(url.protocol!=='http:'||url.hostname!=='127.0.0.1'||!url.port||+url.port<1||+url.port>65535||url.origin!==value.origin||url.username||url.password)throw Error('Canonical loopback origin required');
+ const build=value.build;if(!build||!['source_sha256','data_root_sha256'].every(key=>typeof build[key]==='string'&&/^[a-f0-9]{64}$/.test(build[key]))||!Number.isInteger(build.database_schema_version)||build.database_schema_version<1||build.status==='BLOCK')throw Error('Current backend build/data identity required');
+ return value;
+}
+class ReadyReader{
+ constructor(){this.pending='';this.bytes=0;this.seen=false;}
+ push(chunk){this.bytes+=Buffer.byteLength(chunk);if(this.bytes>LIMIT)throw Error('Desktop startup output limit');this.pending+=chunk;let value=null;while(this.pending.includes('\n')){const at=this.pending.indexOf('\n'),line=this.pending.slice(0,at).replace(/\r$/,'');this.pending=this.pending.slice(at+1);if(line.startsWith(PREFIX)){if(this.seen)throw Error('Duplicate startup descriptor');this.seen=true;value=validateReady(JSON.parse(line.slice(PREFIX.length)));}}return value;}
+}
+function requestText(url,token,maximum){return new Promise((resolve,reject)=>{const req=http.get(url,{headers:token?{'X-Engineer-Token':token}:{},timeout:5000},res=>{if(res.statusCode!==200){res.resume();reject(Error('Backend HTTP status '+res.statusCode));return;}let raw='',bytes=0;res.setEncoding('utf8');res.on('data',chunk=>{bytes+=Buffer.byteLength(chunk);if(bytes>maximum){req.destroy(Error('Backend response limit'));return;}raw+=chunk;});res.on('end',()=>resolve(raw));res.on('error',reject);});req.on('timeout',()=>req.destroy(Error('Backend probe timeout')));req.on('error',reject);});}
+async function verifyBackend(record){validateReady(record);const html=await requestText(record.origin+'/',null,524288);const token=html.match(/name="app-token"\s+content="([A-Za-z0-9_-]{20,200})"/);if(!token)throw Error('Authenticated ENGINEER OS page required');const actual=JSON.parse(await requestText(record.origin+'/api/build',token[1],65536));for(const key of ['source_sha256','data_root_sha256','database_schema_version'])if(actual[key]!==record.build[key])throw Error('Backend build/data identity mismatch');if(actual.status==='BLOCK'||actual.acceptance_granted!==false)throw Error('Backend identity is blocked');return actual;}
+function allowedExternal(raw){try{const u=new URL(raw);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password;}catch{return false;}}
+function trustedSender(event,sender,origin){try{return !!sender&&event.sender===sender&&event.senderFrame===sender.mainFrame&&new URL(event.senderFrame.url).origin===origin;}catch{return false;}}
+async function stopChild(child){if(!child||!child.pid||child.exitCode!==null||child.signalCode!==null)return;await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{try{child.kill('SIGKILL');}catch{}reject(Error('Owned backend shutdown timeout'));},10000);child.once('close',()=>{clearTimeout(timer);resolve();});if(process.platform==='win32'){const killer=spawn('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});killer.on('error',()=>{try{child.kill();}catch{}});}else child.kill('SIGTERM');});}
+async function startBackend({python,root,dataDir,selectionFile,onOutput=()=>{},timeoutMs=60000,signal}){
+ if(signal?.aborted)throw Error('Desktop startup cancelled');
+ const runner=path.join(root,'scripts','run_local_app.py');if(!fs.existsSync(runner))throw Error('ENGINEER OS runner not found');
+ const args=[runner,'--no-browser','--port','0','--desktop-ready'];if(dataDir)args.push('--data-dir',dataDir);if(selectionFile)args.push('--selection-file',selectionFile);
+ const child=spawn(python,args,{cwd:root,windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,PYTHONUTF8:'1',PYTHONUNBUFFERED:'1'}});
+ let record;try{record=await new Promise((resolve,reject)=>{const reader=new ReadyReader(),timer=setTimeout(()=>reject(Error('Desktop backend startup timeout')),timeoutMs);let done=false;const abort=()=>finish(Error('Desktop startup cancelled'));const finish=(err,value)=>{if(done)return;done=true;clearTimeout(timer);signal?.removeEventListener('abort',abort);err?reject(err):resolve(value);};signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();child.on('error',err=>finish(err));child.on('exit',(code,signal)=>finish(Error('Owned backend exited '+code+' '+signal)));child.stderr.on('data',chunk=>onOutput(chunk));child.stdout.on('data',chunk=>{onOutput(chunk);if(done)return;try{const ready=reader.push(chunk.toString('utf8'));if(ready)finish(null,ready);}catch(err){finish(err);}});});if(child.exitCode!==null||child.signalCode!==null)throw Error('Owned backend is not running');await verifyBackend(record);if(signal?.aborted)throw Error('Desktop startup cancelled');if(child.exitCode!==null||child.signalCode!==null)throw Error('Owned backend exited during verification');return {child,record,origin:record.origin,stop:()=>stopChild(child)};}catch(err){await stopChild(child);throw err;}
+}
+module.exports={validateReady,ReadyReader,verifyBackend,allowedExternal,trustedSender,startBackend,stopChild};

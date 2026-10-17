@@ -10,6 +10,7 @@ import time
 import uuid
 from .coverage import unknown_coverage
 from .lock import managed_file,managed_database
+SCHEMA_VERSION=3
 
 
 def identifier(value):
@@ -24,14 +25,14 @@ class ReviewConflict(ValueError):
     pass
 
 
-def _migration_backup(db,root):
-    target=root/'history.pre-migration-v0.sqlite3'
+def _migration_backup(db,root,version=0):
+    target=root/f'history.pre-migration-v{version}.sqlite3'
     managed_file(target)
     def verify(path):
         managed_database(path)
         saved=sqlite3.connect(path)
         try:
-            if saved.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or saved.execute('PRAGMA user_version').fetchone()[0]!=0:
+            if saved.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or saved.execute('PRAGMA user_version').fetchone()[0]!=version:
                 raise ValueError('Invalid migration recovery copy')
             # A structurally valid empty or older unrelated database is not a
             # recovery copy of the data that is about to be migrated.
@@ -57,9 +58,9 @@ class Store:
     def verification_key(self):
         """Read a provisioned local issuer key; never mint authority on audit.
 
-        The current app has no verification issuer/provisioning HTTP endpoint.
-        A missing, malformed or symlinked key fails closed. Backup must preserve
-        this key together with verification records once an issuer is added.
+        Explicit provisioning belongs to verification.provision_key, never an
+        audit/read path. A missing, malformed or symlinked key fails closed.
+        Backup must preserve this key together with verification records.
         """
         path=self.root/'engineering-verification.key'
         try:
@@ -74,9 +75,9 @@ class Store:
         existed=self.path.exists()
         with self.connection() as db:
             version=db.execute('PRAGMA user_version').fetchone()[0]
-            if version>1:raise RuntimeError('Database is from a newer ENGINEER OS version; use the matching application')
-            if existed and version==0:
-                _migration_backup(db,self.root)
+            if version>SCHEMA_VERSION:raise RuntimeError('Database is from a newer ENGINEER OS version; use the matching application')
+            if existed and version<SCHEMA_VERSION:
+                _migration_backup(db,self.root,version)
             db.executescript('''
             PRAGMA journal_mode=WAL;
             BEGIN IMMEDIATE;
@@ -86,6 +87,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),prompt TEXT NOT NULL,file_ids TEXT NOT NULL,state TEXT NOT NULL,result TEXT,error TEXT,created REAL NOT NULL,updated REAL NOT NULL,parent_id TEXT,mode TEXT NOT NULL DEFAULT 'CHAT',requested_checks TEXT NOT NULL DEFAULT '[]');
             CREATE TABLE IF NOT EXISTS local_evidence(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),record TEXT NOT NULL,created REAL NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_receipts(seq INTEGER PRIMARY KEY AUTOINCREMENT,job_id TEXT NOT NULL REFERENCES jobs(id),record TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS engineering_inputs(job_id TEXT PRIMARY KEY REFERENCES jobs(id),record TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS engineering_verifications(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),subject_kind TEXT NOT NULL,subject_id TEXT NOT NULL,revision INTEGER NOT NULL,record TEXT NOT NULL,UNIQUE(session_id,subject_kind,subject_id,revision));
             CREATE TABLE IF NOT EXISTS analysis_contexts(job_id TEXT NOT NULL REFERENCES jobs(id),role TEXT NOT NULL,messages TEXT NOT NULL,PRIMARY KEY(job_id,role));
             CREATE TABLE IF NOT EXISTS extraction_pages(job_id TEXT NOT NULL REFERENCES jobs(id),page INTEGER NOT NULL,record TEXT NOT NULL,PRIMARY KEY(job_id,page));
             CREATE TABLE IF NOT EXISTS source_region_reads(id TEXT PRIMARY KEY,session_id TEXT NOT NULL REFERENCES sessions(id),file_id TEXT NOT NULL REFERENCES files(id),result TEXT NOT NULL,result_sha256 TEXT NOT NULL,source_sha256 TEXT NOT NULL,created REAL NOT NULL);
@@ -108,7 +111,7 @@ class Store:
             if 'requested_checks' not in columns:db.execute("ALTER TABLE jobs ADD COLUMN requested_checks TEXT NOT NULL DEFAULT '[]'")
             if 'source_metadata' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN source_metadata TEXT NOT NULL DEFAULT '{}'")
             if 'extraction_coverage' not in file_columns:db.execute("ALTER TABLE files ADD COLUMN extraction_coverage TEXT NOT NULL DEFAULT '{}'")
-            db.execute('PRAGMA user_version=1')
+            db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')
 
     @contextmanager
     def connection(self):
@@ -320,11 +323,15 @@ class Store:
             db.execute('INSERT INTO local_evidence VALUES(?,?,?,?,?)',(record['id'],record['session_id'],record['file_id'],json.dumps(record,ensure_ascii=False),record['created']))
         return record
 
-    def enqueue(self,session_id,prompt,file_ids,*,mode='CHAT',requested_checks=None):
+    def enqueue(self,session_id,prompt,file_ids,*,mode='CHAT',requested_checks=None,engineering_request=None):
         identifier(session_id)
         if not isinstance(prompt,str) or not prompt.strip() or len(prompt)>8000:raise ValueError('Message must contain 1–8000 characters')
         if not isinstance(file_ids,list) or len(file_ids)>20 or any(not isinstance(x,str) for x in file_ids) or len(set(file_ids))!=len(file_ids):raise ValueError('Select up to 20 distinct files')
-        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING','EXTRACT_OCR'}:raise ValueError('Unknown task mode')
+        if not isinstance(mode,str) or mode not in {'CHAT','CORE_PLAN','CORE_RUN','EXTRACT_NATIVE','EXTRACT_DOCLING','EXTRACT_OCR','ENGINEERING_RUN'}:raise ValueError('Unknown task mode')
+        if mode=='ENGINEERING_RUN':
+            from .engineering_jobs import validate_request
+            validate_request(self,session_id,engineering_request,file_ids)
+        elif engineering_request is not None:raise ValueError('Engineering request requires engineering mode')
         checks=requested_checks if requested_checks is not None else (['report','normative'] if mode in {'CORE_PLAN','CORE_RUN'} else [])
         from engineering.core.engineer_core import CHECK_REGISTRY
         if not isinstance(checks,list) or len(checks)>5 or any(not isinstance(c,str) or c not in CHECK_REGISTRY for c in checks) or len(set(checks))!=len(checks):raise ValueError('Invalid requested engineering checks')
@@ -343,7 +350,9 @@ class Store:
                 if db.execute('SELECT id FROM sessions WHERE id=?',(session_id,)).fetchone() is None:raise ValueError('Conversation not found')
                 for fid in file_ids:
                     if db.execute('SELECT id FROM files WHERE id=? AND session_id=?',(fid,session_id)).fetchone() is None:raise ValueError('Attachment belongs to another conversation or does not exist')
+                if mode=='ENGINEERING_RUN':validate_request(self,session_id,engineering_request,file_ids)
                 db.execute('INSERT INTO jobs(id,session_id,prompt,file_ids,state,result,error,created,updated,mode,requested_checks) VALUES(:id,:session_id,:prompt,:file_ids,:state,:result,:error,:created,:updated,:mode,:requested_checks)',record)
+                if mode=='ENGINEERING_RUN':db.execute('INSERT INTO engineering_inputs VALUES(?,?)',(record['id'],json.dumps(engineering_request,ensure_ascii=False,allow_nan=False)))
                 db.execute('INSERT INTO messages(session_id,role,content,created) VALUES(?,?,?,?)',(session_id,'user',record['prompt'],now))
                 db.execute("UPDATE sessions SET title=? WHERE id=? AND title='Новый диалог'",(record['prompt'][:60],session_id))
         except sqlite3.IntegrityError:raise ValueError('This conversation already has an active task') from None
@@ -553,6 +562,10 @@ class Store:
             row=db.execute('SELECT * FROM jobs WHERE id=? AND session_id=?',(job_id,session_id)).fetchone()
         if row is None or row['parent_id'] or row['mode'].startswith('EXTRACT_') or row['state'] not in {'FAILED','CANCELLED'}:raise ValueError('Task cannot be retried; extraction uses its preserved journal')
         job=self.job_dict(row)
+        if job['mode']=='ENGINEERING_RUN':
+            from .engineering_jobs import enqueue_engineering,request_for,revision
+            request=request_for(self,session_id,job_id)
+            return enqueue_engineering(self,session_id,tool=request['tool'],input_file_ids=request['input_file_ids'],options=request['options'],expected_revision=revision(self,session_id))
         return self.enqueue(session_id,job['prompt'],job['file_ids'],mode=job['mode'],requested_checks=job['requested_checks'])
 
     def checkpoint(self,job_id,result):

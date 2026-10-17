@@ -55,7 +55,7 @@ def source_check(store,session_id,r,expected=None,selected_files=None):
         limitations=(r.get('source_binding') or {}).get('limitations',[]),scope='SOURCE_REVIEW_ONLY',acceptance_granted=False)
 
 
-def report(store,session_id,*,selected_files=None):
+def report(store,session_id,*,selected_files=None,apply_verification=True):
     state=store.requirements_state(session_id);sets=state['sets'];current=sets[-1] if sets else None
     if current is None:return dict(set_id=None,requirements=[],status='BLOCK',reasons=['TZ_CHECKLIST_MISSING'],scope='REQUIREMENT_TRACEABILITY_ONLY',acceptance_granted=False,final_audit='NOT_RUN')
     candidates={r['id']:r for r in store.snapshot(session_id)['evidence']};rows=[]
@@ -85,8 +85,12 @@ def report(store,session_id,*,selected_files=None):
             sources=sources,history=history,reasons=list(dict.fromkeys(reasons)),acceptance_granted=False))
     global_reasons=list(tor_reasons) if tor_status=='BLOCK' else []
     if any(not row['assessment_actor'] for row in rows):global_reasons.append('ASSESSMENT_REVIEWER_MISSING')
-    return dict(set_id=current['id'],requirements=rows,set_versions=len(sets),tor_sources=tor_sources,tor_source_status=tor_status,tor_source_reasons=tor_reasons,tor_transcription_verified=False,status='BLOCK' if global_reasons or any(r['status']=='BLOCK' for r in rows) else 'UNCERTAINTY',reasons=list(dict.fromkeys(global_reasons)),
+    result=dict(set_id=current['id'],requirements=rows,set_versions=len(sets),tor_sources=tor_sources,tor_source_status=tor_status,tor_source_reasons=tor_reasons,tor_transcription_verified=False,status='BLOCK' if global_reasons or any(r['status']=='BLOCK' for r in rows) else 'UNCERTAINTY',reasons=list(dict.fromkeys(global_reasons)),
         scope='REQUIREMENT_TRACEABILITY_ONLY',engineering_verified=False,acceptance_granted=False,final_audit='NOT_RUN')
+    if apply_verification:
+        from .verification import overlay_subject
+        return overlay_subject(store,session_id,'REQUIREMENTS',current['id'],result)
+    return result
 
 
 def context(store,session_id,selected_files):

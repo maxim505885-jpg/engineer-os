@@ -34,6 +34,10 @@ def _source(store,sid,fid):
 def _run(file,request):
     environment={k:v for k,v in os.environ.items() if k in {'PATH','SYSTEMROOT','WINDIR','TEMP','TMP','TESSDATA_PREFIX','ENGINEER_OS_TESSERACT_BIN','ENGINEER_OS_TESSDATA_DIR','ENGINEER_OS_OCR_LAYOUT'}}
     environment['PYTHONUTF8']='1'
+    if request['ocr']:
+        from .ocr import _paths
+        binary,data=_paths()
+        environment.update(ENGINEER_OS_TESSERACT_BIN=str(binary),ENGINEER_OS_TESSDATA_DIR=str(data))
     payload=_json(dict(source=file['path'],page=request['page'],bbox=request['bbox'],sha256=request['expected_sha256'],ocr=request['ocr'],ocr_psm=request.get('ocr_psm',6),ocr_preprocess=request.get('ocr_preprocess','none'),ocr_language=request.get('ocr_language','rus+eng'))).encode()
     child=subprocess.Popen([sys.executable,'-m','engineering.local_app.region_process'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=environment,cwd=Path(__file__).resolve().parents[2],start_new_session=os.name!='nt')
     try:output,_=child.communicate(payload,timeout=PROCESS_TIMEOUT)
@@ -101,7 +105,7 @@ def _validate(result,file,request):
             if derived is not None or region.get('preprocessing','none')!='none':raise ValueError('Unexpected processed raster')
         else:
             from .ocr_label_preprocessing import prepare
-            expected,metadata=prepare(png,profile)
+            expected,metadata=prepare(png,profile,version=derived.get('transform_version') if isinstance(derived,dict) else None)
             if not isinstance(derived,dict) or region.get('preprocessing')!=profile or derived.get('source_png_sha256')!=raster['png_sha256'] or any(derived.get(k)!=v for k,v in metadata.items()):raise ValueError('OCR processed raster identity mismatch')
             if derived.get('png_sha256')!=hashlib.sha256(expected).hexdigest() or derived.get('png_base64')!=base64.b64encode(expected).decode('ascii'):raise ValueError('OCR processed raster content mismatch')
 

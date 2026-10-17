@@ -10,10 +10,11 @@ from .coverage import unknown_coverage
 MAX_FILE_BYTES=100*1024*1024
 MAX_OFFICE_FILE_BYTES=256*1024*1024
 MAX_TEXT=100000
-SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg','.ald','.cop','.log','.zip'}
+SUPPORTED_SUFFIXES={'.txt','.md','.pdf','.docx','.xlsx','.doc','.lir','.png','.jpg','.jpeg','.json','.csv','.dxf','.dwg','.ifc','.ald','.cop','.log','.zip','.spr','.sec','.rtf'}
 
 
 def file_limit(name):
+    if Path(name).suffix.lower()=='.ifc':return 50*1024*1024
     return MAX_OFFICE_FILE_BYTES if Path(name).suffix.lower() in {'.docx','.xlsx'} else MAX_FILE_BYTES
 
 
@@ -53,9 +54,20 @@ def extract_preview(name,data):
         c.update(source_chars=len(text),stored_chars=min(len(text),MAX_TEXT))
         if truncated:c['stop_reasons'].append('CHAR_LIMIT')
         return text[:MAX_TEXT],'UNVERIFIED',report_note(calculation),truncated,c
+    if suffix=='.ifc':
+        c.update(method='IFC_ORIGINAL_ONLY',stop_reasons=['IFC_INVENTORY_REQUIRED','PROJECT_MODEL_NOT_ACTUAL_STRUCTURE'])
+        return '', 'UNAVAILABLE','Оригинал IFC сохранён. Явно запустите чтение деклараций модели; геометрия и фактическая конструкция не проверены.',False,c
     if suffix in {'.dxf','.dwg'}:
         c.update(method='CAD_ORIGINAL_ONLY',stop_reasons=['CAD_INVENTORY_REQUIRED','GEOMETRY_NOT_ENGINEERING_VERIFIED'])
         return '', 'UNAVAILABLE','Оригинал CAD сохранён. Выполните инвентаризацию; геометрия и инженерная корректность не проверены. DWG требует отдельного конвертера.',False,c
+    if suffix in {'.spr','.sec','.rtf'}:
+        rich_text=suffix=='.rtf'
+        c.update(method='RICH_TEXT_ORIGINAL_ONLY' if rich_text else 'VENDOR_ORIGINAL_ONLY',
+                 stop_reasons=['CONTROLLED_RTF_READER_REQUIRED','ACTIVE_CONTENT_NOT_EXECUTED'] if rich_text else
+                              ['VENDOR_FORMAT_NOT_DECODED','CALCULATION_NOT_VERIFIED'])
+        note=('Оригинал RTF сохранён. Содержимое не открывалось в Office; текст, объекты и результаты требуют отдельной проверки.' if rich_text else
+              'Оригинал модели или сечения сохранён. Формат не декодирован; геометрия, нагрузки и результаты не проверены, расчёт не выполнен.')
+        return '', 'UNAVAILABLE',note,False,c
     if suffix=='.lir':
         from engineering.calculation.native_source import inspect_lir
         metadata=inspect_lir(data)
@@ -137,7 +149,7 @@ def candidate_text(name,data):
 def preserve_file(store,session_id,name,data,*,source_metadata=None):
     identifier(session_id)
     if not isinstance(name,str) or not name.strip() or len(name)>240 or any(ord(c)<32 for c in name):raise ValueError('Invalid filename')
-    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG, ALD, COP, LOG, ZIP')
+    if Path(name).suffix.lower() not in SUPPORTED_SUFFIXES:raise ValueError('Supported originals: TXT, MD, PDF, DOCX, XLSX, DOC, LIR, PNG, JPG, JPEG, JSON, CSV, DXF, DWG, IFC, ALD, COP, LOG, ZIP, SPR, SEC, RTF')
     if not isinstance(data,bytes) or not data or len(data)>file_limit(name):raise ValueError('Original exceeds file limit: '+str(file_limit(name)//1024//1024)+' MiB')
     store.snapshot(session_id)
     ident=str(uuid.uuid4());folder=store.root/'files';folder.mkdir(exist_ok=True)

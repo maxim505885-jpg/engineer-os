@@ -209,69 +209,39 @@ class ConfirmedKnowledgeTests(unittest.TestCase):
         self.assertEqual(self.module().recall(restored,self.sid)['records'],[])
 
 class SignedFinalAuditKnowledgeIntegrationTests(unittest.TestCase):
-    """Actual audit authority over a signed software fixture, not a real object.
+    """Production issuer/audit/memory over controlled PROJECT plaintext inputs.
 
-    Stage-7 report supply is unavoidable: no production verification issuer
-    exists. FINAL AUDIT build, stored revision order, report recomputation and
-    knowledge promotion/recall are exercised without mocking their decisions.
+    No mocked authority, manually signed case, real-object acceptance or actual
+    measurement is involved. Source corruption affects only temporary fixtures.
     """
     def test_real_final_audit_authority_rechecks_signed_origin_and_latest_revision(self):
-        import hashlib
-        import hmac
-        import json
-        import time
-        from copy import deepcopy
-        from tests.test_final_audit import verified_case,TEST_VERIFICATION_KEY
+        import tests.test_engineering_verification as fixtures
         from engineering.local_app import knowledge,final_audit
-        with tempfile.TemporaryDirectory() as tmp:
-            store=Store(Path(tmp)/'data');sid=store.create_session()['id'];target=store.create_session()['id']
-            (store.root/'engineering-verification.key').write_bytes(TEST_VERIFICATION_KEY)
-            from engineering.local_app.files import preserve_file
-            source=preserve_file(store,sid,'controlled.txt',b'Controlled fixture quotation')
-            job=store.enqueue(sid,'Controlled signed knowledge integration fixture',[source['id']],mode='CORE_RUN',requested_checks=['report'])
-            case=verified_case();case.update(id=str(uuid.uuid4()),session_id=sid,job_id=job['id'],created=time.time(),current=True)
-            eid=str(uuid.uuid4());evidence=case['evidence'][0]
-            evidence.pop('engineering_verification');evidence.update(candidate_id=eid,statement='Controlled signed fixture statement',quote='Controlled fixture quotation')
-            # Re-sign only the fixture identity/quote fields; never production data.
-            record=dict(decision='ACCEPTED',reviewer='controlled-reviewer',method='controlled source comparison',
-                        version='1',verified_at='2026-10-08T00:00:00Z',source_refs=['f1'],
-                        subject_sha256=hashlib.sha256(json.dumps(evidence,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest())
-            record['signature']=hmac.new(TEST_VERIFICATION_KEY,b'ENGINEER_OS_VERIFICATION_V1\x00'+
-                                        json.dumps(record,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode(),hashlib.sha256).hexdigest()
-            evidence['engineering_verification']=record
-            case['identity']['core_job_id']=job['id']
-            case=store.add_real_case_snapshot(case,0)
-            controlled_report=dict(cases=[case],current_fresh=True)
-            with patch('engineering.local_app.real_case.report',return_value=controlled_report), \
-                 patch('engineering.local_app.final_audit.real_case_report',return_value=controlled_report):
-                audit=final_audit.build(store,sid,case_id=case['id'],expected_revision=0)
-                authoritative=final_audit.report(store,sid)
-                self.assertEqual(authoritative['status'],'ACCEPTED')
-                self.assertEqual(authoritative['current_audit_id'],audit['id'])
-                row=knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Controlled fixture reference',
-                                      evidence_ids=[eid],scope_session_ids=[target],actor='fixture reviewer')
-                recalled=knowledge.recall(store,target)['records']
-                self.assertEqual(recalled[0]['evidence'],case['evidence'])
-                self.assertEqual(recalled[0]['audit_id'],audit['id'])
-                self.assertFalse(recalled[0]['acceptance_granted']);self.assertTrue(recalled[0]['mandatory_reverification'])
-                original=deepcopy(case['evidence'][0])
-                case['evidence'][0]['statement']='Unsigned alteration'
-                self.assertEqual(final_audit.report(store,sid)['status'],'BLOCK')
-                self.assertEqual(knowledge.recall(store,target)['records'],[])
-                with self.assertRaises(ValueError):knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Invalid',evidence_ids=[eid],actor='fixture')
-                blocked=final_audit.build(store,sid,case_id=case['id'],expected_revision=1)
-                self.assertEqual(blocked['decision'],'BLOCK')
-                case['evidence'][0]=original
-                self.assertEqual(final_audit.report(store,sid)['status'],'BLOCK')
-                renewed=final_audit.build(store,sid,case_id=case['id'],expected_revision=2)
-                self.assertEqual(final_audit.report(store,sid)['current_audit_id'],renewed['id'])
-                self.assertEqual([x['revision'] for x in store.final_audit_state(sid)],[1,2,3])
-                # Fresh acceptance from another audit cannot silently refresh knowledge.
-                self.assertEqual(knowledge.recall(store,target)['records'],[])
-                with self.assertRaises(ReviewConflict):knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Stale',evidence_ids=[eid],actor='fixture')
-                revised=knowledge.promote(store,sid,expected_audit_id=renewed['id'],title='Renewed fixture reference',
-                                          evidence_ids=[eid],scope_session_ids=[target],actor='fixture',knowledge_id=row['id'],expected_revision=1)
-                self.assertEqual(revised['revision'],2)
-                self.assertEqual(knowledge.recall(store,target)['records'][0]['audit_id'],renewed['id'])
+        from engineering.local_app.real_case import build
+        setup=fixtures.EngineeringVerificationTests();setup.setUp();self.addCleanup(setup.doCleanups)
+        store=setup.store;sid=setup.sid;job,tor_file=setup.setup_reviewed_core();target=store.create_session()['id']
+        for role in job['result']['core_run']['results']:setup.issue(subject_kind='SPECIALIST',subject_id=job['id']+':'+role['agent'])
+        case=build(store,sid,job_id=job['id'],expected_revision=0,manifest={'TOR':[tor_file],'REPORT':[setup.file['id']]})
+        audit=final_audit.build(store,sid,case_id=case['id'],expected_revision=0)
+        authoritative=final_audit.report(store,sid);eid=setup.candidate['id']
+        self.assertEqual(authoritative['status'],'ACCEPTED');self.assertEqual(authoritative['current_audit_id'],audit['id'])
+        self.assertEqual(authoritative['review_scope'],'PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY');self.assertFalse(authoritative['actual_structure_verified'])
+        row=knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Controlled PROJECT reference',evidence_ids=[eid],scope_session_ids=[target],actor='fixture reviewer')
+        recalled=knowledge.recall(store,target)['records']
+        self.assertEqual(recalled[0]['evidence'],[item for item in case['evidence'] if item['candidate_id']==eid])
+        self.assertEqual(recalled[0]['evidence'][0]['data_class'],'P');self.assertEqual(recalled[0]['audit_id'],audit['id'])
+        self.assertEqual(recalled[0]['origin_review_scope'],'PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY');self.assertFalse(recalled[0]['origin_actual_structure_verified'])
+        self.assertFalse(recalled[0]['acceptance_granted']);self.assertTrue(recalled[0]['mandatory_reverification'])
+        source=Path(store.get_file(setup.file['id'])['path']);original=source.read_bytes();source.write_bytes(b'Controlled source corruption')
+        self.assertEqual(final_audit.report(store,sid)['status'],'BLOCK');self.assertEqual(knowledge.recall(store,target)['records'],[])
+        with self.assertRaises(ValueError):knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Invalid',evidence_ids=[eid],actor='fixture')
+        blocked=final_audit.build(store,sid,case_id=case['id'],expected_revision=1);self.assertEqual(blocked['decision'],'BLOCK')
+        source.write_bytes(original);self.assertEqual(final_audit.report(store,sid)['status'],'BLOCK')
+        renewed=final_audit.build(store,sid,case_id=case['id'],expected_revision=2)
+        self.assertEqual(final_audit.report(store,sid)['current_audit_id'],renewed['id']);self.assertEqual([item['revision'] for item in store.final_audit_state(sid)],[1,2,3])
+        self.assertEqual(knowledge.recall(store,target)['records'],[])
+        with self.assertRaises(ReviewConflict):knowledge.promote(store,sid,expected_audit_id=audit['id'],title='Stale',evidence_ids=[eid],actor='fixture')
+        revised=knowledge.promote(store,sid,expected_audit_id=renewed['id'],title='Renewed PROJECT reference',evidence_ids=[eid],scope_session_ids=[target],actor='fixture',knowledge_id=row['id'],expected_revision=1)
+        self.assertEqual(revised['revision'],2);self.assertEqual(knowledge.recall(store,target)['records'][0]['audit_id'],renewed['id'])
 
 if __name__=='__main__':unittest.main()

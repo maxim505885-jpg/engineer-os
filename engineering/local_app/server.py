@@ -24,6 +24,8 @@ class LocalServer(ThreadingHTTPServer):
 
 def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAULT,recovery_only=False,selection_path=None):
     if host!='127.0.0.1':raise ValueError('Application must bind to 127.0.0.1 only')
+    from .build_identity import runtime_build,runtime_report
+    runtime_build(store)
     from .drive_import import DriveImportError,configured_client,import_original
     if drive_client is _DRIVE_DEFAULT:drive_client=configured_client()
     class Handler(BaseHTTPRequestHandler):
@@ -71,11 +73,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     raise RequestProblem(400,'Canonical local request path required')
                 path=urlsplit(self.path);route=path.path;parts=route.strip('/').split('/')
                 self.check_request(route.startswith('/api/'))
-                if not post and route in {'/','/app.js','/cad-memory.js','/pdf-viewer.js','/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs','/styles.css','/recovery.html','/recovery.js'}:
-                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/pdf-viewer.js':'pdf-viewer.js','/vendor/pdfjs/pdf.mjs':'vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs':'vendor/pdfjs/pdf.worker.mjs','/styles.css':'styles.css','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
+                if not post and route in {'/','/app.js','/cad-memory.js','/pdf-viewer.js','/vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs','/styles.css','/spu-shell.js','/spu-shell.css','/spu-bg-building.jpg','/recovery.html','/recovery.js'}:
+                    name={'/':'recovery.html' if recovery_only else 'index.html','/app.js':'app.js','/cad-memory.js':'cad-memory.js','/pdf-viewer.js':'pdf-viewer.js','/vendor/pdfjs/pdf.mjs':'vendor/pdfjs/pdf.mjs','/vendor/pdfjs/pdf.worker.mjs':'vendor/pdfjs/pdf.worker.mjs','/styles.css':'styles.css','/spu-shell.js':'spu-shell.js','/spu-shell.css':'spu-shell.css','/spu-bg-building.jpg':'spu-bg-building.jpg','/recovery.html':'recovery.html','/recovery.js':'recovery.js'}[route]
                     data=(UI/name).read_bytes()
                     if name.endswith('.html'):data=data.replace(b'__APP_TOKEN__',self.server.token.encode())
-                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'application/javascript; charset=utf-8'
+                    ctype='text/html; charset=utf-8' if name.endswith('.html') else 'text/css; charset=utf-8' if name.endswith('.css') else 'image/jpeg' if name.endswith('.jpg') else 'application/javascript; charset=utf-8'
                     return self.respond(200,data,ctype)
                 if route=='/api/data/status' and not post:
                     return self.respond(200,dict(root=str(self.server.data_root),recovery_only=recovery_only))
@@ -105,15 +107,23 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     except OSError as exc:raise RequestProblem(400,str(exc)) from None
                     finally:self.server.data_slots.release()
                 if recovery_only:raise RequestProblem(409,'Режим обслуживания: чат и модель не запускаются.')
+                if route=='/api/build' and not post:
+                    return self.respond(200,runtime_report(store))
                 if route=='/api/tooling' and not post:
                     from .tooling import report
                     return self.respond(200,report())
+                if route=='/api/review-authority':
+                    if not post:return self.respond(200,dict(key_provisioned=store.verification_key() is not None,acceptance_granted=False,reviewer_identity_verified=False))
+                    from .verification import provision_key
+                    if self.headers.get('X-Engineer-Review-Intent')!='PROVISION_LOCAL_REVIEW_AUTHORITY':raise RequestProblem(403,'Explicit local review provisioning intent required')
+                    if self.json_body()!={}:raise ValueError('Provisioning accepts no supplied key or authority flags')
+                    return self.respond(201,provision_key(store,review_intent='PROVISION_LOCAL_REVIEW_AUTHORITY'))
                 if route=='/api/status' and not post:
                     with self.server.health_lock:
                         if time.monotonic()-self.server.health_at>15:
                             self.server.health_cache=model.health();self.server.health_at=time.monotonic()
                         health=self.server.health_cache
-                    return self.respond(200,dict(model=health,engineering_status='UNCERTAINTY',acceptance_granted=False))
+                    return self.respond(200,dict(model=health,build=runtime_report(store),engineering_status='UNCERTAINTY',acceptance_granted=False))
                 if route=='/api/drive/status' and not post:
                     configured=self.server.drive_client is not None
                     return self.respond(200,dict(configured=configured,connection_verified=False,note='Настройки Drive есть; доступ проверяется при импорте.' if configured else 'Drive не настроен на локальном сервере. Можно загрузить файл вручную.'))
@@ -131,11 +141,35 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='requirements' and not post:
                     from .requirements import report
                     return self.respond(200,report(store,parts[2]))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='normative-catalog' and post:
+                    from .normative_catalog import inspect_catalog
+                    body=self.json_body()
+                    if set(body)!={'catalog_file_id','source_file_ids'}:raise ValueError('Exact catalog selection fields required')
+                    if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another source inspection is busy; retry shortly')
+                    try:return self.respond(200,inspect_catalog(store,parts[2],**body))
+                    finally:self.server.preview_slots.release()
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='domain-packets':
                     from .domain_packets import save,report
                     if not post:return self.respond(200,report(store,parts[2]))
                     body=self.json_body()
                     return self.respond(201,save(store,parts[2],packet=body.get('packet'),expected_revision=body.get('expected_revision')))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='engineering-runs':
+                    from .engineering_jobs import enqueue_engineering,catalog
+                    if not post:return self.respond(200,catalog(store,parts[2]))
+                    body=self.json_body()
+                    if set(body)!={'tool','input_file_ids','options','expected_revision'}:raise ValueError('Exact engineering request fields required')
+                    return self.respond(202,enqueue_engineering(store,parts[2],**body))
+                if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='verifications':
+                    from .verification import review_catalog,review_subject,issue_verification,INTENT
+                    if not post:
+                        query=parse_qs(path.query)
+                        if not query:return self.respond(200,review_catalog(store,parts[2]))
+                        if set(query)!={'kind','subject_id'} or any(len(values)!=1 for values in query.values()):raise ValueError('Exact review subject query required')
+                        return self.respond(200,review_subject(store,parts[2],query['kind'][0],query['subject_id'][0]))
+                    if self.headers.get('X-Engineer-Review-Intent')!=INTENT:raise RequestProblem(403,'Explicit responsible review intent required')
+                    body=self.json_body()
+                    if set(body)!={'subject_kind','subject_id','expected_revision','decision','reviewer','method','source_refs','reason'}:raise ValueError('Exact responsible review fields required')
+                    return self.respond(201,issue_verification(store,parts[2],**body,review_intent=INTENT))
                 if len(parts)==4 and parts[:2]==['api','sessions'] and parts[3]=='real-case':
                     from .real_case import build,report
                     if not post:return self.respond(200,report(store,parts[2]))
@@ -200,7 +234,7 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if parts[3]=='evidence':
                         from .evidence import register
                         body=self.json_body()
-                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U'),source_job=body.get('source_job'),logical_unit=body.get('logical_unit')))
+                        return self.respond(201,register(store,parts[2],file_id=body.get('file_id'),quote=body.get('quote'),statement=body.get('statement'),page=body.get('page'),data_class=body.get('data_class','U'),source_job=body.get('source_job'),logical_unit=body.get('logical_unit'),ifc_locator=body.get('ifc_locator')))
                     if parts[3]=='jobs':
                         body=self.json_body();return self.respond(202,store.enqueue(parts[2],body.get('prompt'),body.get('file_ids',[]),mode=body.get('mode','CHAT'),requested_checks=body.get('requested_checks')))
                     if parts[3]=='files':
@@ -295,6 +329,11 @@ def make_server(store,model,host='127.0.0.1',port=0,*,drive_client=_DRIVE_DEFAUL
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')
                     try:return self.respond(200,render_original(store,parts[2],parts[4],int(query.get('page',['1'])[0])),'image/png')
                     finally:self.server.preview_slots.release()
+                if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='files' and parts[5]=='ifc-location' and not post:
+                    from .source_binding import ifc_location
+                    query=parse_qs(path.query)
+                    if set(query)!={'locator'} or len(query['locator'])!=1 or len(query['locator'][0])>4000:raise ValueError('Exact bounded IFC locator query required')
+                    return self.respond(200,ifc_location(store,parts[2],store.get_file(parts[4]),json.loads(query['locator'][0])))
                 if len(parts)==6 and parts[:2]==['api','sessions'] and parts[3]=='evidence' and parts[5]=='preview' and not post:
                     from .preview import render_preview
                     if not self.server.preview_slots.acquire(blocking=False):raise RequestProblem(429,'Another preview is busy; retry shortly')

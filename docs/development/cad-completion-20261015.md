@@ -1,3 +1,13 @@
+# Прикладной DXF-маршрут — 16.10.2026
+
+В существующую очередь и форму добавлены ограниченные CAD_INVENTORY/CAD_DIFF;
+интерактивный DXF inventory тоже делегирует worker. [Контракт и границы](engineering-jobs.md#cad-read-only-queue--16102026).
+Это продолжение имеющихся adapters, не повторное начало разработки. Два реальных
+DWG и прежние неудачи native/ODA остаются отдельными незавершёнными проверками;
+бюджеты не повышались. Сравнение поддерживаемых DXF не квалифицирует DWG.
+Полные геометрические проверки, большие DWG census и остальные native операции
+остаются следующим участком T08. Исторические записи ниже сохранены.
+
 # Additional native CAD investigation — 15.10.2026
 
 Installed AutoCAD2026 Core Console was also run against a private graphics DWG

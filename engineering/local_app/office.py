@@ -1,6 +1,7 @@
 """Bounded OOXML text candidates, never layout/evidence or formula evaluation."""
 import io
 import copy
+import unicodedata
 import hashlib
 import json
 import posixpath
@@ -82,6 +83,8 @@ def word_text(element):
 def word_limits(element):
     limits=[];tags={e.tag.rsplit('}',1)[-1] for e in element.iter()}
     if 'sym' in tags:limits.append('SYMBOL_NOT_DECODED')
+    if any(unicodedata.category(char)=='Co' for node in element.iter() if node.tag in {W+'t',M+'t'} for char in (node.text or '')):
+        limits.append('PRIVATE_USE_GLYPH_UNVERIFIED')
     for group,reason in [(('drawing','pict'),'DRAWING_NOT_READ'),(('oMath','oMathPara'),'EQUATION_NOT_READ'),
                          (('ins','del','moveFrom','moveTo'),'TRACKED_CHANGES_UNVERIFIED'),(('instrText','fldSimple','fldChar'),'FIELD_NOT_EVALUATED')]:
         if tags.intersection(group):limits.append(reason)
@@ -257,6 +260,7 @@ def word_container_units(body,part,package=None):
                     if any(e.tag in {W+'gridSpan',W+'vMerge',W+'hMerge'} for e in cell.iter()):warnings.append('MERGED_CELL_UNVERIFIED')
                     if cell.find('.//'+W+'tbl') is not None:warnings.append('NESTED_TABLE_UNVERIFIED')
                     text='\n'.join(word_text(e) for e in cell.findall(W+'p'))
+                    native_text=text
                     # Nested Word tables were previously omitted entirely. Preserve
                     # native text as unverified content, without inventing inner cells.
                     nested=cell.findall('.//'+W+'tbl')
@@ -265,6 +269,8 @@ def word_container_units(body,part,package=None):
                         if nested_text:
                             text+='\n[NESTED_TABLE_TEXT_UNVERIFIED]\n'+nested_text
                     locator=dict(kind='table_cell',part=part,table=table,row=row_index,column=column,source_grid=grid[(row_index,column)])
+                    locator['native_text_identity']=dict(scope='XML_CELL_NATIVE_TEXT_BEFORE_ANNOTATIONS',
+                        sha256=hashlib.sha256(native_text.encode('utf-8')).hexdigest(),chars=len(native_text),layout_verified=False)
                     if nested:
                         # Record exact XML cell ordinals and content identity; do not
                         # equate those ordinals with rendered grid positions.
@@ -298,11 +304,23 @@ def word_container_units(body,part,package=None):
     return out
 
 
+def word_style_limitations(p):
+    if 'word/styles.xml' not in p.names:return []
+    styles=p.xml('word/styles.xml');seen=set()
+    for style in styles.findall(W+'style'):
+        name=style.find(W+'name')
+        if name is None or not name.get(W+'val'):continue
+        identity=(style.get(W+'type'),name.get(W+'val'))
+        if identity in seen:return ['DUPLICATE_STYLE_NAMES_LAYOUT_UNVERIFIED']
+        seen.add(identity)
+    return []
+
+
 def read_docx(p):
     root=p.xml('word/document.xml');body=root.find(W+'body')
     if body is None:raise OfficeError('Missing Word body')
     out=word_container_units(body,'word/document.xml',p)
-    limits=['PHYSICAL_PAGES_UNKNOWN','LAYOUT_NOT_VERIFIED']
+    limits=['PHYSICAL_PAGES_UNKNOWN','LAYOUT_NOT_VERIFIED']+word_style_limitations(p)
     if any('/embeddings/' in n or 'vbaProject' in n for n in p.names):limits.append('EMBEDDED_CONTENT_NOT_READ')
     parts={n:('header' if n.startswith('word/header') else 'footer' if n.startswith('word/footer') else 'footnote' if n=='word/footnotes.xml' else 'endnote')
            for n in p.names if re.fullmatch(r'word/(?:header[^/]*|footer[^/]*|footnotes|endnotes)\.xml',n)}

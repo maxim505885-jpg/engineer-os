@@ -36,17 +36,22 @@ _READY_STAGE={
 def _digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()).hexdigest()
 
-def _verified_record(subject,verification_key):
+def _verified_record(subject,verification_key,*,expected_kind=None,expected_id=None,expected_session=None,expected_scope=None):
     """A server-owned verification record binds its decision to exact content.
 
-    No local HTTP/model/import path currently issues these records. The MAC
-    authenticates the local issuer, not the reviewer's civil identity or truth
-    of a calculation. Source checks and live store revalidation remain required.
+    The local responsible-review issuer authenticates issuance, not the reviewer's
+    civil identity or truth of a calculation. Each consumer must bind kind/ID
+    and session; a valid Evidence MAC is not a requirements or domain review.
     """
     if not isinstance(subject,dict):return False
     if not isinstance(verification_key,bytes) or len(verification_key)!=32:return False
     record=subject.get('engineering_verification')
     if not isinstance(record,dict):return False
+    if expected_kind is not None:
+        if not isinstance(expected_id,str) or not expected_id.strip():return False
+        if (record.get('subject_kind'),record.get('subject_id'))!=(expected_kind,expected_id):return False
+    if expected_session is not None and record.get('session_id')!=expected_session:return False
+    if expected_scope is not None and record.get('verified_scope')!=expected_scope:return False
     if record.get('decision') not in {'ACCEPTED','ACCEPTED ALTERNATIVE'}:return False
     for key in ('reviewer','method','version','verified_at'):
         if not isinstance(record.get(key),str) or not record[key].strip():return False
@@ -92,7 +97,11 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=(),store_revalidated=False,ver
     evidence=case.get("evidence")
     domains=case.get("domain_packets")
     identity=case.get("identity")
+    core_job_id=identity.get('core_job_id') if isinstance(identity,dict) else None
     basis_reasons=[]
+    review_scope=case.get('review_scope','UNQUALIFIED')
+    if review_scope!='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY':basis_reasons.append('CASE_REVIEW_SCOPE_NOT_QUALIFIED')
+    if review_scope=='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY' and (not isinstance(identity,dict) or set(identity.get('requested_checks') or [])!={'report'}):basis_reasons.append('CASE_REVIEW_SCOPE_REQUEST_MISMATCH')
     if store_revalidated is not True:
         basis_reasons.append('CASE_NOT_STORE_REVALIDATED')
     if not isinstance(identity,dict) or not identity.get("core_job_id") or not identity.get("originals"):
@@ -103,27 +112,28 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=(),store_revalidated=False,ver
         basis_reasons.append("DOMAIN_ACCEPTANCE_BASIS_MISSING")
     requirements=case.get('requirements') or {}
     if (not isinstance(requirements,dict) or requirements.get('engineering_verified') is not True
-            or not _verified_record(requirements,verification_key)):
+            or not _verified_record(requirements,verification_key,expected_kind='REQUIREMENTS',expected_id=requirements.get('set_id'),expected_session=case.get('session_id'),expected_scope='COMPLETE_PLAINTEXT_TOR_TRACEABILITY_ONLY')):
         basis_reasons.append('TZ_ENGINEERING_VERIFICATION_REQUIRED')
     if not isinstance(evidence,list) or not evidence or any(
             not isinstance(row,dict) or row.get('data_class_verified') is not True
-            or row.get('engineering_verified') is not True or not _verified_record(row,verification_key)
+            or row.get('data_class')!='P' or row.get('engineering_verified') is not True or not _verified_record(row,verification_key,expected_kind='EVIDENCE',expected_id=row.get('candidate_id'),expected_session=case.get('session_id'),expected_scope='PROJECT_DECLARATION_CLASS_ONLY')
             for row in evidence):
         basis_reasons.append('EVIDENCE_ENGINEERING_VERIFICATION_REQUIRED')
     results=(stages.get('specialists') or {}).get('results') or []
     if not isinstance(results,list) or not results or any(
             not isinstance(row,dict) or row.get('status') not in {'PASS','ACCEPTED','ACCEPTED ALTERNATIVE'}
-            or row.get('engineering_verified') is not True or not _verified_record(row,verification_key) for row in results):
+            or row.get('engineering_verified') is not True or not _verified_record(row,verification_key,expected_kind='SPECIALIST',expected_id=str(core_job_id)+':'+str(row.get('agent')) if core_job_id and row.get('agent') else None,expected_session=case.get('session_id'),expected_scope='PROJECT_PLAINTEXT_REPORT_REVIEW_ONLY') for row in results):
         basis_reasons.append('SPECIALIST_ENGINEERING_VERIFICATION_REQUIRED')
     packets=domains.get('packets') if isinstance(domains,dict) else None
     if not isinstance(packets,list) or any(
             not isinstance(row,dict) or row.get('status') not in {'ACCEPTED','ACCEPTED ALTERNATIVE'}
             or row.get('engineering_verified') is not True or row.get('acceptance_granted') is not True
-            or row.get('reasons') or not _verified_record(row,verification_key) for row in packets):
+            or row.get('reasons') or not _verified_record(row,verification_key,expected_kind='DOMAIN',expected_id=row.get('id'),expected_session=case.get('session_id')) for row in packets):
         basis_reasons.append('DOMAIN_ENGINEERING_VERIFICATION_REQUIRED')
     required=(stages.get('domain_prerequisites') or {}).get('required_kinds') or []
     if not isinstance(packets,list) or not set(required)<={row.get('kind') for row in packets if isinstance(row,dict)}:
         basis_reasons.append('REQUIRED_DOMAIN_DECISION_MISSING')
+    if packets:basis_reasons.append('DOMAIN_SCOPE_NOT_QUALIFIED')
     checks.append(dict(dimension="ACCEPTANCE_BASIS",status="BLOCK" if basis_reasons else "PASS",reasons=basis_reasons))
     reasons.extend(basis_reasons)
 
@@ -149,6 +159,7 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=(),store_revalidated=False,ver
         acceptance_granted=accepted,
         engineering_verified=accepted,
         final_audit="COMPLETED",
+        review_scope=review_scope,actual_structure_verified=False,
     )
     deterministic["audit_sha256"]=_digest(deterministic)
     if accepted:
@@ -156,6 +167,7 @@ def evaluate_case(case,*,fresh:bool,stale_reasons=(),store_revalidated=False,ver
             case_id=case.get("id"),case_sha256=case.get("case_sha256"),
             audit_sha256=deterministic["audit_sha256"],
             basis_sha256=_digest(dict(identity=identity,evidence=evidence,domains=domains)),
+            review_scope=review_scope,actual_structure_verified=False,
         )
     else:
         deterministic["acceptance_certificate"]=None
@@ -265,7 +277,8 @@ def report(store,session_id):
         rows.append(row)
     effective="ACCEPTED" if rows[-1]["effective_acceptance_granted"] else "BLOCK"
     return dict(audits=rows,revision=latest["revision"],status=effective,current_audit_id=latest["id"],
-                current_fresh=not stale,acceptance_granted=effective=="ACCEPTED",final_audit="COMPLETED")
+                current_fresh=not stale,acceptance_granted=effective=="ACCEPTED",final_audit="COMPLETED",
+                review_scope=latest.get('review_scope','UNQUALIFIED'),actual_structure_verified=False)
 
 def acceptance_gate(store,session_id):
     r=report(store,session_id)

@@ -1,2 +1,3 @@
 # Optional read-only IFC intake. Never required for the base local application.
+-r requirements-engineering-process.txt
 ifcopenshell==0.8.5

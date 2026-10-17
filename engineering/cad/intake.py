@@ -7,7 +7,9 @@ def inspect_cad(path, expected_sha256=None):
     path=Path(path)
     if not path.is_file() or not 0<path.stat().st_size<=MAX_BYTES:
         raise ValueError('CAD file must contain 1 byte–20 MiB')
-    data=path.read_bytes();sha=hashlib.sha256(data).hexdigest()
+    with path.open('rb') as stream:data=stream.read(MAX_BYTES+1)
+    if not 0<len(data)<=MAX_BYTES:raise ValueError('CAD_SOURCE_SIZE_LIMIT')
+    sha=hashlib.sha256(data).hexdigest()
     if expected_sha256 is not None and sha!=expected_sha256:raise ValueError('CAD source identity changed')
     dwg=data[:6].decode('ascii',errors='replace')
     detected='DWG' if dwg.startswith('AC10') else 'DXF' if b'SECTION' in data[:4096] or data.startswith(b'AutoCAD Binary DXF') else 'UNKNOWN'

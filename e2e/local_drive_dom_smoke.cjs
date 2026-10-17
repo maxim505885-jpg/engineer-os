@@ -53,7 +53,7 @@ server.serve_forever()
   assert.ok(doc.querySelector('.file').textContent.includes('drive_original_123'),'Import provenance must survive reload');
   doc.querySelector('#drive-source').value='unsaved_original';doc.querySelector('#drive-sha').value='0'.repeat(64);
   await until(()=>delayedList);doc.querySelector('#new-chat').click();await until(()=>doc.querySelectorAll('nav .session').length===2&&doc.querySelectorAll('.file').length===0);
-  releaseList();await until(()=>staleDelivered&&!doc.querySelector('#drive-import').disabled);
+  releaseList();try{await until(()=>staleDelivered&&!doc.querySelector('#drive-import').disabled);}catch(e){console.error('DRIVE_DIAGNOSTIC',JSON.stringify({staleDelivered,sessionReads,errors,ui:doc.querySelector('#error').textContent,state:dom.window.eval('({pending,creating,uploading,driveConfigured,current})')}));throw e;}
   assert.equal(doc.querySelectorAll('nav .session').length,2,'Older bootstrap list must not overwrite the created conversation');
   assert.equal(doc.querySelector('#drive-source').value,'');assert.equal(doc.querySelector('#drive-sha').value,'');
   doc.querySelector('#drive-source').value='drive_original_123';doc.querySelector('#drive-sha').value='0'.repeat(64);
@@ -62,5 +62,5 @@ server.serve_forever()
   assert.equal(doc.querySelectorAll('.file').length,0,'Failed checksum must not create a file');
   assert.equal(errors.length,0,errors.join('\n'));
   console.log(JSON.stringify({result:'PASS',dom_emulation:true,live_google:false,oauth_verified:false,browser_visual_check:false,checks:['configured-not-connected','import-submit','selected-original','provenance-reload','no-secret','conversation-isolation','draft-isolation','failed-checksum-no-file']}));
- }finally{if(dom)dom.window.close();if(child){child.kill('SIGTERM');await new Promise(r=>{if(child.exitCode!==null)return r();const t=setTimeout(()=>{child.kill('SIGKILL');r();},2000);child.once('exit',()=>{clearTimeout(t);r();});});}fs.rmSync(temp,{recursive:true,force:true});}
+ }finally{if(dom)dom.window.close();if(child)await require('../desktop/server-owner.cjs').stopChild(child);fs.rmSync(temp,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exitCode=1;});

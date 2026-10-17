@@ -1,0 +1,103 @@
+{
+  "source_root": "C:\\Users\\maxim\\Desktop\\Платформа для работы ИИ\\Платформа СПУ",
+  "scope": "UNCHANGED_SOURCE_REFERENCE_WITH_SEPARATE_ENGINEER_OS_ADAPTATION",
+  "files": [
+    {
+      "path": "web/index.html",
+      "bytes": 35622,
+      "sha256": "cc2ebdc1a01dc0e1da6c0ec862179a026349ced4bb5dadec76ceb094946f7313"
+    },
+    {
+      "path": "web/app.css",
+      "bytes": 26354,
+      "sha256": "3edfe28639a39d0a1994181dc03338e36cd77f6e0faeab7c2db194e63d6bbff7"
+    },
+    {
+      "path": "web/index.js",
+      "bytes": 93526,
+      "sha256": "b2976d54d9048a7cc34e93f95635b5d68682bcc74d48d05d94ca6ec648d141a2"
+    },
+    {
+      "path": "web/dashboard.js",
+      "bytes": 6274,
+      "sha256": "8b26db65802da8b81230260a875bf6d5a57325ab5a02cfc96e46022933a0e80d"
+    },
+    {
+      "path": "desktop/main.js",
+      "bytes": 30714,
+      "sha256": "ebca888ea68ad05f9d1f5cc0c68dbba2584f383f91eff7a7c46f9d65b7ffe2d4"
+    },
+    {
+      "path": "desktop/preload.js",
+      "bytes": 691,
+      "sha256": "725b6f554453007d97b40ed771272f0eba690ca17ff6fe11407a12f1c4e53c61"
+    },
+    {
+      "path": "desktop/splash.html",
+      "bytes": 2882,
+      "sha256": "3e9b6b6a34f1b2c076f3446ea111a3e3363b6beee46ee23e706c9601d7fb6cc8"
+    },
+    {
+      "path": "desktop/package.json",
+      "bytes": 2077,
+      "sha256": "199366bba10de149a8027505c2bba527d66b77a7ef44b895de3ae4a75cf5d2cc"
+    },
+    {
+      "path": "desktop/package-lock.json",
+      "bytes": 191915,
+      "sha256": "9ff0f7fcd0a03633fd05568a31964210fadfb6701c34d10d3aab2e90770db8c9"
+    },
+    {
+      "path": "desktop/README.md",
+      "bytes": 7962,
+      "sha256": "1b8bb80abc948fe4fcc5743ecc364c1a06b496ed08e53f60400fdb10f8050b78"
+    },
+    {
+      "path": "docs/design/01-desktop.png",
+      "bytes": 458845,
+      "sha256": "dae17a9de821f89c4712c3ca33766c6e2b45d4203422229112c500f2c589524e"
+    },
+    {
+      "path": "docs/design/02-project.png",
+      "bytes": 172485,
+      "sha256": "c605a12a5be2bf709a0f057d8bc285e97a7012511a14fe279cf8b0241cd9baee"
+    },
+    {
+      "path": "docs/design/03-tasks.png",
+      "bytes": 202730,
+      "sha256": "af6ac9cdcb8bb0ee5e72c33023a698f149e0bf79f6a35cb29179dae1f4c600c2"
+    },
+    {
+      "path": "docs/design/06-knowledge.png",
+      "bytes": 144574,
+      "sha256": "063d3aab6693d8777a1077376b0285e1cd063b308399621bbfb583f5ea9ae735"
+    },
+    {
+      "path": "docs/design/07-settings.png",
+      "bytes": 141458,
+      "sha256": "ef3093891d7e4321e33dad318b56dea9ccb405afb9ea45354724ee9a4f535440"
+    },
+    {
+      "path": "web/bg-building.jpg",
+      "bytes": 611584,
+      "sha256": "f71757971aa6ae6f4dd15acb1711fbbd302bfe68649c9a9b44b61e644831cc24",
+      "reused_as": "engineering/local_app/ui/spu-bg-building.jpg"
+    }
+  ],
+  "user_direction": "Copied interface/application stays unchanged as reference; adapt a working application to ENGINEER OS core per subsequent explicit user instruction.",
+  "unchanged_import_root": "C:\\Users\\maxim\\engineer-os\\.engineer-os\\imports\\spu-ui-desktop",
+  "working_adaptation": {
+    "ui": "engineering/local_app/ui/spu-shell.js + spu-shell.css",
+    "backend": "Existing ENGINEER OS authenticated local_app APIs and engineering worker",
+    "desktop": "desktop/main.js window/tray/state adapted from supplied main.js; server-owner replaces source backend",
+    "copied_assets": [
+      "engineering/local_app/ui/spu-bg-building.jpg",
+      "desktop/build/icon.png",
+      "desktop/build/icon.ico",
+      "desktop/build/tray.png",
+      "desktop/splash.html"
+    ],
+    "source_database_imported": false,
+    "original_installer_modified": false
+  }
+}

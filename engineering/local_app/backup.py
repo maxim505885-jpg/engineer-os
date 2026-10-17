@@ -64,7 +64,7 @@ def _database(path):
     db=sqlite3.connect(path)
     try:
         if db.execute('PRAGMA integrity_check').fetchone()[0]!='ok':raise ValueError('Database integrity failed')
-        if db.execute('PRAGMA user_version').fetchone()[0] not in {0,1}:raise ValueError('Unsupported database version')
+        if db.execute('PRAGMA user_version').fetchone()[0] not in {0,1,2,3}:raise ValueError('Unsupported database version')
         if db.execute('PRAGMA foreign_key_check').fetchone() is not None:raise ValueError('Database references are invalid')
         return db
     except BaseException:db.close();raise

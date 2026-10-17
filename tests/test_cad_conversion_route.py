@@ -65,3 +65,60 @@ class CadConversionTests(unittest.TestCase):
         result=self.run_conversion(runner)
         self.assertEqual(result['conversion_status'],'BLOCK')
         self.assertTrue(any(x['code']=='CONVERTER_OUTPUT_INCOMPLETE' for x in result['ledger']))
+    def test_oversized_derivative_never_uses_unbounded_read_bytes(self):
+        def runner(command,**kwargs):
+            with (Path(command[2])/'source.dxf').open('wb') as stream:
+                stream.truncate(21*1024*1024)
+            return subprocess.CompletedProcess(command,0,b'',b'')
+        real_read=Path.read_bytes
+        def guarded(path):
+            if path.suffix=='.dxf':
+                self.fail('Derivative must be size-bounded before hashing, not read_bytes')
+            return real_read(path)
+        with patch.object(Path,'read_bytes',guarded):
+            result=self.run_conversion(runner)
+        self.assertEqual(result['conversion_status'],'BLOCK')
+        self.assertNotIn('output_sha256',result)
+        self.assertTrue(result['source_unchanged'])
+        self.assertTrue((self.root/'derived/conversion.json').is_file())
+
+    def test_source_growth_during_conversion_preserves_block_receipt(self):
+        def runner(command,**kwargs):
+            with self.source.open('ab') as stream:stream.truncate(21*1024*1024)
+            return subprocess.CompletedProcess(command,1,b'',b'')
+        real_read=Path.read_bytes
+        def guarded(path):
+            if path==self.source:
+                self.fail('Changed original must not be read into an unbounded buffer')
+            return real_read(path)
+        with patch.object(Path,'read_bytes',guarded):
+            result=self.run_conversion(runner)
+        self.assertFalse(result['source_unchanged'])
+        self.assertEqual(result['conversion_status'],'BLOCK')
+        self.assertTrue(any(x['code']=='SOURCE_CHANGED' for x in result['ledger']))
+        self.assertTrue((self.root/'derived/conversion.json').is_file())
+
+    def test_original_removed_during_conversion_still_writes_block_receipt(self):
+        def runner(command,**kwargs):
+            self.source.unlink()
+            return subprocess.CompletedProcess(command,1,b'',b'')
+        result=self.run_conversion(runner)
+        self.assertFalse(result['source_unchanged'])
+        self.assertEqual(result['conversion_status'],'BLOCK')
+        self.assertTrue(any(x['code']=='SOURCE_CHANGED' for x in result['ledger']))
+        self.assertTrue((self.root/'derived/conversion.json').is_file())
+    def test_derivative_change_after_inventory_cannot_report_conversion_pass(self):
+        def runner(command,**kwargs):
+            import ezdxf
+            ezdxf.new('R2018',units=4).saveas(Path(command[2])/'source.dxf')
+            return subprocess.CompletedProcess(command,0,b'',b'')
+        from engineering.cad.dxf_workflow import inventory_dxf
+        def mutate_after_inventory(path,sha):
+            result=inventory_dxf(path,sha)
+            data=path.read_bytes()
+            path.write_bytes(data.replace(b'HEADER',b'HEADEQ',1))
+            return result
+        with patch('engineering.cad.conversion.inventory_dxf',side_effect=mutate_after_inventory):
+            result=self.run_conversion(runner)
+        self.assertEqual(result['conversion_status'],'BLOCK')
+        self.assertTrue(any(x['code']=='CONVERTER_OUTPUT_CHANGED' for x in result['ledger']))

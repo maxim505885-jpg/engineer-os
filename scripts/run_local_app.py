@@ -1,5 +1,6 @@
 """Start the local application, durable worker and browser without cloud keys."""
 import argparse
+import json
 import os
 from pathlib import Path
 import sys
@@ -23,6 +24,7 @@ def main(argv=None):
     parser.add_argument('--data-dir',type=Path)
     parser.add_argument('--selection-file',type=Path,default=ROOT/'.engineer-os/active-data-dir.txt')
     parser.add_argument('--no-browser',action='store_true')
+    parser.add_argument('--desktop-ready',action='store_true',help='Emit owned desktop startup identity; does not grant acceptance')
     args=parser.parse_args(argv)
     if not 0<=args.port<=65535:parser.error('Port must be 0–65535')
     if sys.version_info<(3,12):parser.error('Python 3.12 or newer is required')
@@ -37,11 +39,17 @@ def main(argv=None):
                          timeout=int(settings.get('ENGINEER_OS_LOCAL_MODEL_TIMEOUT','180')))
         with DataLock(args.data_dir):
             store=Store(args.data_dir)
+            from engineering.local_app.build_identity import BuildIdentity
+            store.runtime_build=BuildIdentity(ROOT,manifest_path=os.environ.get('ENGINEER_OS_BUILD_MANIFEST'),
+                                             profile=os.environ.get('ENGINEER_OS_PROFILE','native'),discover_git=True)
             server=make_server(store,model,port=args.port)
             store.interrupt_running()
             worker=Worker(store,model)
             thread=threading.Thread(target=worker.run,name='local-model-worker',daemon=True)
             thread.start()
+            if args.desktop_ready:
+                from engineering.local_app.build_identity import runtime_report
+                print('ENGINEER_OS_DESKTOP_READY '+json.dumps(dict(schema='ENGINEER_OS_DESKTOP_READY_V1',pid=os.getpid(),origin=server.origin,build=runtime_report(store)),ensure_ascii=True),flush=True)
             print('ENGINEER OS:',server.origin,flush=True)
             print('History and files:',store.root,flush=True)
             print('Model:',model.model,'at',model.origin,flush=True)
