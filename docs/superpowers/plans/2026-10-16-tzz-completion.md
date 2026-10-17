@@ -135,3 +135,18 @@ for evidence boundaries and scoped results.
 Binary-DXF compression was tested only on a copy of the smallest audit=1 output.
 The candidate was smaller than the intake limit but ezdxf read-back failed with
 `missing ENDSEC`; it is rejected as an intake workaround and grants no CAD pass.
+
+### Controlling technical assignment received — 2026-10-17
+
+The supplied signed ТЗ is now controlling for report scope. It requires survey and
+measurement drawings, visual/instrumental findings, defect photos and schedule,
+cause analysis, masonry non-destructive testing, roof/wall verification
+calculations, condition conclusion under the named standards, defect-linked
+graphics, and delivery as a compiled PDF plus three paper originals. The QA
+checkpoint records the evidence boundary and the confirmed address conflict:
+the ТЗ states “4-я линия”, while the report and drawing title block state
+“14-я линия”. It also records that the report PDF has only the Appendix К title
+page and the separate indexed drawing PDF contains two of seven listed sheets.
+Object identity, full graphics, clause-level normative applicability and
+technical validity of tests/calculations remain BLOCK/UNVERIFIED; the report is
+not promoted.

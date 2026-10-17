@@ -172,3 +172,40 @@ its smaller size is not evidence of preserved content. No application ingestion,
 entity-fidelity comparison, or conversion acceptance was performed. Binary DXF
 is rejected as a size workaround for this corpus unless a separately validated
 writer/read-back path is established.
+
+## Controlling ТЗ checkpoint — 2026-10-17
+
+A signed three-page technical assignment has now been supplied. It controls this
+report review. Its scope calls for review of available project/executive records;
+3D dimensional survey and measurement drawings; visual/instrumental inspection;
+defect photo records and schedules; structural description and defect-cause
+analysis; non-destructive masonry-strength assessment; verification calculations
+for roof and wall structures; a condition conclusion under the named inspection
+standards; and graphics with defects tied to locations. Openings/samples are
+conditional on need. Delivery is specified as one compiled PDF and three paper
+originals. Field safety, site access and electrical supply are execution
+conditions, not commands to the reviewer.
+
+The report contents list sections for building characteristics, roof/wall survey,
+defect schedules, photo materials, masonry tests, calculations, condition
+conclusion, recommendations and graphic materials. This confirms that headings
+and claimed appendices exist; it does not qualify their technical validity,
+source traceability or completeness.
+
+A material object-identity conflict is confirmed: the TЗ names “4-я линия”,
+while the report cover, object description, conclusion and drawing title block
+name “14-я линия”. Other visible parcel/object identifiers are consistent, but
+the address conflict is unresolved. Keep object identity BLOCK and do not
+silently change either source.
+
+The report PDF ends on a title-only page for Appendix К. A separate graphics PDF
+contains two pages, while its drawing index enumerates seven sheets; the supplied
+pages include the index and sheet 2, not the full indexed set. The missing defect
+location sheets prevent verification of the TЗ requirement for graphics tied to
+observed defects. The accompanying DWG has not been qualified as a complete,
+usable substitute for the missing PDF pages.
+
+The requested one-PDF/three-paper-copy delivery is not established by the files.
+Clause-level normative verification and detailed source-bound review of the
+inspection, test results, calculations and defect-to-drawing links remain open.
+T03/T04 stay BLOCK and the report remains DERIVED_UNVERIFIED.
